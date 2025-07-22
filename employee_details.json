@@ -1,0 +1,296 @@
+[
+  {
+    "Employee Code":"00 UH",
+    "Full Name":"Uwe Hohmann",
+    "Department":"CEO",
+    "Designation":"Managing Director",
+    "Company email address":"uwe@TME-Services.com"
+  },
+  {
+    "Employee Code":"13 DH",
+    "Full Name":"Dijendra Keshava Hegde",
+    "Department":"Accounting",
+    "Designation":"Chief Financial Officer (CFO)",
+    "Company email address":"dijendra@TME-Services.com"
+  },
+  {
+    "Employee Code":"14 HH",
+    "Full Name":"Hafees - Shahul Hameed",
+    "Department":"IT",
+    "Designation":"Manager - IT Consulting",
+    "Company email address":"hafees@TME-Services.com"
+  },
+  {
+    "Employee Code":"19 DS",
+    "Full Name":"Dakshath Shetty Sridhara",
+    "Department":"Accounting",
+    "Designation":"Accounting Manager",
+    "Company email address":"dakshath@TME-Services.com"
+  },
+  {
+    "Employee Code":"22 NF",
+    "Full Name":"Natali Bernadette Fernando Wood",
+    "Department":"Client Support",
+    "Designation":"Manager - Client Support ",
+    "Company email address":"natali@TME-Services.com"
+  },
+  {
+    "Employee Code":"23 TA",
+    "Full Name":"Tabassum Begum Syed Arif Ahmed",
+    "Department":"Accounting",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"tabassum@TME-Services.com"
+  },
+  {
+    "Employee Code":"25 KM",
+    "Full Name":"Mukesh Kumar Beera",
+    "Department":"Client Support",
+    "Designation":"Public Relation Officer (PRO)",
+    "Company email address":"pro@TME-Services.com"
+  },
+  {
+    "Employee Code":"33 MK",
+    "Full Name":"Malavika Nanjappa Kolera",
+    "Department":"Tax & Compliance",
+    "Designation":"Director - Tax & Compliance",
+    "Company email address":"malavika@TME-Services.com"
+  },
+  {
+    "Employee Code":"38 TZ",
+    "Full Name":"Tariq Zarif Khan Malik",
+    "Department":"Accounting",
+    "Designation":"Accounting Manager",
+    "Company email address":"tariq@TME-Services.com"
+  },
+  {
+    "Employee Code":"40 AS",
+    "Full Name":"Akash Nagesh Shetty",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"akash@TME-Services.com"
+  },
+  {
+    "Employee Code":"42 RJ",
+    "Full Name":"Reshma Joseph",
+    "Department":"Tax & Compliance",
+    "Designation":"Accountant",
+    "Company email address":"reshma@TME-Services.com"
+  },
+  {
+    "Employee Code":"48 AB",
+    "Full Name":"Ashly Biju",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"ashly@TME-Services.com"
+  },
+  {
+    "Employee Code":"50 PA",
+    "Full Name":"Praveen Anton Pereira",
+    "Department":"IT",
+    "Designation":"System Administrator",
+    "Company email address":"praveen@TME-Services.com"
+  },
+  {
+    "Employee Code":"53 JT",
+    "Full Name":"Jovel Monton Tiro",
+    "Department":"Client Support",
+    "Designation":"Administrative Supervisor",
+    "Company email address":"jovel@TME-Services.com"
+  },
+  {
+    "Employee Code":"58 YF",
+    "Full Name":"Yashika Fernandes",
+    "Department":"Tax & Compliance",
+    "Designation":"Accountant",
+    "Company email address":"yashika@TME-Services.com"
+  },
+  {
+    "Employee Code":"65 WM",
+    "Full Name":"Wilma Menezes",
+    "Department":"Client Support",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"wilma@TME-Services.com"
+  },
+  {
+    "Employee Code":"70 DN",
+    "Full Name":"Damir Novalic",
+    "Department":"Marketing ",
+    "Designation":"Manager - Digital Marketing",
+    "Company email address":"damir@TME-Services.com"
+  },
+  {
+    "Employee Code":"75 WS",
+    "Full Name":"Wafa Sulthana Masood",
+    "Department":"Client Support",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"wafa@TME-Services.com"
+  },
+  {
+    "Employee Code":"76 RA",
+    "Full Name":"Rowelyn Allibang Jocson",
+    "Department":"Client Support",
+    "Designation":"Marketing Specialist",
+    "Company email address":"rowelyn@TME-Services.com"
+  },
+  {
+    "Employee Code":"79 ST",
+    "Full Name":"Surya Padmakumari Thulaseedharan",
+    "Department":"Client Support",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"surya@TME-Services.com"
+  },
+  {
+    "Employee Code":"80 RoJ",
+    "Full Name":"Roja James",
+    "Department":"Tax & Compliance",
+    "Designation":"Accountant",
+    "Company email address":"roja@TME-Services.com"
+  },
+  {
+    "Employee Code":"82 AC",
+    "Full Name":"Alyssa Marie Jimenez Castillo",
+    "Department":"Client Support",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"alyssa@TME-Services.com"
+  },
+  {
+    "Employee Code":"83 TM",
+    "Full Name":"Tanya Maria Miranda",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"tanya@TME-Services.com"
+  },
+  {
+    "Employee Code":"86 MA",
+    "Full Name":"Muhammed Anshad Chandveettil",
+    "Department":"Tax & Compliance",
+    "Designation":"Accountant",
+    "Company email address":"muhammed@TME-Services.com"
+  },
+  {
+    "Employee Code":"87 VR",
+    "Full Name":"Via Andrea Rosales",
+    "Department":"Client Support",
+    "Designation":"Receptionist",
+    "Company email address":"via@TME-Services.com"
+  },
+  {
+    "Employee Code":"88 AjA",
+    "Full Name":"Aiswarya Ajaykumar",
+    "Department":"Client Support",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"aiswarya@TME-Services.com"
+  },
+  {
+    "Employee Code":"89 RR",
+    "Full Name":"Renji Reghunadh",
+    "Department":"Client Support",
+    "Designation":"Administration Manager",
+    "Company email address":"renji@TME-Services.com"
+  },
+  {
+    "Employee Code":"90 MD",
+    "Full Name":"Alicia Myles Elamparo Dela Cruz",
+    "Department":"Accounting",
+    "Designation":"Assistant Accountant",
+    "Company email address":"alicia@TME-Services.com"
+  },
+  {
+    "Employee Code":"91 PG",
+    "Full Name":"Priya Ganapathy Kariappa",
+    "Department":"Client Support",
+    "Designation":"Client Support Coordinator",
+    "Company email address":"priya@TME-Services.com"
+  },
+  {
+    "Employee Code":"92 CM",
+    "Full Name":"Chirath Deshitha Mayakaduwa",
+    "Department":"Tax & Compliance",
+    "Designation":"Accountant",
+    "Company email address":"chirath@TME-Services.com"
+  },
+  {
+    "Employee Code":"95 Sis",
+    "Full Name":"Saquib Siraj",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"saquib@TME-Services.com"
+  },
+  {
+    "Employee Code":"96 TR",
+    "Full Name":"Tina Reimann",
+    "Department":"Company Setup",
+    "Designation":"Service Station Manager",
+    "Company email address":"tina@TME-Services.com"
+  },
+  {
+    "Employee Code":"98 NP",
+    "Full Name":"Nidhi Pandey",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"nidhi@TME-Services.com"
+  },
+  {
+    "Employee Code":"99 AtS",
+    "Full Name":"Atheesha Shetty",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"atheesha@TME-Services.com"
+  },
+  {
+    "Employee Code":"100 MB",
+    "Full Name":"Mehran Masood Barde",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"mehran@TME-Services.com"
+  },
+  {
+    "Employee Code":"102 OO",
+    "Full Name":"Onur Ozturk",
+    "Department":"Company Setup",
+    "Designation":"Business Development Assistant",
+    "Company email address":"onur@TME-Services.com"
+  },
+  {
+    "Employee Code":"103 BD",
+    "Full Name":"Brayan Dsouza",
+    "Department":"IT",
+    "Designation":"Information Technology Consultant",
+    "Company email address":"brayan@TME-Services.com"
+  },
+  {
+    "Employee Code":"105 MM",
+    "Full Name":"Milani Listin Morris",
+    "Department":"Client Support",
+    "Designation":"Front Desk Support",
+    "Company email address":"milani@TME-Services.com"
+  },
+  {
+    "Employee Code":"106 CV",
+    "Full Name":"Charltzon Varghese",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"charltzon@TME-Services.com"
+  },
+  {
+    "Employee Code":"108 MR",
+    "Full Name":"Mohamed Rashid Basheer",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"mohamed@TME-Services.com"
+  },
+  {
+    "Employee Code":"109 PS",
+    "Full Name":"Princyss Sampaga",
+    "Department":"Client Support",
+    "Designation":"Administration Officer",
+    "Company email address":"princyss@TME-Services.com"
+  },
+  {
+    "Employee Code":"110 CD",
+    "Full Name":"Carol Jenifa Dalmeida",
+    "Department":"Accounting",
+    "Designation":"Accountant",
+    "Company email address":"carol@TME-Services.com"
+  }
+]
