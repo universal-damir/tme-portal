@@ -104,10 +104,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
               </div>
               <div>
                 <SheetTitle className="text-lg font-semibold text-gray-900">
-                  AI Assistant
+                  Quick PDF Form Assistant
                 </SheetTitle>
                 <SheetDescription className="text-sm text-gray-600">
-                  Fill your form with natural language
+                  Enter client requirements to populate forms
                 </SheetDescription>
               </div>
             </div>
@@ -138,24 +138,24 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <Sparkles className="h-8 w-8 text-purple-600" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Welcome to AI Assistant
+                  Quick PDF Form Assistant
                 </h3>
                 <p className="text-gray-600 text-sm max-w-sm">
-                  Tell me what kind of UAE business setup you need, and I&apos;ll fill out the form and generate a PDF preview automatically.
+                  Enter client requirements and I&apos;ll populate the form fields automatically.
                 </p>
               </div>
 
               {/* Examples */}
               <div className="w-full max-w-sm space-y-3">
                 <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
-                  Try these examples:
+                  COMMON SETUPS:
                 </p>
                 <div className="space-y-2">
                   {[
-                    "2 visa quote, IFZA",
-                    "DET commercial license for tech company",
-                    "IFZA setup with spouse and 2 child visas",
-                    "Professional license for Ahmed's consultancy"
+                    "Individual shareholder, IFZA, two visa quota, one visa",
+                    "Corporate shareholder, DET, two investor visas",
+                    "Mainland LLC, Dubai, activities tbc, family visas",
+                    "IFZA, individual, two visa quota, two investor visa, one reduced visa cost"
                   ].map((example, index) => (
                     <div
                       key={index}
@@ -198,8 +198,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
           disabled={isLoading}
           isLoading={isLoading}
           placeholder={hasMessages 
-            ? "Continue the conversation..." 
-            : "Describe your UAE business setup needs..."
+            ? "Add more requirements..." 
+            : "Enter client requirements..."
           }
         />
       </SheetContent>

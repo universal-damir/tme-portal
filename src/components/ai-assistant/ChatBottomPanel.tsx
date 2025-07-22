@@ -50,16 +50,18 @@ export const ChatBottomPanel: React.FC<ChatBottomPanelProps> = ({
       className={cn(
         "fixed bottom-0 bg-white border-t-2 border-purple-200 shadow-2xl z-30",
         "transition-all duration-300 ease-in-out",
+        "rounded-t-2xl border-x-2",
         isMinimized ? "h-14" : "h-96"
       )}
       style={{
-        left: 'var(--sidebar-width, 280px)',
-        right: '0',
+        left: 'calc(var(--sidebar-width, 280px) + (100vw - var(--sidebar-width, 280px)) / 2)',
+        transform: 'translateX(-50%)',
+        width: 'min(600px, calc(100vw - var(--sidebar-width, 280px) - 4rem))',
         boxShadow: '0 -8px 32px rgba(147, 51, 234, 0.15)'
       }}
     >
       {/* Header Bar */}
-      <div className="h-14 px-6 flex items-center justify-between bg-gradient-to-r from-purple-50 to-blue-50 border-b border-purple-100">
+      <div className="h-14 px-6 flex items-center justify-between bg-gradient-to-r from-purple-50 to-blue-50 border-b border-purple-100 rounded-t-2xl">
         {/* Left side - Title and status */}
         <div className="flex items-center gap-3">
           <div className="p-2 bg-purple-100 rounded-lg shadow-sm">
@@ -67,10 +69,10 @@ export const ChatBottomPanel: React.FC<ChatBottomPanelProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-900">
-              AI Assistant
+              Quick PDF Form Assistant
             </h3>
             <p className="text-xs text-gray-600">
-              {isLoading ? 'Thinking...' : hasMessages ? `${messages.length} messages` : 'Ready to help'}
+              {isLoading ? 'Processing...' : hasMessages ? `${messages.length} entries` : 'Ready to populate'}
             </p>
           </div>
           {/* Loading indicator */}
@@ -116,7 +118,7 @@ export const ChatBottomPanel: React.FC<ChatBottomPanelProps> = ({
             size="sm"
             onClick={onClose}
             className="text-gray-500 hover:text-red-600 h-8 w-8 p-0"
-            title="Close AI Assistant"
+            title="Close Form Assistant"
           >
             <X className="h-3 w-3" />
           </Button>
@@ -140,23 +142,23 @@ export const ChatBottomPanel: React.FC<ChatBottomPanelProps> = ({
                       <Sparkles className="h-6 w-6 text-purple-600" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Welcome to AI Assistant
+                      Quick PDF Form Assistant
                     </h3>
                     <p className="text-gray-600 text-sm">
-                      Tell me what kind of UAE business setup you need, and I&apos;ll fill out the form and generate a PDF preview automatically.
+                      Enter client requirements and I&apos;ll populate the form fields automatically.
                     </p>
                   </div>
 
                   {/* Examples Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-xl mx-auto">
                     <p className="col-span-full text-xs text-gray-500 font-medium uppercase tracking-wide mb-2">
-                      Try these examples:
+                      COMMON SETUPS:
                     </p>
                     {[
-                      "2 visa quote, IFZA",
-                      "DET commercial license for tech company",
-                      "IFZA setup with spouse and 2 child visas",
-                      "Professional license for Ahmed's consultancy"
+                      "Individual shareholder, IFZA, two visa quota, one visa",
+                      "Corporate shareholder, DET, two investor visas",
+                      "Mainland LLC, Dubai, activities tbc, two employment visas",
+                      "IFZA, individual, two visa quota, two investor visa, one reduced visa cost"
                     ].map((example, index) => (
                       <div
                         key={index}
@@ -200,8 +202,8 @@ export const ChatBottomPanel: React.FC<ChatBottomPanelProps> = ({
               disabled={isLoading}
               isLoading={isLoading}
               placeholder={hasMessages 
-                ? "Continue the conversation..." 
-                : "Describe your UAE business setup needs..."
+                ? "Add more requirements..." 
+                : "Enter client requirements..."
               }
               compact={true}
             />
