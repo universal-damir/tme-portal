@@ -1,0 +1,10 @@
+{
+  "typescript.preferences.include.packageJsonAutoImports": "auto",
+  "typescript.suggest.paths": true,
+  "typescript.suggest.autoImports": true,
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.preferences.useAliasesForRenames": false,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.allowIncompleteCompletions": true,
+  "typescript.preferences.allowRenameOfImportPath": true
+} 

@@ -1,0 +1,11 @@
+
+> cost-offer-generator@0.1.0 dev
+> next dev --turbopack
+
+ ⚠ Port 3000 is in use, using available port 3002 instead.
+   ▲ Next.js 15.3.3 (Turbopack)
+   - Local:        http://localhost:3002
+   - Network:      http://192.168.70.193:3002
+
+ ✓ Starting...
+ ✓ Ready in 1642ms
