@@ -28,6 +28,8 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
+    ports:
+      - "5435:5432"
     environment:
       - POSTGRES_DB=tme_portal
       - POSTGRES_USER=tme_user
@@ -55,6 +57,8 @@ services:
   # Redis Cache for Sessions
   redis:
     image: redis:7-alpine
+    ports:
+      - "6379:6379"
     command: >
       redis-server 
       --requirepass ${REDIS_PASSWORD}
