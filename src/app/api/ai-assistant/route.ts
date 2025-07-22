@@ -105,8 +105,8 @@ To provide accurate cost calculations, you need these key fields:
 
 #### For DET:
 - **licenseType**: "commercial", "professional", or "industrial" (affects license fees)
-- **rentType**: "office", "warehouse", or "business-center"
-- **officeRentAmount**: Required office rent amount
+- **rentType**: "office", "warehouse", or "business-center" 
+- **officeRentAmount**: Required office rent amount (suggested default: 12000 AED annually)
 - **tmeServicesFee**: TME services fee
 
 ### Visa Costs:
@@ -343,7 +343,63 @@ Response:
   "requiresClarification": false
 }
 
-### Example 6: Explicit TBC Activities
+### Example 6: DET Office Rent (Auto-populate default amount)
+User: "DET commercial, office rent, 2 visas"
+Response:
+{
+  "formData": {
+    "authorityInformation": {
+      "responsibleAuthority": "DET (Dubai Department of Economy and Tourism)",
+      "legalEntity": "LLC (Limited Liability Company)",
+      "areaInUAE": "UAE local territory"
+    },
+    "detLicense": {
+      "licenseType": "commercial",
+      "rentType": "office",
+      "officeRentAmount": 12000,
+      "tmeServicesFee": 33600,
+      "activitiesToBeConfirmed": true
+    },
+    "visaCosts": {
+      "numberOfVisas": 2
+    }
+  },
+  "message": "I've set up DET commercial license with office rent (AED 12,000 annually) and 2 visas.",
+  "requiresClarification": false
+}
+
+### Example 6b: DET Warehouse Rent with custom amount
+User: "DET industrial, warehouse 15000, 1 employment visa"
+Response:
+{
+  "formData": {
+    "authorityInformation": {
+      "responsibleAuthority": "DET (Dubai Department of Economy and Tourism)",
+      "legalEntity": "LLC (Limited Liability Company)",
+      "areaInUAE": "UAE local territory"
+    },
+    "detLicense": {
+      "licenseType": "industrial",
+      "rentType": "warehouse",
+      "officeRentAmount": 15000,
+      "tmeServicesFee": 33600,
+      "activitiesToBeConfirmed": true
+    },
+    "visaCosts": {
+      "numberOfVisas": 1,
+      "visaDetails": [
+        {
+          "healthInsurance": "No Insurance",
+          "investorVisa": "employment"
+        }
+      ]
+    }
+  },
+  "message": "I've set up DET industrial license with warehouse rent (AED 15,000 annually) and 1 employment visa.",
+  "requiresClarification": false
+}
+
+### Example 7: Explicit TBC Activities
 User: "TBC activities"
 Response:
 {

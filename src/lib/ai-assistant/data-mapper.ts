@@ -44,7 +44,8 @@ export function mapAIResponseToFormData(aiFormData: AIFormData): Partial<OfferDa
     if (aiFormData.authorityInformation.responsibleAuthority !== undefined) {
       authorityData.responsibleAuthority = aiFormData.authorityInformation.responsibleAuthority;
       // Auto-set area and legal entity when authority is set
-      authorityData.areaInUAE = isIFZA ? 'Dubai Digital Park (DDP) Building A2' : '';
+      authorityData.areaInUAE = isIFZA ? 'Dubai Digital Park (DDP) Building A2' : 
+                               isDET ? 'UAE local territory' : '';
       authorityData.legalEntity = isIFZA ? 'FZCO (LLC Structure)' : 
                                   isDET ? 'LLC (Limited Liability Company)' : '';
     }
@@ -118,6 +119,9 @@ export function mapAIResponseToFormData(aiFormData: AIFormData): Partial<OfferDa
     }
     if (aiFormData.detLicense.officeRentAmount !== undefined) {
       detData.officeRentAmount = aiFormData.detLicense.officeRentAmount;
+    } else if (aiFormData.detLicense.rentType !== undefined && !existingFormData?.detLicense?.officeRentAmount) {
+      // Auto-populate default office rent amount (12,000 AED) when rent type is specified but amount is not
+      detData.officeRentAmount = 12000;
     }
     if (aiFormData.detLicense.thirdPartyApproval !== undefined) {
       detData.thirdPartyApproval = aiFormData.detLicense.thirdPartyApproval;
