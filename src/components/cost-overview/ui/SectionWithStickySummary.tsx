@@ -107,7 +107,7 @@ export const SectionWithStickySummary: React.FC<SectionWithStickySummaryProps> =
     }
 
     const exchangeRate = watchedData.clientDetails?.exchangeRate || 4;
-    const currency = watchedData.clientDetails?.secondaryCurrency || 'USD';
+    const currency = watchedData.clientDetails?.secondaryCurrency || 'EUR';
 
          const renderCostLine = (description: string, amount: number, isReduction = false) => {
        if (amount === 0) return null;

@@ -36,6 +36,7 @@ export function useAIAssistant({
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasBeenUsed, setHasBeenUsed] = useState(false);
   
   // Keep track of last message for retry functionality
   const lastMessageRef = useRef<string>('');
@@ -146,28 +147,36 @@ export function useAIAssistant({
           const mergedData = {
             ...currentFormData,
             ...mappedFormData,
-            // Ensure nested objects are properly merged
+            // Ensure nested objects are properly merged (handle undefined cases)
             clientDetails: {
               ...currentFormData.clientDetails,
               ...mappedFormData.clientDetails
             },
             authorityInformation: {
-              ...currentFormData.authorityInformation,
-              ...mappedFormData.authorityInformation
+              ...(currentFormData.authorityInformation || {}),
+              ...(mappedFormData.authorityInformation || {})
             },
             visaCosts: {
-              ...currentFormData.visaCosts,
-              ...mappedFormData.visaCosts
+              ...(currentFormData.visaCosts || {}),
+              ...(mappedFormData.visaCosts || {})
             },
             ifzaLicense: {
-              ...currentFormData.ifzaLicense,
-              ...mappedFormData.ifzaLicense
+              ...(currentFormData.ifzaLicense || {}),
+              ...(mappedFormData.ifzaLicense || {})
             },
             detLicense: {
-              ...currentFormData.detLicense,
-              ...mappedFormData.detLicense
+              ...(currentFormData.detLicense || {}),
+              ...(mappedFormData.detLicense || {})
             }
           };
+          
+          // Additional validation to ensure client details are present
+          const hasClientInfo = mergedData.clientDetails?.firstName || 
+                               mergedData.clientDetails?.lastName || 
+                               mergedData.clientDetails?.companyName;
+          
+          console.log('Client details in merged data:', mergedData.clientDetails);
+          console.log('Has client info:', hasClientInfo);
           
           console.log('Merged data for PDF:', mergedData);
           onAutoGeneratePDF?.(mergedData);
@@ -243,6 +252,7 @@ export function useAIAssistant({
       // Apply form data if provided
       if (aiResponse.formData && Object.keys(aiResponse.formData).length > 0) {
         applyFormData(aiResponse.formData);
+        setHasBeenUsed(true); // Mark as used when form data is applied
       }
 
       // Handle clarification questions
@@ -296,6 +306,7 @@ export function useAIAssistant({
     isLoading,
     isOpen,
     error,
+    hasBeenUsed,
     sendMessage,
     openChat,
     closeChat,

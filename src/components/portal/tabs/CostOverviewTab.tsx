@@ -76,8 +76,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = ({
         addressToCompany: false,
         date: new Date().toISOString().split('T')[0],
         companySetupType: '',
-        secondaryCurrency: 'USD',
-        exchangeRate: 4,
+        secondaryCurrency: 'EUR',
+        exchangeRate: 4.0,
       },
       authorityInformation: {
         responsibleAuthority: '',
@@ -744,56 +744,76 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = ({
         </>
       )}
 
-      {/* Generate and Preview Buttons */}
-      <div className="text-center">
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-
-          <button
-            type="button"
-            onClick={() => handlePreviewPDF(watchedData)}
-            disabled={isGenerating}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <span>Preview PDF</span>
-              </>
-            )}
-          </button>
-          
-          <button
-            type="button"
-            onClick={() => handleGeneratePDF(watchedData)}
-            disabled={isGenerating}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Download PDF</span>
-              </>
-            )}
-          </button>
-
-
+      {/* Generate and Preview Buttons - Only show when authority is selected or AI assistant has been used */}
+      {(isAuthoritySelected || aiAssistant.hasBeenUsed) && (
+        <div className="text-center animate-in slide-in-from-bottom duration-500">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <button
+              type="button"
+              onClick={() => handlePreviewPDF(watchedData)}
+              disabled={isGenerating}
+              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>Preview PDF</span>
+                </>
+              )}
+            </button>
+            
+            <button
+              type="button"
+              onClick={() => handleGeneratePDF(watchedData)}
+              disabled={isGenerating}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Download PDF</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Help text when buttons are not visible */}
+      {!isAuthoritySelected && !aiAssistant.hasBeenUsed && (
+        <div className="text-center py-8">
+          <div className="max-w-md mx-auto">
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                Ready to Generate Your Quote?
+              </h3>
+              <p className="text-blue-700 text-sm">
+                Select an authority above or use the AI Assistant to get started. Once you provide the basic information, you'll see options to preview and download your PDF quote.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AI Assistant Chat Interface */}
       <ChatInterface

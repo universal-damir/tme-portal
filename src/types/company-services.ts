@@ -102,8 +102,8 @@ export const COMPANY_SERVICES_DEFAULTS = {
     companyName: '',
     shortCompanyName: '',
     date: new Date().toISOString().split('T')[0],
-    secondaryCurrency: 'USD' as const,
-    exchangeRate: 3.67,
+    secondaryCurrency: 'EUR' as const,
+    exchangeRate: 4.0,
   },
   form: {
     companyType: 'tme-fzco' as const,

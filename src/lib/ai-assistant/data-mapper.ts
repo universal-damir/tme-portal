@@ -168,6 +168,9 @@ export function mapAIResponseToFormData(aiFormData: AIFormData): Partial<OfferDa
     if (aiFormData.visaCosts?.vipStampingVisas !== undefined) {
       visaData.vipStampingVisas = aiFormData.visaCosts.vipStampingVisas;
     }
+    if (aiFormData.visaCosts?.visaDetails !== undefined) {
+      visaData.visaDetails = aiFormData.visaCosts.visaDetails;
+    }
     
     // Only add to mappedData if we have actual visa data to update
     if (Object.keys(visaData).length > 0) {
@@ -312,16 +315,23 @@ export function validateForPDFGeneration(formData: Partial<OfferData>): {
 } {
   const missingFields: string[] = [];
 
-  // For AI assistant, we only require authority selection
-  // Client details can be filled with defaults if missing
+  // For AI assistant, we require authority selection and some client details
   if (!formData.authorityInformation?.responsibleAuthority) {
     missingFields.push('Responsible authority');
   }
 
-  // Always allow PDF generation if authority is selected
-  // This allows for quick demos and previews even with minimal data
+  // Check if we have client details (firstName, lastName, or companyName)
+  const hasClientInfo = !!(formData.clientDetails?.firstName || 
+                          formData.clientDetails?.lastName || 
+                          formData.clientDetails?.companyName);
+  
+  if (!hasClientInfo) {
+    missingFields.push('Client name or company name');
+  }
+
+  // Allow PDF generation if we have both authority and client info
   return {
-    isValid: !!formData.authorityInformation?.responsibleAuthority,
+    isValid: !!formData.authorityInformation?.responsibleAuthority && hasClientInfo,
     missingFields
   };
 }

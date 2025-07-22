@@ -31,7 +31,7 @@ export function transformTaxationData(
     date: taxationData.date || clientInfo.date,
     
     // Taxation doesn't need secondary currency, but PDF components expect these fields
-    secondaryCurrency: 'USD' as const,
+    secondaryCurrency: 'EUR' as const,
     exchangeRate: 3.67,
     companySetupType: 'Tax Advisory Services',
     

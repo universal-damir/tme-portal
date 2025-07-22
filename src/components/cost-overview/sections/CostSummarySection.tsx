@@ -42,7 +42,7 @@ export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
 }) => {
   const { clientDetails } = watchedData;
   const exchangeRate = clientDetails?.exchangeRate || 4;
-  const currency = clientDetails?.secondaryCurrency || 'USD';
+  const currency = clientDetails?.secondaryCurrency || 'EUR';
 
   if (!costs || !authorityConfig) {
     return null;

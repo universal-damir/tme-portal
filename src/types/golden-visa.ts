@@ -100,8 +100,8 @@ export const GOLDEN_VISA_DEFAULTS = {
     lastName: '',
     companyName: '',
     date: new Date().toISOString().split('T')[0],
-    secondaryCurrency: 'USD' as const,
-    exchangeRate: 3.67,
+    secondaryCurrency: 'EUR' as const,
+    exchangeRate: 4.0,
   },
   // Primary visa defaults
   primaryVisaRequired: true,

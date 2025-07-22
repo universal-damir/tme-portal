@@ -52,8 +52,8 @@ const CostOverview: React.FC = () => {
         addressToCompany: false,
         date: new Date().toISOString().split('T')[0],
         companySetupType: '',
-        secondaryCurrency: 'USD',
-        exchangeRate: 4,
+        secondaryCurrency: 'EUR',
+        exchangeRate: 4.0,
       },
       authorityInformation: {
         responsibleAuthority: '',

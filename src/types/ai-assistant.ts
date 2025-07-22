@@ -51,6 +51,13 @@ export interface AIFormData {
     reducedVisaCost?: number;
     vipStamping?: boolean;
     vipStampingVisas?: number;
+    visaDetails?: Array<{
+      healthInsurance?: string;
+      investorVisa?: boolean | string;
+      employmentVisa?: boolean;
+      statusChange?: boolean;
+      vipStamping?: boolean;
+    }>;
   };
 }
 
@@ -91,6 +98,7 @@ export interface ChatContextType {
 // Hook return type for useAIAssistant
 export interface UseAIAssistantReturn extends ChatContextType {
   error: string | null;
+  hasBeenUsed: boolean;
   retryLastMessage: () => Promise<void>;
 }
 

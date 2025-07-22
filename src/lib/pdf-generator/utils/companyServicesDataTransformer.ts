@@ -46,7 +46,7 @@ export function transformCompanyServicesData(
     // Add company services data as a nested object for easy access in PDF components
     companyServicesData: {
       date: companyServicesData.date || new Date().toISOString().split('T')[0],
-      secondaryCurrency: companyServicesData.secondaryCurrency || 'USD',
+      secondaryCurrency: companyServicesData.secondaryCurrency || 'EUR',
       exchangeRate: companyServicesData.exchangeRate || 3.67,
       companyType: companyServicesData.companyType,
       taxConsultingServices: companyServicesData.taxConsultingServices,
