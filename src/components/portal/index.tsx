@@ -3,6 +3,7 @@
 import React, { Suspense } from 'react'
 import { TMEPortalLayout } from './TMEPortalLayout'
 import { useTabNavigation } from '@/hooks/useTabNavigation'
+import { useChatPanel } from '@/hooks/useChatPanel'
 import { Skeleton } from '@/components/ui/skeleton'
 
 // Lazy load tab components for performance
@@ -62,21 +63,12 @@ const TabContentSkeleton = () => (
 
 export default function TMEPortal() {
   const { activeTab, setActiveTab } = useTabNavigation()
-  const [isAIAssistantOpen, setIsAIAssistantOpen] = React.useState(false)
-
-  const handleOpenAIAssistant = () => {
-    setIsAIAssistantOpen(!isAIAssistantOpen)
-  }
+  const chatPanel = useChatPanel()
 
   const renderActiveTab = () => {
     switch (activeTab) {
       case 'cost-overview':
-        return (
-          <CostOverviewTab 
-            onOpenAIAssistant={handleOpenAIAssistant}
-            isAIAssistantOpen={isAIAssistantOpen}
-          />
-        )
+        return <CostOverviewTab />
       case 'golden-visa':
         return <GoldenVisaTab />
       case 'company-services':
@@ -86,12 +78,7 @@ export default function TMEPortal() {
       case 'taxation':
         return <TaxationTab />
       default:
-        return (
-          <CostOverviewTab 
-            onOpenAIAssistant={handleOpenAIAssistant}
-            isAIAssistantOpen={isAIAssistantOpen}
-          />
-        )
+        return <CostOverviewTab />
     }
   }
 
@@ -113,8 +100,6 @@ export default function TMEPortal() {
       onTabChange={setActiveTab}
       onGeneratePDF={handleGeneratePDF}
       onPreview={handlePreview}
-      onOpenAIAssistant={activeTab === 'cost-overview' ? handleOpenAIAssistant : undefined}
-      isAIAssistantOpen={activeTab === 'cost-overview' ? isAIAssistantOpen : false}
     >
       {/* Enhanced Tab Content with Skeleton Loading */}
       <Suspense fallback={<TabContentSkeleton />}>

@@ -11,13 +11,15 @@ interface ChatInputProps {
   disabled?: boolean;
   isLoading?: boolean;
   placeholder?: string;
+  compact?: boolean;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   onSendMessage,
   disabled = false,
   isLoading = false,
-  placeholder = "Type your request... (e.g., '2 visa quote, IFZA')"
+  placeholder = "Type your request... (e.g., '2 visa quote, IFZA')",
+  compact = false
 }) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -62,7 +64,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className="border-t border-gray-200 p-4 bg-white">
+    <div className={cn(
+      "bg-white",
+      !compact && "border-t border-gray-200 p-4"
+    )}>
       <form onSubmit={handleSubmit} className="flex gap-3">
         <div className="flex-1 relative">
           <Textarea

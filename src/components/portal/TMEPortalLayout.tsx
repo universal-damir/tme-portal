@@ -18,8 +18,6 @@ interface TMEPortalLayoutProps {
   title?: string
   onGeneratePDF?: () => void
   onPreview?: () => void
-  onOpenAIAssistant?: () => void
-  isAIAssistantOpen?: boolean
 }
 
 const tabTitles: Record<TabId, string> = {
@@ -36,9 +34,7 @@ export function TMEPortalLayout({
   onTabChange,
   title,
   onGeneratePDF,
-  onPreview,
-  onOpenAIAssistant,
-  isAIAssistantOpen
+  onPreview
 }: TMEPortalLayoutProps) {
   const currentTitle = title || tabTitles[activeTab] || 'TME Portal'
 
@@ -60,14 +56,8 @@ export function TMEPortalLayout({
               title={currentTitle}
               onGeneratePDF={onGeneratePDF}
               onPreview={onPreview}
-              onOpenAIAssistant={onOpenAIAssistant}
-              isAIAssistantOpen={isAIAssistantOpen}
             />
-            <div className={`flex flex-1 flex-col transition-all duration-300 ${
-              isAIAssistantOpen 
-                ? 'lg:pr-2 xl:pr-4' 
-                : ''
-            }`}>
+            <div className="flex flex-1 flex-col">
               <div className="@container/main flex flex-1 flex-col gap-2">
                 <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
                   {children}

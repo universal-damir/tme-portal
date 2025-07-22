@@ -3,6 +3,8 @@
 import React, { useRef, useEffect } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { ChatInput } from './ChatInput';
+import { ChatBottomPanel } from './ChatBottomPanel';
+import { ChatFloatingButton } from './ChatFloatingButton';
 import { ChatMessage as ChatMessageType } from '@/types/ai-assistant';
 import { 
   Sheet, 
@@ -14,24 +16,36 @@ import {
 import { Button } from '@/components/ui/button';
 import { Bot, Trash2, Sparkles } from 'lucide-react';
 
+type ChatMode = 'side-panel' | 'bottom-panel';
+
 interface ChatInterfaceProps {
+  mode?: ChatMode;
   isOpen: boolean;
+  isMinimized?: boolean;
   onClose: () => void;
+  onOpen?: () => void;
+  onToggleMinimize?: () => void;
   messages: ChatMessageType[];
   onSendMessage: (message: string) => Promise<void>;
   onClearHistory: () => void;
   isLoading?: boolean;
   error?: string | null;
+  hasUnreadMessages?: boolean;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  mode = 'side-panel',
   isOpen,
+  isMinimized = false,
   onClose,
+  onOpen,
+  onToggleMinimize,
   messages,
   onSendMessage,
   onClearHistory,
   isLoading = false,
-  error = null
+  error = null,
+  hasUnreadMessages = false
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -45,6 +59,34 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const hasMessages = messages.length > 0;
 
+  // Bottom panel mode
+  if (mode === 'bottom-panel') {
+    return (
+      <>
+        {/* Only show floating button when panel is closed */}
+        {!isOpen && (
+          <ChatFloatingButton
+            isOpen={isOpen}
+            onClick={() => onOpen?.()}
+            hasUnreadMessages={hasUnreadMessages}
+          />
+        )}
+        <ChatBottomPanel
+          isOpen={isOpen}
+          isMinimized={isMinimized}
+          onClose={onClose}
+          onToggleMinimize={onToggleMinimize || (() => {})}
+          messages={messages}
+          onSendMessage={onSendMessage}
+          onClearHistory={onClearHistory}
+          isLoading={isLoading}
+          error={error}
+        />
+      </>
+    );
+  }
+
+  // Side panel mode (original)
   return (
     <Sheet open={isOpen} onOpenChange={onClose} modal={false}>
       <SheetContent 

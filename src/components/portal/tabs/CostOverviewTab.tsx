@@ -33,6 +33,7 @@ import { useAuthorityConfig } from '../../cost-overview/hooks/useAuthorityConfig
 import { useCostCalculation } from '../../cost-overview/hooks/useCostCalculation';
 import { useSharedClient } from '@/contexts/SharedClientContext';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
+import { useChatPanel } from '@/hooks/useChatPanel';
 
 // Import AI Assistant components
 import { ChatInterface } from '@/components/ai-assistant';
@@ -45,15 +46,12 @@ interface PDFGenerationProgress {
 }
 
 interface CostOverviewTabProps {
-  onOpenAIAssistant?: () => void;
-  isAIAssistantOpen?: boolean;
+  // No props needed anymore as we're using global bottom panel
 }
 
-const CostOverviewTab: React.FC<CostOverviewTabProps> = ({ 
-  onOpenAIAssistant, 
-  isAIAssistantOpen 
-}) => {
+const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
+  const chatPanel = useChatPanel();
 
   // Form state management
   const {
@@ -196,24 +194,27 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = ({
     onAutoGeneratePDF: (updatedData) => handlePreviewPDF(updatedData) // Use merged data
   });
 
-  // Sync AI assistant state with parent component
+  // Sync AI assistant state with chat panel
   React.useEffect(() => {
-    if (isAIAssistantOpen !== undefined) {
-      if (isAIAssistantOpen && !aiAssistant.isOpen) {
-        aiAssistant.openChat();
-      } else if (!isAIAssistantOpen && aiAssistant.isOpen) {
-        aiAssistant.closeChat();
+    if (aiAssistant.isOpen !== chatPanel.isOpen) {
+      if (aiAssistant.isOpen) {
+        chatPanel.openPanel();
+      } else {
+        chatPanel.closePanel();
       }
     }
-  }, [isAIAssistantOpen, aiAssistant]);
+  }, [aiAssistant.isOpen, chatPanel]);
 
-  // Handle external AI assistant state changes
-  React.useEffect(() => {
-    if (onOpenAIAssistant && aiAssistant.isOpen !== isAIAssistantOpen) {
-      // Only call onOpenAIAssistant if the states are out of sync
-      // This prevents infinite loops
-    }
-  }, [aiAssistant.isOpen, isAIAssistantOpen, onOpenAIAssistant]);
+  // Override AI assistant open/close to also control chat panel
+  const handleOpenChat = () => {
+    aiAssistant.openChat();
+    chatPanel.openPanel();
+  };
+
+  const handleCloseChat = () => {
+    aiAssistant.closeChat();
+    chatPanel.closePanel();
+  };
 
   // PDF generation states
   const [isGenerating, setIsGenerating] = React.useState(false);
@@ -815,10 +816,14 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = ({
         </div>
       )}
 
-      {/* AI Assistant Chat Interface */}
+      {/* AI Assistant Chat Interface - Bottom Panel Mode */}
       <ChatInterface
-        isOpen={aiAssistant.isOpen}
-        onClose={aiAssistant.closeChat}
+        mode="bottom-panel"
+        isOpen={chatPanel.isOpen}
+        isMinimized={chatPanel.isMinimized}
+        onClose={handleCloseChat}
+        onOpen={handleOpenChat}
+        onToggleMinimize={chatPanel.toggleMinimize}
         messages={aiAssistant.messages}
         onSendMessage={aiAssistant.sendMessage}
         onClearHistory={aiAssistant.clearHistory}
