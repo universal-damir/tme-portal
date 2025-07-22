@@ -68,26 +68,13 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
       description="Select the responsible UAE authority and provide company details"
       icon={Shield}
       iconColor="text-blue-600"
-      tooltipContent="Choose the UAE authority that will regulate your business and set up your company's financial structure. Each authority has different requirements and fee structures."
     >
       <div className="space-y-6">
         {/* Responsible Authority */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="authority" className="text-sm font-semibold text-gray-700">
-              Responsible Authority *
-            </Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button type="button" className="text-gray-400 hover:text-gray-600">
-                  <AlertCircle className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-sm">
-                <p>The UAE government authority that will regulate your business. Each authority serves different business zones and has different requirements and costs.</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          <Label htmlFor="authority" className="text-sm font-semibold text-gray-700">
+            Responsible Authority *
+          </Label>
           <Select value={watchedData.authorityInformation?.responsibleAuthority || ''} onValueChange={handleAuthorityChange}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select responsible authority" />
@@ -108,21 +95,9 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
         {/* Legal Entity and Area */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-semibold text-gray-700">
-                Legal Entity Type
-              </Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <AlertCircle className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <p>The legal structure of your company (e.g., LLC, Free Zone Company). This affects legal requirements and operational permissions.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <Label className="text-sm font-semibold text-gray-700">
+              Legal Entity Type
+            </Label>
             <input
               type="text"
               {...register('authorityInformation.legalEntity')}
@@ -132,21 +107,9 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-semibold text-gray-700">
-                Area in UAE
-              </Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <AlertCircle className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <p>The specific area or emirate where your business will be located (e.g., Dubai, Abu Dhabi, Sharjah). Different areas may have different regulations.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <Label className="text-sm font-semibold text-gray-700">
+              Area in UAE
+            </Label>
             <input
               type="text"
               {...register('authorityInformation.areaInUAE')}
@@ -159,21 +122,9 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
         {/* Share Capital, Value per Share, and Number of Shares */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-semibold text-gray-700">
-                Share Capital (AED) *
-              </Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <AlertCircle className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <p>The total amount of money invested in the company. Minimum requirements vary by authority. For investor visas, higher amounts may be required (e.g., AED 300,000+ per investor visa).</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <Label className="text-sm font-semibold text-gray-700">
+              Share Capital (AED) *
+            </Label>
             <div className="relative">
               <input
                 type="text"
@@ -207,21 +158,9 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-semibold text-gray-700">
-                Value per Share (AED) *
-              </Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <AlertCircle className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <p>The value of each individual share. Common values are AED 1, 10, or 100 per share. This determines how many shares will be issued.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <Label className="text-sm font-semibold text-gray-700">
+              Value per Share (AED) *
+            </Label>
             <input
               type="text"
               value={formattedInputs.valuePerShareFormatted}
@@ -241,21 +180,9 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Label className="text-sm font-semibold text-gray-700">
-                Number of Shares
-              </Label>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="text-gray-400 hover:text-gray-600">
-                    <AlertCircle className="w-4 h-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <p>Automatically calculated by dividing Share Capital by Value per Share. This shows how many individual shares will be issued to shareholders.</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
+            <Label className="text-sm font-semibold text-gray-700">
+              Number of Shares
+            </Label>
             <input
               type="text"
               value={watchedData.authorityInformation?.numberOfShares ? watchedData.authorityInformation.numberOfShares.toLocaleString() : ''}
