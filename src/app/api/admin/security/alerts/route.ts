@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
         al.action as type,
         al.details,
         al.ip_address,
-        al.created_at as timestamp,
+        al.created_at AT TIME ZONE 'UTC' as timestamp,
         al.user_id,
         u.full_name as user_name,
         u.employee_code,

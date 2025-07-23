@@ -39,6 +39,18 @@ export default function ProfileTab() {
   }
 
   const formatDate = (dateString: string) => {
+    // Now that we get proper UTC timestamps with timezone info, 
+    // JavaScript will automatically convert to local time
+    const date = new Date(dateString)
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    return `${day}.${month}.${year} ${hours}:${minutes}`
+  }
+
+  const formatDateOnly = (dateString: string) => {
     const date = new Date(dateString)
     const day = date.getDate().toString().padStart(2, '0')
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -92,14 +104,10 @@ export default function ProfileTab() {
               <p className="text-sm">{user.designation}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500">Role</p>
-              <p className="text-sm">{user.role || 'Employee'}</p>
-            </div>
-            <div>
               <p className="text-xs font-medium text-gray-500">Last Login</p>
               <p className="text-sm">
                 {user.last_login 
-                  ? formatDate(user.last_login.toString())
+                  ? formatDateOnly(user.last_login.toString())
                   : 'Never'
                 }
               </p>

@@ -48,8 +48,9 @@ export async function GET(req: NextRequest) {
     const usersResult = await query(
       `SELECT 
         id, employee_code, email, full_name, department, designation, 
-        role, status, created_at, last_login, failed_login_attempts, 
-        locked_until, must_change_password
+        role, status, created_at AT TIME ZONE 'UTC' as created_at, 
+        last_login AT TIME ZONE 'UTC' as last_login, failed_login_attempts, 
+        locked_until AT TIME ZONE 'UTC' as locked_until, must_change_password
       FROM users 
       ${whereClause}
       ORDER BY full_name ASC`,

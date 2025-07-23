@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const { user } = sessionData;
     
     const result = await query(
-      `SELECT id, action, resource, created_at, ip_address 
+      `SELECT id, action, resource, created_at AT TIME ZONE 'UTC' as created_at, ip_address 
        FROM audit_logs 
        WHERE user_id = $1 
        ORDER BY created_at DESC 
