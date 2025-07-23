@@ -280,12 +280,17 @@ export async function logSecurityEvent(event: {
 
 // Helper function to get client IP from request
 export function getClientIP(req: any): string {
-  return (
-    req.headers['x-forwarded-for']?.split(',')[0] ||
+  const ip = (
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
     req.headers['x-real-ip'] ||
     req.connection?.remoteAddress ||
-    'unknown'
+    req.ip ||
+    '127.0.0.1'  // Use localhost instead of 'unknown'
   );
+  
+  // Ensure it's a valid IP format for database inet type
+  const ipRegex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$|^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$/;
+  return ipRegex.test(ip) ? ip : '127.0.0.1';
 }
 
 // Helper function to get user agent from request

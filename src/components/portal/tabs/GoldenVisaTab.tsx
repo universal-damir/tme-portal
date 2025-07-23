@@ -238,6 +238,28 @@ const GoldenVisaTab: React.FC = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
+      // Log PDF generation activity
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_generated',
+            resource: 'golden_visa',
+            details: {
+              filename: filename,
+              client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+              visa_type: data.visaType,
+              document_type: 'Golden Visa'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF generation activity:', error);
+      }
+
       // Success notification
       toast.dismiss(loadingToast);
       toast.success('Golden Visa PDF Generated!', {
@@ -288,7 +310,7 @@ const GoldenVisaTab: React.FC = () => {
 
       // Step 2: Generate preview document
       updateProgress('Generating document preview...', (++currentStep / totalSteps) * 100);
-      const { generateGoldenVisaPDF } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
       // Convert form data to shared client format for PDF generation
       const clientInfo = {
         firstName: data.firstName || '',
@@ -296,7 +318,7 @@ const GoldenVisaTab: React.FC = () => {
         companyName: data.companyName || '',
         date: data.date,
       };
-      const blob = await generateGoldenVisaPDF(data, clientInfo);
+      const { blob, filename } = await generateGoldenVisaPDFWithFilename(data, clientInfo);
       
       // Open PDF in new tab for preview
       const url = URL.createObjectURL(blob);
@@ -307,15 +329,30 @@ const GoldenVisaTab: React.FC = () => {
         URL.revokeObjectURL(url);
       }, 1000);
 
-      // Success notification
+      // Log PDF preview activity
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_previewed',
+            resource: 'golden_visa',
+            details: {
+              filename: filename,
+              client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+              visa_type: data.visaType,
+              document_type: 'Golden Visa'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF preview activity:', error);
+      }
+
+      // Dismiss loading notification
       toast.dismiss(loadingToast);
-      toast.success('Preview Ready!', {
-        description: 'Golden Visa preview document has been opened in a new tab.',
-        action: {
-          label: 'Preview Again',
-          onClick: () => handlePreviewPDF(data)
-        }
-      });
 
     } catch (error) {
       console.error('Error generating PDF preview:', error);

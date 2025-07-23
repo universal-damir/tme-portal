@@ -135,8 +135,6 @@ const CompanyServicesTab: React.FC = () => {
       // Dynamic import to avoid bundling issues
       const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator');
       
-      console.log('Generating Company Services PDF with data:', data);
-      
       const { blob, filename } = await generateCompanyServicesPDFWithFilename(data, clientInfo);
       
       // Create download link
@@ -148,6 +146,28 @@ const CompanyServicesTab: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Log PDF generation activity
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_generated',
+            resource: 'company_services',
+            details: {
+              filename: filename,
+              client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+              company_type: data.companyType,
+              document_type: 'Company Services'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF generation activity:', error);
+      }
       
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -167,11 +187,9 @@ const CompanyServicesTab: React.FC = () => {
     setIsGenerating(true);
     try {
       // Dynamic import to avoid bundling issues
-      const { generateCompanyServicesPDF } = await import('@/lib/pdf-generator');
+      const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator');
       
-      console.log('Previewing Company Services PDF with data:', data);
-      
-      const blob = await generateCompanyServicesPDF(data, clientInfo);
+      const { blob, filename } = await generateCompanyServicesPDFWithFilename(data, clientInfo);
       const url = URL.createObjectURL(blob);
       
       // Open PDF in new tab for preview
@@ -181,6 +199,28 @@ const CompanyServicesTab: React.FC = () => {
       setTimeout(() => {
         URL.revokeObjectURL(url);
       }, 1000);
+
+      // Log PDF preview activity
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_previewed',
+            resource: 'company_services',
+            details: {
+              filename: filename,
+              client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+              company_type: data.companyType,
+              document_type: 'Company Services'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF preview activity:', error);
+      }
       
     } catch (error) {
       console.error('Error generating PDF preview:', error);

@@ -11,9 +11,14 @@ interface ActivityLog {
   resource: string
   created_at: string
   ip_address: string
+  details?: any
 }
 
-export default function ProfileTab() {
+interface ProfileTabProps {
+  refreshTrigger?: number;
+}
+
+export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
   const { user, loading } = useAuth()
   const [activities, setActivities] = useState<ActivityLog[]>([])
   const [loadingActivities, setLoadingActivities] = useState(true)
@@ -21,6 +26,35 @@ export default function ProfileTab() {
   useEffect(() => {
     if (user) {
       fetchUserActivities()
+    }
+  }, [user])
+
+  // Refresh activities when refreshTrigger changes
+  useEffect(() => {
+    if (refreshTrigger && user) {
+      fetchUserActivities()
+    }
+  }, [refreshTrigger, user])
+
+  // Add a refresh effect when component becomes visible
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user) {
+        fetchUserActivities()
+      }
+    }
+
+    const handleRefreshActivities = () => {
+      if (user) {
+        fetchUserActivities()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    window.addEventListener('refreshActivities', handleRefreshActivities)
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      window.removeEventListener('refreshActivities', handleRefreshActivities)
     }
   }, [user])
 
@@ -116,7 +150,25 @@ export default function ProfileTab() {
               <div className="space-y-3">
                 {activities.slice(0, 5).map((activity) => {
                   // Format activity type to be more readable
-                  const formatActivityType = (action: string) => {
+                  const formatActivityType = (action: string, details?: any) => {
+                    if (action === 'pdf_generated') {
+                      const filename = details?.filename;
+                      if (filename) {
+                        return `Generated ${filename}`;
+                      }
+                      const documentType = details?.document_type || 'Document';
+                      const clientName = details?.client_name ? ` for ${details.client_name}` : '';
+                      return `Generated ${documentType}${clientName}`;
+                    }
+                    if (action === 'pdf_previewed') {
+                      const filename = details?.filename;
+                      if (filename) {
+                        return `Previewed ${filename}`;
+                      }
+                      const documentType = details?.document_type || 'Document';
+                      const clientName = details?.client_name ? ` for ${details.client_name}` : '';
+                      return `Previewed ${documentType}${clientName}`;
+                    }
                     return action
                       .replace(/_/g, ' ')
                       .replace(/\b\w/g, l => l.toUpperCase())
@@ -125,16 +177,29 @@ export default function ProfileTab() {
                   };
 
                   // Get activity icon and color based on type
-                  const getActivityStyle = (action: string) => {
+                  const getActivityStyle = (action: string, resource?: string) => {
                     if (action.includes('login')) return { bg: 'bg-green-100', text: 'text-green-600', icon: '🔑' };
                     if (action.includes('logout')) return { bg: 'bg-gray-100', text: 'text-gray-600', icon: '🚪' };
                     if (action.includes('password')) return { bg: 'bg-yellow-100', text: 'text-yellow-600', icon: '🔒' };
                     if (action.includes('admin')) return { bg: 'bg-blue-100', text: 'text-blue-600', icon: '⚙️' };
                     if (action.includes('alert')) return { bg: 'bg-red-100', text: 'text-red-600', icon: '⚠️' };
+                    
+                    // PDF-related activities with different colors based on resource
+                    if (action.includes('pdf_generated')) {
+                      if (resource === 'company_services') return { bg: 'bg-blue-100', text: 'text-blue-600', icon: '🏢' };
+                      if (resource === 'golden_visa') return { bg: 'bg-amber-100', text: 'text-amber-600', icon: '👑' };
+                      return { bg: 'bg-purple-100', text: 'text-purple-600', icon: '📄' }; // cost_overview
+                    }
+                    if (action.includes('pdf_previewed')) {
+                      if (resource === 'company_services') return { bg: 'bg-blue-50', text: 'text-blue-500', icon: '🔍' };
+                      if (resource === 'golden_visa') return { bg: 'bg-amber-50', text: 'text-amber-500', icon: '👁️' };
+                      return { bg: 'bg-indigo-100', text: 'text-indigo-600', icon: '👁️' }; // cost_overview
+                    }
+                    
                     return { bg: 'bg-gray-100', text: 'text-gray-600', icon: '📋' };
                   };
 
-                  const style = getActivityStyle(activity.action);
+                  const style = getActivityStyle(activity.action, activity.resource);
 
                   return (
                     <div key={activity.id} className="flex items-start space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
@@ -143,7 +208,7 @@ export default function ProfileTab() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">
-                          {formatActivityType(activity.action)}
+                          {formatActivityType(activity.action, activity.details)}
                         </p>
                         <div className="flex items-center space-x-2 mt-1">
                           <p className="text-xs text-gray-500">

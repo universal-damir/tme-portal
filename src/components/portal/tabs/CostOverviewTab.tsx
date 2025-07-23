@@ -344,6 +344,29 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       updateProgress('Finalizing documents...', (++currentStep / totalSteps) * 100);
       await new Promise(resolve => setTimeout(resolve, 300));
 
+      // Log PDF generation activity
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_generated',
+            resource: 'cost_overview',
+            details: {
+              filename: mainFilename,
+              client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
+              authority: data.authorityDetails?.authority || 'Not specified',
+              has_family_visa: hasFamilyVisaDoc,
+              document_type: 'Cost Overview'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF generation activity:', error);
+      }
+
       // Success notification
       toast.dismiss(loadingToast);
       toast.success('PDF Generated Successfully!', {
@@ -416,7 +439,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
       // Step 2: Generate main preview
       updateProgress('Generating main document preview...', (++currentStep / totalSteps) * 100);
-      const mainPdfBlob = await generatePDF(data);
+      const { blob: mainPdfBlob, filename: mainFilename } = await generatePDFWithFilename(data);
       const mainUrl = URL.createObjectURL(mainPdfBlob);
       
       // Open main PDF in new tab for preview
@@ -444,17 +467,31 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         }, 500); // Slight delay to prevent browser popup blocker
       }
 
-      // Success notification
+      // Log PDF preview activity
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_previewed',
+            resource: 'cost_overview',
+            details: {
+              filename: mainFilename,
+              client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
+              authority: data.authorityDetails?.authority || 'Not specified',
+              has_family_visa: hasFamilyVisaDoc,
+              document_type: 'Cost Overview'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF preview activity:', error);
+      }
+
+      // Dismiss loading notification
       toast.dismiss(loadingToast);
-      toast.success('Preview Ready!', {
-        description: hasFamilyVisaDoc
-          ? 'Both preview documents have been opened in new tabs.'
-          : 'Preview document has been opened in a new tab.',
-        action: {
-          label: 'Preview Again',
-          onClick: () => handlePreviewPDF(data)
-        }
-      });
 
     } catch (error) {
       console.error('Error generating PDF preview:', error);
