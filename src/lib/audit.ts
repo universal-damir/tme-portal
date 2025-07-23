@@ -1,5 +1,6 @@
 import { query } from '@/lib/database';
 import { logUserAction } from '@/lib/auth';
+import { detectSuspiciousActivity as detectSecurityEvents, SecurityEvent } from '@/lib/security';
 
 export interface AuditEventData {
   user_id?: number;
@@ -22,6 +23,16 @@ export async function logAuditEvent(eventData: AuditEventData): Promise<void> {
       eventData.ip_address,
       eventData.user_agent
     );
+
+    // Detect and log security events if applicable
+    if (eventData.user_id && eventData.ip_address && eventData.user_agent) {
+      await detectAndLogSecurityEvents(
+        eventData.user_id,
+        eventData.action,
+        eventData.ip_address,
+        eventData.user_agent
+      );
+    }
   } catch (error) {
     console.error('Failed to log audit event:', error);
     // Don't throw the error as we don't want audit logging failures to break the main flow
@@ -280,4 +291,112 @@ export function getClientIP(req: any): string {
 // Helper function to get user agent from request
 export function getUserAgent(req: any): string {
   return req.headers['user-agent'] || 'unknown';
+}
+
+// Enhanced security event detection
+async function detectAndLogSecurityEvents(
+  userId: number,
+  action: string,
+  ipAddress: string,
+  userAgent: string
+): Promise<void> {
+  try {
+    // Get recent activity for the user
+    const recentActivityResult = await query(`
+      SELECT action, created_at, ip_address 
+      FROM audit_logs 
+      WHERE user_id = $1 
+        AND created_at > NOW() - INTERVAL '1 hour'
+      ORDER BY created_at DESC
+      LIMIT 20
+    `, [userId]);
+
+    const securityEvents = detectSecurityEvents(
+      userId,
+      action,
+      ipAddress,
+      userAgent,
+      recentActivityResult.rows
+    );
+
+    // Log each security event
+    for (const event of securityEvents) {
+      await query(
+        `INSERT INTO audit_logs (user_id, action, resource, details, ip_address, user_agent) 
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [
+          userId,
+          `security_event_${event.type}`,
+          'security',
+          JSON.stringify({
+            severity: event.severity,
+            originalAction: action,
+            ...event.details
+          }),
+          ipAddress,
+          userAgent
+        ]
+      );
+    }
+  } catch (error) {
+    console.error('Failed to detect and log security events:', error);
+  }
+}
+
+// Get enhanced security statistics
+export async function getSecurityStats(): Promise<Record<string, number>> {
+  try {
+    const stats: Record<string, number> = {};
+
+    // Failed logins in last 24 hours
+    const failedLogins = await query(`
+      SELECT COUNT(*) as count 
+      FROM audit_logs 
+      WHERE action = 'login_failed' 
+        AND created_at > NOW() - INTERVAL '24 hours'
+    `);
+    stats.failedLogins24h = parseInt(failedLogins.rows[0]?.count || '0');
+
+    // Locked accounts
+    const lockedAccounts = await query(`
+      SELECT COUNT(*) as count 
+      FROM users 
+      WHERE (locked_until IS NOT NULL AND locked_until > NOW()) 
+         OR status = 'locked'
+    `);
+    stats.lockedAccounts = parseInt(lockedAccounts.rows[0]?.count || '0');
+
+    // Unusual access patterns
+    const unusualAccess = await query(`
+      SELECT COUNT(*) as count 
+      FROM audit_logs 
+      WHERE action = 'login'
+        AND (EXTRACT(hour FROM created_at) < 7 OR EXTRACT(hour FROM created_at) > 20)
+        AND created_at > NOW() - INTERVAL '24 hours'
+    `);
+    stats.unusualAccess = parseInt(unusualAccess.rows[0]?.count || '0');
+
+    // Admin actions in last 24 hours
+    const adminActions = await query(`
+      SELECT COUNT(*) as count 
+      FROM audit_logs 
+      WHERE action LIKE 'admin_%' 
+        AND created_at > NOW() - INTERVAL '24 hours'
+    `);
+    stats.adminActions24h = parseInt(adminActions.rows[0]?.count || '0');
+
+    // Security events in last 24 hours
+    const securityEvents = await query(`
+      SELECT COUNT(*) as count 
+      FROM audit_logs 
+      WHERE action LIKE 'security_event_%' 
+        AND created_at > NOW() - INTERVAL '24 hours'
+    `);
+    stats.securityEvents24h = parseInt(securityEvents.rows[0]?.count || '0');
+
+    return stats;
+  } catch (error) {
+    console.error('Failed to get security stats:', error);
+    return {};
+  }
 }

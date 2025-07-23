@@ -30,9 +30,15 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Security hardening: Install security updates
+RUN apk update && apk upgrade && apk add --no-cache curl
+
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Security: Remove unnecessary packages and clear cache
+RUN rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 # Copy the public folder
 COPY --from=builder /app/public ./public
@@ -51,6 +57,13 @@ RUN mkdir -p /app/public/uploads && chown nextjs:nodejs /app/public/uploads
 
 # Install production dependencies only
 COPY --from=deps /app/node_modules ./node_modules
+
+# Security: Set proper permissions
+RUN chmod 755 /app && \
+    chmod -R 755 /app/public && \
+    chmod -R 700 /app/database && \
+    find /app -type f -name "*.json" -exec chmod 644 {} \; && \
+    find /app -type f -name "*.js" -exec chmod 644 {} \;
 
 # Switch to non-root user
 USER nextjs
