@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { UserAvatar } from '@/components/ui/user-avatar'
 import { useAuth } from '@/contexts/AuthContext'
-import { Bot, User, Settings, LogOut } from 'lucide-react'
+import { Bot, User, Settings, LogOut, Shield } from 'lucide-react'
 
 interface TMEPortalHeaderProps {
   title?: string;
@@ -39,6 +39,10 @@ export function TMEPortalHeader({
 
   const handleSettingsClick = () => {
     window.location.href = '/settings'
+  }
+
+  const handleAdminClick = () => {
+    window.location.href = '/admin'
   }
 
   return (
@@ -111,6 +115,15 @@ export function TMEPortalHeader({
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
+                    {user.role === 'admin' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleAdminClick}>
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Admin Panel</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout}>
                       <LogOut className="mr-2 h-4 w-4" />

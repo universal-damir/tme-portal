@@ -169,7 +169,7 @@ This implementation plan focuses on deploying user account management for TME Po
 ### Phase 4: Administration Panel
 **Timeline: 4-5 days**
 
-#### Admin Dashboard (Assign to IT Department + Employee 70DN Damir)
+#### Admin Dashboard (Assign to 00 UH Uwe, IT Department + Employee 70DN Damir)
 - [ ] **Create admin-only interface**
   - [ ] User management dashboard
   - [ ] Employee account creation/editing
