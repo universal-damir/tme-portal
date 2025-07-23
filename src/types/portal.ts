@@ -1,5 +1,6 @@
 // Tab system types
 export type TabId = 
+  | 'profile'
   | 'cost-overview'
   | 'golden-visa'
   | 'company-services'

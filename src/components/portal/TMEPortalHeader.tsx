@@ -55,28 +55,6 @@ export function TMEPortalHeader({
         />
         <h1 className="text-base font-medium">{title}</h1>
         <div className="ml-auto flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                asChild 
-                size="sm" 
-                className="hidden sm:flex dark:text-foreground"
-              >
-                <a
-                  href="https://tme-services.com"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  Help
-                </a>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Get help and documentation for using the portal</p>
-            </TooltipContent>
-          </Tooltip>
-
           {user && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />

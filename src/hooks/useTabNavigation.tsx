@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { TabId } from '@/types/portal';
 
-const DEFAULT_TAB: TabId = 'cost-overview';
+const DEFAULT_TAB: TabId = 'profile';
 
 export const useTabNavigation = () => {
   const router = useRouter();
@@ -15,6 +15,7 @@ export const useTabNavigation = () => {
   const getInitialTab = (): TabId => {
     const tabFromUrl = searchParams?.get('tab') as TabId;
     const validTabs: TabId[] = [
+      'profile',
       'cost-overview',
       'golden-visa', 
       'company-services',
@@ -48,6 +49,7 @@ export const useTabNavigation = () => {
   useEffect(() => {
     const tabFromUrl = searchParams?.get('tab') as TabId;
     const validTabs: TabId[] = [
+      'profile',
       'cost-overview',
       'golden-visa',
       'company-services', 
@@ -64,6 +66,7 @@ export const useTabNavigation = () => {
   // Navigation helpers
   const goToNextTab = useCallback(() => {
     const tabs: TabId[] = [
+      'profile',
       'cost-overview',
       'golden-visa',
       'company-services',
@@ -81,6 +84,7 @@ export const useTabNavigation = () => {
 
   const goToPreviousTab = useCallback(() => {
     const tabs: TabId[] = [
+      'profile',
       'cost-overview',
       'golden-visa',
       'company-services',

@@ -58,6 +58,7 @@ export function usePermissions() {
     if (!user) return false
 
     const featurePermissions: Record<string, string[]> = {
+      'profile': ['IT', 'Management', 'Business Development', 'Finance', 'Legal', 'Administration', 'HR'],
       'cost_overview': ['IT', 'Management', 'Business Development', 'Finance'],
       'golden_visa': ['IT', 'Management', 'Legal', 'Business Development', 'Finance'],
       'company_services': ['IT', 'Management', 'Finance', 'Legal', 'Administration', 'HR'],

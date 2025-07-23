@@ -95,6 +95,11 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
       filtered = filtered.filter(user => user.status === selectedStatus);
     }
 
+    // Sort users by employee code (staff code)
+    filtered.sort((a, b) => {
+      return a.employee_code.localeCompare(b.employee_code, undefined, { numeric: true });
+    });
+
     setFilteredUsers(filtered);
   };
 
@@ -169,7 +174,13 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
         user.designation,
         user.role,
         user.status,
-        user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'
+        user.last_login ? (() => {
+          const date = new Date(user.last_login);
+          const day = date.getDate().toString().padStart(2, '0');
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}.${month}.${year}`;
+        })() : 'Never'
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -346,7 +357,13 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
                       <span>{user.designation}</span>
                     </div>
                     <div className="mt-1 text-xs text-gray-400">
-                      Last login: {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                      Last login: {user.last_login ? (() => {
+                        const date = new Date(user.last_login);
+                        const day = date.getDate().toString().padStart(2, '0');
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        const year = date.getFullYear();
+                        return `${day}.${month}.${year}`;
+                      })() : 'Never'}
                     </div>
                   </div>
                 </div>

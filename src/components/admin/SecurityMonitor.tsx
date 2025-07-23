@@ -193,7 +193,12 @@ export default function SecurityMonitor({ detailed = false }: SecurityMonitorPro
             <h3 className="text-lg font-medium text-gray-900">Security Alerts</h3>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-gray-500">
-                Last updated: {lastRefresh.toLocaleTimeString()}
+                Last updated: {lastRefresh.toLocaleTimeString('en-GB', { 
+                  timeZone: 'Asia/Dubai',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                })}
               </span>
               <button
                 onClick={fetchSecurityData}
@@ -232,7 +237,18 @@ export default function SecurityMonitor({ detailed = false }: SecurityMonitorPro
                             {alert.message}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {new Date(alert.timestamp).toLocaleString()}
+                            {(() => {
+                              const date = new Date(alert.timestamp);
+                              const day = date.toLocaleDateString('en-GB', { timeZone: 'Asia/Dubai', day: '2-digit' });
+                              const month = date.toLocaleDateString('en-GB', { timeZone: 'Asia/Dubai', month: '2-digit' });
+                              const year = date.toLocaleDateString('en-GB', { timeZone: 'Asia/Dubai', year: 'numeric' });
+                              const time = date.toLocaleTimeString('en-GB', { 
+                                timeZone: 'Asia/Dubai',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              });
+                              return `${day}.${month}.${year} ${time}`;
+                            })()}
                             {alert.user_name && (
                               <span className="ml-2">• {alert.user_name}</span>
                             )}
@@ -275,20 +291,66 @@ export default function SecurityMonitor({ detailed = false }: SecurityMonitorPro
                 const SeverityIcon = getSeverityIcon(activity.severity);
                 const colorClass = getSeverityColor(activity.severity);
                 
+                // Format activity type to be more readable
+                const formatActivityType = (type: string) => {
+                  return type
+                    .replace(/_/g, ' ')
+                    .replace(/\b\w/g, l => l.toUpperCase())
+                    .replace('Admin ', '')
+                    .replace('User', '');
+                };
+
+                // Format timestamp
+                const formatTimestamp = (timestamp?: string) => {
+                  if (!timestamp) return '';
+                  const date = new Date(timestamp);
+                  const day = date.toLocaleDateString('en-GB', { timeZone: 'Asia/Dubai', day: '2-digit' });
+                  const month = date.toLocaleDateString('en-GB', { timeZone: 'Asia/Dubai', month: '2-digit' });
+                  const year = date.toLocaleDateString('en-GB', { timeZone: 'Asia/Dubai', year: 'numeric' });
+                  const time = date.toLocaleTimeString('en-GB', { 
+                    timeZone: 'Asia/Dubai',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  });
+                  return `${day}.${month}.${year} ${time}`;
+                };
+                
                 return (
-                  <div key={index} className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className={`flex-shrink-0 p-2 rounded-full ${colorClass}`}>
-                        <SeverityIcon className="h-4 w-4" />
+                  <div key={index} className="px-6 py-3 hover:bg-gray-50 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start space-x-3">
+                        <div className={`flex-shrink-0 p-1.5 rounded-full ${colorClass} mt-0.5`}>
+                          <SeverityIcon className="h-3 w-3" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center space-x-2">
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {formatActivityType(activity.type)}
+                            </p>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              activity.severity === 'high' ? 'bg-red-100 text-red-800' :
+                              activity.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {activity.severity}
+                            </span>
+                          </div>
+                          {activity.user_name && (
+                            <p className="text-sm text-gray-600 mt-1">
+                              {activity.user_name} ({activity.employee_code})
+                            </p>
+                          )}
+                          {activity.details && (
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                              {activity.details}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-900">
-                          {activity.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                        </p>
-                        <p className="text-sm text-gray-500">{activity.details}</p>
-                        {activity.user_name && (
-                          <p className="text-xs text-gray-400 mt-1">
-                            User: {activity.user_name} ({activity.employee_code})
+                      <div className="flex-shrink-0 text-right">
+                        {activity.timestamp && (
+                          <p className="text-xs text-gray-400">
+                            {formatTimestamp(activity.timestamp)}
                           </p>
                         )}
                       </div>

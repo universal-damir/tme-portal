@@ -1,21 +1,14 @@
 'use client'
 
 import {
-  UserCircle,
-  Settings,
-  Activity,
   LogOut,
   MoreVertical,
-  User as UserIcon,
 } from 'lucide-react'
 
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
@@ -36,13 +29,6 @@ export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
   const { logout } = useAuth()
 
-  const handleProfileClick = () => {
-    window.location.href = '/profile'
-  }
-
-  const handleSettingsClick = () => {
-    window.location.href = '/settings'
-  }
 
   return (
     <SidebarMenu>
@@ -69,36 +55,6 @@ export function NavUser({ user }: NavUserProps) {
             align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <UserAvatar user={user} size="sm" className="h-8 w-8" />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.full_name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {user.email}
-                  </span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {user.department} • {user.designation}
-                  </span>
-                </div>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleProfileClick}>
-                <UserIcon />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSettingsClick}>
-                <Settings />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => window.location.href = '/profile#activity'}>
-                <Activity />
-                Activity Log
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out

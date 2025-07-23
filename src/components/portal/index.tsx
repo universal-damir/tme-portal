@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
 
 // Lazy load tab components for performance
+const ProfileTab = React.lazy(() => import('./tabs/ProfileTab'))
 const CostOverviewTab = React.lazy(() => import('./tabs/CostOverviewTab'))
 const GoldenVisaTab = React.lazy(() => import('./tabs/GoldenVisaTab'))
 const CompanyServicesTab = React.lazy(() => import('./tabs/CompanyServicesTab'))
@@ -94,6 +95,8 @@ export default function TMEPortal() {
 
   const renderActiveTab = () => {
     switch (activeTab) {
+      case 'profile':
+        return <ProfileTab />
       case 'cost-overview':
         return <CostOverviewTab />
       case 'golden-visa':
@@ -105,7 +108,7 @@ export default function TMEPortal() {
       case 'taxation':
         return <TaxationTab />
       default:
-        return <CostOverviewTab />
+        return <ProfileTab />
     }
   }
 

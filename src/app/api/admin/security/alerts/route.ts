@@ -10,6 +10,15 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
+    // Create acknowledgments table if it doesn't exist
+    await query(`
+      CREATE TABLE IF NOT EXISTS security_alert_acknowledgments (
+        alert_id INTEGER PRIMARY KEY,
+        acknowledged_by INTEGER REFERENCES users(id),
+        acknowledged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Get recent security-related audit logs as alerts
     const alertsResult = await query(
       `SELECT 
@@ -26,9 +35,11 @@ export async function GET(req: NextRequest) {
           WHEN al.action LIKE '%lock%' THEN 'high'
           WHEN al.action LIKE '%admin_%' THEN 'medium'
           ELSE 'low'
-        END as severity
+        END as severity,
+        CASE WHEN saa.alert_id IS NOT NULL THEN true ELSE false END as acknowledged
       FROM audit_logs al
       LEFT JOIN users u ON al.user_id = u.id
+      LEFT JOIN security_alert_acknowledgments saa ON al.id = saa.alert_id
       WHERE al.action IN ('login_failed', 'account_locked', 'password_reset', 'admin_action')
         OR al.action LIKE '%_fail%'
         OR al.action LIKE '%_error%'
@@ -46,7 +57,7 @@ export async function GET(req: NextRequest) {
       user_name: row.user_name,
       employee_code: row.employee_code,
       timestamp: row.timestamp,
-      acknowledged: false // In a real app, you'd store this in the database
+      acknowledged: row.acknowledged
     }));
 
     return NextResponse.json({ alerts });

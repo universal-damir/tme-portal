@@ -1,14 +1,13 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import {
   FileBarChart,
   Building2,
   Crown,
   Briefcase,
   Receipt,
-  Settings,
-  HelpCircle,
   Users,
   Shield,
 } from 'lucide-react'
@@ -84,19 +83,7 @@ const adminNavItems = [
   },
 ];
 
-const secondaryNavItems = [
-  {
-    title: 'Settings',
-    url: '/settings',
-    icon: Settings,
-    external: true,
-  },
-  {
-    title: 'Help & Support',
-    url: '#help',
-    icon: HelpCircle,
-  },
-];
+const secondaryNavItems: Array<{title: string, url: string, icon: any, external?: boolean}> = [];
 
 interface TMEPortalSidebarProps {
   activeTab: TabId;
@@ -124,7 +111,6 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
       ...item,
       isActive: activeTab === item.url.replace('#', ''),
     })),
-    navSecondary: secondaryNavItems,
   };
 
   return (
@@ -140,9 +126,18 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
               size="lg"
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <div className="flex items-center cursor-pointer">
-                <div className="flex items-center justify-center w-8 h-8 bg-blue-600 rounded-lg mr-2">
-                  <Building2 className="h-5 w-5 text-white" />
+              <div 
+                className="flex items-center cursor-pointer"
+                onClick={() => handleNavClick('#profile')}
+              >
+                <div className="flex items-center justify-center w-8 h-8 mr-2">
+                  <Image 
+                    src="/logo.png" 
+                    alt="TME Logo" 
+                    width={32} 
+                    height={32} 
+                    className="rounded-lg"
+                  />
                 </div>
                 <span className="text-base font-semibold">TME Portal</span>
               </div>
@@ -187,26 +182,6 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
           </SidebarGroup>
         )}
 
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navData.navSecondary.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild 
-                    size="sm"
-                    onClick={() => handleNavClick(item.url, item.external)}
-                  >
-                    <a href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
       
       <SidebarFooter>

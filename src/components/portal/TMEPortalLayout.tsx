@@ -21,6 +21,7 @@ interface TMEPortalLayoutProps {
 }
 
 const tabTitles: Record<TabId, string> = {
+  'profile': 'User Profile',
   'cost-overview': 'Cost Overview Generator',
   'golden-visa': 'Golden Visa Applications',
   'company-services': 'Company Services',
