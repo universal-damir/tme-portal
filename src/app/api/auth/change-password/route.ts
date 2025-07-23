@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, hashPassword, verifyPassword, logUserAction } from '@/lib/auth';
+import { getSession, hashPassword, verifyPassword, logUserAction, invalidateAllUserSessions } from '@/lib/auth';
 import { changePasswordSchema } from '@/lib/validations/auth';
 import { query } from '@/lib/database';
 
@@ -68,18 +68,24 @@ export async function POST(request: NextRequest) {
       [hashedNewPassword, sessionData.user.id]
     );
 
+    // Invalidate all other sessions (keep current session active)
+    await invalidateAllUserSessions(sessionData.user.id, sessionId);
+
     // Log successful password change
     await logUserAction(
       sessionData.user.id,
       'change_password_success',
       'auth',
       undefined,
-      undefined,
+      { sessions_invalidated: true },
       request.ip || request.headers.get('x-forwarded-for'),
       request.headers.get('user-agent')
     );
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true,
+      message: 'Password changed successfully. All other sessions have been terminated.'
+    });
   } catch (error) {
     console.error('Change password error:', error);
     

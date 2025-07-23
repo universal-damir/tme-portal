@@ -9,6 +9,8 @@ import {
   Receipt,
   Settings,
   HelpCircle,
+  Users,
+  Shield,
 } from 'lucide-react'
 
 import {
@@ -27,55 +29,74 @@ import { Button } from '@/components/ui/button'
 import { TabId } from '@/types/portal'
 import { NavMain } from './navigation/NavMain'
 import { NavUser } from './navigation/NavUser'
+import { useAuth } from '@/contexts/AuthContext'
+import { usePermissions } from '@/hooks/usePermissions'
 
-// TME Portal navigation data with enhanced structure
-const portalData = {
-  user: {
-    name: 'TME User',
-    email: 'user@TME-Services.com',
-    avatar: '/logo.png',
+// Base navigation items available to all authenticated users
+const baseNavItems = [
+  {
+    title: 'Cost Overview',
+    url: '#cost-overview',
+    icon: FileBarChart,
+    feature: 'cost_overview',
   },
-  navMain: [
-    {
-      title: 'Cost Overview',
-      url: '#cost-overview',
-      icon: FileBarChart,
-      isActive: true,
-    },
-    {
-      title: 'Golden Visa',
-      url: '#golden-visa',
-      icon: Crown,
-    },
-    {
-      title: 'Company Services',
-      url: '#company-services',
-      icon: Building2,
-    },
-    {
-      title: 'Corporate Changes',
-      url: '#corporate-changes',
-      icon: Briefcase,
-    },
-    {
-      title: 'Taxation',
-      url: '#taxation',
-      icon: Receipt,
-    },
-  ],
-  navSecondary: [
-    {
-      title: 'Settings',
-      url: '#settings',
-      icon: Settings,
-    },
-    {
-      title: 'Help & Support',
-      url: '#help',
-      icon: HelpCircle,
-    },
-  ],
-}
+  {
+    title: 'Golden Visa',
+    url: '#golden-visa',
+    icon: Crown,
+    feature: 'golden_visa',
+  },
+  {
+    title: 'Company Services',
+    url: '#company-services',
+    icon: Building2,
+    feature: 'company_services',
+  },
+  {
+    title: 'Corporate Changes',
+    url: '#corporate-changes',
+    icon: Briefcase,
+    feature: 'corporate_changes',
+  },
+  {
+    title: 'Taxation',
+    url: '#taxation',
+    icon: Receipt,
+    feature: 'taxation',
+  },
+];
+
+// Admin-only navigation items
+const adminNavItems = [
+  {
+    title: 'User Management',
+    url: '/admin/users',
+    icon: Users,
+    feature: 'user_management',
+    external: true,
+  },
+  {
+    title: 'System Admin',
+    url: '/admin/system',
+    icon: Shield,
+    feature: 'system_admin',
+    external: true,
+  },
+];
+
+const secondaryNavItems = [
+  {
+    title: 'Settings',
+    url: '/settings',
+    icon: Settings,
+    external: true,
+  },
+  {
+    title: 'Help & Support',
+    url: '#help',
+    icon: HelpCircle,
+  },
+];
 
 interface TMEPortalSidebarProps {
   activeTab: TabId;
@@ -83,9 +104,27 @@ interface TMEPortalSidebarProps {
 }
 
 export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarProps) {
-  const handleNavClick = (url: string) => {
+  const { user } = useAuth()
+  const { canAccessFeature } = usePermissions()
+
+  const handleNavClick = (url: string, external?: boolean) => {
+    if (external) {
+      window.location.href = url;
+      return;
+    }
     const tabId = url.replace('#', '') as TabId;
     onTabChange(tabId);
+  };
+
+  const visibleNavItems = baseNavItems.filter(item => canAccessFeature(item.feature));
+  const visibleAdminItems = adminNavItems.filter(item => canAccessFeature(item.feature));
+
+  const navData = {
+    navMain: visibleNavItems.map(item => ({
+      ...item,
+      isActive: activeTab === item.url.replace('#', ''),
+    })),
+    navSecondary: secondaryNavItems,
   };
 
   return (
@@ -113,17 +152,51 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
       </SidebarHeader>
       
       <SidebarContent>
-        <NavMain 
-          items={portalData.navMain} 
-          activeTab={activeTab}
-          onItemClick={handleNavClick}
-        />
+        <SidebarGroup>
+          <SidebarGroupLabel>Portal Services</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <NavMain 
+              items={navData.navMain} 
+              activeTab={activeTab}
+              onItemClick={handleNavClick}
+            />
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {visibleAdminItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Administration</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {visibleAdminItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton 
+                      asChild 
+                      size="sm"
+                      onClick={() => handleNavClick(item.url, item.external)}
+                    >
+                      <a href={item.url}>
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup className="mt-auto">
           <SidebarGroupContent>
             <SidebarMenu>
-              {portalData.navSecondary.map((item) => (
+              {navData.navSecondary.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild size="sm">
+                  <SidebarMenuButton 
+                    asChild 
+                    size="sm"
+                    onClick={() => handleNavClick(item.url, item.external)}
+                  >
                     <a href={item.url}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -137,7 +210,7 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
       </SidebarContent>
       
       <SidebarFooter>
-        <NavUser user={portalData.user} />
+        {user && <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   )

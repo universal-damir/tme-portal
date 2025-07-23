@@ -5,7 +5,7 @@ import fs from 'fs';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { employeeCode: string } }
+  { params }: { params: Promise<{ employeeCode: string }> }
 ) {
   try {
     // Validate session
@@ -19,15 +19,15 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
-    const { employeeCode } = params;
+    const resolvedParams = await params;
+    const { employeeCode } = resolvedParams;
     
     // Sanitize employee code
     if (!/^[\w\s]+$/.test(employeeCode)) {
       return NextResponse.json({ error: 'Invalid employee code format' }, { status: 400 });
     }
 
-    // Get photo size preference
-    const size = request.nextUrl.searchParams.get('size') || 'medium';
+    // Get photo format preference
     const format = request.nextUrl.searchParams.get('format') || 'webp';
 
     // Look for photo files in staff-photos directory
@@ -108,7 +108,7 @@ export async function GET(
 // Handle HEAD requests for cache validation
 export async function HEAD(
   request: NextRequest,
-  { params }: { params: { employeeCode: string } }
+  { params }: { params: Promise<{ employeeCode: string }> }
 ) {
   const getResponse = await GET(request, { params });
   

@@ -1,10 +1,12 @@
 'use client'
 
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { TMEPortalLayout } from './TMEPortalLayout'
 import { useTabNavigation } from '@/hooks/useTabNavigation'
 import { useChatPanel } from '@/hooks/useChatPanel'
+import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useRouter } from 'next/navigation'
 
 // Lazy load tab components for performance
 const CostOverviewTab = React.lazy(() => import('./tabs/CostOverviewTab'))
@@ -64,6 +66,31 @@ const TabContentSkeleton = () => (
 export default function TMEPortal() {
   const { activeTab, setActiveTab } = useTabNavigation()
   const chatPanel = useChatPanel()
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login')
+    }
+  }, [user, loading, router])
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="space-y-4 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return null
+  }
 
   const renderActiveTab = () => {
     switch (activeTab) {

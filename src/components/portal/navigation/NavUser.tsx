@@ -2,17 +2,13 @@
 
 import {
   UserCircle,
-  CreditCard,
-  Bell,
+  Settings,
+  Activity,
   LogOut,
   MoreVertical,
+  User as UserIcon,
 } from 'lucide-react'
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,17 +24,25 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { UserAvatar } from '@/components/ui/user-avatar'
+import { useAuth } from '@/contexts/AuthContext'
+import { User } from '@/lib/auth'
 
 interface NavUserProps {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
+  user: User;
 }
 
 export function NavUser({ user }: NavUserProps) {
   const { isMobile } = useSidebar()
+  const { logout } = useAuth()
+
+  const handleProfileClick = () => {
+    window.location.href = '/profile'
+  }
+
+  const handleSettingsClick = () => {
+    window.location.href = '/settings'
+  }
 
   return (
     <SidebarMenu>
@@ -49,16 +53,11 @@ export function NavUser({ user }: NavUserProps) {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600">
-                  <UserCircle className="h-4 w-4 text-white" />
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar user={user} size="sm" className="h-8 w-8" />
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.full_name}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.email}
+                  {user.department} • {user.role}
                 </span>
               </div>
               <MoreVertical className="ml-auto size-4" />
@@ -72,37 +71,35 @@ export function NavUser({ user }: NavUserProps) {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600">
-                    <UserCircle className="h-4 w-4 text-white" />
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar user={user} size="sm" className="h-8 w-8" />
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user.full_name}</span>
                   <span className="truncate text-xs text-muted-foreground">
                     {user.email}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {user.department} • {user.designation}
                   </span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircle />
-                Account
+              <DropdownMenuItem onClick={handleProfileClick}>
+                <UserIcon />
+                Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
+              <DropdownMenuItem onClick={handleSettingsClick}>
+                <Settings />
+                Settings
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+              <DropdownMenuItem onClick={() => window.location.href = '/profile#activity'}>
+                <Activity />
+                Activity Log
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

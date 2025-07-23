@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { ClientProvider } from '@/components/providers/ClientProvider';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -29,7 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className={`h-full antialiased ${inter.variable} ${jetbrainsMono.variable}`}>
-        {children}
+        <ClientProvider>
+          {children}
+        </ClientProvider>
         <Toaster 
           position="top-right"
           expand={true}

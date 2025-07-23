@@ -205,6 +205,112 @@ export async function invalidateSession(sessionId: string): Promise<void> {
   await query('DELETE FROM sessions WHERE id = $1', [sessionId]);
 }
 
+// Renew session expiration
+export async function renewSession(sessionId: string): Promise<boolean> {
+  try {
+    const sessionData = await getSession(sessionId);
+    if (!sessionData) {
+      return false;
+    }
+
+    const newExpiresAt = new Date();
+    newExpiresAt.setHours(newExpiresAt.getHours() + 8); // Extend by 8 hours
+
+    // Update database
+    await query(
+      'UPDATE sessions SET expires_at = $1 WHERE id = $2',
+      [newExpiresAt, sessionId]
+    );
+
+    // Update Redis cache
+    sessionData.expiresAt = newExpiresAt;
+    await redis.setEx(`session:${sessionId}`, 8 * 60 * 60, JSON.stringify(sessionData));
+
+    return true;
+  } catch (error) {
+    console.error('Session renewal error:', error);
+    return false;
+  }
+}
+
+// Get all active sessions for a user
+export async function getUserSessions(userId: number): Promise<any[]> {
+  try {
+    const result = await query(`
+      SELECT id, expires_at, ip_address, user_agent, created_at
+      FROM sessions
+      WHERE user_id = $1 AND expires_at > CURRENT_TIMESTAMP
+      ORDER BY created_at DESC
+    `, [userId]);
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching user sessions:', error);
+    return [];
+  }
+}
+
+// Invalidate all sessions for a user (useful for password changes)
+export async function invalidateAllUserSessions(userId: number, exceptSessionId?: string): Promise<void> {
+  try {
+    // Get all active sessions for the user
+    const sessions = await getUserSessions(userId);
+    
+    for (const session of sessions) {
+      if (exceptSessionId && session.id === exceptSessionId) {
+        continue; // Skip the current session if specified
+      }
+      
+      // Remove from Redis
+      await redis.del(`session:${session.id}`);
+    }
+
+    // Remove from database
+    if (exceptSessionId) {
+      await query(
+        'DELETE FROM sessions WHERE user_id = $1 AND id != $2',
+        [userId, exceptSessionId]
+      );
+    } else {
+      await query(
+        'DELETE FROM sessions WHERE user_id = $1',
+        [userId]
+      );
+    }
+  } catch (error) {
+    console.error('Error invalidating user sessions:', error);
+    throw error;
+  }
+}
+
+// Check if session is close to expiring (within 30 minutes)
+export function isSessionNearExpiry(sessionData: SessionData): boolean {
+  const now = new Date();
+  const expiry = new Date(sessionData.expiresAt);
+  const thirtyMinutes = 30 * 60 * 1000; // 30 minutes in milliseconds
+  
+  return (expiry.getTime() - now.getTime()) <= thirtyMinutes;
+}
+
+// Verify and get session from request
+export async function verifySession(request: Request): Promise<SessionData | null> {
+  try {
+    const sessionCookie = request.headers.get('cookie')
+      ?.split(';')
+      .find(c => c.trim().startsWith('session='))
+      ?.split('=')[1];
+
+    if (!sessionCookie) {
+      return null;
+    }
+
+    return await getSession(sessionCookie);
+  } catch (error) {
+    console.error('Session verification error:', error);
+    return null;
+  }
+}
+
 // Audit logging
 export async function logUserAction(
   userId: number | null,

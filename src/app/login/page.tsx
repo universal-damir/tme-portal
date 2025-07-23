@@ -66,7 +66,7 @@ export default function LoginPage() {
         if (data.user?.must_change_password) {
           router.push('/change-password');
         } else {
-          router.push('/dashboard');
+          router.push('/');
         }
       } else {
         setError(data.error || 'Login failed');

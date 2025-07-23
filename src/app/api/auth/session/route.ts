@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
         department: sessionData.user.department,
         designation: sessionData.user.designation,
         role: sessionData.user.role,
+        status: sessionData.user.status,
         must_change_password: sessionData.user.must_change_password,
         last_login: sessionData.user.last_login,
       },
