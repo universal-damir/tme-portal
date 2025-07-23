@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,13 +15,14 @@ import { loginSchema, type LoginInput } from '@/lib/validations/auth';
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   
   // Form state
   const [formData, setFormData] = useState<LoginInput>({
-    employeeCode: '',
+    email: '',
     password: '',
     rememberMe: false,
   });
@@ -62,6 +63,9 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        // Update AuthContext with user data
+        login(data.user);
+        
         // Check if user needs to change password
         if (data.user?.must_change_password) {
           router.push('/change-password');
@@ -103,33 +107,15 @@ export default function LoginPage() {
               </div>
             </div>
             <p className="text-xl text-blue-100 leading-relaxed">
-              Your comprehensive business services platform for cost calculations, 
-              company setup, and administrative management.
+            Comprehensive platform for admin and document management. <br></br>Built for TME Services employees to streamline internal operations.
             </p>
           </div>
           
-          <div className="space-y-4 text-sm text-blue-200">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-400 rounded-full" />
-              <span>Cost Overview & Quote Generation</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-400 rounded-full" />
-              <span>Company Services Management</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-400 rounded-full" />
-              <span>Golden Visa Applications</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-blue-400 rounded-full" />
-              <span>Tax Consultation & Filing</span>
-            </div>
-          </div>
+         
 
           <div className="mt-12 pt-8 border-t border-blue-700">
             <p className="text-sm text-blue-300">
-              © 2024 TME Services. All rights reserved.
+              © 2025 TME Services. Created by Damir. All rights reserved.
             </p>
           </div>
         </div>
@@ -152,7 +138,7 @@ export default function LoginPage() {
               
               <CardTitle className="text-2xl text-gray-900">Sign In</CardTitle>
               <CardDescription className="text-gray-600">
-                Enter your employee credentials to access the portal
+                Enter your email and password to access the portal
               </CardDescription>
             </CardHeader>
 
@@ -179,18 +165,17 @@ export default function LoginPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="employeeCode" className="text-sm font-medium text-gray-700">
-                    Employee Code
+                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                    Email Address
                   </Label>
                   <Input
-                    id="employeeCode"
-                    type="text"
-                    placeholder="Enter your employee code"
-                    value={formData.employeeCode}
-                    onChange={(e) => handleInputChange('employeeCode', e.target.value.toUpperCase())}
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                     disabled={isLoading}
-                    className="uppercase"
-                    autoComplete="username"
+                    autoComplete="email"
                     required
                   />
                 </div>
@@ -260,9 +245,9 @@ export default function LoginPage() {
 
               <div className="mt-6 pt-6 border-t border-gray-200 text-center">
                 <p className="text-xs text-gray-500">
-                  Having trouble signing in? Contact your system administrator at{' '}
-                  <a href="mailto:uwe@TME-Services.com" className="text-blue-600 hover:text-blue-700">
-                    uwe@TME-Services.com
+                  Having trouble signing in? <br></br> Contact Damir at{' '}
+                  <a href="mailto:damir@TME-Services.com" className="text-blue-600 hover:text-blue-700">
+                    damir@TME-Services.com
                   </a>
                 </p>
               </div>
@@ -271,7 +256,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-400">
-              This is a secure system. Unauthorized access is prohibited.
+              This is a secure system design for internal use only. <br></br> Unauthorized access is prohibited.
             </p>
           </div>
         </div>

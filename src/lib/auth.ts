@@ -51,11 +51,11 @@ export async function verifyToken(token: string): Promise<any> {
 }
 
 // User authentication
-export async function authenticateUser(employeeCode: string, password: string): Promise<User | null> {
+export async function authenticateUser(email: string, password: string): Promise<User | null> {
   try {
     const result = await query(
-      'SELECT * FROM users WHERE employee_code = $1 AND status = $2',
-      [employeeCode, 'active']
+      'SELECT * FROM users WHERE email = $1 AND status = $2',
+      [email, 'active']
     );
 
     if (result.rows.length === 0) {

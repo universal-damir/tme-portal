@@ -1,10 +1,9 @@
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  employeeCode: z.string()
-    .min(1, 'Employee code is required')
-    .max(10, 'Employee code must be 10 characters or less')
-    .regex(/^[A-Z0-9\s]+$/, 'Employee code must contain only uppercase letters, numbers, and spaces'),
+  email: z.string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email address'),
   password: z.string()
     .min(1, 'Password is required')
     .min(8, 'Password must be at least 8 characters long'),

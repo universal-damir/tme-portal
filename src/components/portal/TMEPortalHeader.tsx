@@ -41,7 +41,7 @@ export function TMEPortalHeader({
                 <div className="hidden md:flex flex-col text-right">
                   <span className="text-sm font-medium">{user.full_name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {user.department} • {user.designation}
+                    {user.designation}
                   </span>
                 </div>
                 

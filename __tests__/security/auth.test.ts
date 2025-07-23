@@ -70,7 +70,7 @@ describe('Authentication Security Tests', () => {
 
   describe('Account Lockout Protection', () => {
     test('should lock account after 5 failed attempts', async () => {
-      const employeeCode = 'TEST01';
+      const email = 'test@example.com';
       const mockUser = {
         id: 1,
         employee_code: employeeCode,
@@ -85,7 +85,7 @@ describe('Authentication Security Tests', () => {
       mockQuery.mockResolvedValueOnce({ rows: [] }); // Lock account
 
       try {
-        await authenticateUser(employeeCode, 'WrongPassword');
+        await authenticateUser(email, 'WrongPassword');
       } catch (error) {
         expect(error.message).toContain('Account locked');
       }
@@ -97,7 +97,7 @@ describe('Authentication Security Tests', () => {
     });
 
     test('should reject locked account login', async () => {
-      const employeeCode = 'TEST01';
+      const email = 'test@example.com';
       const futureDate = new Date();
       futureDate.setMinutes(futureDate.getMinutes() + 15);
       
@@ -111,7 +111,7 @@ describe('Authentication Security Tests', () => {
       mockQuery.mockResolvedValueOnce({ rows: [mockUser] });
 
       try {
-        await authenticateUser(employeeCode, 'AnyPassword');
+        await authenticateUser(email, 'AnyPassword');
       } catch (error) {
         expect(error.message).toContain('Account is locked');
       }

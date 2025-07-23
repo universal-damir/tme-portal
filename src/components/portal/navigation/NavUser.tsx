@@ -42,7 +42,7 @@ export function NavUser({ user }: NavUserProps) {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.full_name}</span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {user.department} • {user.role}
+                  {user.designation}
                 </span>
               </div>
               <MoreVertical className="ml-auto size-4" />

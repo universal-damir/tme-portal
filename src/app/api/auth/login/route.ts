@@ -5,14 +5,14 @@ import { loginSchema } from '@/lib/validations/auth';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { employeeCode, password, rememberMe } = loginSchema.parse(body);
+    const { email, password, rememberMe } = loginSchema.parse(body);
 
     // Get client info
     const ipAddress = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     const userAgent = request.headers.get('user-agent') || 'unknown';
 
     // Authenticate user
-    const user = await authenticateUser(employeeCode, password);
+    const user = await authenticateUser(email, password);
 
     if (!user) {
       // Log failed login attempt
@@ -20,14 +20,14 @@ export async function POST(request: NextRequest) {
         null, // No user ID for failed attempts
         'login_failed',
         'auth',
-        employeeCode,
+        email,
         { reason: 'invalid_credentials' },
         ipAddress,
         userAgent
       );
 
       return NextResponse.json(
-        { error: 'Invalid employee code or password' },
+        { error: 'Invalid email or password' },
         { status: 401 }
       );
     }

@@ -50,13 +50,6 @@ export default function ProfileTab() {
     return `${day}.${month}.${year} ${hours}:${minutes}`
   }
 
-  const formatDateOnly = (dateString: string) => {
-    const date = new Date(dateString)
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}.${month}.${year}`
-  }
 
   if (loading) {
     return (
@@ -102,15 +95,6 @@ export default function ProfileTab() {
             <div>
               <p className="text-xs font-medium text-gray-500">Designation</p>
               <p className="text-sm">{user.designation}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500">Last Login</p>
-              <p className="text-sm">
-                {user.last_login 
-                  ? formatDateOnly(user.last_login.toString())
-                  : 'Never'
-                }
-              </p>
             </div>
           </div>
 
