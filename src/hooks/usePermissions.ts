@@ -10,6 +10,7 @@ const DEPARTMENT_ACCESS: Record<string, string[]> = {
   'Finance': ['taxation', 'company_services', 'golden_visa'],
   'Legal': ['golden_visa', 'corporate_changes', 'company_services'],
   'Business Development': ['cost_overview', 'company_services', 'golden_visa'],
+  'Company Setup': ['cost_overview', 'company_services', 'golden_visa'],
   'Administration': ['company_services', 'corporate_changes'],
   'HR': ['user_management', 'company_services'],
 }
@@ -58,10 +59,10 @@ export function usePermissions() {
     if (!user) return false
 
     const featurePermissions: Record<string, string[]> = {
-      'profile': ['IT', 'Management', 'Business Development', 'Finance', 'Legal', 'Administration', 'HR'],
-      'cost_overview': ['IT', 'Management', 'Business Development', 'Finance'],
-      'golden_visa': ['IT', 'Management', 'Legal', 'Business Development', 'Finance'],
-      'company_services': ['IT', 'Management', 'Finance', 'Legal', 'Administration', 'HR'],
+      'profile': ['IT', 'Management', 'Business Development', 'Finance', 'Legal', 'Administration', 'HR', 'Company Setup'],
+      'cost_overview': ['IT', 'Management', 'Business Development', 'Finance', 'Company Setup'],
+      'golden_visa': ['IT', 'Management', 'Legal', 'Business Development', 'Finance', 'Company Setup'],
+      'company_services': ['IT', 'Management', 'Finance', 'Legal', 'Administration', 'HR', 'Company Setup'],
       'corporate_changes': ['IT', 'Management', 'Legal', 'Administration'],
       'taxation': ['IT', 'Management', 'Finance'],
       'user_management': ['IT', 'HR'],
