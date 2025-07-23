@@ -117,7 +117,7 @@ const TaxationTab: React.FC = () => {
       // Dynamic import to avoid bundling issues
       const { generateTaxationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
       
-      console.log('Generating Taxation PDF with data:', data);
+      // Generating Taxation PDF
       
       const { blob, filename } = await generateTaxationPDFWithFilename(data, clientInfo);
       
@@ -151,7 +151,7 @@ const TaxationTab: React.FC = () => {
       // Dynamic import to avoid bundling issues
       const { generateTaxationPDF } = await import('@/lib/pdf-generator/utils/taxationGenerator');
       
-      console.log('Previewing Taxation PDF with data:', data);
+      // Previewing Taxation PDF
       
       const blob = await generateTaxationPDF(data, clientInfo);
       const url = URL.createObjectURL(blob);
@@ -191,7 +191,7 @@ const TaxationTab: React.FC = () => {
       // Dynamic import to avoid bundling issues
       const { generateCITShareholderDeclarationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
       
-      console.log('Generating CIT Shareholder Declaration PDF with data:', data);
+      // Generating CIT Shareholder Declaration PDF
       
       const { blob, filename } = await generateCITShareholderDeclarationPDFWithFilename(data, clientInfo);
       
@@ -231,7 +231,7 @@ const TaxationTab: React.FC = () => {
       // Dynamic import to avoid bundling issues
       const { generateCITShareholderDeclarationPDF } = await import('@/lib/pdf-generator/utils/taxationGenerator');
       
-      console.log('Previewing CIT Shareholder Declaration PDF with data:', data);
+      // Previewing CIT Shareholder Declaration PDF
       
       const blob = await generateCITShareholderDeclarationPDF(data, clientInfo);
       const url = URL.createObjectURL(blob);

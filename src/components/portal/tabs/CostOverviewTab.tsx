@@ -173,14 +173,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   );
   const { costs, hasCalculations } = useCostCalculation(authorityConfig || null, watchedData);
 
-  // Debug: Log when authority config changes
+  // Track authority configuration changes
   React.useEffect(() => {
-    console.log('Authority Config Changed:', {
-      authority: authorityInformation?.responsibleAuthority,
-      isAuthoritySelected,
-      authorityConfig: authorityConfig?.id,
-      visaCount: watchedData.visaCosts?.numberOfVisas
-    });
+    // Authority configuration updated
   }, [authorityInformation?.responsibleAuthority, isAuthoritySelected, authorityConfig?.id, watchedData.visaCosts?.numberOfVisas]);
 
   // AI Assistant integration
@@ -396,10 +391,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   };
 
   const handlePreviewPDF = async (data: OfferData): Promise<void> => {
-    console.log('PDF Preview Data:', data);
-    console.log('PDF Data - Authority:', data.authorityInformation?.responsibleAuthority);
-    console.log('PDF Data - Visa Count:', data.visaCosts?.numberOfVisas);
-    console.log('PDF Data - Client:', data.clientDetails?.firstName, data.clientDetails?.lastName, data.clientDetails?.companyName);
+    // PDF preview data validation
     
     // Validate required data before generating PDF
     if (!data || !data.clientDetails || !data.authorityInformation) {

@@ -213,13 +213,13 @@ export function applyToForm(
   formData: Partial<OfferData>, 
   setValue: UseFormSetValue<OfferData>
 ): void {
-  console.log('Applying form data:', formData);
+  // Applying form data to fields
   
   // Apply client details
   if (formData.clientDetails) {
     Object.entries(formData.clientDetails).forEach(([key, value]) => {
       if (value !== undefined) {
-        console.log(`Setting clientDetails.${key} =`, value);
+        // Setting client detail field
         setValue(`clientDetails.${key as keyof typeof formData.clientDetails}`, value);
       }
     });
@@ -229,7 +229,7 @@ export function applyToForm(
   if (formData.authorityInformation) {
     Object.entries(formData.authorityInformation).forEach(([key, value]) => {
       if (value !== undefined) {
-        console.log(`Setting authorityInformation.${key} =`, value);
+        // Setting authority information field
         setValue(`authorityInformation.${key as keyof typeof formData.authorityInformation}`, value);
       }
     });
@@ -257,7 +257,7 @@ export function applyToForm(
   if (formData.visaCosts) {
     Object.entries(formData.visaCosts).forEach(([key, value]) => {
       if (value !== undefined) {
-        console.log(`Setting visaCosts.${key} =`, value);
+        // Setting visa cost field
         setValue(`visaCosts.${key as keyof typeof formData.visaCosts}`, value);
       }
     });

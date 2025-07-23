@@ -81,9 +81,7 @@ export function useAIAssistant({
       // Map AI response to form data structure
       const mappedFormData = mapAIResponseToFormData(aiFormData);
       
-      // Debug: log what data is being mapped
-      console.log('AI Response Data:', aiFormData);
-      console.log('Mapped Form Data:', mappedFormData);
+      // AI response mapping completed
       
       // Apply to form using setValue
       applyToForm(mappedFormData, setValue);
@@ -175,10 +173,7 @@ export function useAIAssistant({
                                mergedData.clientDetails?.lastName || 
                                mergedData.clientDetails?.companyName;
           
-          console.log('Client details in merged data:', mergedData.clientDetails);
-          console.log('Has client info:', hasClientInfo);
-          
-          console.log('Merged data for PDF:', mergedData);
+          // PDF data merge completed
           onAutoGeneratePDF?.(mergedData);
         }, 3000); // Longer delay to ensure form fully renders with authority-dependent sections
         
