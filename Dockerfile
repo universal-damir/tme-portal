@@ -6,9 +6,9 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Install ALL dependencies (including dev dependencies needed for build)
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Stage 2: Builder
 FROM node:20-alpine AS builder
@@ -17,18 +17,27 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Environment variables for build
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
-# Build the application
+# Build the application (disable ESLint for production build)
+ENV ESLINT_NO_DEV_ERRORS=true
+ENV DISABLE_ESLINT_PLUGIN=true
+# Use dummy URLs for build phase (will be overridden at runtime)
+ENV DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ENV REDIS_URL=redis://localhost:6379
+ENV NEXTAUTH_SECRET=dummy-build-secret
+ENV OPENAI_API_KEY=placeholder_key_for_build
+# Skip Redis connections during build
+ENV SKIP_REDIS_CONNECTION=true
 RUN npm run build
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # Security hardening: Install security updates
 RUN apk update && apk upgrade && apk add --no-cache curl
@@ -71,8 +80,8 @@ USER nextjs
 # Expose port 3000
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \

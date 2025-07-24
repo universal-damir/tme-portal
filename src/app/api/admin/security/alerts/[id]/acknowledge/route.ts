@@ -4,7 +4,7 @@ import { query } from '@/lib/database';
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Verify admin authentication
@@ -13,7 +13,7 @@ export async function POST(
       return NextResponse.json({ error: authResult.error }, { status: authResult.status });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Create table if it doesn't exist (for acknowledged alerts tracking)
     await query(`
