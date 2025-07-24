@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
+import { shouldUseSecureCookies } from '@/lib/security';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
       const response = NextResponse.json({ authenticated: false }, { status: 401 });
       response.cookies.set('session', '', {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: shouldUseSecureCookies(),
         sameSite: 'lax',
         path: '/',
         maxAge: 0,

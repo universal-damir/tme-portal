@@ -271,6 +271,16 @@ export function isSecureContext(req: NextRequest): boolean {
   return protocol === 'https:';
 }
 
+export function shouldUseSecureCookies(): boolean {
+  // Check explicit SECURE_COOKIES environment variable first
+  if (process.env.SECURE_COOKIES !== undefined) {
+    return process.env.SECURE_COOKIES === 'true';
+  }
+  
+  // Fall back to NODE_ENV check for backward compatibility
+  return process.env.NODE_ENV === 'production';
+}
+
 export function generateSecureSessionCookie(sessionId: string, maxAge: number): string {
   const cookieOptions = [
     `session=${sessionId}`,
@@ -280,7 +290,7 @@ export function generateSecureSessionCookie(sessionId: string, maxAge: number): 
     'Path=/'
   ];
   
-  if (process.env.NODE_ENV === 'production') {
+  if (shouldUseSecureCookies()) {
     cookieOptions.push('Secure');
   }
   

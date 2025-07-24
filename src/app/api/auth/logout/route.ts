@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { invalidateSession, logUserAction, getSession } from '@/lib/auth';
+import { shouldUseSecureCookies } from '@/lib/security';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     const response = NextResponse.json({ success: true });
     response.cookies.set('session', '', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: shouldUseSecureCookies(),
       sameSite: 'lax',
       path: '/',
       maxAge: 0, // Expire immediately
