@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
@@ -80,35 +81,39 @@ export const NumberInputField: React.FC<NumberInputFieldProps> = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div style={{ fontFamily: 'Inter, sans-serif' }}>
       <Label 
         htmlFor={inputId}
-        className="text-sm font-semibold text-foreground"
+        className="text-sm font-medium mb-1"
+        style={{ color: '#243F7B' }}
       >
         {label}{required && ' *'}
       </Label>
       
-      <Input
-        id={inputId}
-        type="text"
-        value={formattedValue}
-        onChange={handleInputChange}
-        placeholder={placeholder}
-        aria-describedby={errorId}
-        aria-invalid={!!error}
-        className={cn(
-          "h-12 text-base",
-          "focus-visible:ring-2 focus-visible:ring-primary",
-          "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
-          error && "border-destructive focus-visible:ring-destructive",
-          className
-        )}
-      />
+      <motion.div whileFocus={{ scale: 1.01 }}>
+        <Input
+          id={inputId}
+          type="text"
+          value={formattedValue}
+          onChange={handleInputChange}
+          placeholder={placeholder}
+          aria-describedby={errorId}
+          aria-invalid={!!error}
+          className={cn(
+            "h-[42px] text-base px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200",
+            "[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
+            error && "border-red-500",
+            className
+          )}
+          onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+          onBlur={(e) => e.target.style.borderColor = error ? '#ef4444' : '#e5e7eb'}
+        />
+      </motion.div>
       
       {error && (
         <p 
           id={errorId}
-          className="text-sm text-destructive font-medium"
+          className="text-sm text-red-500 font-medium"
           role="alert"
         >
           {error}

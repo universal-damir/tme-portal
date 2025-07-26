@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Download, Eye, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { GoldenVisaData, GOLDEN_VISA_DEFAULTS, GoldenVisaType } from '@/types/golden-visa';
 import { goldenVisaSchema } from '@/lib/validations';
@@ -15,7 +16,6 @@ import {
   ClientDetailsSection,
   VisaTypeSection,
   CompanySelectionSection,
-  AuthorityFeesSection,
   NOCRequirementsSection,
   DependentVisasSection
 } from '../../golden-visa';
@@ -385,7 +385,7 @@ const GoldenVisaTab: React.FC = () => {
   }, [watchedData]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ fontFamily: 'Inter, sans-serif' }}>
 
       {/* Enhanced Progress Dialog for PDF Generation */}
       {pdfProgress.isVisible && (
@@ -451,56 +451,19 @@ const GoldenVisaTab: React.FC = () => {
         register={register}
       />
 
-      {/* Golden Visa Type Selection */}
+      {/* Golden Visa Type Selection with Integrated Authority Costs and TME Fee */}
       <VisaTypeSection
         register={register}
         errors={errors}
         onVisaTypeChange={handleVisaTypeChange}
         primaryVisaRequired={watchedData.primaryVisaRequired}
         onPrimaryVisaChange={handlePrimaryVisaChange}
-      />
-
-      {/* Authority Fees Section - Unified for all visa types */}
-      <AuthorityFeesSection
-        visaType={watchedData.visaType}
+        currentVisaType={watchedData.visaType}
         data={watchedData}
         onFieldChange={(path, value) => setValue(path as any, value)}
       />
 
-      {/* NOC Requirements Section - Only for Skilled Employee with primary visa */}
-      {watchedData.primaryVisaRequired && watchedData.visaType === 'skilled-employee' && (
-        <NOCRequirementsSection
-          data={watchedData}
-          register={register}
-          setValue={setValue}
-          errors={errors}
-        />
-      )}
 
-      {/* TME Services Fee - Only when primary visa is required */}
-      {watchedData.primaryVisaRequired && (
-        <FormSection
-          title="TME Professional Service Fee"
-          description="Professional service fees for Golden Visa processing"
-          icon={FileText}
-          iconColor="text-blue-600"
-        >
-          <div className="max-w-md">
-            <NumberInputField
-              label="TME Professional Service Fee (AED)"
-              value={watchedData.tmeServicesFee}
-              onChange={(value) => setValue('tmeServicesFee', value)}
-              placeholder="4,820"
-              required
-              error={errors.tmeServicesFee?.message}
-              className="focus:ring-blue-500"
-            />
-            <p className="text-xs text-gray-500 mt-2">
-              Golden Visa (all types): AED 4,820
-            </p>
-          </div>
-        </FormSection>
-      )}
 
       {/* Dependents Section */}
       <DependentVisasSection
@@ -509,48 +472,59 @@ const GoldenVisaTab: React.FC = () => {
         onFieldChange={(path, value) => setValue(path as any, value)}
       />
 
-      {/* Generate PDF Button */}
-      <div className="text-center">
+      {/* Generate PDF Buttons */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="text-center"
+      >
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => handlePreviewPDF(watchedData)}
             disabled={isGenerating}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <Eye className="h-6 w-6" />
+                <Eye className="h-5 w-5" />
                 <span>Preview PDF</span>
               </>
             )}
-          </button>
+          </motion.button>
           
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => handleGeneratePDF(watchedData)}
             disabled={isGenerating}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            style={{ backgroundColor: '#243F7B' }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <Download className="h-6 w-6" />
+                <Download className="h-5 w-5" />
                 <span>Download PDF</span>
               </>
             )}
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

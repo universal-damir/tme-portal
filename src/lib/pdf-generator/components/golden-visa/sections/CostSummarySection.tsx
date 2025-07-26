@@ -36,42 +36,45 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     const items: CostItem[] = [];
     let itemNumber = 1;
     
-    // Calculate authority total from detailed breakdown
-    let authorityTotal = 0;
-    if (goldenVisaData?.visaType === 'property-investment' && goldenVisaData?.propertyAuthorityFees) {
-      const fees = goldenVisaData.propertyAuthorityFees;
-      authorityTotal = fees.professionalPassportPicture + fees.dldApprovalFee + fees.mandatoryUaeMedicalTest + 
-                     fees.emiratesIdFee + fees.immigrationResidencyFee + fees.thirdPartyCosts;
-      if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
-    } else if ((goldenVisaData?.visaType === 'time-deposit' || goldenVisaData?.visaType === 'skilled-employee') && goldenVisaData?.skilledEmployeeAuthorityFees) {
-      const fees = goldenVisaData.skilledEmployeeAuthorityFees;
-      authorityTotal = fees.professionalPassportPicture + fees.mandatoryUaeMedicalTest + 
-                     fees.emiratesIdFee + fees.immigrationResidencyFee + fees.thirdPartyCosts;
-      if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
-    } else {
-      // Fallback to legacy calculation
-      authorityTotal = goldenVisaData?.governmentFee || 0;
-    }
-    
-    // 1. Authority Costs line
-    items.push({
-      description: `${itemNumber}. ${getVisaTypeDisplay()} Golden Visa Authority Fees`,
-      amount: authorityTotal,
-      secondaryAmount: authorityTotal / exchangeRate,
-      isReduction: false
-    });
-    itemNumber++;
-    
-    // 2. NOC fee as separate line (only for skilled employee with NOC)
-    if (goldenVisaData?.requiresNOC && goldenVisaData?.selectedFreezone && goldenVisaData?.freezoneNocFee) {
-      const freezoneLabel = goldenVisaData.selectedFreezone.toUpperCase();
+    // Only include primary visa costs if primary visa is required
+    if (goldenVisaData?.primaryVisaRequired) {
+      // Calculate authority total from detailed breakdown
+      let authorityTotal = 0;
+      if (goldenVisaData?.visaType === 'property-investment' && goldenVisaData?.propertyAuthorityFees) {
+        const fees = goldenVisaData.propertyAuthorityFees;
+        authorityTotal = fees.professionalPassportPicture + fees.dldApprovalFee + fees.mandatoryUaeMedicalTest + 
+                       fees.emiratesIdFee + fees.immigrationResidencyFee + fees.thirdPartyCosts;
+        if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
+      } else if ((goldenVisaData?.visaType === 'time-deposit' || goldenVisaData?.visaType === 'skilled-employee') && goldenVisaData?.skilledEmployeeAuthorityFees) {
+        const fees = goldenVisaData.skilledEmployeeAuthorityFees;
+        authorityTotal = fees.professionalPassportPicture + fees.mandatoryUaeMedicalTest + 
+                       fees.emiratesIdFee + fees.immigrationResidencyFee + fees.thirdPartyCosts;
+        if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
+      } else {
+        // Fallback to legacy calculation
+        authorityTotal = goldenVisaData?.governmentFee || 0;
+      }
+      
+      // 1. Authority Costs line
       items.push({
-        description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) Fee`,
-        amount: goldenVisaData.freezoneNocFee,
-        secondaryAmount: goldenVisaData.freezoneNocFee / exchangeRate,
+        description: `${itemNumber}. ${getVisaTypeDisplay()} Golden Visa Authority Fees`,
+        amount: authorityTotal,
+        secondaryAmount: authorityTotal / exchangeRate,
         isReduction: false
       });
       itemNumber++;
+      
+      // 2. NOC fee as separate line (only for skilled employee with NOC)
+      if (goldenVisaData?.requiresNOC && goldenVisaData?.selectedFreezone && goldenVisaData?.freezoneNocFee) {
+        const freezoneLabel = goldenVisaData.selectedFreezone.toUpperCase();
+        items.push({
+          description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) Fee`,
+          amount: goldenVisaData.freezoneNocFee,
+          secondaryAmount: goldenVisaData.freezoneNocFee / exchangeRate,
+          isReduction: false
+        });
+        itemNumber++;
+      }
     }
     
     // 3. Spouse Visa (if selected)
@@ -107,7 +110,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     }
     
     // Last item: TME Services (always at the bottom)
-    const baseTmeServices = goldenVisaData?.tmeServicesFee || 0;
+    const baseTmeServices = goldenVisaData?.primaryVisaRequired ? (goldenVisaData?.tmeServicesFee || 0) : 0;
     // Calculate dependent TME services
     let dependentTmeServices = 0;
     if (hasSpouse) {
@@ -119,12 +122,16 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     }
     
     const totalTmeServices = baseTmeServices + dependentTmeServices;
-    items.push({
-      description: `${itemNumber}. TME Services Professional Fee`,
-      amount: totalTmeServices,
-      secondaryAmount: totalTmeServices / exchangeRate,
-      isReduction: false
-    });
+    
+    // Only add TME services if there are any services to include
+    if (totalTmeServices > 0) {
+      items.push({
+        description: `${itemNumber}. TME Services Professional Fee`,
+        amount: totalTmeServices,
+        secondaryAmount: totalTmeServices / exchangeRate,
+        isReduction: false
+      });
+    }
     
     return items;
   };
@@ -132,11 +139,26 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
   const costItems = generateCostSummaryItems();
   const totalAmount = costItems.reduce((sum, item) => sum + item.amount, 0);
 
+  // Dynamic title and description based on whether primary visa is required
+  const getSummaryTitle = () => {
+    if (!goldenVisaData?.primaryVisaRequired) {
+      return 'Golden Visa Dependent Services Summary';
+    }
+    return `${getVisaTypeDisplay()} Golden Visa Summary`;
+  };
+
+  const getSummaryDescription = () => {
+    if (!goldenVisaData?.primaryVisaRequired) {
+      return 'This represents the overall cost for your Golden Visa dependent services only. A detailed cost breakdown is provided on the following pages for full transparency. All government cost will always be charged on cost basis.';
+    }
+    return 'This represents the overall cost for your Golden Visa application. A detailed cost breakdown is provided on the following pages for full transparency. All government cost will always be charged on cost basis.';
+  };
+
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{getVisaTypeDisplay()} Golden Visa Summary</Text>
+      <Text style={styles.sectionTitle}>{getSummaryTitle()}</Text>
       <Text style={styles.introText}>
-        This represents the overall cost for your Golden Visa application. A detailed cost breakdown is provided on the following pages for full transparency. All government cost will always be charged on cost basis.
+        {getSummaryDescription()}
       </Text>
       
       <View style={styles.costTable}>

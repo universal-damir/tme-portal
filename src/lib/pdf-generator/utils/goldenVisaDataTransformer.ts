@@ -102,6 +102,12 @@ export function hasDependentVisas(goldenVisaData: GoldenVisaData): boolean {
 // Generate Authority Fees breakdown with detailed numbered items
 export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenVisaData): GoldenVisaServiceItem[] {
   const services: GoldenVisaServiceItem[] = [];
+  
+  // Only generate authority fees if primary visa is required
+  if (!goldenVisaData.primaryVisaRequired) {
+    return services;
+  }
+  
   const visaType = goldenVisaData.visaType;
 
   if (visaType === 'property-investment' && goldenVisaData.propertyAuthorityFees) {
@@ -235,6 +241,12 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
 // Generate TME Services breakdown with detailed numbered items
 export function generateGoldenVisaTMEServicesBreakdown(goldenVisaData: GoldenVisaData): GoldenVisaServiceItem[] {
   const services: GoldenVisaServiceItem[] = [];
+  
+  // Only generate TME services if primary visa is required
+  if (!goldenVisaData.primaryVisaRequired) {
+    return services;
+  }
+  
   const baseTmeServicesFee = goldenVisaData.tmeServicesFee || 0;
 
   services.push({

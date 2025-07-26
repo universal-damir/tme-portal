@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { NumberInputField } from '../../portal/tabs/NumberInputField';
 import { VISA_CANCELATION_COLORS, getFieldPlaceholder } from '../utils/goldenVisaConfig';
 
@@ -84,14 +86,32 @@ export const VisaCancelationField: React.FC<VisaCancelationFieldProps> = ({
   };
 
   return (
-    <div className={`mt-6 p-4 ${colors.bg} border ${colors.border} rounded-xl ${className}`}>
+    <div className={`mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl ${className}`}>
       <label className="flex items-center cursor-pointer">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => handleCheckboxChange(e.target.checked)}
-          className={`w-4 h-4 ${colors.text} bg-gray-100 border-gray-300 rounded ${colors.ring} focus:ring-2`}
-        />
+        <div className="relative">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => handleCheckboxChange(e.target.checked)}
+            className="sr-only"
+          />
+          <div 
+            className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+            style={{ 
+              borderColor: checked ? '#243F7B' : '#d1d5db',
+              backgroundColor: checked ? '#243F7B' : 'white'
+            }}
+          >
+            {checked && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+              >
+                <Check className="w-3 h-3 text-white" />
+              </motion.div>
+            )}
+          </div>
+        </div>
         <span className="ml-2 text-sm font-medium text-gray-700">
           {label}
         </span>
@@ -110,7 +130,7 @@ export const VisaCancelationField: React.FC<VisaCancelationFieldProps> = ({
             value={fee}
             onChange={onFeeChange}
             placeholder={placeholder}
-            className={colors.ring}
+            className="focus:ring-blue-500"
           />
         </div>
       )}

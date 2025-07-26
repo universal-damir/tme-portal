@@ -33,14 +33,15 @@ export const GoldenVisaDocument: React.FC<GoldenVisaDocumentProps> = ({
 
   // Determine which pages should be shown based on actual data
   const showDependentVisas = hasDependentVisas(goldenVisaData);
+  const showAuthorityCosts = goldenVisaData.primaryVisaRequired;
 
   return (
     <Document>
       {/* Cover Page - Always shown */}
       <GoldenVisaCoverPage data={transformedData} />
 
-      {/* Authority Costs Page - Always shown */}
-      <AuthorityCostsPage data={transformedData} />
+      {/* Authority Costs Page - Only when primary visa is required */}
+      {showAuthorityCosts && <AuthorityCostsPage data={transformedData} />}
 
       {/* Dependent Visas Page - Only when dependents are selected */}
       {showDependentVisas && <DependentVisasPage data={transformedData} />}

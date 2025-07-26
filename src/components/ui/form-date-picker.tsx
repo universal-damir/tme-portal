@@ -1,18 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import { motion } from "framer-motion"
 import { UseFormRegister, FieldPath, FieldValues } from "react-hook-form"
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 
 interface FormDatePickerProps<T extends FieldValues> {
   /**
@@ -82,7 +73,7 @@ export function FormDatePicker<T extends FieldValues>({
   value,
   onChange,
   label,
-  placeholder = "Pick a date",
+  placeholder = "dd.mm.yyyy",
   disabled = false,
   required = false,
   className,
@@ -90,30 +81,87 @@ export function FormDatePicker<T extends FieldValues>({
   error,
   captionLayout = "label",
 }: FormDatePickerProps<T>) {
-  const [open, setOpen] = React.useState(false)
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false)
+  const [currentMonth, setCurrentMonth] = React.useState(new Date().getMonth())
+  const [currentYear, setCurrentYear] = React.useState(new Date().getFullYear())
   
   // Convert ISO string to Date object for display
   const selectedDate = value ? new Date(value) : undefined
   
-  // Handle date selection
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      // Use local date formatting to avoid timezone issues
-      const year = date.getFullYear()
-      const month = String(date.getMonth() + 1).padStart(2, '0')
-      const day = String(date.getDate()).padStart(2, '0')
-      const localDateString = `${year}-${month}-${day}`
-      onChange?.(localDateString)
-    } else {
-      onChange?.('')
-    }
-    setOpen(false)
+  // Month names for the calendar
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+  
+  const dayNames = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+  
+  // Calendar helper functions
+  const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month + 1, 0).getDate()
   }
+  
+  const getFirstDayOfMonth = (month: number, year: number) => {
+    const firstDay = new Date(year, month, 1).getDay()
+    return firstDay === 0 ? 6 : firstDay - 1
+  }
+  
+  // Handle date selection
+  const handleDateSelect = (day: number) => {
+    const date = new Date(currentYear, currentMonth, day)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const dayStr = String(date.getDate()).padStart(2, '0')
+    const formattedDate = `${year}-${month}-${dayStr}`
+    onChange?.(formattedDate)
+    setIsCalendarOpen(false)
+  }
+  
+  // Navigate months
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11)
+        setCurrentYear(currentYear - 1)
+      } else {
+        setCurrentMonth(currentMonth - 1)
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0)
+        setCurrentYear(currentYear + 1)
+      } else {
+        setCurrentMonth(currentMonth + 1)
+      }
+    }
+  }
+  
+  // Format display date
+  const formatDisplayDate = (dateString: string) => {
+    if (!dateString) return placeholder
+    const [year, month, day] = dateString.split('-')
+    return `${day}.${month}.${year}`
+  }
+  
+  // Close calendar on outside click
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element
+      if (!target.closest('.calendar-container')) {
+        setIsCalendarOpen(false)
+      }
+    }
+    
+    if (isCalendarOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isCalendarOpen])
 
   return (
-    <div className={className}>
+    <div className={className} style={{ fontFamily: 'Inter, sans-serif' }}>
       {label && (
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
           {label} {required && '*'}
         </label>
       )}
@@ -125,38 +173,148 @@ export function FormDatePicker<T extends FieldValues>({
         value={value || ''}
       />
       
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal px-4 py-3 h-auto border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 hover:bg-white text-gray-900",
-              !selectedDate && "text-gray-500",
-              error && "border-red-300 focus:ring-red-500"
-            )}
-            disabled={disabled}
+      <div className="relative calendar-container">
+        <motion.button
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          type="button"
+          onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+          disabled={disabled}
+          className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-white text-left flex items-center justify-between focus:outline-none transition-all duration-200 h-[42px]"
+          onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+          onBlur={(e) => e.target.style.borderColor = error ? '#ef4444' : '#e5e7eb'}
+          style={{ borderColor: error ? '#ef4444' : '#e5e7eb' }}
+        >
+          <span className={value ? 'text-gray-900' : 'text-gray-500'}>
+            {formatDisplayDate(value || '')}
+          </span>
+          <CalendarIcon className="w-5 h-5" style={{ color: '#243F7B' }} />
+        </motion.button>
+        
+        {isCalendarOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl p-4 min-w-[320px]"
           >
-            <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
-            {selectedDate ? (
-              format(selectedDate, dateFormat)
-            ) : (
-              <span className="text-gray-500">{placeholder}</span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateSelect}
-            showOutsideDays={true}
-            initialFocus
-            className="rounded-md border shadow-sm"
-            captionLayout={captionLayout}
-          />
-        </PopoverContent>
-      </Popover>
+            {/* Calendar Header */}
+            <div className="flex items-center justify-between mb-4">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                type="button"
+                onClick={() => navigateMonth('prev')}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+              >
+                <ChevronLeft className="w-5 h-5" style={{ color: '#243F7B' }} />
+              </motion.button>
+              
+              <h3 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
+                {monthNames[currentMonth]} {currentYear}
+              </h3>
+              
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                type="button"
+                onClick={() => navigateMonth('next')}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+              >
+                <ChevronRight className="w-5 h-5" style={{ color: '#243F7B' }} />
+              </motion.button>
+            </div>
+            
+            {/* Day Headers */}
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {dayNames.map((day, index) => (
+                <div
+                  key={`${day}-${index}`}
+                  className="text-center text-sm font-semibold py-2 w-10 h-8 flex items-center justify-center"
+                  style={{ color: '#243F7B' }}
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+            
+            {/* Calendar Days */}
+            <div className="grid grid-cols-7 gap-1">
+              {/* Empty cells for days before month starts */}
+              {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, index) => (
+                <div key={`empty-${index}`} className="h-10 w-10" />
+              ))}
+              
+              {/* Days of the month */}
+              {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, index) => {
+                const day = index + 1
+                const date = new Date(currentYear, currentMonth, day)
+                const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+                const isSelected = value === dateString
+                const isToday = 
+                  new Date().getDate() === day &&
+                  new Date().getMonth() === currentMonth &&
+                  new Date().getFullYear() === currentYear
+                
+                return (
+                  <motion.button
+                    key={day}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    type="button"
+                    onClick={() => handleDateSelect(day)}
+                    className={`h-10 w-10 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-center ${
+                      isSelected
+                        ? 'text-white shadow-md'
+                        : isToday
+                        ? 'text-white border-2'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                    style={{
+                      backgroundColor: isSelected ? '#243F7B' : isToday ? '#D2BC99' : 'transparent',
+                      borderColor: isToday ? '#243F7B' : 'transparent'
+                    }}
+                  >
+                    {day}
+                  </motion.button>
+                )
+              })}
+            </div>
+            
+            {/* Calendar Footer */}
+            <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => {
+                  onChange?.('')
+                  setIsCalendarOpen(false)
+                }}
+                className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-150"
+              >
+                Clear
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => {
+                  const today = new Date()
+                  setCurrentMonth(today.getMonth())
+                  setCurrentYear(today.getFullYear())
+                  handleDateSelect(today.getDate())
+                }}
+                className="px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-150"
+                style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+              >
+                Today
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </div>
       
       {error && (
         <p className="text-red-500 text-sm mt-1">{error}</p>

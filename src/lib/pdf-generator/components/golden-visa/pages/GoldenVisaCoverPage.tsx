@@ -19,8 +19,18 @@ export const GoldenVisaCoverPage: React.FC<PDFComponentProps> = ({ data }) => {
   // Access golden visa data from transformed data
   const goldenVisaData = (data as any).goldenVisaData;
 
-  // Generate intro content based on visa type
+  // Generate intro content based on visa type and requirements
   const getIntroContent = () => {
+    if (!goldenVisaData?.primaryVisaRequired) {
+      const content = `We are pleased to share a personalized proposal for your Golden Visa dependent services. This document provides a transparent breakdown of fees and services for dependent visa applications only, based on your specific requirements.`;
+      
+      return data.clientDetails.addressToCompany ? 
+        content :
+        `Dear ${data.clientDetails.firstName},
+
+${content}`;
+    }
+
     const visaTypeDisplay = goldenVisaData?.visaType === 'property-investment' 
       ? 'Property Investment'
       : goldenVisaData?.visaType === 'time-deposit'
@@ -36,8 +46,12 @@ export const GoldenVisaCoverPage: React.FC<PDFComponentProps> = ({ data }) => {
 ${content}`;
   };
 
-  // Generate headline based on visa type
+  // Generate headline based on visa type and requirements
   const getHeadline = () => {
+    if (!goldenVisaData?.primaryVisaRequired) {
+      return 'Golden Visa Dependent Services Proposal';
+    }
+
     const visaTypeDisplay = goldenVisaData?.visaType === 'property-investment' 
       ? 'Property Investment'
       : goldenVisaData?.visaType === 'time-deposit'

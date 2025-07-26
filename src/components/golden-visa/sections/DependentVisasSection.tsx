@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Users } from 'lucide-react';
+import { Users, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { DependentVisaCard } from '../ui/DependentVisaCard';
 import { NumberInputField } from '../../portal/tabs/NumberInputField';
@@ -74,24 +75,50 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
   };
 
   return (
-    <FormSection
-      title="Dependent Visas (Optional)"
-      description="Add spouse and children to the application"
-      icon={Users}
-      iconColor="text-pink-600"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+    >
+      <FormSection
+        title="Dependent Visas (Optional)"
+        description="Add spouse and children to the application"
+        icon={Users}
+      iconColor="text-slate-600"
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Spouse Section */}
         <div className="border border-gray-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                {...register('dependents.spouse.required')}
-                className="w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500 focus:ring-2"
-              />
-              <span className="ml-2 text-sm font-semibold text-gray-700">Include Spouse</span>
-            </div>
+            <motion.label 
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center cursor-pointer"
+            >
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  {...register('dependents.spouse.required')}
+                  className="sr-only"
+                />
+                <div 
+                  className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                  style={{ 
+                    borderColor: dependents.spouse?.required ? '#243F7B' : '#d1d5db',
+                    backgroundColor: dependents.spouse?.required ? '#243F7B' : 'white'
+                  }}
+                >
+                  {dependents.spouse?.required && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <Check className="w-3 h-3 text-white" />
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+              <span className="ml-3 text-sm font-semibold text-gray-700">Include Spouse</span>
+            </motion.label>
             {/* Invisible spacer to match children counter height */}
             <div className="w-28 h-8"></div>
           </div>
@@ -109,13 +136,13 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               />
               
               {/* TME Professional Service Fee for Spouse */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="bg-slate-100 border border-slate-300 rounded-lg p-4">
                 <NumberInputField
                   label="TME Professional Service Fee - Spouse (AED)"
                   value={dependents.spouse?.tmeServicesFee}
                   onChange={handleSpouseTMEServicesFeeChange}
                   placeholder="3,490"
-                  className="focus:ring-green-500"
+                  className="focus:ring-slate-500"
                 />
               </div>
             </div>
@@ -125,23 +152,44 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
         {/* Children Section */}
         <div className="border border-gray-200 rounded-xl p-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={(dependents.children?.count || 0) > 0}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    // When checking, set at least one child to show the options
-                    handleChildrenCountChange(1);
-                  } else {
-                    // Reset children count to 0 when unchecked
-                    handleChildrenCountChange(0);
-                  }
-                }}
-                className="w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500 focus:ring-2"
-              />
-              <span className="ml-2 text-sm font-semibold text-gray-700">Include Children</span>
-            </div>
+            <motion.label 
+              whileHover={{ scale: 1.02 }}
+              className="flex items-center cursor-pointer"
+            >
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  checked={(dependents.children?.count || 0) > 0}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      // When checking, set at least one child to show the options
+                      handleChildrenCountChange(1);
+                    } else {
+                      // Reset children count to 0 when unchecked
+                      handleChildrenCountChange(0);
+                    }
+                  }}
+                  className="sr-only"
+                />
+                <div 
+                  className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                  style={{ 
+                    borderColor: (dependents.children?.count || 0) > 0 ? '#243F7B' : '#d1d5db',
+                    backgroundColor: (dependents.children?.count || 0) > 0 ? '#243F7B' : 'white'
+                  }}
+                >
+                  {(dependents.children?.count || 0) > 0 && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                    >
+                      <Check className="w-3 h-3 text-white" />
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+              <span className="ml-3 text-sm font-semibold text-gray-700">Include Children</span>
+            </motion.label>
             
             {/* Compact inline counter */}
             {(dependents.children?.count || 0) > 0 && (
@@ -150,7 +198,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
                   type="button"
                   onClick={() => handleChildrenCountChange(Math.max(1, (dependents.children?.count || 1) - 1))}
                   disabled={(dependents.children?.count || 0) <= 1}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-l-lg hover:bg-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
+                  className="w-8 h-8 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-l-lg hover:bg-gray-200 focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
                 >
                   -
                 </button>
@@ -158,13 +206,13 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
                   type="text"
                   value={dependents.children?.count || 0}
                   readOnly
-                  className="w-12 px-2 py-1 border-t border-b border-gray-300 text-center text-sm focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+                  className="w-12 px-2 py-1 border-t border-b border-gray-300 text-center text-sm focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-gray-50"
                 />
                 <button
                   type="button"
                   onClick={() => handleChildrenCountChange(Math.min(10, (dependents.children?.count || 0) + 1))}
                   disabled={(dependents.children?.count || 0) >= 10}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-r-lg hover:bg-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
+                  className="w-8 h-8 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-r-lg hover:bg-gray-200 focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
                 >
                   +
                 </button>
@@ -185,13 +233,13 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               />
               
               {/* TME Professional Service Fee for Children */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="bg-slate-200 border border-slate-400 rounded-lg p-4">
                 <NumberInputField
                   label="TME Professional Service Fee per Child (AED)"
                   value={dependents.children?.tmeServicesFee}
                   onChange={handleChildrenTMEServicesFeeChange}
                   placeholder="2,930"
-                  className="focus:ring-green-500"
+                  className="focus:ring-slate-500"
                 />
               </div>
             </div>
@@ -199,5 +247,6 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
         </div>
       </div>
     </FormSection>
+    </motion.div>
   );
 }; 

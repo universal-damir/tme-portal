@@ -44,7 +44,7 @@ export const ChildrenCounter: React.FC<ChildrenCounterProps> = ({
 
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-2">
+      <label className="block text-sm font-semibold text-gray-700 mb-1">
         Children
       </label>
       <div className="flex items-center">

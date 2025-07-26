@@ -163,13 +163,16 @@ export const AuthorityFeeBreakdown: React.FC<AuthorityFeeBreakdownProps> = ({
         ))}
       </div>
 
-      {/* Visa Cancelation Section */}
-      <VisaCancelationField
-        checked={data.visaCancelation as boolean || false}
-        onCheckedChange={onVisaCancelationChange}
-        fee={data.visaCancelationFee as number}
-        onFeeChange={onVisaCancelationFeeChange}
-      />
+      {/* Visa Cancelation Section - constrained to match grid column width */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <VisaCancelationField
+          checked={data.visaCancelation as boolean || false}
+          onCheckedChange={onVisaCancelationChange}
+          fee={data.visaCancelationFee as number}
+          onFeeChange={onVisaCancelationFeeChange}
+        />
+        <div></div> {/* Empty div to maintain grid structure */}
+      </div>
     </div>
   );
 }; 

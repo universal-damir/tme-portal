@@ -162,6 +162,18 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
     return 'Please review the following requirements that must be met to be eligible for this Golden Visa:';
   };
 
+  // Only render requirements section if primary visa is required
+  if (!goldenVisaData?.primaryVisaRequired) {
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Golden Visa Dependent Services</Text>
+        <Text style={styles.introText}>
+          This proposal covers dependent visa services only. No primary Golden Visa application is included in this quote.
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Visa Requirements & Eligibility Criteria</Text>

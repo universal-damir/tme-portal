@@ -30,10 +30,10 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
   spouse: {
     title: 'Spouse Authority Costs Breakdown',
     colorScheme: {
-      bg: 'bg-pink-50',
-      border: 'border-pink-200',
-      text: 'text-pink-800',
-      ring: 'focus:ring-pink-500',
+      bg: 'bg-slate-100',
+      border: 'border-slate-300',
+      text: 'text-slate-800',
+      ring: 'focus:ring-slate-500',
     },
     fields: [
       { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00' },
@@ -48,10 +48,10 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
   children: {
     title: 'Children Authority Costs Breakdown (per child)',
     colorScheme: {
-      bg: 'bg-purple-50',
-      border: 'border-purple-200',
-      text: 'text-purple-800',
-      ring: 'focus:ring-purple-500',
+      bg: 'bg-slate-200',
+      border: 'border-slate-400',
+      text: 'text-slate-800',
+      ring: 'focus:ring-slate-500',
     },
     fields: [
       { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00' },
