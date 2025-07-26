@@ -10,15 +10,42 @@ const pool = new Pool({
 });
 
 // Redis client for session storage
-const redis = createClient({
-  url: process.env.REDIS_URL,
-});
+const redisUrl = process.env.REDIS_URL;
+let redisConfig;
+
+if (redisUrl) {
+  try {
+    const url = new URL(redisUrl);
+    redisConfig = {
+      socket: {
+        host: url.hostname,
+        port: parseInt(url.port) || 6379,
+      },
+      password: decodeURIComponent(url.password),
+    };
+  } catch (error) {
+    console.error('Failed to parse Redis URL:', error);
+    redisConfig = { url: redisUrl };
+  }
+} else {
+  redisConfig = { url: 'redis://localhost:6379' };
+}
+
+const redis = createClient(redisConfig);
 
 redis.on('error', (err) => console.error('Redis Client Error', err));
 
-// Initialize Redis connection
-if (!redis.isOpen) {
-  redis.connect().catch(console.error);
+// Initialize Redis connection only when needed (not during build)
+let redisConnected = false;
+async function ensureRedisConnection() {
+  if (!redisConnected && !redis.isOpen) {
+    try {
+      await redis.connect();
+      redisConnected = true;
+    } catch (error) {
+      console.error('Failed to connect to Redis:', error);
+    }
+  }
 }
 
 // Database query function with error handling
@@ -53,5 +80,5 @@ export async function transaction<T>(
   }
 }
 
-export { redis, pool };
-export default { query, transaction, redis, pool };
+export { redis, pool, ensureRedisConnection };
+export default { query, transaction, redis, pool, ensureRedisConnection };

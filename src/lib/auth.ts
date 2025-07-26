@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
-import { query, redis } from './database';
+import { query, redis, ensureRedisConnection } from './database';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.NEXTAUTH_SECRET || 'fallback-secret');
 
@@ -139,6 +139,7 @@ export async function createSession(user: User, ipAddress?: string, userAgent?: 
     expiresAt,
   };
 
+  await ensureRedisConnection();
   await redis.setEx(`session:${sessionId}`, 8 * 60 * 60, JSON.stringify(sessionData)); // 8 hours
 
   return sessionId;
@@ -147,6 +148,7 @@ export async function createSession(user: User, ipAddress?: string, userAgent?: 
 export async function getSession(sessionId: string): Promise<SessionData | null> {
   try {
     // Try Redis first for performance
+    await ensureRedisConnection();
     const cached = await redis.get(`session:${sessionId}`);
     if (cached) {
       const sessionData = JSON.parse(cached);
@@ -187,6 +189,7 @@ export async function getSession(sessionId: string): Promise<SessionData | null>
     // Update Redis cache
     const ttl = Math.floor((new Date(row.expires_at).getTime() - Date.now()) / 1000);
     if (ttl > 0) {
+      await ensureRedisConnection();
       await redis.setEx(`session:${sessionId}`, ttl, JSON.stringify(sessionData));
     }
 
@@ -199,6 +202,7 @@ export async function getSession(sessionId: string): Promise<SessionData | null>
 
 export async function invalidateSession(sessionId: string): Promise<void> {
   // Remove from Redis
+  await ensureRedisConnection();
   await redis.del(`session:${sessionId}`);
   
   // Remove from database
@@ -224,6 +228,7 @@ export async function renewSession(sessionId: string): Promise<boolean> {
 
     // Update Redis cache
     sessionData.expiresAt = newExpiresAt;
+    await ensureRedisConnection();
     await redis.setEx(`session:${sessionId}`, 8 * 60 * 60, JSON.stringify(sessionData));
 
     return true;
@@ -262,6 +267,7 @@ export async function invalidateAllUserSessions(userId: number, exceptSessionId?
       }
       
       // Remove from Redis
+      await ensureRedisConnection();
       await redis.del(`session:${session.id}`);
     }
 
