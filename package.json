@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:local": "./scripts/dev-local.sh",
+    "dev:docker": "./scripts/dev-docker.sh", 
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

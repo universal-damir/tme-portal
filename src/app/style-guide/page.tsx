@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, ChevronDown, Check } from 'lucide-react'
+import { Calendar, ChevronDown, Check, ChevronLeft, ChevronRight } from 'lucide-react'
 
 export default function StyleGuidePage() {
   const [selectedDropdown, setSelectedDropdown] = useState('')
@@ -10,6 +10,9 @@ export default function StyleGuidePage() {
   const [checkedItems, setCheckedItems] = useState<string[]>([])
   const [selectedDate, setSelectedDate] = useState('')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth())
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
 
   const handleCheckboxChange = (value: string) => {
     setCheckedItems(prev => 
@@ -17,6 +20,58 @@ export default function StyleGuidePage() {
         ? prev.filter(item => item !== value)
         : [...prev, value]
     )
+  }
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+  const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month + 1, 0).getDate()
+  }
+
+  const getFirstDayOfMonth = (month: number, year: number) => {
+    const firstDay = new Date(year, month, 1).getDay()
+    return firstDay === 0 ? 6 : firstDay - 1
+  }
+
+  const handleDateSelect = (day: number) => {
+    const date = new Date(currentYear, currentMonth, day)
+    const formattedDate = date.toISOString().split('T')[0]
+    setSelectedDate(formattedDate)
+    setIsCalendarOpen(false)
+  }
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    if (direction === 'prev') {
+      if (currentMonth === 0) {
+        setCurrentMonth(11)
+        setCurrentYear(currentYear - 1)
+      } else {
+        setCurrentMonth(currentMonth - 1)
+      }
+    } else {
+      if (currentMonth === 11) {
+        setCurrentMonth(0)
+        setCurrentYear(currentYear + 1)
+      } else {
+        setCurrentMonth(currentMonth + 1)
+      }
+    }
+  }
+
+  const formatDisplayDate = (dateString: string) => {
+    if (!dateString) return 'Select a date...'
+    const date = new Date(dateString + 'T00:00:00')
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
   }
 
   const dropdownOptions = [
@@ -512,16 +567,134 @@ export default function StyleGuidePage() {
               Select Date
             </label>
             <div className="relative">
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200"
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 bg-white text-left flex items-center justify-between focus:outline-none transition-all duration-200"
                 onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                 onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              />
-              <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+              >
+                <span className={selectedDate ? 'text-gray-900' : 'text-gray-500'}>
+                  {formatDisplayDate(selectedDate)}
+                </span>
+                <Calendar className="w-5 h-5 text-gray-400" />
+              </motion.button>
+              
+              {isCalendarOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl p-4"
+                >
+                  {/* Calendar Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => navigateMonth('prev')}
+                      className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+                    >
+                      <ChevronLeft className="w-5 h-5" style={{ color: '#243F7B' }} />
+                    </motion.button>
+                    
+                    <h3 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
+                      {monthNames[currentMonth]} {currentYear}
+                    </h3>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => navigateMonth('next')}
+                      className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+                    >
+                      <ChevronRight className="w-5 h-5" style={{ color: '#243F7B' }} />
+                    </motion.button>
+                  </div>
+                  
+                  {/* Day Headers */}
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {dayNames.map((day) => (
+                      <div
+                        key={day}
+                        className="text-center text-sm font-medium py-2 text-gray-500"
+                      >
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Calendar Days */}
+                  <div className="grid grid-cols-7 gap-1">
+                    {/* Empty cells for days before month starts */}
+                    {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, index) => (
+                      <div key={`empty-${index}`} className="h-10" />
+                    ))}
+                    
+                    {/* Days of the month */}
+                    {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, index) => {
+                      const day = index + 1
+                      const isSelected = selectedDate === new Date(currentYear, currentMonth, day).toISOString().split('T')[0]
+                      const isToday = 
+                        new Date().getDate() === day &&
+                        new Date().getMonth() === currentMonth &&
+                        new Date().getFullYear() === currentYear
+                      
+                      return (
+                        <motion.button
+                          key={day}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handleDateSelect(day)}
+                          className={`h-10 w-10 rounded-lg text-sm font-medium transition-all duration-150 ${
+                            isSelected
+                              ? 'text-white shadow-md'
+                              : isToday
+                              ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                          style={{
+                            backgroundColor: isSelected ? '#243F7B' : isToday ? '#f0f9ff' : 'transparent'
+                          }}
+                        >
+                          {day}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                  
+                  {/* Calendar Footer */}
+                  <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setSelectedDate('')
+                        setIsCalendarOpen(false)
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-150"
+                    >
+                      Clear
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        const today = new Date()
+                        setCurrentMonth(today.getMonth())
+                        setCurrentYear(today.getFullYear())
+                        handleDateSelect(today.getDate())
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-150"
+                      style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                    >
+                      Today
+                    </motion.button>
+                  </div>
+                </motion.div>
+              )}
             </div>
           </div>
         </motion.section>

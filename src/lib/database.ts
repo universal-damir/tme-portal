@@ -1,36 +1,22 @@
 import { Pool, PoolClient } from 'pg';
 import { createClient } from 'redis';
+import { getDatabaseConfig, getRedisConfig } from './env-config';
 
-// PostgreSQL connection pool
+// Auto-detected database configuration
+const dbConfig = getDatabaseConfig();
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  host: dbConfig.host,
+  port: dbConfig.port,
+  database: dbConfig.database,
+  user: dbConfig.user,
+  password: dbConfig.password,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
 
-// Redis client for session storage
-const redisUrl = process.env.REDIS_URL;
-let redisConfig;
-
-if (redisUrl) {
-  try {
-    const url = new URL(redisUrl);
-    redisConfig = {
-      socket: {
-        host: url.hostname,
-        port: parseInt(url.port) || 6379,
-      },
-      password: decodeURIComponent(url.password),
-    };
-  } catch (error) {
-    console.error('Failed to parse Redis URL:', error);
-    redisConfig = { url: redisUrl };
-  }
-} else {
-  redisConfig = { url: 'redis://localhost:6379' };
-}
-
+// Auto-detected Redis configuration
+const redisConfig = getRedisConfig();
 const redis = createClient(redisConfig);
 
 redis.on('error', (err) => console.error('Redis Client Error', err));

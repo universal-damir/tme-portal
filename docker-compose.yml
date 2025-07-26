@@ -28,6 +28,8 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
+    ports:
+      - "5434:5432"  # Enable local development access on port 5434
     environment:
       - POSTGRES_DB=tme_portal
       - POSTGRES_USER=tme_user
