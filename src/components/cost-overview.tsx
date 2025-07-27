@@ -423,8 +423,8 @@ const CostOverview: React.FC = () => {
                 />
               </SectionWithStickySummary>
 
-              {/* Full Cost Summaries - Now moved to bottom for complete overview */}
-              {hasCalculations && costs && (
+              {/* Full Cost Summaries - COMMENTED OUT - Detailed breakdown sections under additional services */}
+              {/* {hasCalculations && costs && (
                 <div className="space-y-8 mt-12">
                   <div className="text-center">
                     <h2 className="text-3xl font-bold text-gray-900 mb-2">Complete Cost Overview</h2>
@@ -432,7 +432,7 @@ const CostOverview: React.FC = () => {
                   </div>
 
                   {/* Initial Setup Cost Summary */}
-                  {costs.initialSetup && (
+                  {/* {costs.initialSetup && (
                     <CostSummarySection 
                       title="Initial Setup Cost Summary"
                       costs={costs.initialSetup}
@@ -442,10 +442,10 @@ const CostOverview: React.FC = () => {
                       iconColor="bg-green-600"
                       includeDeposits={true}
                     />
-                  )}
+                  )} */}
 
                   {/* Visa Cost Summary (only if has visa costs) */}
-                  {costs.visaCosts && costs.visaCosts.total > 0 && (
+                  {/* {costs.visaCosts && costs.visaCosts.total > 0 && (
                     <CostSummarySection 
                       title="Visa Cost Summary for 2 Year Employment Visa"
                       costs={costs.visaCosts}
@@ -454,10 +454,10 @@ const CostOverview: React.FC = () => {
                       gradientColors="bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-200"
                       iconColor="bg-blue-600"
                     />
-                  )}
+                  )} */}
 
                   {/* Yearly Running Cost Summary */}
-                  {costs.yearlyRunning && (() => {
+                  {/* {costs.yearlyRunning && (() => {
                     const licenseYears = watchedData.ifzaLicense?.licenseYears || 1;
                     const isMultiYear = authorityConfig.id === 'ifza' && licenseYears > 1;
                     const title = isMultiYear 
@@ -474,9 +474,9 @@ const CostOverview: React.FC = () => {
                         iconColor="bg-yellow-500"
                       />
                     );
-                  })()}
-                </div>
-              )}
+                  })()} */}
+                {/* </div>
+              )} */}
             </>
           )}
 
@@ -487,16 +487,24 @@ const CostOverview: React.FC = () => {
                 type="button"
                 onClick={() => handlePreviewPDF(watchedData)}
                 disabled={isGenerating}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+                className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+                style={{ 
+                  backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B',
+                  fontFamily: 'Inter, sans-serif'
+                }}
+                onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
+                onMouseLeave={(e) => !isGenerating && (e.target.style.transform = 'scale(1)')}
+                onMouseDown={(e) => !isGenerating && (e.target.style.transform = 'scale(0.98)')}
+                onMouseUp={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
               >
                 {isGenerating ? (
                   <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                     <span>Generating...</span>
                   </>
                 ) : (
                   <>
-                    <Eye className="h-6 w-6" />
+                    <Eye className="h-5 w-5" />
                     <span>Preview PDF</span>
                   </>
                 )}
@@ -506,21 +514,29 @@ const CostOverview: React.FC = () => {
                 type="button"
                 onClick={() => handleGeneratePDF(watchedData)}
                 disabled={isGenerating}
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+                className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+                style={{ 
+                  backgroundColor: isGenerating ? '#E5E7EB' : '#D2BC99', 
+                  color: isGenerating ? '#9CA3AF' : '#243F7B',
+                  fontFamily: 'Inter, sans-serif'
+                }}
+                onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
+                onMouseLeave={(e) => !isGenerating && (e.target.style.transform = 'scale(1)')}
+                onMouseDown={(e) => !isGenerating && (e.target.style.transform = 'scale(0.98)')}
+                onMouseUp={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
               >
                 {isGenerating ? (
                   <>
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
                     <span>Generating...</span>
                   </>
                 ) : (
                   <>
-                    <Download className="h-6 w-6" />
+                    <Download className="h-5 w-5" />
                     <span>Download PDF</span>
                   </>
                 )}
               </button>
-
 
             </div>
           </div>

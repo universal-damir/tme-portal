@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Building2 } from 'lucide-react';
 import { CostInputField } from '../ui/CostInputField';
 import { FormattedInputState, FormattedInputHandlers } from '../hooks/useFormattedInputs';
@@ -14,89 +15,154 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
 }) => {
 
   return (
-    <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-8 border border-orange-200">
-      <div className="flex items-center mb-6">
-        <div className="bg-orange-600 p-3 rounded-xl mr-4">
-          <Building2 className="h-6 w-6 text-white" />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="bg-white rounded-lg p-6 border border-gray-200"
+      style={{ fontFamily: 'Inter, sans-serif' }}
+    >
+      <motion.div 
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+        className="flex items-center mb-4"
+      >
+        <div className="p-2 rounded-lg mr-3" style={{ backgroundColor: '#243F7B' }}>
+          <Building2 className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Additional Services</h2>
-          <p className="text-gray-600">Optional services and fees</p>
+          <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>Additional Services</h2>
+          <p className="text-sm text-gray-600">Optional services and fees</p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="space-y-6">
-        <div className="bg-white rounded-xl p-6 shadow-md">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="space-y-4">
+        <div className="bg-white rounded-lg p-4 border border-gray-100">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             
-            <CostInputField
-              label="One-time TME Services Professional Fee and cost for Company stamp preparation and production (Two stamps)"
-              value={formattedInputs.companyStampFormatted}
-              onChange={handlers.handleCompanyStampChange}
-              placeholder="646.00"
-              description=""
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <CostInputField
+                label="Company Stamp (Two stamps)"
+                value={formattedInputs.companyStampFormatted}
+                onChange={handlers.handleCompanyStampChange}
+                placeholder="646.00"
+                description=""
+              />
+            </motion.div>
 
-            <CostInputField
-              label="One-time TME Services Professional Fee for registration with Emirates Post P.O. Box"
-              value={formattedInputs.emiratesPostFormatted}
-              onChange={handlers.handleEmiratesPostChange}
-              placeholder="1,500.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
+            >
+              <CostInputField
+                label="Emirates Post P.O. Box Registration"
+                value={formattedInputs.emiratesPostFormatted}
+                onChange={handlers.handleEmiratesPostChange}
+                placeholder="1,500.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="One-time TME Services Professional Fee for CIT (Corporate Income Tax Registration)"
-              value={formattedInputs.citRegistrationFormatted}
-              onChange={handlers.handleCitRegistrationChange}
-              placeholder="3,070.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+            >
+              <CostInputField
+                label="CIT Registration"
+                value={formattedInputs.citRegistrationFormatted}
+                onChange={handlers.handleCitRegistrationChange}
+                placeholder="3,070.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="One-time TME Professional Service Fee for VAT (Value Added Tax) Registration or Exception"
-              value={formattedInputs.vatRegistrationFormatted}
-              onChange={handlers.handleVatRegistrationChange}
-              placeholder="3,810.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.25 }}
+            >
+              <CostInputField
+                label="VAT Registration/Exception"
+                value={formattedInputs.vatRegistrationFormatted}
+                onChange={handlers.handleVatRegistrationChange}
+                placeholder="3,810.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="One-time TME Services Professional Fee for application to open 1 personal bank accounts with a UAE bank"
-              value={formattedInputs.personalBankFormatted}
-              onChange={handlers.handlePersonalBankChange}
-              placeholder="3,150.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
+              <CostInputField
+                label="Personal Bank Account"
+                value={formattedInputs.personalBankFormatted}
+                onChange={handlers.handlePersonalBankChange}
+                placeholder="3,150.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="One-time TME Services Professional Fee for application to open 1 company account with the digital bank WIO"
-              value={formattedInputs.digitalBankFormatted}
-              onChange={handlers.handleDigitalBankChange}
-              placeholder="3,150.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.35 }}
+            >
+              <CostInputField
+                label="Digital Bank WIO Account"
+                value={formattedInputs.digitalBankFormatted}
+                onChange={handlers.handleDigitalBankChange}
+                placeholder="3,150.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="One-time TME Services Professional fee for application to open 1 company account with a traditional UAE bank"
-              value={formattedInputs.traditionalBankFormatted}
-              onChange={handlers.handleTraditionalBankChange}
-              placeholder="7,350.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.4 }}
+            >
+              <CostInputField
+                label="Traditional UAE Bank Account"
+                value={formattedInputs.traditionalBankFormatted}
+                onChange={handlers.handleTraditionalBankChange}
+                placeholder="7,350.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="Yearly Accounting fee based on 360 Transactions per Year"
-              value={formattedInputs.accountingFeeFormatted}
-              onChange={handlers.handleAccountingFeeChange}
-              placeholder="6,293.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.45 }}
+            >
+              <CostInputField
+                label="Yearly Accounting (360 Transactions)"
+                value={formattedInputs.accountingFeeFormatted}
+                onChange={handlers.handleAccountingFeeChange}
+                placeholder="6,293.00"
+              />
+            </motion.div>
 
-            <CostInputField
-              label="Yearly TME Services Professional Fee for CIT (Corporate Income Tax) Return Filing"
-              value={formattedInputs.citReturnFilingFormatted}
-              onChange={handlers.handleCitReturnFilingChange}
-              placeholder="5,458.00"
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.5 }}
+            >
+              <CostInputField
+                label="CIT Return Filing (Yearly)"
+                value={formattedInputs.citReturnFilingFormatted}
+                onChange={handlers.handleCitReturnFilingChange}
+                placeholder="5,458.00"
+              />
+            </motion.div>
 
 
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }; 

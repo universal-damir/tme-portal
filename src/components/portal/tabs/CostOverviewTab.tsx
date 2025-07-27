@@ -711,8 +711,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             />
           </SectionWithStickySummary>
 
-          {/* Full Cost Summaries - Now moved to bottom for complete overview */}
-          {hasCalculations && costs && (
+          {/* Full Cost Summaries - COMMENTED OUT - Detailed breakdown sections under additional services */}
+          {/* {hasCalculations && costs && (
             <div className="space-y-8 mt-12">
               <div className="text-center">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Complete Cost Overview</h2>
@@ -720,7 +720,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               </div>
 
               {/* Initial Setup Cost Summary */}
-              {costs.initialSetup && (
+              {/* {costs.initialSetup && (
                 <CostSummarySection 
                   title="Initial Setup Cost Summary"
                   costs={costs.initialSetup}
@@ -730,10 +730,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                   iconColor="bg-green-600"
                   includeDeposits={true}
                 />
-              )}
+              )} */}
 
               {/* Visa Cost Summary (only if has visa costs) */}
-              {costs.visaCosts && costs.visaCosts.total > 0 && (
+              {/* {costs.visaCosts && costs.visaCosts.total > 0 && (
                 <CostSummarySection 
                   title="Visa Cost Summary for 2 Year Employment Visa"
                   costs={costs.visaCosts}
@@ -742,10 +742,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                   gradientColors="bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-200"
                   iconColor="bg-blue-600"
                 />
-              )}
+              )} */}
 
               {/* Yearly Running Cost Summary */}
-              {costs.yearlyRunning && (() => {
+              {/* {costs.yearlyRunning && (() => {
                 const licenseYears = watchedData.ifzaLicense?.licenseYears || 1;
                 const isMultiYear = authorityConfig.id === 'ifza' && licenseYears > 1;
                 const title = isMultiYear 
@@ -762,9 +762,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                     iconColor="bg-yellow-500"
                   />
                 );
-              })()}
-            </div>
-          )}
+              })()} */}
+            {/* </div>
+          )} */}
         </>
       )}
 
@@ -776,16 +776,24 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               type="button"
               onClick={() => handlePreviewPDF(watchedData)}
               disabled={isGenerating}
-              className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              style={{ 
+                backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B',
+                fontFamily: 'Inter, sans-serif'
+              }}
+              onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => !isGenerating && (e.target.style.transform = 'scale(1)')}
+              onMouseDown={(e) => !isGenerating && (e.target.style.transform = 'scale(0.98)')}
+              onMouseUp={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                   <span>Generating...</span>
                 </>
               ) : (
                 <>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
@@ -798,16 +806,25 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               type="button"
               onClick={() => handleGeneratePDF(watchedData)}
               disabled={isGenerating}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              style={{ 
+                backgroundColor: isGenerating ? '#E5E7EB' : '#D2BC99', 
+                color: isGenerating ? '#9CA3AF' : '#243F7B',
+                fontFamily: 'Inter, sans-serif'
+              }}
+              onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => !isGenerating && (e.target.style.transform = 'scale(1)')}
+              onMouseDown={(e) => !isGenerating && (e.target.style.transform = 'scale(0.98)')}
+              onMouseUp={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
                   <span>Generating...</span>
                 </>
               ) : (
                 <>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                   <span>Download PDF</span>
