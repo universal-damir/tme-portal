@@ -36,51 +36,51 @@ export const SpouseVisaBreakdown: React.FC<SpouseVisaBreakdownProps> = ({
     });
   };
 
-  return (
-    <CostBreakdownCard
-      title="Spouse Visa Breakdown"
-      currency={currency}
-      variant="pink"
-      className="space-y-3"
-    >
-      {/* Spouse Visa Costs */}
-      {(() => {
-        // Define spouse visa services in order with conditions
-        const spouseServices = [
-          {
-            condition: visaCosts.spouseVisaStandardFees > 0,
-            description: 'Standard Authority Fees for Spouse Visa and Emirates ID Application',
-            amount: visaCosts.spouseVisaStandardFees
-          },
-          {
-            condition: visaCosts.spouseVisaStatusChangeFees > 0,
-            description: 'Authority Cost for Spouse Visa Status Change',
-            amount: visaCosts.spouseVisaStatusChangeFees
-          },
-          {
-            condition: visaCosts.spouseVisaHealthInsurance > 0,
-            description: (() => {
-              const insuranceType = watchedData.visaCosts?.spouseVisaInsurance;
-              return insuranceType ? `Spouse Visa Health Insurance - ${insuranceType}` : 'Spouse Visa Health Insurance';
-            })(),
-            amount: visaCosts.spouseVisaHealthInsurance
-          },
-          {
-            condition: visaCosts.spouseVisaVipStampingFees > 0,
-            description: 'Spouse Visa VIP Stamping Service',
-            amount: visaCosts.spouseVisaVipStampingFees
-          },
-          {
-            condition: visaCosts.spouseVisaTmeServicesFees > 0,
-            description: 'TME Services Professional Fee for Spouse Visa and Emirates ID Application',
-            amount: visaCosts.spouseVisaTmeServicesFees
-          }
-        ];
+  // Define spouse visa services in order with conditions
+  const spouseServices = [
+    {
+      condition: visaCosts.spouseVisaStandardFees > 0,
+      description: 'Standard Authority Fees for Spouse Visa and Emirates ID Application',
+      amount: visaCosts.spouseVisaStandardFees
+    },
+    {
+      condition: visaCosts.spouseVisaStatusChangeFees > 0,
+      description: 'Authority Cost for Spouse Visa Status Change',
+      amount: visaCosts.spouseVisaStatusChangeFees
+    },
+    {
+      condition: visaCosts.spouseVisaHealthInsurance > 0,
+      description: (() => {
+        const insuranceType = watchedData.visaCosts?.spouseVisaInsurance;
+        return insuranceType ? `Spouse Visa Health Insurance - ${insuranceType}` : 'Spouse Visa Health Insurance';
+      })(),
+      amount: visaCosts.spouseVisaHealthInsurance
+    },
+    {
+      condition: visaCosts.spouseVisaVipStampingFees > 0,
+      description: 'Spouse Visa VIP Stamping Service',
+      amount: visaCosts.spouseVisaVipStampingFees
+    },
+    {
+      condition: visaCosts.spouseVisaTmeServicesFees > 0,
+      description: 'TME Services Professional Fee for Spouse Visa and Emirates ID Application',
+      amount: visaCosts.spouseVisaTmeServicesFees
+    }
+  ];
 
-        // Filter active services and add numbering
-        const activeSpouseServices = spouseServices.filter(service => service.condition);
-        
-        return activeSpouseServices.map((service, index) => {
+  // Filter active services and add numbering
+  const activeSpouseServices = spouseServices.filter(service => service.condition);
+
+  return (
+    <div className="space-y-4">
+      <CostBreakdownCard
+        title="Spouse Visa Breakdown"
+        currency={currency}
+        variant="pink"
+        className="space-y-3"
+      >
+        {/* Spouse Visa Costs */}
+        {activeSpouseServices.map((service, index) => {
           const numberedDescription = formatServiceDescription(index + 1, service.description);
           const key = generateListItemKey('spouse-service', index, service.description);
           
@@ -92,11 +92,11 @@ export const SpouseVisaBreakdown: React.FC<SpouseVisaBreakdownProps> = ({
               exchangeRate={exchangeRate}
             />
           );
-        });
-      })()}
+        })}
+      </CostBreakdownCard>
       
-      {/* Spouse Visa Total */}
-      <div className="border-t border-pink-300 pt-4 mt-4">
+      {/* Spouse Visa Total - Outside the table structure */}
+      <div className="bg-pink-50 border border-pink-200 rounded-lg p-4">
         <Table>
           <TableBody>
             <TableRow className="font-semibold text-pink-900">
@@ -111,6 +111,6 @@ export const SpouseVisaBreakdown: React.FC<SpouseVisaBreakdownProps> = ({
           </TableBody>
         </Table>
       </div>
-    </CostBreakdownCard>
+    </div>
   );
 }; 
