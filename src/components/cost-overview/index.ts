@@ -3,7 +3,6 @@
 // Section component exports
 export { ClientDetailsSection } from './sections/ClientDetailsSection';
 export { AuthorityInfoSection } from './sections/AuthorityInfoSection';
-export { ActivityCodesSection } from './sections/ActivityCodesSection';
 export { LicenseFeesSection } from './sections/LicenseFeesSection';
 export { VisaCostsSection } from './sections/VisaCostsSection';
 export { CostSummarySection } from './sections/CostSummarySection';

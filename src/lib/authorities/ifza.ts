@@ -4,8 +4,8 @@ export const IFZA_CONFIG: AuthorityConfig = {
   id: 'ifza',
   name: 'IFZA (International Free Zone Authority)',
   displayName: 'IFZA',
-  areaInUAE: 'Dubai Digital Park (DDP) Building A2',
-  legalEntity: 'FZCO (LLC Structure)',
+  areaInUAE: 'DDP (Dubai Digital Park) Building A2',
+  legalEntity: 'FZCO - LLC Structure',
   
   initialSetup: {
     baseLicenseFee: 12900,

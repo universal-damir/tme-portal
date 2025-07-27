@@ -300,6 +300,7 @@ const CostOverview: React.FC = () => {
               handlers={handlers}
               validationErrors={validationErrors}
               activityCodesArray={activityCodesArray}
+              authorityConfig={authorityConfig}
             />
           </div>
 

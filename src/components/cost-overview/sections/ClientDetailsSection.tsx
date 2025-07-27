@@ -85,8 +85,8 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
           </div>
 
           {/* Company Information and Date */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div>
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Company Name
               </label>
@@ -290,7 +290,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                 onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
-              <div className="bg-gray-50 border border-gray-200 rounded-md px-3 py-2 mt-2">
+              <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1 mt-2 w-fit">
                 <p className="text-xs text-gray-600 font-medium">
                   {clientDetails?.exchangeRate || '4.00'} AED = 1 {clientDetails?.secondaryCurrency || 'Currency'}
                 </p>

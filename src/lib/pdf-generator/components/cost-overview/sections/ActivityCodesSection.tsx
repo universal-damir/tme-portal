@@ -3,13 +3,29 @@ import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
 import type { PDFComponentProps } from '../../../types';
 
-// ActivityCodesSection extracted from the original PDF generator cover page
+// ActivityCodesSection - Full width section for business activity codes
 export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
   // Check if TBC is enabled for IFZA or DET
   const isIfzaSelected = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
   const isDetSelected = data.authorityInformation.responsibleAuthority === 'DET (Dubai Department of Economy and Tourism)';
   const isTbcEnabled = (isIfzaSelected && data.ifzaLicense?.activitiesToBeConfirmed) || 
                        (isDetSelected && data.detLicense?.activitiesToBeConfirmed);
+
+  // Compact styles - reduced padding for smaller table height
+  const compactStyles = {
+    activityHeader: {
+      ...styles.activityHeader,
+      padding: 4, // Reduced from 8 to 4
+    },
+    activityRow: {
+      ...styles.activityRow,
+      padding: 4, // Reduced from 8 to 4
+    },
+    activityRowLast: {
+      ...styles.activityRowLast,
+      padding: 4, // Reduced from 8 to 4
+    },
+  };
 
   return (
     <View style={styles.section}>
@@ -23,7 +39,7 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
         </View>
       ) : (
         <View style={styles.activityTable}>
-          <View style={styles.activityHeader}>
+          <View style={compactStyles.activityHeader}>
             <Text style={[styles.activityHeaderText, styles.activityCodeColumn]}>Code</Text>
             <Text style={[styles.activityHeaderText, styles.activityDescColumn]}>Description</Text>
           </View>
@@ -37,7 +53,7 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
               return (
                 <View 
                   key={`activity-${activity.code}-${index}`} 
-                  style={isLast ? styles.activityRowLast : styles.activityRow}
+                  style={isLast ? compactStyles.activityRowLast : compactStyles.activityRow}
                 >
                   <Text style={styles.activityCode}>{activity.code}</Text>
                   <Text style={styles.activityDesc}>{activity.description}</Text>
@@ -48,4 +64,4 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
       )}
     </View>
   );
-}; 
+};
