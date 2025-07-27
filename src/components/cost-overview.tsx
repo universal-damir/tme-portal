@@ -17,7 +17,6 @@ import {
 // Import our new section components
 import { ClientDetailsSection } from './cost-overview/sections/ClientDetailsSection';
 import { AuthorityInfoSection } from './cost-overview/sections/AuthorityInfoSection';
-import { ActivityCodesSection } from './cost-overview/sections/ActivityCodesSection';
 import { LicenseFeesSection } from './cost-overview/sections/LicenseFeesSection';
 import { VisaCostsSection } from './cost-overview/sections/VisaCostsSection';
 import { SpouseVisaSection } from './cost-overview/sections/SpouseVisaSection';
@@ -300,16 +299,9 @@ const CostOverview: React.FC = () => {
               formattedInputs={formattedInputs}
               handlers={handlers}
               validationErrors={validationErrors}
+              activityCodesArray={activityCodesArray}
             />
           </div>
-
-          {/* Activity Codes Section */}
-          <ActivityCodesSection 
-            register={register}
-            errors={errors}
-            activityCodesArray={activityCodesArray}
-            watchedData={watchedData}
-          />
 
           {/* Authority-Specific Sections */}
           {isAuthoritySelected && authorityConfig && (

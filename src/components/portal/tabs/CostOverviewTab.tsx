@@ -18,7 +18,6 @@ import { Progress } from '@/components/ui/progress';
 // Import our section components
 import { ClientDetailsSection } from '../../cost-overview/sections/ClientDetailsSection';
 import { AuthorityInfoSection } from '../../cost-overview/sections/AuthorityInfoSection';
-import { ActivityCodesSection } from '../../cost-overview/sections/ActivityCodesSection';
 import { LicenseFeesSection } from '../../cost-overview/sections/LicenseFeesSection';
 import { VisaCostsSection } from '../../cost-overview/sections/VisaCostsSection';
 import { SpouseVisaSection } from '../../cost-overview/sections/SpouseVisaSection';
@@ -589,6 +588,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
           formattedInputs={formattedInputs}
           handlers={handlers}
           validationErrors={validationErrors}
+          activityCodesArray={activityCodesArray}
+          authorityConfig={authorityConfig}
         />
       </div>
 
@@ -596,13 +597,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       {/* Authority-Specific Sections */}
       {isAuthoritySelected && authorityConfig && (
         <>
-          {/* Activity Codes Section */}
-          <ActivityCodesSection 
-            register={register}
-            errors={errors}
-            activityCodesArray={activityCodesArray}
-            watchedData={watchedData}
-          />
           {/* License Fees Section with sticky summary */}
           <SectionWithStickySummary
             sectionId="license-fees"
