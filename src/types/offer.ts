@@ -54,7 +54,7 @@ export interface DETLicense {
   mofaPowerOfAttorney?: boolean;
   
   // DET License type selection (mandatory)
-  licenseType?: 'commercial' | 'commercial-real-estate' | 'commercial-investment' | 'instant' | 'industrial' | 'professional';
+  licenseType?: 'commercial' | 'commercial-real-estate' | 'commercial-investment' | 'instant' | 'industrial';
   
   // Office rent selection (mandatory)
   rentType?: 'business-center' | 'office' | 'warehouse' | 'showroom';

@@ -36,8 +36,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
     { value: 'commercial-real-estate', label: 'Commercial Real Estate (AED 24,000)', fee: 24000 },
     { value: 'commercial-investment', label: 'Commercial Investment (AED 30,000)', fee: 30000 },
     { value: 'instant', label: 'Instant License (AED 13,000)', fee: 13000 },
-    { value: 'industrial', label: 'Industrial (AED 20,000)', fee: 20000 },
-    { value: 'professional', label: 'Professional (AED 10,000)', fee: 10000 }
+    { value: 'industrial', label: 'Industrial (AED 20,000)', fee: 20000 }
   ];
 
   const rentTypeOptions = [
@@ -145,7 +144,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
         {/* Rent Type Selection */}
         <div>
           <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-            Office Requirements *
+            Facility Requirements *
           </label>
           <div className="relative">
             <motion.button
