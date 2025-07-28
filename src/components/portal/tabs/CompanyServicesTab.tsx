@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Download, Eye, FileText } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { CompanyServicesData, COMPANY_SERVICES_DEFAULTS } from '@/types/company-services';
 import { companyServicesSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
@@ -117,8 +118,8 @@ const CompanyServicesTab: React.FC = () => {
   // Handle secondary currency change
   const handleSecondaryCurrencyChange = (currency: 'EUR' | 'USD' | 'GBP') => {
     setValue('secondaryCurrency', currency);
-    // Update exchange rate based on currency (these are example rates)
-    const rates = { EUR: 4.0, USD: 3.67, GBP: 4.5 };
+    // Update exchange rate based on currency - all currencies use 4 as default
+    const rates = { EUR: 4.0, USD: 4.0, GBP: 4.0 };
     setValue('exchangeRate', rates[currency]);
   };
 
@@ -284,45 +285,56 @@ const CompanyServicesTab: React.FC = () => {
       />
 
       {/* Generate and Preview Buttons */}
-      <div className="text-center">
+      <div className="text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <button
+          <motion.button
             type="button"
             onClick={() => handlePreviewPDF(watchedData)}
             disabled={isGenerating}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            whileHover={!isGenerating ? { scale: 1.02 } : {}}
+            whileTap={!isGenerating ? { scale: 0.98 } : {}}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
+              color: '#243F7B' 
+            }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <Eye className="h-6 w-6" />
+                <Eye className="h-5 w-5" />
                 <span>Preview PDF</span>
               </>
             )}
-          </button>
+          </motion.button>
           
-          <button
+          <motion.button
             type="button"
             onClick={() => handleGeneratePDF(watchedData)}
             disabled={isGenerating}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
+            whileHover={!isGenerating ? { scale: 1.02 } : {}}
+            whileTap={!isGenerating ? { scale: 0.98 } : {}}
+            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B' 
+            }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <Download className="h-6 w-6" />
+                <Download className="h-5 w-5" />
                 <span>Download PDF</span>
               </>
             )}
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>

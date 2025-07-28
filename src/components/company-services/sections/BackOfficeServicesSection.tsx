@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
-import { Users } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Users, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { CompanyServicesData } from '@/types/company-services';
 import { UseFormRegister, FieldErrors, UseFormSetValue } from 'react-hook-form';
@@ -77,6 +78,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
   setValue,
   watchedData,
 }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // Reset back-office fields when main checkbox is unchecked
   useEffect(() => {
     if (!watchedData.backOfficeServices?.enabled) {
@@ -99,117 +101,185 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
     return Math.round(aedValue / exchangeRate);
   };
 
-  const secondaryCurrencySymbol = watchedData.secondaryCurrency === 'EUR' ? '€' : 
-    watchedData.secondaryCurrency === 'GBP' ? '£' : '$';
+  const secondaryCurrencyCode = watchedData.secondaryCurrency || 'USD';
 
   return (
-    <FormSection
-      title="Back-Office (PRO) Services"
-      description="Comprehensive administrative support for government-related processes"
-      icon={Users}
-      iconColor="text-blue-600"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      <div className="space-y-6">
-        {/* Main Back-Office Services Checkbox */}
-        <div>
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              {...register('backOfficeServices.enabled')}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-            />
-            <span className="ml-2 text-sm font-medium text-gray-700">
-              Include Back-Office (PRO) Services
-            </span>
-          </label>
-          <p className="text-xs text-gray-500 mt-2">
-            Select to include comprehensive administrative support for government-related processes
-          </p>
-        </div>
-
-        {/* Back-Office Options - Show only if enabled */}
-        {watchedData.backOfficeServices?.enabled && (
-          <div className="space-y-6 pl-6 border-l-2 border-blue-200">
-            {/* Team Size Selection */}
-            <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                Team Size Selection
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Select Team Size
-                  </label>
-                  <select
-                    {...register('backOfficeServices.teamSize')}
-                    className="w-full max-w-md px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+      <FormSection
+        title="Back-Office (PRO) Services"
+        description="Comprehensive administrative support for government-related processes"
+        icon={Users}
+        iconColor="text-blue-600"
+      >
+        <div className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {/* Main Back-Office Services Checkbox */}
+          <motion.label
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+          >
+            <div className="relative">
+              <input
+                type="checkbox"
+                {...register('backOfficeServices.enabled')}
+                checked={watchedData.backOfficeServices?.enabled || false}
+                className="sr-only"
+              />
+              <div 
+                className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                style={{ 
+                  borderColor: watchedData.backOfficeServices?.enabled ? '#243F7B' : '#d1d5db',
+                  backgroundColor: watchedData.backOfficeServices?.enabled ? '#243F7B' : 'white'
+                }}
+              >
+                {watchedData.backOfficeServices?.enabled && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-3 h-3 text-white flex items-center justify-center"
                   >
-                    <option value="">Select team size...</option>
-                    <option value="micro">1-2 | 3-4 | 5-6 | Staff</option>
-                    <option value="small">1-3 | 4-6 | 7-10 | Staff</option>
-                    <option value="medium">1-4 | 5-6 | 7-8 | Staff</option>
-                    <option value="large">1-5 | 6-10 | 11-15 | 16-20 | Staff</option>
-                  </select>
-                  {errors.backOfficeServices?.teamSize && (
-                    <p className="text-red-500 text-sm mt-1">{errors.backOfficeServices.teamSize.message}</p>
-                  )}
-                                 </div>
+                    ✓
+                  </motion.div>
+                )}
               </div>
             </div>
+            <div>
+              <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                Include Back-Office (PRO) Services
+              </span>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Comprehensive administrative support for government-related processes
+              </p>
+            </div>
+          </motion.label>
 
-            {/* Pricing Table - Show only if team size is selected */}
-            {currentTeamConfig && (
-              <div className="bg-white rounded-xl p-6 border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                  {currentTeamConfig.label} - Monthly Pricing
+          {/* Back-Office Options - Show only if enabled */}
+          {watchedData.backOfficeServices?.enabled && (
+            <div className="space-y-4 mt-4">
+              {/* Combined Configuration */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h3 className="text-base font-semibold mb-4" style={{ color: '#243F7B' }}>
+                  Back-Office Configuration
                 </h3>
                 
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300 rounded-lg">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
-                          Team Size
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
-                          Monthly Fee (AED)
-                        </th>
-                        <th className="border border-gray-300 px-4 py-3 text-left font-semibold text-gray-900">
-                          Monthly Fee ({watchedData.secondaryCurrency === 'EUR' ? 'EUR' : watchedData.secondaryCurrency === 'GBP' ? 'GBP' : 'USD'})
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentTeamConfig.tiers.map((tier, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="border border-gray-300 px-4 py-3 text-gray-700">
-                            {tier.staffRange}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-gray-700 font-medium">
-                            {tier.monthlyFee.toLocaleString()}
-                          </td>
-                          <td className="border border-gray-300 px-4 py-3 text-gray-700 font-medium">
-                            {getSecondaryCurrencyValue(tier.monthlyFee).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Team Size Selection */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
+                      Select Team Size
+                    </label>
+                    <div className="relative">
+                      <motion.button
+                        type="button"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] flex items-center justify-between bg-white"
+                        onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                      >
+                        <span className="text-gray-700">
+                          {watchedData.backOfficeServices?.teamSize 
+                            ? (() => {
+                                const teamSize = watchedData.backOfficeServices.teamSize;
+                                if (teamSize === 'micro') return '1-2 | 3-4 | 5-6 | Staff';
+                                if (teamSize === 'small') return '1-3 | 4-6 | 7-10 | Staff';
+                                if (teamSize === 'medium') return '1-4 | 5-6 | 7-8 | Staff';
+                                if (teamSize === 'large') return '1-5 | 6-10 | 11-15 | 16-20 | Staff';
+                                return '';
+                              })()
+                            : 'Select team size...'}
+                        </span>
+                        <ChevronDown 
+                          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                        />
+                      </motion.button>
 
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 font-medium">
-                    📋 Note: All pricing is based on monthly fees with a 12-month minimum commitment requirement.
-                  </p>
+                      {isDropdownOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+                        >
+                          {Object.entries(TEAM_CONFIGURATIONS).map(([key, config]) => {
+                            const displayText = key === 'micro' ? '1-2 | 3-4 | 5-6 | Staff' :
+                                              key === 'small' ? '1-3 | 4-6 | 7-10 | Staff' :
+                                              key === 'medium' ? '1-4 | 5-6 | 7-8 | Staff' :
+                                              '1-5 | 6-10 | 11-15 | 16-20 | Staff';
+                            
+                            return (
+                              <motion.button
+                                key={key}
+                                type="button"
+                                whileHover={{ backgroundColor: '#f3f4f6' }}
+                                onClick={() => {
+                                  setValue('backOfficeServices.teamSize', key);
+                                  setIsDropdownOpen(false);
+                                }}
+                                className="w-full px-3 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors duration-150"
+                              >
+                                {displayText}
+                              </motion.button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                      
+                      {/* Hidden input for React Hook Form registration */}
+                      <input
+                        type="hidden"
+                        {...register('backOfficeServices.teamSize')}
+                        value={watchedData.backOfficeServices?.teamSize || ''}
+                      />
+                    </div>
+                    {errors.backOfficeServices?.teamSize && (
+                      <p className="text-red-500 text-xs mt-1" role="alert">
+                        {errors.backOfficeServices.teamSize.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Pricing Display */}
+                  {currentTeamConfig && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
+                        {currentTeamConfig.label} - Monthly Pricing
+                      </label>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {currentTeamConfig.tiers.map((tier, index) => (
+                          <motion.div 
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.3, delay: index * 0.1 }}
+                            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100"
+                          >
+                            <span className="text-sm font-medium text-gray-700">
+                              {tier.staffRange}
+                            </span>
+                            <div className="text-right">
+                              <div className="text-sm font-bold" style={{ color: '#243F7B' }}>
+                                AED {tier.monthlyFee.toLocaleString()}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {secondaryCurrencyCode} {getSecondaryCurrencyValue(tier.monthlyFee).toLocaleString()}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        )}
-      </div>
-    </FormSection>
+            </div>
+          )}
+        </div>
+      </FormSection>
+    </motion.div>
   );
 }; 

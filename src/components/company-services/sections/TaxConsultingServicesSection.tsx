@@ -2,6 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Calculator } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { CompanyServicesData } from '@/types/company-services';
 import { DEFAULT_FEES, FORMATTED_DEFAULT_FEES } from '../utils/accountingPricingConfig';
@@ -98,208 +99,321 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
   }, [watchedData.taxConsultingServices?.vatReturnFilingType, setValue]);
 
   return (
-    <FormSection
-      title="Tax Consulting Services"
-      description="CIT (Corporate Income Tax) and VAT (Value Added Tax) consulting services"
-      icon={Calculator}
-      iconColor="text-green-600"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
     >
-      <div className="space-y-6">
-        {/* Main Tax Consulting Services Checkbox */}
-        <div>
-          <label className="flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              {...register('taxConsultingServices.enabled')}
-              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
-            />
-            <span className="ml-2 text-sm font-medium text-gray-700">
-              Include Tax Consulting Services
-            </span>
-          </label>
-          <p className="text-xs text-gray-500 mt-2">
-            Select to include Corporate Income Tax (CIT) and Value Added Tax (VAT) services
-          </p>
-        </div>
-
-        {/* Tax Consulting Options - Show only if enabled */}
-        {watchedData.taxConsultingServices?.enabled && (
-          <div className="space-y-8 pl-6 border-l-2 border-green-200">
-            {/* CIT Section */}
-            <div className="bg-green-50 rounded-xl p-6 border border-green-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                Corporate Income Tax (CIT) Section
-              </h3>
-              
-              <div className="space-y-4">
-                {/* CIT Registration */}
-                <div>
-                  <NumberInputField
-                    label="CIT (Corporate Income Tax) Registration (AED)"
-                    value={watchedData.taxConsultingServices?.citRegistration || 0}
-                    onChange={(value) => setValue('taxConsultingServices.citRegistration', value)}
-                    placeholder={FORMATTED_DEFAULT_FEES.citRegistration}
-                    className="w-full max-w-xs focus:ring-green-500"
-                    error={errors.taxConsultingServices?.citRegistration?.message}
-                    min={0}
-                  />
-                </div>
-
-                {/* CIT Type Selection */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    CIT Return Filing Type
-                  </label>
-                  <div className="flex flex-wrap gap-4">
-                    {[
-                      { value: 'sbr-regular', label: 'SBR / Regular' },
-                      { value: 'qfzp', label: 'QFZP' }
-                    ].map((option) => (
-                      <label key={option.value} className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          {...register('taxConsultingServices.citType')}
-                          value={option.value}
-                          className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 focus:ring-green-500 focus:ring-2"
-                        />
-                        <span className="ml-2 text-sm font-medium text-gray-700">{option.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.taxConsultingServices?.citType && (
-                    <p className="text-red-500 text-sm mt-1">{errors.taxConsultingServices.citType.message}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-2">
-                    Select the appropriate CIT filing type
-                  </p>
-                </div>
+      <FormSection
+        title="Tax Consulting Services"
+        description="CIT (Corporate Income Tax) and VAT (Value Added Tax) consulting services"
+        icon={Calculator}
+        iconColor="text-blue-600"
+      >
+        <div className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+          {/* Main Tax Consulting Services Checkbox */}
+          <motion.label
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+          >
+            <div className="relative">
+              <input
+                type="checkbox"
+                {...register('taxConsultingServices.enabled')}
+                checked={watchedData.taxConsultingServices?.enabled || false}
+                className="sr-only"
+              />
+              <div 
+                className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                style={{ 
+                  borderColor: watchedData.taxConsultingServices?.enabled ? '#243F7B' : '#d1d5db',
+                  backgroundColor: watchedData.taxConsultingServices?.enabled ? '#243F7B' : 'white'
+                }}
+              >
+                {watchedData.taxConsultingServices?.enabled && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="w-3 h-3 text-white flex items-center justify-center"
+                  >
+                    ✓
+                  </motion.div>
+                )}
               </div>
             </div>
+            <div>
+              <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                Include Tax Consulting Services
+              </span>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Select to include Corporate Income Tax (CIT) and Value Added Tax (VAT) services
+              </p>
+            </div>
+          </motion.label>
 
-            {/* VAT Section */}
-            <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                Value Added Tax (VAT) Section
-              </h3>
-              
-              <div className="space-y-4">
-                {/* VAT Type Selection */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    VAT Service Type
-                  </label>
-                  <div className="flex flex-wrap gap-4">
-                    {[
-                      { value: 'registration', label: 'VAT Registration' },
-                      { value: 'exception', label: 'VAT Exception' },
-                      { value: 'de-registration', label: 'VAT De-registration' }
-                    ].map((option) => (
-                      <label key={option.value} className="flex items-center cursor-pointer">
-                        <input
-                          type="radio"
-                          {...register('taxConsultingServices.vatType')}
-                          value={option.value}
-                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                        />
-                        <span className="ml-2 text-sm font-medium text-gray-700">{option.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                  {errors.taxConsultingServices?.vatType && (
-                    <p className="text-red-500 text-sm mt-1">{errors.taxConsultingServices.vatType.message}</p>
-                  )}
-                </div>
-
-                {/* VAT Registration Fee - Show when VAT type is selected */}
-                {watchedData.taxConsultingServices?.vatType && ['registration', 'exception', 'de-registration'].includes(watchedData.taxConsultingServices.vatType) && (
+          {/* Tax Consulting Options - Show only if enabled */}
+          {watchedData.taxConsultingServices?.enabled && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+              {/* CIT Section */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
+                  Corporate Income Tax (CIT)
+                </h3>
+                
+                <div className="space-y-3">
+                  {/* CIT Registration */}
                   <div>
                     <NumberInputField
-                      label={`VAT ${watchedData.taxConsultingServices.vatType === 'registration' ? 'Registration' : 
-                           watchedData.taxConsultingServices.vatType === 'exception' ? 'Exception' : 'De-registration'} Fee (AED)`}
-                      value={watchedData.taxConsultingServices?.vatRegistration || 0}
-                      onChange={(value) => setValue('taxConsultingServices.vatRegistration', value)}
-                      placeholder={FORMATTED_DEFAULT_FEES.vatRegistration}
-                      className="w-full max-w-xs focus:ring-blue-500"
-                      error={errors.taxConsultingServices?.vatRegistration?.message}
+                      label="CIT (Corporate Income Tax) Registration (AED)"
+                      value={watchedData.taxConsultingServices?.citRegistration || 0}
+                      onChange={(value) => setValue('taxConsultingServices.citRegistration', value)}
+                      placeholder={FORMATTED_DEFAULT_FEES.citRegistration}
+                      className="w-full max-w-xs"
+                      error={errors.taxConsultingServices?.citRegistration?.message}
                       min={0}
                     />
                   </div>
-                )}
 
-                {/* VAT Return Filing */}
-                {watchedData.taxConsultingServices?.vatType && ['registration', 'exception', 'de-registration'].includes(watchedData.taxConsultingServices.vatType) && (
-                  <div className="space-y-4">
-                    {/* VAT Return Filing Type Selection */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        VAT Return Filing Type
-                      </label>
-                      <div className="flex flex-wrap gap-4">
-                        {[
-                          { value: 'mini', label: 'Mini' },
-                          { value: 'basic', label: 'Basic' },
-                          { value: 'complex', label: 'Complex' }
-                        ].map((option) => (
-                          <label key={option.value} className="flex items-center cursor-pointer">
+                  {/* CIT Type Selection */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                      CIT Return Filing Type
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { value: 'sbr-regular', label: 'SBR / Regular' },
+                        { value: 'qfzp', label: 'QFZP' }
+                      ].map((option) => (
+                        <motion.label
+                          key={option.value}
+                          whileHover={{ scale: 1.01 }}
+                          className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          <div className="relative">
                             <input
                               type="radio"
-                              {...register('taxConsultingServices.vatReturnFilingType')}
+                              {...register('taxConsultingServices.citType')}
                               value={option.value}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                              checked={watchedData.taxConsultingServices?.citType === option.value}
+                              className="sr-only"
                             />
-                            <span className="ml-2 text-sm font-medium text-gray-700">{option.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                      {errors.taxConsultingServices?.vatReturnFilingType && (
-                        <p className="text-red-500 text-sm mt-1">{errors.taxConsultingServices.vatReturnFilingType.message}</p>
-                      )}
+                            <div 
+                              className="w-4 h-4 rounded-full border-2 border-gray-300 transition-all duration-200 flex items-center justify-center"
+                              style={{ 
+                                borderColor: watchedData.taxConsultingServices?.citType === option.value ? '#243F7B' : '#d1d5db' 
+                              }}
+                            >
+                              {watchedData.taxConsultingServices?.citType === option.value && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: '#243F7B' }}
+                                />
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-sm text-gray-700">{option.label}</span>
+                        </motion.label>
+                      ))}
                     </div>
-
-                    {/* VAT Return Filing Fee - Show when VAT return filing type is selected */}
-                    {watchedData.taxConsultingServices?.vatReturnFilingType && (
-                      <div>
-                        <NumberInputField
-                          label={`VAT Return Filing (${watchedData.taxConsultingServices.vatReturnFilingType.charAt(0).toUpperCase() + watchedData.taxConsultingServices.vatReturnFilingType.slice(1)}) (AED)`}
-                          value={watchedData.taxConsultingServices?.vatReturnFiling || 0}
-                          onChange={(value) => setValue('taxConsultingServices.vatReturnFiling', value)}
-                          placeholder={
-                            watchedData.taxConsultingServices.vatReturnFilingType === 'mini' ? '664' :
-                            watchedData.taxConsultingServices.vatReturnFilingType === 'basic' ? '2,361' :
-                            watchedData.taxConsultingServices.vatReturnFilingType === 'complex' ? '3,541' : '664'
-                          }
-                          className="w-full max-w-xs focus:ring-blue-500"
-                          error={errors.taxConsultingServices?.vatReturnFiling?.message}
-                          min={0}
-                        />
-                      </div>
+                    {errors.taxConsultingServices?.citType && (
+                      <p className="text-red-500 text-xs mt-1">{errors.taxConsultingServices.citType.message}</p>
                     )}
                   </div>
-                )}
+                </div>
+              </div>
 
-                {/* Client-Managed Accounting Option */}
-                <div>
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      {...register('taxConsultingServices.clientManagedAccounting')}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                    />
-                    <span className="ml-2 text-sm font-medium text-gray-700">
-                      Client-Managed Accounting
-                    </span>
-                  </label>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Select if the client handles their own accounting (not TME Services)
-                  </p>
+              {/* VAT Section */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
+                  Value Added Tax (VAT)
+                </h3>
+                
+                <div className="space-y-3">
+                  {/* VAT Type Selection */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                      VAT Service Type
+                    </label>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { value: 'registration', label: 'Registration' },
+                        { value: 'exception', label: 'Exception' },
+                        { value: 'de-registration', label: 'De-registration' }
+                      ].map((option) => (
+                        <motion.label
+                          key={option.value}
+                          whileHover={{ scale: 1.01 }}
+                          className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          <div className="relative">
+                            <input
+                              type="radio"
+                              {...register('taxConsultingServices.vatType')}
+                              value={option.value}
+                              checked={watchedData.taxConsultingServices?.vatType === option.value}
+                              className="sr-only"
+                            />
+                            <div 
+                              className="w-4 h-4 rounded-full border-2 border-gray-300 transition-all duration-200 flex items-center justify-center"
+                              style={{ 
+                                borderColor: watchedData.taxConsultingServices?.vatType === option.value ? '#243F7B' : '#d1d5db' 
+                              }}
+                            >
+                              {watchedData.taxConsultingServices?.vatType === option.value && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ backgroundColor: '#243F7B' }}
+                                />
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-sm text-gray-700">{option.label}</span>
+                        </motion.label>
+                      ))}
+                    </div>
+                    {errors.taxConsultingServices?.vatType && (
+                      <p className="text-red-500 text-xs mt-1">{errors.taxConsultingServices.vatType.message}</p>
+                    )}
+                  </div>
+
+                  {/* VAT Registration Fee - Show when VAT type is selected */}
+                  {watchedData.taxConsultingServices?.vatType && ['registration', 'exception', 'de-registration'].includes(watchedData.taxConsultingServices.vatType) && (
+                    <div>
+                      <NumberInputField
+                        label={`VAT ${watchedData.taxConsultingServices.vatType === 'registration' ? 'Registration' : 
+                             watchedData.taxConsultingServices.vatType === 'exception' ? 'Exception' : 'De-registration'} Fee (AED)`}
+                        value={watchedData.taxConsultingServices?.vatRegistration || 0}
+                        onChange={(value) => setValue('taxConsultingServices.vatRegistration', value)}
+                        placeholder={FORMATTED_DEFAULT_FEES.vatRegistration}
+                        className="w-full max-w-xs"
+                        error={errors.taxConsultingServices?.vatRegistration?.message}
+                        min={0}
+                      />
+                    </div>
+                  )}
+
+                  {/* VAT Return Filing */}
+                  {watchedData.taxConsultingServices?.vatType && ['registration', 'exception', 'de-registration'].includes(watchedData.taxConsultingServices.vatType) && (
+                    <div className="space-y-3">
+                      {/* VAT Return Filing Type Selection */}
+                      <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                          VAT Return Filing Type
+                        </label>
+                        <div className="flex flex-wrap gap-3">
+                          {[
+                            { value: 'mini', label: 'Mini' },
+                            { value: 'basic', label: 'Basic' },
+                            { value: 'complex', label: 'Complex' }
+                          ].map((option) => (
+                            <motion.label
+                              key={option.value}
+                              whileHover={{ scale: 1.01 }}
+                              className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                            >
+                              <div className="relative">
+                                <input
+                                  type="radio"
+                                  {...register('taxConsultingServices.vatReturnFilingType')}
+                                  value={option.value}
+                                  checked={watchedData.taxConsultingServices?.vatReturnFilingType === option.value}
+                                  className="sr-only"
+                                />
+                                <div 
+                                  className="w-4 h-4 rounded-full border-2 border-gray-300 transition-all duration-200 flex items-center justify-center"
+                                  style={{ 
+                                    borderColor: watchedData.taxConsultingServices?.vatReturnFilingType === option.value ? '#243F7B' : '#d1d5db' 
+                                  }}
+                                >
+                                  {watchedData.taxConsultingServices?.vatReturnFilingType === option.value && (
+                                    <motion.div
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      className="w-2 h-2 rounded-full"
+                                      style={{ backgroundColor: '#243F7B' }}
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-sm text-gray-700">{option.label}</span>
+                            </motion.label>
+                          ))}
+                        </div>
+                        {errors.taxConsultingServices?.vatReturnFilingType && (
+                          <p className="text-red-500 text-xs mt-1">{errors.taxConsultingServices.vatReturnFilingType.message}</p>
+                        )}
+                      </div>
+
+                      {/* VAT Return Filing Fee - Show when VAT return filing type is selected */}
+                      {watchedData.taxConsultingServices?.vatReturnFilingType && (
+                        <div>
+                          <NumberInputField
+                            label={`VAT Return Filing (${watchedData.taxConsultingServices.vatReturnFilingType.charAt(0).toUpperCase() + watchedData.taxConsultingServices.vatReturnFilingType.slice(1)}) (AED)`}
+                            value={watchedData.taxConsultingServices?.vatReturnFiling || 0}
+                            onChange={(value) => setValue('taxConsultingServices.vatReturnFiling', value)}
+                            placeholder={
+                              watchedData.taxConsultingServices.vatReturnFilingType === 'mini' ? '664' :
+                              watchedData.taxConsultingServices.vatReturnFilingType === 'basic' ? '2,361' :
+                              watchedData.taxConsultingServices.vatReturnFilingType === 'complex' ? '3,541' : '664'
+                            }
+                            className="w-full max-w-xs"
+                            error={errors.taxConsultingServices?.vatReturnFiling?.message}
+                            min={0}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Client-Managed Accounting Option */}
+                  <motion.label
+                    whileHover={{ scale: 1.01 }}
+                    className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        {...register('taxConsultingServices.clientManagedAccounting')}
+                        checked={watchedData.taxConsultingServices?.clientManagedAccounting || false}
+                        className="sr-only"
+                      />
+                      <div 
+                        className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                        style={{ 
+                          borderColor: watchedData.taxConsultingServices?.clientManagedAccounting ? '#243F7B' : '#d1d5db',
+                          backgroundColor: watchedData.taxConsultingServices?.clientManagedAccounting ? '#243F7B' : 'white'
+                        }}
+                      >
+                        {watchedData.taxConsultingServices?.clientManagedAccounting && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-3 h-3 text-white flex items-center justify-center"
+                          >
+                            ✓
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">
+                        Client-Managed Accounting
+                      </span>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Select if the client handles their own accounting (not TME Services)
+                      </p>
+                    </div>
+                  </motion.label>
                 </div>
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </FormSection>
+          )}
+        </div>
+      </FormSection>
+    </motion.div>
   );
 }; 

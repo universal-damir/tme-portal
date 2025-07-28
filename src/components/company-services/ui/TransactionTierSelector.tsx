@@ -1,18 +1,10 @@
 'use client';
 
-import React from 'react';
-import { SECTION_COLORS } from '../utils/accountingServiceConfig';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CompanyServicesData } from '@/types/company-services';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 
 interface TransactionTierSelectorProps {
   /**
@@ -54,62 +46,73 @@ export const TransactionTierSelector: React.FC<TransactionTierSelectorProps> = (
   value,
   onValueChange,
 }) => {
-  const colors = SECTION_COLORS.transactionTier;
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!serviceType) {
     return null;
   }
 
-  // Generate unique ID for accessibility
-  const selectId = React.useId();
-  const errorId = errors.accountingServices?.transactionTier ? `${selectId}-error` : undefined;
+  const selectedTier = transactionTiers.find(tier => tier === value);
 
   return (
-    <div className={cn(
-      "rounded-xl p-6 border",
-      colors.bg,
-      colors.border
-    )}>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-        <div className={cn(
-          "w-2 h-2 rounded-full mr-2",
-          colors.dotColor
-        )}></div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-lg p-4 border border-gray-200"
+      style={{ fontFamily: 'Inter, sans-serif' }}
+    >
+      <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
         Transaction Volume
       </h3>
       
       <div className="space-y-2">
-        <Label 
-          htmlFor={selectId}
-          className="text-sm font-semibold text-foreground"
-        >
+        <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
           Select transaction volume per month
-        </Label>
+        </label>
         
-        <Select
-          value={value ? value.toString() : ''}
-          onValueChange={(val) => onValueChange && onValueChange(Number(val))}
-        >
-          <SelectTrigger
-            id={selectId}
-            aria-describedby={errorId}
-            aria-invalid={!!errors.accountingServices?.transactionTier}
-            className={cn(
-              "w-full max-w-md h-12 text-base",
-              "focus-visible:ring-2 focus-visible:ring-blue-500",
-              errors.accountingServices?.transactionTier && "border-destructive focus-visible:ring-destructive"
-            )}
+        <div className="relative">
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
+            onClick={() => setIsOpen(!isOpen)}
+            className="w-full max-w-md px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] flex items-center justify-between bg-white"
+            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
           >
-            <SelectValue placeholder="Select transaction tier..." />
-          </SelectTrigger>
-          <SelectContent>
-            {transactionTiers.map((tier) => (
-              <SelectItem key={tier} value={tier.toString()}>
-                Up to {tier} transactions/month
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+            <span className="text-gray-700">
+              {selectedTier ? `Up to ${selectedTier} transactions/month` : 'Select transaction tier...'}
+            </span>
+            <ChevronDown 
+              className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+            />
+          </motion.button>
+
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="absolute z-10 w-full max-w-md mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
+            >
+              {transactionTiers.map((tier) => (
+                <motion.button
+                  key={tier}
+                  type="button"
+                  whileHover={{ backgroundColor: '#f3f4f6' }}
+                  onClick={() => {
+                    onValueChange?.(tier);
+                    setIsOpen(false);
+                  }}
+                  className="w-full px-3 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors duration-150"
+                >
+                  Up to {tier} transactions/month
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+        </div>
         
         {/* Hidden input for React Hook Form registration */}
         <input
@@ -119,15 +122,11 @@ export const TransactionTierSelector: React.FC<TransactionTierSelectorProps> = (
         />
         
         {errors.accountingServices?.transactionTier && (
-          <p 
-            id={errorId}
-            className="text-sm text-destructive font-medium"
-            role="alert"
-          >
+          <p className="text-red-500 text-xs mt-1" role="alert">
             {errors.accountingServices.transactionTier.message}
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }; 

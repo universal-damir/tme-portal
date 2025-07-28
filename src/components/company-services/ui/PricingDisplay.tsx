@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SECTION_COLORS } from '../utils/accountingServiceConfig';
+import { motion } from 'framer-motion';
 
 interface PricingTier {
   tier: number;
@@ -34,39 +34,49 @@ export const PricingDisplay: React.FC<PricingDisplayProps> = ({
   }
 
   const isMonthly = serviceType === 'monthly';
-  const colors = isMonthly ? SECTION_COLORS.monthlyPricing : SECTION_COLORS.quarterlyYearlyPricing;
   const title = isMonthly ? 'Monthly Service Pricing' : 'Quarterly/Yearly Service Pricing';
 
   return (
-    <div className={`${colors.bg} rounded-xl p-6 border ${colors.border}`}>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-        <div className={`w-2 h-2 ${colors.dotColor} rounded-full mr-2`}></div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-lg p-4 border border-gray-200"
+      style={{ fontFamily: 'Inter, sans-serif' }}
+    >
+      <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
         {title}
       </h3>
       
       <div className="space-y-3">
-        {displayTiers.map(({ tier, price, pricing }) => (
-          <div key={tier} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-200">
+        {displayTiers.map(({ tier, price, pricing }, index) => (
+          <motion.div 
+            key={tier}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.1 }}
+            className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100"
+          >
             <span className="text-sm font-medium text-gray-700">
               Up to {tier} transactions/month
             </span>
             {isMonthly ? (
-              <span className="text-sm font-bold text-gray-900">
+              <span className="text-sm font-bold" style={{ color: '#243F7B' }}>
                 AED {price?.toLocaleString()}
               </span>
             ) : (
               <div className="text-right">
-                <div className="text-sm font-bold text-gray-900">
+                <div className="text-sm font-bold" style={{ color: '#243F7B' }}>
                   Quarterly: AED {pricing?.quarterly.toLocaleString()}
                 </div>
-                <div className="text-sm font-bold text-gray-900">
+                <div className="text-sm font-bold" style={{ color: '#243F7B' }}>
                   Yearly: AED {pricing?.yearly.toLocaleString()}
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }; 

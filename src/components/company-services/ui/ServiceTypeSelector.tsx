@@ -1,15 +1,10 @@
 'use client';
 
 import React from 'react';
-import { SERVICE_TYPE_OPTIONS, SECTION_COLORS } from '../utils/accountingServiceConfig';
-import { UseFormRegister, FieldErrors, Control } from 'react-hook-form';
+import { motion } from 'framer-motion';
+import { SERVICE_TYPE_OPTIONS } from '../utils/accountingServiceConfig';
+import { UseFormRegister, FieldErrors } from 'react-hook-form';
 import { CompanyServicesData } from '@/types/company-services';
-import { 
-  RadioGroup, 
-  RadioGroupItem 
-} from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
 
 interface ServiceTypeSelectorProps {
   /**
@@ -39,51 +34,55 @@ export const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({
   value,
   onValueChange,
 }) => {
-  const colors = SECTION_COLORS.serviceType;
-
   return (
-    <div className={cn(
-      "rounded-xl p-6 border",
-      colors.bg,
-      colors.border
-    )}>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-        <div className={cn(
-          "w-2 h-2 rounded-full mr-2",
-          colors.dotColor
-        )}></div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-white rounded-lg p-4 border border-gray-200"
+      style={{ fontFamily: 'Inter, sans-serif' }}
+    >
+      <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
         Service Type
       </h3>
       
-      <div className="space-y-4">
-        <RadioGroup 
-          value={value}
-          onValueChange={onValueChange}
-          className="space-y-3"
-        >
-          {SERVICE_TYPE_OPTIONS.map((option) => {
-            const itemId = `serviceType-${option.value}`;
-            
-            return (
-              <div key={option.value} className="flex items-center space-x-3">
-                <RadioGroupItem
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-3">
+          {SERVICE_TYPE_OPTIONS.map((option) => (
+            <motion.label
+              key={option.value}
+              whileHover={{ scale: 1.01 }}
+              className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+            >
+              <div className="relative">
+                <input
+                  type="radio"
+                  {...register('accountingServices.serviceType')}
                   value={option.value}
-                  id={itemId}
-                  className={cn(
-                    "focus-visible:ring-2 focus-visible:ring-purple-500",
-                    "border-purple-300 text-purple-600"
-                  )}
+                  checked={value === option.value}
+                  onChange={() => onValueChange?.(option.value)}
+                  className="sr-only"
                 />
-                <Label 
-                  htmlFor={itemId}
-                  className="text-sm font-medium text-gray-700 cursor-pointer"
+                <div 
+                  className="w-4 h-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center"
+                  style={{ 
+                    borderColor: value === option.value ? '#243F7B' : '#d1d5db' 
+                  }}
                 >
-                  {option.label}
-                </Label>
+                  {value === option.value && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: '#243F7B' }}
+                    />
+                  )}
+                </div>
               </div>
-            );
-          })}
-        </RadioGroup>
+              <span className="text-sm text-gray-700">{option.label}</span>
+            </motion.label>
+          ))}
+        </div>
         
         {/* Hidden input for React Hook Form registration */}
         <input
@@ -93,14 +92,11 @@ export const ServiceTypeSelector: React.FC<ServiceTypeSelectorProps> = ({
         />
         
         {errors.accountingServices?.serviceType && (
-          <p 
-            className="text-sm text-destructive font-medium mt-2"
-            role="alert"
-          >
+          <p className="text-red-500 text-xs mt-1" role="alert">
             {errors.accountingServices.serviceType.message}
           </p>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }; 
