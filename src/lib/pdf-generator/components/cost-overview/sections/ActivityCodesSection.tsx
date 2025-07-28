@@ -34,7 +34,7 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
       {isTbcEnabled ? (
         <View style={styles.contentArea}>
           <Text style={[styles.introText, { textAlign: 'center', fontStyle: 'italic', color: '#d97706' }]}>
-            Activities will be confirmed at a later stage (TBC)
+            Activities will be confirmed at a later stage.
           </Text>
         </View>
       ) : (

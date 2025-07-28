@@ -83,6 +83,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         shareCapitalAED: 0,
         valuePerShareAED: 0,
         numberOfShares: 0,
+        activitiesToBeConfirmed: true,
       },
       activityCodes: [],
       ifzaLicense: {

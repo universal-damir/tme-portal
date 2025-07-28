@@ -16,6 +16,7 @@ export interface AuthorityInformation {
   shareCapitalAED: number;
   valuePerShareAED: number;
   numberOfShares: number;
+  activitiesToBeConfirmed?: boolean;
 }
 
 export interface ActivityCode {

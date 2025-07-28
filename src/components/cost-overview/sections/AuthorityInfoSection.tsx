@@ -74,12 +74,8 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
     setValue
   ]);
 
-  // Activity codes logic
-  const isIfzaSelected = watchedData.authorityInformation?.responsibleAuthority === 'IFZA (International Free Zone Authority)';
-  const isDetSelected = watchedData.authorityInformation?.responsibleAuthority === 'DET (Dubai Department of Economy and Tourism)';
-  
-  const isTbcEnabled = (isIfzaSelected && watchedData.ifzaLicense?.activitiesToBeConfirmed) || 
-                       (isDetSelected && watchedData.detLicense?.activitiesToBeConfirmed) || false;
+  // Activity codes logic - simplified to always use TBC from authorityInformation
+  const isTbcEnabled = watchedData.authorityInformation?.activitiesToBeConfirmed || false;
 
   // Ensure at least one activity field exists when TBC is not enabled
   useEffect(() => {
@@ -303,45 +299,43 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
               </label>
             </div>
 
-            {/* TBC Checkbox - Compact inline style */}
-            {(isIfzaSelected || isDetSelected) && (
-              <div className="mb-3">
-                <motion.label
-                  whileHover={{ scale: 1.01 }}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      {...register(isIfzaSelected ? 'ifzaLicense.activitiesToBeConfirmed' : 'detLicense.activitiesToBeConfirmed')}
-                      className="sr-only"
-                    />
-                    <div 
-                      className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                      style={{ 
-                        borderColor: (isIfzaSelected ? watchedData.ifzaLicense?.activitiesToBeConfirmed : watchedData.detLicense?.activitiesToBeConfirmed) ? '#243F7B' : '#d1d5db',
-                        backgroundColor: (isIfzaSelected ? watchedData.ifzaLicense?.activitiesToBeConfirmed : watchedData.detLicense?.activitiesToBeConfirmed) ? '#243F7B' : 'white'
-                      }}
-                    >
-                      {(isIfzaSelected ? watchedData.ifzaLicense?.activitiesToBeConfirmed : watchedData.detLicense?.activitiesToBeConfirmed) && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </motion.div>
-                      )}
-                    </div>
+            {/* TBC Checkbox - Always available, simplified */}
+            <div className="mb-3">
+              <motion.label
+                whileHover={{ scale: 1.01 }}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    {...register('authorityInformation.activitiesToBeConfirmed')}
+                    className="sr-only"
+                  />
+                  <div 
+                    className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                    style={{ 
+                      borderColor: watchedData.authorityInformation?.activitiesToBeConfirmed ? '#243F7B' : '#d1d5db',
+                      backgroundColor: watchedData.authorityInformation?.activitiesToBeConfirmed ? '#243F7B' : 'white'
+                    }}
+                  >
+                    {watchedData.authorityInformation?.activitiesToBeConfirmed && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </motion.div>
+                    )}
                   </div>
-                  <span className="text-sm text-gray-700">
-                    Activities to be confirmed (TBC)
-                  </span>
-                </motion.label>
-              </div>
-            )}
+                </div>
+                <span className="text-sm text-gray-700">
+                  Activities TBC (To be confirmed)
+                </span>
+              </motion.label>
+            </div>
 
             {/* Activity Fields */}
             {!isTbcEnabled && (
@@ -352,12 +346,12 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
-                    className={index === 0 && fields.length === 1 ? "grid grid-cols-1 lg:grid-cols-2 gap-4" : "flex gap-3 items-start"}
+                    className="flex gap-3 items-start"
                   >
-                    <div className={index === 0 && fields.length === 1 ? "" : "flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4"}>
+                    <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                          Activity Code {(!isIfzaSelected && !isDetSelected) && '*'}
+                          Activity Code *
                         </label>
                         <motion.input
                           whileFocus={{ scale: 1.01 }}
@@ -374,7 +368,7 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
 
                       <div>
                         <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                          Description {(!isIfzaSelected && !isDetSelected) && '*'}
+                          Description *
                         </label>
                         <motion.input
                           whileFocus={{ scale: 1.01 }}
