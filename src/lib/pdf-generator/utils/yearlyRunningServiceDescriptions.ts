@@ -26,9 +26,9 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'ifza-license-renewal',
         condition: true,
-        description: 'IFZA License Renewal Fee',
+        description: 'IFZA License Renewal Cost',
         amount: yearlyRunningData.baseLicenseRenewal + yearlyRunningData.visaQuotaRenewal,
-        explanation: `Annual renewal cost for your business license issued by ${data.authorityInformation.responsibleAuthority}. This includes the base license fee and visa quota renewal costs.`
+        explanation: `Annual renewal cost for your business license issued by ${data.authorityInformation.responsibleAuthority}.`
       });
     }
 
@@ -37,9 +37,9 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'immigration-renewal',
         condition: true,
-        description: 'GDRFA (Immigration Establishment Card) Renewal Fee',
+        description: 'GDRFA (Immigration Establishment Card) Renewal Cost',
         amount: yearlyRunningData.immigrationRenewal,
-        explanation: 'Mandatory Renewal Fee.'
+        explanation: 'Mandatory Renewal Cost.'
       });
     }
 
@@ -48,9 +48,9 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'cross-border-renewal',
         condition: true,
-        description: 'IFZA Cross Border Renewal Fee',
+        description: 'IFZA Cross Border Renewal Cost',
         amount: yearlyRunningData.crossBorderRenewal,
-        explanation: 'Annual renewal fee required for conducting both professional and commercial activities across UAE borders.'
+        explanation: 'Annual renewal cost required for conducting both professional and commercial activities across UAE borders.'
       });
     }
 
@@ -59,9 +59,9 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'third-party-approval',
         condition: true,
-        description: 'Third-party Approval (NOC) Renewal Fee',
+        description: 'Third-party Approval (NOC) Renewal Cost',
         amount: yearlyRunningData.thirdPartyApproval,
-        explanation: 'Annual renewal fee for third-party approvals or No Objection Certificates (NOC) required for specific business activities.'
+        explanation: 'Annual renewal cost for third-party approvals or NOC (No Objection Certificate) required for specific business activities.'
       });
     }
 
@@ -94,18 +94,18 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-license-renewal',
       condition: true,
-      description: 'DET License Fee (Annual Renewal)',
+      description: 'DET License Cost (Annual Renewal)',
       amount: 13000,
-      explanation: 'Annual renewal fee for your business license with the Department of Economy and Tourism-Dubai (DET).'
+      explanation: 'Annual renewal cost for your business license with the Department of Economy and Tourism-Dubai (DET).'
     });
 
     // 2. DET Immigration Renewal
     services.push({
       id: 'det-immigration-renewal',
       condition: true,
-      description: 'GDRFA (Immigration) renewal fee Establishment Card for visa',
+      description: 'GDRFA (Immigration) renewal cost Establishment Card for visa',
       amount: 2000,
-      explanation: 'Annual renewal fee for the immigration establishment card required for visa processing and employee sponsorship with DET.'
+      explanation: 'Annual renewal cost for the immigration establishment card required for visa processing and employee sponsorship with DET.'
     });
 
     // 3. DET Office Rent
@@ -134,7 +134,7 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: 'Activities Required Third-party Approval',
         amount: data.detLicense.thirdPartyApprovalAmount,
-        explanation: 'Annual renewal fee for third-party approvals required for specific business activities under DET jurisdiction.'
+        explanation: 'Annual renewal cost for third-party approvals required for specific business activities under DET jurisdiction.'
       });
     }
 

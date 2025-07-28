@@ -268,19 +268,34 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
       if (currentShareCapital < requiredShareCapital) {
         // Small delay to ensure DOM is ready
         setTimeout(() => {
-          // Try multiple selectors to find the share capital field
-          let shareCapitalField = document.querySelector('input[name="authorityInformation.shareCapitalAED"]');
+          // Try multiple selectors to find the share capital field with improved targeting
+          let shareCapitalField = document.querySelector('input[name="authorityInformation.shareCapitalAED"]') as HTMLInputElement;
           
+          // If not found, try by placeholder text
           if (!shareCapitalField) {
-            shareCapitalField = document.querySelector('input[placeholder*="10,000"]');
+            shareCapitalField = document.querySelector('input[placeholder*="10,000"], input[placeholder*="Share capital"]') as HTMLInputElement;
           }
           
+          // Try finding by parent label or nearby text
           if (!shareCapitalField) {
-            shareCapitalField = document.querySelector('input[value="10,000"]');
+            const labels = document.querySelectorAll('label, span, div');
+            for (const label of labels) {
+              if (label.textContent?.toLowerCase().includes('share capital')) {
+                const nearbyInput = label.parentElement?.querySelector('input[type="text"]') as HTMLInputElement;
+                if (nearbyInput) {
+                  shareCapitalField = nearbyInput;
+                  break;
+                }
+              }
+            }
           }
           
+          // Last resort: find input in authority info section
           if (!shareCapitalField) {
-            shareCapitalField = document.querySelector('input[type="text"]:not([name*="visa"]):not([name*="company"]):not([name*="client"])');
+            const authoritySection = document.querySelector('[data-section="authority-info"], .authority-info');
+            if (authoritySection) {
+              shareCapitalField = authoritySection.querySelector('input[type="text"]') as HTMLInputElement;
+            }
           }
           
           if (shareCapitalField) {
@@ -306,10 +321,10 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
             }, 600);
           }
 
-          // Set alert state
+          // Set alert state with improved message
           setShareCapitalAlert({
             shouldHighlight: true,
-            message: `💡 Update share capital to AED ${requiredShareCapital.toLocaleString()} for ${currentInvestorVisaCount} investor visa${currentInvestorVisaCount > 1 ? 's' : ''}.`,
+            message: `💡 Minimum AED ${requiredShareCapital.toLocaleString()} required for ${currentInvestorVisaCount} investor visa${currentInvestorVisaCount > 1 ? 's' : ''}.`,
           });
 
           // Clear alert after 4 seconds

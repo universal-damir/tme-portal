@@ -80,8 +80,8 @@ export const YearlyRunningPage: React.FC<PDFComponentProps> = ({ data }) => {
     : 'Yearly Running Costs';
   
   const tableTitle = isIFZAMultiYear 
-    ? `YEARLY RUNNING COSTS`
-    : 'YEARLY RUNNING COSTS';
+    ? `Yearly Running Costs`
+    : 'Yearly Running Costs';
 
   return (
     <>

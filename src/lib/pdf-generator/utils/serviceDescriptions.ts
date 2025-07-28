@@ -20,9 +20,9 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
   if (isDet) {
     // DET specific order as requested by user:
     // 1. Registration fee Dubai Department of Economy and Tourism (DET)
-    // 2. GDRFA Fee (Immigration Establishment Card)
+    // 2. GDRFA Cost (Immigration Establishment Card)
     // 3. Registration fee MoHRE (Labour)
-    // 4. DET License Fee - Commercial
+    // 4. DET License Cost - Commercial
     // 5. Business Center arrangement cost
     // 6. Third-party Approval (NOC)
     // 7. Power Of Attorney
@@ -35,14 +35,14 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       condition: true,
       description: 'Registration fee Dubai Department of Economy and Tourism (DET)',
       amount: 2000,
-      explanation: 'Fee for obtaining the business license issued by DET (Department of Economy and Tourism).'
+      explanation: 'Cost for obtaining the business license issued by DET (Department of Economy and Tourism).'
     });
 
-    // 2. GDRFA Fee (Immigration Establishment Card)
+    // 2. GDRFA Cost (Immigration Establishment Card)
     services.push({
       id: 'gdrfa-registration',
       condition: true,
-      description: 'GDRFA Fee (Immigration Establishment Card)',
+      description: 'GDRFA Cost (Immigration Establishment Card)',
       amount: 2000,
       explanation: 'Mandatory registration for the Establishment Card.'
     });
@@ -56,9 +56,9 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       explanation: 'Mandatory registration fee with the MoHRE (Ministry of Human Resources and Emiratisation).'
     });
 
-    // 4. DET License Fee - Commercial (or other type)
+    // 4. DET License Cost - Commercial (or other type)
     if (data.detLicense?.licenseType) {
-      const detLicenseFees = {
+      const detLicenseCosts = {
         commercial: 13000,
         'commercial-real-estate': 24000,
         'commercial-investment': 30000,
@@ -76,15 +76,15 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         professional: 'Professional',
       };
       
-      const licenseFee = detLicenseFees[data.detLicense.licenseType];
+      const licenseCost = detLicenseCosts[data.detLicense.licenseType];
       const licenseTypeName = licenseTypeNames[data.detLicense.licenseType];
       
       services.push({
         id: 'det-license-fee',
         condition: true,
-        description: `DET License Fee - ${licenseTypeName}`,
-        amount: licenseFee,
-        explanation: `License fee for ${licenseTypeName} license with the Department of Economy and Tourism-Dubai (DET).`
+        description: `DET License Cost - ${licenseTypeName}`,
+        amount: licenseCost,
+        explanation: `License cost for ${licenseTypeName} license with the Department of Economy and Tourism-Dubai (DET).`
       });
     }
 
@@ -133,7 +133,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       let explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup';
       
       if (setupType === 'Corporate Setup') {
-        description = 'Document Translation Services & Government Cost';
+        description = 'Government Document & Translation Cost';
       }
 
       services.push({
@@ -161,7 +161,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'price-reduction',
         condition: true,
-        description: 'TME Services Price Reduction (Including VAT)',
+        description: 'TME Services Professional Fee Reduction (Including VAT)',
         amount: data.detLicense.reductionAmount,
         isReduction: true,
         explanation: 'A reduction applied to our professional fee as discussed, including VAT.'
@@ -171,7 +171,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
   } else if (isIfza) {
     // IFZA specific logic (unchanged)
 
-    // 1. IFZA License Fee
+    // 1. IFZA License Cost
     const baseLicense = 12900;
     const visaQuotaCosts = (data.ifzaLicense?.visaQuota || 0) * 2000;
     const annualAmount = baseLicense + visaQuotaCosts;
@@ -184,10 +184,10 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'ifza-license-fee',
         condition: true,
         description: isMultiYearIFZA 
-          ? `IFZA License Fee (for ${licenseYears} years)`
-          : 'IFZA License Fee',
+          ? `IFZA License Cost (for ${licenseYears} years)`
+          : 'IFZA License Cost',
         amount: totalLicenseAmount,
-        explanation: `IFZA license fee including visa quota for ${data.ifzaLicense?.visaQuota || 0} visas.`
+        explanation: `IFZA license cost including visa quota for ${data.ifzaLicense?.visaQuota || 0} visas.`
       });
 
       // Multi-year discount (appears right after license fee)
@@ -208,7 +208,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         services.push({
           id: 'ifza-license-discount',
           condition: true,
-          description: `IFZA License Fee Reduction (${discountPercentage}%)`,
+          description: `IFZA License Cost Reduction (${discountPercentage}%)`,
           amount: discountAmount,
           isReduction: true,
           explanation: `Multi-year license discount of ${discountPercentage}% for ${licenseYears}-year license term.`
@@ -232,14 +232,14 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'gdrfa-registration',
         condition: true,
         description: isMultiYearIFZA 
-          ? `GDRFA Fee (Immigration Establishment Card) (for ${licenseYears} years)`
-          : 'GDRFA Fee (Immigration Establishment Card)',
+          ? `GDRFA Cost (Immigration Establishment Card) (for ${licenseYears} years)`
+          : 'GDRFA Cost (Immigration Establishment Card)',
         amount: gdrfaAmount,
         explanation: `Mandatory registration for the Establishment Card.`
       });
     }
 
-    // 3. Cross Border Fee (IFZA only)
+    // 3. Cross Border Cost (IFZA only)
     if (data.ifzaLicense?.crossBorderLicense) {
       const crossBorderAmount = 2000 * licenseYears; // Multiply by years for multi-year licenses
       
@@ -247,10 +247,10 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'cross-border-license',
         condition: true,
         description: isMultiYearIFZA 
-          ? `IFZA Cross Border Fee (for ${licenseYears} years)`
-          : 'IFZA Cross Border Fee',
+          ? `IFZA Cross Border Cost (for ${licenseYears} years)`
+          : 'IFZA Cross Border Cost',
         amount: crossBorderAmount,
-        explanation: `Additional fee required for conducting both professional and commercial activities.`
+        explanation: `Additional cost required for conducting both professional and commercial activities.`
       });
     }
 
@@ -297,7 +297,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       if (setupType === 'Individual Setup') {
         description = 'Power of Attorney';
       } else if (setupType === 'Corporate Setup') {
-        description = 'Document Translation Services & Government Cost';
+        description = 'Government Document & Translation Cost';
       }
 
       services.push({
@@ -311,7 +311,8 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
 
     // IFZA Additional Business Activities Cost (only if TBC not enabled and >3 activities)
     const activitiesCount = data.activityCodes?.length || 0;
-    const isTbcEnabled = data.ifzaLicense?.activitiesToBeConfirmed || false;
+    const isTbcEnabled = data.authorityInformation?.activitiesToBeConfirmed || 
+                         data.ifzaLicense?.activitiesToBeConfirmed || false;
     
     if (!isTbcEnabled && activitiesCount > 3) {
       const additionalActivities = activitiesCount - 3;
@@ -341,7 +342,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'price-reduction',
         condition: true,
-        description: 'TME Services Price Reduction (Including VAT)',
+        description: 'TME Services Professional Fee Reduction (Including VAT)',
         amount: data.ifzaLicense.reductionAmount,
         isReduction: true,
         explanation: 'A reduction applied to our professional fee as discussed, including VAT.'

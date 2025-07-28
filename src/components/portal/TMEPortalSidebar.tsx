@@ -46,7 +46,7 @@ const baseNavItems = [
     feature: 'golden_visa',
   },
   {
-    title: 'Company Services',
+    title: 'Summary of Services',
     url: '#company-services',
     icon: Building2,
     feature: 'company_services',

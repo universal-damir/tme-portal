@@ -6,7 +6,7 @@ import { OfferData } from '@/types/offer';
 import { AUTHORITIES } from '@/lib/constants';
 import { AuthorityConfig } from '@/lib/authorities/types';
 import { FormSection } from '../ui/FormSection';
-import { FormattedInputState, FormattedInputHandlers, ValidationErrors, getInvestorVisaCount } from '../hooks/useFormattedInputs';
+import { FormattedInputState, FormattedInputHandlers, ValidationErrors, ShareCapitalAlert, getInvestorVisaCount } from '../hooks/useFormattedInputs';
 import {
   Tooltip,
   TooltipContent,
@@ -22,6 +22,7 @@ interface AuthorityInfoSectionProps {
   formattedInputs: FormattedInputState;
   handlers: FormattedInputHandlers;
   validationErrors: ValidationErrors;
+  shareCapitalAlert: ShareCapitalAlert;
   activityCodesArray: UseFieldArrayReturn<OfferData, 'activityCodes', 'id'>;
   authorityConfig?: AuthorityConfig;
 }
@@ -34,6 +35,7 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
   formattedInputs,
   handlers,
   validationErrors,
+  shareCapitalAlert,
   activityCodesArray,
   authorityConfig
 }) => {
@@ -176,7 +178,10 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
                 type="text"
                 value={authorityConfig?.legalEntity || ''}
                 readOnly
-                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-gray-100 text-gray-600 cursor-not-allowed h-[42px]"
+                className={cn(
+                  "w-full px-3 py-2 rounded-lg border-2 bg-gray-100 text-gray-600 cursor-not-allowed h-[42px]",
+                  errors.authorityInformation?.legalEntity ? 'border-red-300' : 'border-gray-200'
+                )}
                 placeholder="Select authority first"
               />
               {/* Hidden input for form registration */}
@@ -184,6 +189,9 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
                 type="hidden"
                 {...register('authorityInformation.legalEntity')}
               />
+              {errors.authorityInformation?.legalEntity && (
+                <p className="text-red-500 text-xs mt-1">{errors.authorityInformation.legalEntity.message}</p>
+              )}
             </div>
 
             <div>
@@ -225,24 +233,22 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
                   onFocus={(e) => e.target.style.borderColor = validationErrors.shareCapitalError ? '#ef4444' : '#243F7B'}
                   onBlur={(e) => e.target.style.borderColor = validationErrors.shareCapitalError ? '#ef4444' : '#e5e7eb'}
                 />
-                {investorVisaCount > 0 && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AlertCircle className="w-4 h-4 text-amber-500" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Consider AED {(investorVisaCount * 300000).toLocaleString()} for {investorVisaCount} investor visa{investorVisaCount > 1 ? 's' : ''}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                )}
               </div>
               {validationErrors.shareCapitalError && (
                 <p className="text-red-500 text-xs mt-1">{validationErrors.shareCapitalError}</p>
               )}
               {errors.authorityInformation?.shareCapitalAED && (
                 <p className="text-red-500 text-xs mt-1">{errors.authorityInformation.shareCapitalAED.message}</p>
+              )}
+              {shareCapitalAlert.shouldHighlight && shareCapitalAlert.message && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                >
+                  <p className="text-blue-700 text-sm font-medium">{shareCapitalAlert.message}</p>
+                </motion.div>
               )}
             </div>
 

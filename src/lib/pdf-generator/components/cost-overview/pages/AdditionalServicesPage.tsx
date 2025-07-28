@@ -77,7 +77,7 @@ export const AdditionalServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           <>
             <CostTable
               data={data}
-              title="ADDITIONAL SERVICES"
+              title="Additional Services"
               items={additionalServicesItems}
               theme="orange"
               showTotal={false}

@@ -40,9 +40,9 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
   const generateIndividualChildVisaCostItems = (childVisa: IndividualChildVisa): CostItem[] => {
     const items: CostItem[] = [];
     
-    // Standard Authority Fees
+    // Standard Authority Costs
     items.push({
-      description: 'Standard Authority Fees for Child Visa and Emirates ID Application',
+      description: 'Standard Authority Costs for Child Visa and Emirates ID Application',
       amount: childVisa.standardFee,
       secondaryAmount: childVisa.standardFee / exchangeRate,
       isReduction: false
@@ -135,7 +135,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
               <View key={`individual-child-visa-${childVisa.childNumber}`} style={{ marginBottom: 16 }}>
                 <CostTable
                   data={data}
-                  title={`CHILD ${childVisa.childNumber} VISA BREAKDOWN`}
+                  title={`Child ${childVisa.childNumber} Visa Breakdown`}
                   items={childVisaCostItems}
                   total={actualTotal}
                   secondaryTotal={actualTotal / exchangeRate}

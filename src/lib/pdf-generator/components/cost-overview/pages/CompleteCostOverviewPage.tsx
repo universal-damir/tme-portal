@@ -410,25 +410,25 @@ export const CompleteCostOverviewPage: React.FC<PDFComponentProps> = ({ data }) 
         {items.map((item, index) => (
           <View key={index} style={compactTableStyles.tableRow}>
             <Text style={
-              item.isReduction || item.description.startsWith('TME Services Price Reduction')
+              item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')
                 ? compactTableStyles.tableCellDescriptionRed
                 : compactTableStyles.tableCellDescription
             }>
               {item.description}
             </Text>
             <Text style={
-              item.isReduction || item.description.startsWith('TME Services Price Reduction')
+              item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')
                 ? compactTableStyles.tableCellAmountRed
                 : compactTableStyles.tableCellAmount
             }>
-              {(item.isReduction || item.description.startsWith('TME Services Price Reduction')) ? '-' : ''}{formatNumber(item.amount)}
+              {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatNumber(item.amount)}
             </Text>
             <Text style={
-              item.isReduction || item.description.startsWith('TME Services Price Reduction')
+              item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')
                 ? compactTableStyles.tableCellAmountRed
                 : compactTableStyles.tableCellAmount
             }>
-              {(item.isReduction || item.description.startsWith('TME Services Price Reduction')) ? '-' : ''}{formatNumber(item.secondaryAmount)}
+              {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatNumber(item.secondaryAmount)}
             </Text>
           </View>
         ))}

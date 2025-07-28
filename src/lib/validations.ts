@@ -13,8 +13,8 @@ export const clientDetailsSchema = z.object({
 
 export const authorityInformationSchema = z.object({
   responsibleAuthority: z.string().min(1, 'Responsible authority is required'),
-  areaInUAE: z.string().min(1, 'Area in UAE is required'),
-  legalEntity: z.string().min(1, 'Legal entity is required'),
+  areaInUAE: z.string().optional(),
+  legalEntity: z.string().optional(),
   shareCapitalAED: z.number().min(1, 'Share capital is required'),
   valuePerShareAED: z.number().min(10, 'Minimum value per share is AED 10'),
   numberOfShares: z.number().min(1, 'Number of shares must be greater than 0'),

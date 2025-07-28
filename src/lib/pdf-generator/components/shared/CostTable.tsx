@@ -40,27 +40,51 @@ export const CostTable: React.FC<CostTableProps> = ({
         {items.map((item, index) => {
           // Handle bold formatting for banking services
           const renderDescription = () => {
-            // Handle bold formatting for "1 personal" or "1 company" in single line
-            if (item.description.includes('1 personal') || item.description.includes('1 company')) {
+            // Handle bold formatting for banking account descriptions
+            if (item.description.includes('1 personal bank account') || item.description.includes('1 personal bank') || item.description.includes('1 company account') || item.description.includes('1 company bank account') || item.description.includes('personal bank account') || item.description.includes('company account')) {
               return (
                 <Text style={
-                  (item.isReduction || item.description.startsWith('TME Services Price Reduction'))
+                  (item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction'))
                     ? (theme === 'blue' ? styles.tableCellDescriptionWideRed : styles.tableCellDescriptionRed)
                     : (theme === 'blue' 
                         ? styles.tableCellDescriptionWide 
                         : styles.tableCellDescription)
                 }>
-                  {item.description.includes('1 personal') ? (
+                  {item.description.includes('1 personal bank account') ? (
                     <>
-                      {item.description.split('1 personal')[0]}
-                      <Text style={{ fontWeight: 'bold' }}>1 personal</Text>
-                      {item.description.split('1 personal')[1]}
+                      {item.description.split('1 personal bank account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>1 personal bank account</Text>
+                      {item.description.split('1 personal bank account')[1]}
                     </>
-                  ) : item.description.includes('1 company') ? (
+                  ) : item.description.includes('1 company bank account') ? (
                     <>
-                      {item.description.split('1 company')[0]}
-                      <Text style={{ fontWeight: 'bold' }}>1 company</Text>
-                      {item.description.split('1 company')[1]}
+                      {item.description.split('1 company bank account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>1 company bank account</Text>
+                      {item.description.split('1 company bank account')[1]}
+                    </>
+                  ) : item.description.includes('1 company account') ? (
+                    <>
+                      {item.description.split('1 company account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>1 company account</Text>
+                      {item.description.split('1 company account')[1]}
+                    </>
+                  ) : item.description.includes('1 personal bank') ? (
+                    <>
+                      {item.description.split('1 personal bank')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>1 personal bank</Text>
+                      {item.description.split('1 personal bank')[1]}
+                    </>
+                  ) : item.description.includes('personal bank account') ? (
+                    <>
+                      {item.description.split('personal bank account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>personal bank account</Text>
+                      {item.description.split('personal bank account')[1]}
+                    </>
+                  ) : item.description.includes('company account') ? (
+                    <>
+                      {item.description.split('company account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>company account</Text>
+                      {item.description.split('company account')[1]}
                     </>
                   ) : (
                     item.description
@@ -71,7 +95,7 @@ export const CostTable: React.FC<CostTableProps> = ({
             
             return (
               <Text style={
-                (item.isReduction || item.description.startsWith('TME Services Price Reduction'))
+                (item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction'))
                   ? (theme === 'blue' ? styles.tableCellDescriptionWideRed : styles.tableCellDescriptionRed)
                   : (theme === 'blue' 
                       ? styles.tableCellDescriptionWide 
@@ -86,18 +110,18 @@ export const CostTable: React.FC<CostTableProps> = ({
             <View key={`cost-item-${index}`} style={styles.tableRow}>
               {renderDescription()}
               <Text style={
-                (item.isReduction || item.description.startsWith('TME Services Price Reduction'))
+                (item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction'))
                   ? styles.tableCellAmountRed
                   : styles.tableCellAmount
               }>
-                {(item.isReduction || item.description.startsWith('TME Services Price Reduction')) ? '-' : ''}{formatNumber(item.amount)}
+                {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatNumber(item.amount)}
               </Text>
               <Text style={
-                (item.isReduction || item.description.startsWith('TME Services Price Reduction'))
+                (item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction'))
                   ? styles.tableCellAmountRed
                   : styles.tableCellAmount
               }>
-                {(item.isReduction || item.description.startsWith('TME Services Price Reduction')) ? '-' : ''}{formatNumber(item.secondaryAmount)}
+                {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatNumber(item.secondaryAmount)}
               </Text>
             </View>
           );

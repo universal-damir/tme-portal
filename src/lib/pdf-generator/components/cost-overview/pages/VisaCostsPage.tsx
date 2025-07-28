@@ -80,7 +80,7 @@ export const VisaCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
 
           <CostTable
             data={data}
-            title="VISA COST BREAKDOWN (2-YEAR EMPLOYMENT VISA)"
+            title="Visa Cost Breakdown (2-Year Employment Visa)"
             items={companyVisaCostItems}
             total={companyVisaTotal}
             secondaryTotal={companyVisaTotal / exchangeRate}

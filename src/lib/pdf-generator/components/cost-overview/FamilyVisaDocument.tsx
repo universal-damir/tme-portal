@@ -156,7 +156,7 @@ ${content}`;
           />
           <CompactCostTable
             data={data}
-            title="SPOUSE VISA BREAKDOWN"
+            title="Spouse Visa Breakdown"
             items={spouseVisaCostItems}
             total={spouseVisaTotal}
             secondaryTotal={spouseVisaTotal / exchangeRate}
@@ -180,7 +180,7 @@ ${content}`;
             const tmeServiceFee = authorityConfig?.visaCosts?.childVisaTmeServiceFee || 0;
             const childItems: CostItem[] = [
               {
-                description: `1. Standard Authority Fees for Child ${childNumber} Visa and Emirates ID Application`,
+                description: `1. Standard Authority Costs for Child ${childNumber} Visa and Emirates ID Application`,
                 amount: standardFee,
                 secondaryAmount: standardFee / exchangeRate,
                 isReduction: false
@@ -198,7 +198,7 @@ ${content}`;
               <CompactCostTable
                 key={`child-${childNumber}`}
                 data={data}
-                title={numberOfChildren === 1 ? "CHILD VISA BREAKDOWN" : `CHILD ${childNumber} VISA BREAKDOWN`}
+                title={numberOfChildren === 1 ? "Child Visa Breakdown" : `Child ${childNumber} Visa Breakdown`}
                 items={childItems}
                 total={childTotal}
                 secondaryTotal={childTotal / exchangeRate}
@@ -241,7 +241,7 @@ ${content}`;
 
           <CompactCostTable
             data={data}
-            title="SPOUSE VISA BREAKDOWN"
+            title="Spouse Visa Breakdown"
             items={spouseVisaCostItems}
             total={spouseVisaTotal}
             secondaryTotal={spouseVisaTotal / exchangeRate}
@@ -253,7 +253,7 @@ ${content}`;
             const tmeServiceFee = authorityConfig?.visaCosts?.childVisaTmeServiceFee || 0;
             const childItems: CostItem[] = [
               {
-                description: `1. Standard Authority Fees for Child ${childNumber} Visa and Emirates ID Application`,
+                description: `1. Standard Authority Costs for Child ${childNumber} Visa and Emirates ID Application`,
                 amount: standardFee,
                 secondaryAmount: standardFee / exchangeRate,
                 isReduction: false
@@ -271,7 +271,7 @@ ${content}`;
               <CompactCostTable
                 key={`child-${childNumber}`}
                 data={data}
-                title={`CHILD ${childNumber} VISA BREAKDOWN`}
+                title={`Child ${childNumber} Visa Breakdown`}
                 items={childItems}
                 total={childTotal}
                 secondaryTotal={childTotal / exchangeRate}
@@ -332,7 +332,7 @@ ${content}`;
           />
           <CompactCostTable
             data={data}
-            title="DEPENDENT VISA COST SUMMARY"
+            title="Dependent Visa Cost Summary"
             items={[
               {
                 description: "Total Spouse Visa Cost",

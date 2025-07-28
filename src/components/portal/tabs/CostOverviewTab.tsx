@@ -167,7 +167,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   // Auto-save removed to prevent infinite re-rendering issues
 
   // Custom hooks
-  const { formattedInputs, handlers, validationErrors, formatNumberWithSeparators, parseFormattedNumber } = useFormattedInputs(setValue, watchedData);
+  const { formattedInputs, handlers, validationErrors, shareCapitalAlert, formatNumberWithSeparators, parseFormattedNumber } = useFormattedInputs(setValue, watchedData);
   const { authorityConfig, isAuthoritySelected } = useAuthorityConfig(
     authorityInformation?.responsibleAuthority, 
     setValue
@@ -590,6 +590,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
           formattedInputs={formattedInputs}
           handlers={handlers}
           validationErrors={validationErrors}
+          shareCapitalAlert={shareCapitalAlert}
           activityCodesArray={activityCodesArray}
           authorityConfig={authorityConfig}
         />
@@ -779,9 +780,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               type="button"
               onClick={() => handlePreviewPDF(watchedData)}
               disabled={isGenerating}
-              className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
               style={{ 
-                backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B',
+                backgroundColor: isGenerating ? '#E5E7EB' : '#D2BC99',
+                color: isGenerating ? '#9CA3AF' : '#243F7B',
                 fontFamily: 'Inter, sans-serif'
               }}
               onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
@@ -809,10 +811,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               type="button"
               onClick={() => handleGeneratePDF(watchedData)}
               disabled={isGenerating}
-              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
               style={{ 
-                backgroundColor: isGenerating ? '#E5E7EB' : '#D2BC99', 
-                color: isGenerating ? '#9CA3AF' : '#243F7B',
+                backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B',
                 fontFamily: 'Inter, sans-serif'
               }}
               onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}

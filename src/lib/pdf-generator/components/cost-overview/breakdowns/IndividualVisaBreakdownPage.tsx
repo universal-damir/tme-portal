@@ -52,7 +52,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       
       // 1. Standard Authority Fee
       items.push({
-        description: 'Standard Authority Fees for Visa and Emirates ID Application',
+        description: 'Standard Authority Costs for Visa and Emirates ID Application',
         amount: standardFee,
         secondaryAmount: standardFee / exchangeRate,
         isReduction: false
@@ -61,7 +61,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       // 2. Reduced Authority Fee (as discount)
       const actualReducedFee = standardFee - reductionAmount;
       items.push({
-        description: 'Reduced Authority Fees for Visa and Emirates ID Application',
+        description: 'Reduced Authority Costs for Visa and Emirates ID Application',
         amount: actualReducedFee, // Positive value, isReduction will handle display
         secondaryAmount: actualReducedFee / exchangeRate,
         isReduction: true
@@ -69,7 +69,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
     } else {
       // For standard visas, show only standard fee
       items.push({
-        description: 'Standard Authority Fees for Visa and Emirates ID Application',
+        description: 'Standard Authority Costs for Visa and Emirates ID Application',
         amount: visa.governmentFee,
         secondaryAmount: visa.governmentFee / exchangeRate,
         isReduction: false
@@ -190,15 +190,15 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
             let visaTypeText = '';
             if (authorityConfig?.id === 'det' && visaDetail?.investorVisa) {
               if (visaDetail.investorVisa === "employment") {
-                visaTypeText = ' (EMPLOYMENT VISA)';
+                visaTypeText = ' (Employment Visa)';
               } else if (visaDetail.investorVisa === "true" || visaDetail.investorVisa === true) {
-                visaTypeText = ' (INVESTOR VISA)';
+                visaTypeText = ' (Investor Visa)';
               }
             }
             
             // Dynamic title: "VISA BREAKDOWN" for single visa, "VISA X BREAKDOWN" for multiple
-            const baseTitle = numberOfVisas === 1 ? 'VISA BREAKDOWN' : `VISA ${visa.visaNumber} BREAKDOWN`;
-            const title = `${baseTitle}${visa.isReduced ? ' (PROMOTIONAL RATE)' : ''}${visaTypeText}`;
+            const baseTitle = numberOfVisas === 1 ? 'Visa Breakdown' : `Visa ${visa.visaNumber} Breakdown`;
+            const title = `${baseTitle}${visa.isReduced ? ' (Promotional Rate)' : ''}${visaTypeText}`;
             
             return (
               <View key={`individual-visa-${visa.visaNumber}`} style={{ marginBottom: 6 }}>

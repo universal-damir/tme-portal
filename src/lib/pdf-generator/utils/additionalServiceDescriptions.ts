@@ -65,7 +65,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'personal-bank-account',
       condition: true,
-      description: 'One-time TME Services Professional Fee for application to open 1 personal bank account with a UAE bank',
+      description: 'One-time TME Services Professional Fee for 1 personal bank account application with a UAE bank',
       amount: data.additionalServices.personalBank,
       explanation: 'Professional assistance for opening a personal bank account, including documentation preparation, bank liaison, and application support.'
     });
@@ -76,7 +76,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'digital-bank-account',
       condition: true,
-      description: 'One-time TME Services Professional Fee for application to open 1 company account with the digital bank WIO',
+      description: 'One-time TME Services Professional Fee for 1 company bank account application with the digital bank WIO',
       amount: data.additionalServices.digitalBank,
       explanation: 'Professional service for opening a digital banking account with WIO Bank, including application preparation and process facilitation.'
     });
@@ -87,7 +87,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'traditional-bank-account',
       condition: true,
-      description: 'One-time TME Services Professional fee for application to open 1 company account with a traditional UAE bank',
+      description: 'One-time TME Services Professional Fee for 1 company account application with a traditional UAE bank',
       amount: data.additionalServices.traditionalBank,
       explanation: 'Professional assistance for opening a corporate bank account with traditional banks, including documentation preparation and bank introduction services.'
     });
@@ -98,7 +98,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'yearly-accounting-fee',
       condition: true,
-      description: 'Yearly Accounting fee based on 360 Transactions per Year',
+      description: 'Yearly Accounting Fee based on 360 Transactions per Year',
       amount: data.additionalServices.accountingFee,
       explanation: 'Annual accounting and bookkeeping services based on 360 transactions per year, including financial record maintenance and basic reporting.'
     });

@@ -44,7 +44,7 @@ export const generateCompanyVisaServiceDescriptions = (
   
   const visaText = (count: number) => count === 1 ? 'visa' : 'visas';
 
-  // 1. Standard Authority Fees for Visa and Emirates ID Application
+  // 1. Standard Authority Costs for Visa and Emirates ID Application
   if (visaCostData.standardGovernmentFees > 0) {
     services.push({
       id: 'standard-government-fees',
@@ -55,7 +55,7 @@ export const generateCompanyVisaServiceDescriptions = (
     });
   }
 
-  // 2. Reduced Authority Fees (shown as discount from standard rate)
+  // 2. Reduced Authority Costs (shown as discount from standard rate)
   if (visaCostData.reducedGovernmentFees > 0) {
     services.push({
       id: 'reduced-government-fees',
@@ -171,7 +171,7 @@ export const generateSpouseVisaServiceDescriptions = (
 
   const visaText = (count: number) => count === 1 ? 'visa' : 'visas';
 
-  // 1. Standard Authority Fees for Spouse Visa and Emirates ID Application
+  // 1. Standard Authority Costs for Spouse Visa and Emirates ID Application
   if (visaCostData.spouseVisaStandardFees > 0) {
     services.push({
       id: 'spouse-visa-standard-fees',
@@ -245,7 +245,7 @@ export const generateChildVisaServiceDescriptions = (
   const childVisaVipStamping = data.visaCosts?.childVisaVipStamping || 0;
   const visaText = (count: number) => count === 1 ? 'visa' : 'visas';
 
-  // 1. Standard Authority Fees for Child Visa and Emirates ID Application
+  // 1. Standard Authority Costs for Child Visa and Emirates ID Application
   if (visaCostData.childVisaStandardFees > 0) {
     services.push({
       id: 'child-visa-standard-fees',

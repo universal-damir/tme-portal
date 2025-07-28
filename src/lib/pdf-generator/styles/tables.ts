@@ -161,7 +161,7 @@ export const tableStyles = {
     fontWeight: 'bold' as const,
     color: 'white',
     textAlign: 'left' as const,
-    flex: 3,
+    flex: 5,
     paddingLeft: theme.spacing.base,
   },
   
@@ -170,7 +170,7 @@ export const tableStyles = {
     fontWeight: 'bold' as const,
     color: 'white',
     textAlign: 'left' as const,
-    flex: 4,
+    flex: 6,
     paddingLeft: theme.spacing.base,
     borderRadius: theme.borderRadius.lg,
   },
@@ -188,7 +188,7 @@ export const tableStyles = {
   tableCellDescription: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.gray[800],
-    flex: 3,
+    flex: 5,
     paddingLeft: theme.spacing.base,
     textAlign: 'left' as const,
   },
@@ -196,7 +196,7 @@ export const tableStyles = {
   tableCellDescriptionWide: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.gray[800],
-    flex: 4,
+    flex: 6,
     paddingLeft: theme.spacing.base,
     textAlign: 'left' as const,
   },
@@ -213,7 +213,7 @@ export const tableStyles = {
   tableCellDescriptionRed: {
     fontSize: theme.fontSize.xs,
     color: '#dc2626',
-    flex: 3,
+    flex: 5,
     paddingLeft: theme.spacing.base,
     textAlign: 'left' as const,
   },
@@ -221,7 +221,7 @@ export const tableStyles = {
   tableCellDescriptionWideRed: {
     fontSize: theme.fontSize.xs,
     color: '#dc2626',
-    flex: 4,
+    flex: 6,
     paddingLeft: theme.spacing.base,
     textAlign: 'left' as const,
   },

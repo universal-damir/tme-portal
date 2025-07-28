@@ -5,10 +5,11 @@ import type { PDFComponentProps } from '../../../types';
 
 // ActivityCodesSection - Full width section for business activity codes
 export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
-  // Check if TBC is enabled for IFZA or DET
+  // Check if TBC is enabled - can be stored in different locations depending on form state
   const isIfzaSelected = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
   const isDetSelected = data.authorityInformation.responsibleAuthority === 'DET (Dubai Department of Economy and Tourism)';
-  const isTbcEnabled = (isIfzaSelected && data.ifzaLicense?.activitiesToBeConfirmed) || 
+  const isTbcEnabled = data.authorityInformation?.activitiesToBeConfirmed || 
+                       (isIfzaSelected && data.ifzaLicense?.activitiesToBeConfirmed) || 
                        (isDetSelected && data.detLicense?.activitiesToBeConfirmed);
 
   // Compact styles - reduced padding for smaller table height
