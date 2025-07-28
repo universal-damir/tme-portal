@@ -275,8 +275,8 @@ export const SectionWithStickySummary: React.FC<SectionWithStickySummaryProps> =
       // DET deposits logic
       const detRentType = watchedData.detLicense?.rentType;
       const detRentAmount = watchedData.detLicense?.officeRentAmount || 0;
-      const detLandlordDeposit = (detRentType && detRentType !== 'business-center') ? detRentAmount * 0.05 : 0;
-      const detDewaDeposit = detRentType === 'office' ? 2000 : (detRentType === 'warehouse' ? 4000 : 0);
+      const detLandlordDeposit = watchedData.detLicense?.landlordDepositAmount || 0;
+      const detDewaDeposit = detRentType === 'office' ? 2000 : (detRentType === 'warehouse' || detRentType === 'showroom' ? 4000 : 0);
       
       const shouldShowIfzaDeposits = isIfzaDepositEnabled && ifzaDepositAmount > 0;
       const shouldShowDetDeposits = authorityConfig?.id === 'det' && (detLandlordDeposit > 0 || detDewaDeposit > 0);
@@ -290,7 +290,7 @@ export const SectionWithStickySummary: React.FC<SectionWithStickySummaryProps> =
             {shouldShowIfzaDeposits && renderCostLine('Deposit with Landlord', ifzaDepositAmount)}
             {shouldShowDetDeposits && (
               <>
-                {detLandlordDeposit > 0 && renderCostLine('Landlord Deposit (5% of rent)', detLandlordDeposit)}
+                {detLandlordDeposit > 0 && renderCostLine('Landlord Deposit', detLandlordDeposit)}
                 {detDewaDeposit > 0 && renderCostLine('DEWA Deposit', detDewaDeposit)}
               </>
             )}
@@ -308,9 +308,8 @@ export const SectionWithStickySummary: React.FC<SectionWithStickySummaryProps> =
         }
         // Add DET deposits
         if (authorityConfig?.id === 'det' && watchedData.detLicense?.rentType && watchedData.detLicense?.rentType !== 'business-center') {
-          const detRentAmount = watchedData.detLicense?.officeRentAmount || 0;
-          const detLandlordDeposit = detRentAmount * 0.05;
-          const detDewaDeposit = watchedData.detLicense?.rentType === 'office' ? 2000 : (watchedData.detLicense?.rentType === 'warehouse' ? 4000 : 0);
+          const detLandlordDeposit = watchedData.detLicense?.landlordDepositAmount || 0;
+          const detDewaDeposit = watchedData.detLicense?.rentType === 'office' ? 2000 : (watchedData.detLicense?.rentType === 'warehouse' || watchedData.detLicense?.rentType === 'showroom' ? 4000 : 0);
           total += detLandlordDeposit + detDewaDeposit;
         }
       }

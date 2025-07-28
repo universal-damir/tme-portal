@@ -29,6 +29,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
   const { initialSetup } = authorityConfig;
   const [isLicenseTypeOpen, setIsLicenseTypeOpen] = useState(false);
   const [isRentTypeOpen, setIsRentTypeOpen] = useState(false);
+  const [hasManuallyEditedDeposit, setHasManuallyEditedDeposit] = useState(false);
 
   const licenseTypeOptions = [
     { value: 'commercial', label: 'Commercial (AED 13,000)', fee: 13000 },
@@ -42,18 +43,19 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
   const rentTypeOptions = [
     { value: 'business-center', label: 'Business Center', description: 'Shared business address' },
     { value: 'office', label: 'Office', description: 'Dedicated office space' },
-    { value: 'warehouse', label: 'Warehouse', description: 'Industrial/storage space' }
+    { value: 'warehouse', label: 'Warehouse', description: 'Industrial/storage space' },
+    { value: 'showroom', label: 'Showroom', description: 'Retail/display space' }
   ];
 
   // Set default TME Services fee based on setup type
   useEffect(() => {
     const defaultFee = clientDetails?.companySetupType === 'Individual Setup' 
       ? 11550  // Individual Setup
-      : 33600; // Corporate Setup
-    if (defaultFee > 0 && !watchedData.detLicense?.tmeServicesFee) {
+      : 33600; // Corporate Shareholder
+    if (defaultFee > 0) {
       setValue('detLicense.tmeServicesFee', defaultFee);
     }
-  }, [clientDetails?.companySetupType, watchedData.detLicense?.tmeServicesFee]);
+  }, [clientDetails?.companySetupType, watchedData.detLicense?.tmeServicesFee, setValue]);
 
   // Set default office rent amount based on rent type
   useEffect(() => {
@@ -61,6 +63,25 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
       setValue('detLicense.officeRentAmount', initialSetup.defaultOfficeRent || 12000);
     }
   }, [watchedData.detLicense?.rentType, watchedData.detLicense?.officeRentAmount, initialSetup]);
+
+  // Auto-calculate landlord deposit as 5% of rent amount when rent amount changes
+  useEffect(() => {
+    if (watchedData.detLicense?.rentType && 
+        watchedData.detLicense?.rentType !== 'business-center' &&
+        watchedData.detLicense?.officeRentAmount &&
+        !hasManuallyEditedDeposit) {
+      const calculatedDeposit = Math.round(watchedData.detLicense.officeRentAmount * 0.05);
+      setValue('detLicense.landlordDepositAmount', calculatedDeposit);
+    }
+  }, [watchedData.detLicense?.officeRentAmount, hasManuallyEditedDeposit, setValue]);
+
+  // Clear landlord deposit when rent type changes to business center or is cleared
+  useEffect(() => {
+    if (!watchedData.detLicense?.rentType || watchedData.detLicense?.rentType === 'business-center') {
+      setValue('detLicense.landlordDepositAmount', 0);
+      setHasManuallyEditedDeposit(false); // Reset manual edit flag
+    }
+  }, [watchedData.detLicense?.rentType, setValue]);
 
   return (
     <div className="space-y-3">
@@ -180,37 +201,97 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
         </div>
       </div>
 
-      {/* Office Rent Amount */}
+      {/* Office Rent Amount and Deposits */}
       {watchedData.detLicense?.rentType && (
         <div className="bg-white rounded-lg p-3 border border-gray-200">
-          <div className="space-y-2">
-            <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
-              Annual {watchedData.detLicense.rentType === 'business-center' ? 'Service Fee' : 'Rent'} (AED)
-            </label>
-            <motion.input
-              whileFocus={{ scale: 1.01 }}
-              type="text"
-              value={watchedData.detLicense?.officeRentAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.detLicense?.officeRentAmount || 0))}
-              onChange={(e) => {
-                const value = e.target.value;
-                const parsed = parseFormattedNumber(value);
-              setValue('detLicense.officeRentAmount', parsed);
-              }}
-              className="w-1/2 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-              placeholder="12,000"
-              onFocus={(e) => {
-                e.target.style.borderColor = '#243F7B';
-                e.target.select();
-              }}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-            />
+          <div className="space-y-4">
+            {/* Rent Amount and Landlord Deposit - Side by side for non-business-center */}
+            {watchedData.detLicense.rentType === 'business-center' ? (
+              // Business center - only service fee
+              <div className="space-y-2">
+                <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
+                  Annual Service Fee (AED)
+                </label>
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  type="text"
+                  value={watchedData.detLicense?.officeRentAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.detLicense?.officeRentAmount || 0))}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const parsed = parseFormattedNumber(value);
+                  setValue('detLicense.officeRentAmount', parsed);
+                  }}
+                  className="w-1/2 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                  placeholder="12,000"
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#243F7B';
+                    e.target.select();
+                  }}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+              </div>
+            ) : (
+              // Office, warehouse, showroom - rent and deposit side by side
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
+                    Annual Rent (AED)
+                  </label>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="text"
+                    value={watchedData.detLicense?.officeRentAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.detLicense?.officeRentAmount || 0))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const parsed = parseFormattedNumber(value);
+                    setValue('detLicense.officeRentAmount', parsed);
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                    placeholder="12,000"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#243F7B';
+                      e.target.select();
+                    }}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
+                    Landlord Deposit (AED)
+                  </label>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="text"
+                    value={watchedData.detLicense?.landlordDepositAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.detLicense?.landlordDepositAmount || 0))}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const parsed = parseFormattedNumber(value);
+                      setValue('detLicense.landlordDepositAmount', parsed);
+                      setHasManuallyEditedDeposit(true); // Mark as manually edited
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                    placeholder={watchedData.detLicense?.officeRentAmount ? 
+                      Math.round(watchedData.detLicense.officeRentAmount * 0.05).toLocaleString() : 
+                      "Auto-calculated (5% of rent)"}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = '#243F7B';
+                      e.target.select();
+                    }}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* DEWA Deposit Information */}
+            {watchedData.detLicense.rentType !== 'business-center' && (
+              <p className="text-xs text-gray-600">
+                {watchedData.detLicense.rentType === 'office' && `DEWA deposit: AED 2,000`}
+                {(watchedData.detLicense.rentType === 'warehouse' || watchedData.detLicense.rentType === 'showroom') && `DEWA deposit: AED 4,000`}
+              </p>
+            )}
           </div>
-          {watchedData.detLicense.rentType !== 'business-center' && (
-            <p className="text-xs text-gray-600 mt-1">
-              {watchedData.detLicense.rentType === 'office' && `DEWA deposit: AED 2,000 | Landlord Deposit: AED ${Math.round((watchedData.detLicense?.officeRentAmount || 0) * 0.05).toLocaleString()}`}
-              {watchedData.detLicense.rentType === 'warehouse' && `DEWA deposit: AED 4,000 | Landlord Deposit: AED ${Math.round((watchedData.detLicense?.officeRentAmount || 0) * 0.05).toLocaleString()}`}
-            </p>
-          )}
         </div>
       )}
 
@@ -229,7 +310,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.detLicense?.mofaOwnersDeclaration || false}
-                    label="Owner's Declaration Translation"
+                    label="OD - Owner's Declaration Translation"
                     cost={initialSetup.mofaTranslations.ownersDeclaration.toLocaleString()}
                   />
                 )}
@@ -239,7 +320,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.detLicense?.mofaCertificateOfIncorporation || false}
-                    label="Certificate of Incorporation Translation"
+                    label="CoIncorp - Certificate of Incorporation Translation"
                     cost={initialSetup.mofaTranslations.certificateOfIncorporation.toLocaleString()}
                   />
                 )}
@@ -249,7 +330,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.detLicense?.mofaActualMemorandumOrArticles || false}
-                    label="Memorandum/Articles Translation"
+                    label="MoA/AoA - Memorandum/Articles Translation"
                     cost={initialSetup.mofaTranslations.memorandumOrArticles.toLocaleString()}
                   />
                 )}
@@ -259,7 +340,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.detLicense?.mofaCommercialRegister || false}
-                    label="Commercial Register Translation"
+                    label="CR - Commercial Register Translation"
                     cost={initialSetup.mofaTranslations.commercialRegister.toLocaleString()}
                   />
                 )}

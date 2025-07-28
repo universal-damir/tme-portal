@@ -41,7 +41,28 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
     if (!watchedData.ifzaLicense?.depositWithLandlord && watchedData.ifzaLicense?.depositAmount) {
       setValue('ifzaLicense.depositAmount', 0);
     }
-  }, [watchedData.ifzaLicense?.depositWithLandlord]);
+  }, [watchedData.ifzaLicense?.depositWithLandlord, setValue]);
+
+  // Auto-calculate deposit as 5% of rent amount when rent amount changes
+  useEffect(() => {
+    if (watchedData.ifzaLicense?.rentOfficeRequired && 
+        watchedData.ifzaLicense?.officeRentAmount && 
+        watchedData.ifzaLicense?.depositWithLandlord) {
+      const defaultDeposit = Math.round(watchedData.ifzaLicense.officeRentAmount * 0.05);
+      // Only set if deposit is currently 0 or not set (don't override user's manual input)
+      if (!watchedData.ifzaLicense?.depositAmount || watchedData.ifzaLicense?.depositAmount === 0) {
+        setValue('ifzaLicense.depositAmount', defaultDeposit);
+      }
+    }
+  }, [watchedData.ifzaLicense?.officeRentAmount, watchedData.ifzaLicense?.depositWithLandlord, setValue]);
+
+  // Clear deposit checkbox when rent office is unchecked
+  useEffect(() => {
+    if (!watchedData.ifzaLicense?.rentOfficeRequired && watchedData.ifzaLicense?.depositWithLandlord) {
+      setValue('ifzaLicense.depositWithLandlord', false);
+      setValue('ifzaLicense.depositAmount', 0);
+    }
+  }, [watchedData.ifzaLicense?.rentOfficeRequired, setValue]);
 
   // Set default TME Services fee
   useEffect(() => {
@@ -148,6 +169,11 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
               />
             )}
 
+            {/* Visual separator */}
+            {initialSetup.crossBorderLicense && (clientDetails?.companySetupType === 'Corporate Setup' || (clientDetails?.companySetupType === 'Individual Setup' && initialSetup.mofaTranslations.powerOfAttorney)) && (
+              <div className="border-t border-gray-200 my-3"></div>
+            )}
+
             {/* Document Services for Corporate */}
             {clientDetails?.companySetupType === 'Corporate Setup' && (
               <>
@@ -157,7 +183,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.ifzaLicense?.mofaOwnersDeclaration || false}
-                    label="Owner's Declaration Translation"
+                    label=" OD - Owner's Declaration Translation"
                     cost={initialSetup.mofaTranslations.ownersDeclaration.toLocaleString()}
                   />
                 )}
@@ -167,7 +193,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.ifzaLicense?.mofaCertificateOfIncorporation || false}
-                    label="Certificate of Incorporation Translation"
+                    label="CoIncorp - Certificate of Incorporation Translation"
                     cost={initialSetup.mofaTranslations.certificateOfIncorporation.toLocaleString()}
                   />
                 )}
@@ -177,7 +203,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.ifzaLicense?.mofaActualMemorandumOrArticles || false}
-                    label="Memorandum/Articles Translation"
+                    label="MoA/AoA - Memorandum/Articles Translation"
                     cost={initialSetup.mofaTranslations.memorandumOrArticles.toLocaleString()}
                   />
                 )}
@@ -187,7 +213,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                     register={register}
                     setValue={setValue}
                     checked={watchedData.ifzaLicense?.mofaCommercialRegister || false}
-                    label="Commercial Register Translation"
+                    label="CR - Commercial Register Translation"
                     cost={initialSetup.mofaTranslations.commercialRegister.toLocaleString()}
                   />
                 )}
@@ -201,7 +227,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                 register={register}
                 setValue={setValue}
                 checked={watchedData.ifzaLicense?.mofaPowerOfAttorney || false}
-                label="Power Of Attorney"
+                label="Power of Attorney"
                 cost={initialSetup.mofaTranslations.powerOfAttorney.toLocaleString()}
               />
             )}
@@ -248,6 +274,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                 setValue={setValue}
                 checked={watchedData.ifzaLicense?.depositWithLandlord || false}
                 label="Deposit with Landlord"
+                disabled={!watchedData.ifzaLicense?.rentOfficeRequired}
               />
               {watchedData.ifzaLicense?.depositWithLandlord && (
                 <motion.input
@@ -260,7 +287,9 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                     setValue('ifzaLicense.depositAmount', parsed);
                   }}
                   className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                  placeholder="10,000"
+                  placeholder={watchedData.ifzaLicense?.officeRentAmount ? 
+                    Math.round(watchedData.ifzaLicense.officeRentAmount * 0.05).toLocaleString() : 
+                    "Auto-calculated (5% of rent)"}
                   onFocus={(e) => {
                     e.target.style.borderColor = '#243F7B';
                     e.target.select();

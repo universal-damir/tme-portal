@@ -57,8 +57,9 @@ export interface DETLicense {
   licenseType?: 'commercial' | 'commercial-real-estate' | 'commercial-investment' | 'instant' | 'industrial' | 'professional';
   
   // Office rent selection (mandatory)
-  rentType?: 'business-center' | 'office' | 'warehouse';
+  rentType?: 'business-center' | 'office' | 'warehouse' | 'showroom';
   officeRentAmount?: number;
+  landlordDepositAmount?: number;
   
   // Third party approval
   thirdPartyApproval?: boolean;

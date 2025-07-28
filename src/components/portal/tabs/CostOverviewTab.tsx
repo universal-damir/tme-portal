@@ -114,6 +114,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         licenseType: undefined,
         rentType: undefined,
         officeRentAmount: 0,
+        landlordDepositAmount: 0,
         thirdPartyApproval: false,
         thirdPartyApprovalAmount: 0,
         tmeServicesFee: 0,
