@@ -74,6 +74,19 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
               transition={{ duration: 0.3, delay: 0.2 }}
             >
               <CostInputField
+                label="Accounting (Yearly)"
+                value={formattedInputs.accountingFeeFormatted}
+                onChange={handlers.handleAccountingFeeChange}
+                placeholder="6,293.00"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.25 }}
+            >
+              <CostInputField
                 label="CIT Registration"
                 value={formattedInputs.citRegistrationFormatted}
                 onChange={handlers.handleCitRegistrationChange}
@@ -84,7 +97,20 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.25 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+            >
+              <CostInputField
+                label="CIT Return Filing (Yearly)"
+                value={formattedInputs.citReturnFilingFormatted}
+                onChange={handlers.handleCitReturnFilingChange}
+                placeholder="5,458.00"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.35 }}
             >
               <CostInputField
                 label="VAT Registration/Exception"
@@ -97,20 +123,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.3 }}
-            >
-              <CostInputField
-                label="Personal Bank Account"
-                value={formattedInputs.personalBankFormatted}
-                onChange={handlers.handlePersonalBankChange}
-                placeholder="3,150.00"
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.35 }}
+              transition={{ duration: 0.3, delay: 0.4 }}
             >
               <CostInputField
                 label="Digital Bank WIO Account"
@@ -123,7 +136,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
+              transition={{ duration: 0.3, delay: 0.45 }}
             >
               <CostInputField
                 label="Traditional UAE Bank Account"
@@ -136,26 +149,13 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.45 }}
-            >
-              <CostInputField
-                label="Yearly Accounting (360 Transactions)"
-                value={formattedInputs.accountingFeeFormatted}
-                onChange={handlers.handleAccountingFeeChange}
-                placeholder="6,293.00"
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.5 }}
             >
               <CostInputField
-                label="CIT Return Filing (Yearly)"
-                value={formattedInputs.citReturnFilingFormatted}
-                onChange={handlers.handleCitReturnFilingChange}
-                placeholder="5,458.00"
+                label="Personal Bank Account"
+                value={formattedInputs.personalBankFormatted}
+                onChange={handlers.handlePersonalBankChange}
+                placeholder="3,150.00"
               />
             </motion.div>
 

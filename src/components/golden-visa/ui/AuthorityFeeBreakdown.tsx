@@ -27,7 +27,7 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
     },
     {
       key: 'dldApprovalFee',
-      label: 'DLD (Dubai Land Department) Approval Fee',
+      label: 'DLD (Dubai Land Department) Approval Cost',
       placeholder: '4,020.00',
     },
     {
@@ -37,12 +37,12 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
     },
     {
       key: 'emiratesIdFee',
-      label: 'Emirates ID Fee',
+      label: 'Emirates ID Cost',
       placeholder: '1,155.00',
     },
     {
       key: 'immigrationResidencyFee',
-      label: 'Immigration - Residency Fee',
+      label: 'Immigration - Residency Cost',
       placeholder: '3,160.00',
     },
     {
@@ -64,12 +64,12 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
     },
     {
       key: 'emiratesIdFee',
-      label: 'Emirates ID Fee',
+      label: 'Emirates ID Cost',
       placeholder: '1,155.00',
     },
     {
       key: 'immigrationResidencyFee',
-      label: 'Immigration - Residency Fee',
+      label: 'Immigration - Residency Cost',
       placeholder: '3,160.00',
     },
     {
@@ -91,12 +91,12 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
     },
     {
       key: 'emiratesIdFee',
-      label: 'Emirates ID Fee',
+      label: 'Emirates ID Cost',
       placeholder: '1,155.00',
     },
     {
       key: 'immigrationResidencyFee',
-      label: 'Immigration - Residency Fee',
+      label: 'Immigration - Residency Cost',
       placeholder: '3,160.00',
     },
     {

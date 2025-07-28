@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UseFormRegister, FieldErrors, UseFieldArrayReturn } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { UseFormRegister, FieldErrors, UseFieldArrayReturn, UseFormSetValue } from 'react-hook-form';
 import { User, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { OfferData } from '@/types/offer';
@@ -12,6 +12,7 @@ interface VisaCostsSectionProps {
   watchedData: OfferData;
   authorityConfig: AuthorityConfig;
   visaDetailsArray: UseFieldArrayReturn<OfferData, 'visaCosts.visaDetails', 'id'>;
+  setValue: UseFormSetValue<OfferData>;
 }
 
 interface CustomDropdownProps {
@@ -95,7 +96,8 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
   register,
   errors,
   watchedData,
-  authorityConfig
+  authorityConfig,
+  setValue
 }) => {
   const { id: authorityId, visaCosts } = authorityConfig;
   const healthInsurance = visaCosts?.healthInsurance;
@@ -103,12 +105,25 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
   // For reduced visas: maximum 1 (independent of investor visas)
   const maxReducedVisas = 1;
 
-  // State for dropdown values
-  const [dropdownValues, setDropdownValues] = useState<{[key: string]: string}>({});
-
-  const updateDropdownValue = (key: string, value: string) => {
-    setDropdownValues(prev => ({ ...prev, [key]: value }));
-  };
+  // Initialize visa details array if needed
+  useEffect(() => {
+    const numberOfVisas = watchedData.visaCosts?.numberOfVisas || 0;
+    const currentVisaDetails = watchedData.visaCosts?.visaDetails || [];
+    
+    // Ensure we have visa detail objects for each visa
+    if (numberOfVisas > 0 && currentVisaDetails.length < numberOfVisas) {
+      const newVisaDetails = [...currentVisaDetails];
+      for (let i = currentVisaDetails.length; i < numberOfVisas; i++) {
+        newVisaDetails.push({
+          healthInsurance: 'No Insurance',
+          statusChange: false,
+          vipStamping: false,
+          investorVisa: false
+        });
+      }
+      setValue('visaCosts.visaDetails', newVisaDetails);
+    }
+  }, [watchedData.visaCosts?.numberOfVisas, setValue, watchedData.visaCosts?.visaDetails]);
 
   // Only show if authority supports visas
   if (!visaCosts) {
@@ -136,7 +151,7 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
               {/* Number of Visas */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                  Number of Visas
+                Standard Number of Visas
                 </label>
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
@@ -162,7 +177,7 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
               {/* Reduced Visa Cost (Visa Free for Life) */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                  Reduced Visa Cost (Visa Free for Life)
+                Reduced Number of Visas
                 </label>
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
@@ -189,7 +204,7 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
               {/* Number of Visas */}
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                  Number of Visas
+                Standard Number of Visas
                 </label>
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
@@ -244,10 +259,9 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                         { value: "Low Cost", label: `Low Cost (AED ${healthInsurance.lowCost.toLocaleString()})` },
                         { value: "Silver Package", label: `Silver Package (AED ${healthInsurance.silverPackage.toLocaleString()})` }
                       ]}
-                      value={dropdownValues[`healthInsurance-${index}`] || "No Insurance"}
+                      value={watchedData.visaCosts?.visaDetails?.[index]?.healthInsurance || "No Insurance"}
                       onChange={(value) => {
-                        updateDropdownValue(`healthInsurance-${index}`, value);
-                        register(`visaCosts.visaDetails.${index}.healthInsurance`).onChange({ target: { value } });
+                        setValue(`visaCosts.visaDetails.${index}.healthInsurance`, value);
                       }}
                       error={errors.visaCosts?.visaDetails?.[index]?.healthInsurance?.message}
                     />
@@ -267,10 +281,10 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                         { value: "", label: "No Investor Visa" },
                         { value: "true", label: "Enable Investor Visa" }
                       ]}
-                      value={dropdownValues[`investorVisa-${index}`] || ""}
+                      value={(watchedData.visaCosts?.visaDetails?.[index]?.investorVisa?.toString() || "")}
                       onChange={(value) => {
-                        updateDropdownValue(`investorVisa-${index}`, value);
-                        register(`visaCosts.visaDetails.${index}.investorVisa`).onChange({ target: { value } });
+                        const boolValue = value === "true" ? true : (value === "employment" ? "employment" : false);
+                        setValue(`visaCosts.visaDetails.${index}.investorVisa`, boolValue);
                       }}
                     />
                   )}
@@ -283,10 +297,9 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                         { value: "", label: "No Status Change" },
                         { value: "true", label: "Enable Status Change" }
                       ]}
-                      value={dropdownValues[`statusChange-${index}`] || ""}
+                      value={(watchedData.visaCosts?.visaDetails?.[index]?.statusChange ? "true" : "")}
                       onChange={(value) => {
-                        updateDropdownValue(`statusChange-${index}`, value);
-                        register(`visaCosts.visaDetails.${index}.statusChange`).onChange({ target: { value } });
+                        setValue(`visaCosts.visaDetails.${index}.statusChange`, value === "true");
                       }}
                     />
                   )}
@@ -299,10 +312,9 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                         { value: "", label: "No VIP Stamping" },
                         { value: "true", label: "Enable VIP Stamping" }
                       ]}
-                      value={dropdownValues[`vipStamping-${index}`] || ""}
+                      value={(watchedData.visaCosts?.visaDetails?.[index]?.vipStamping ? "true" : "")}
                       onChange={(value) => {
-                        updateDropdownValue(`vipStamping-${index}`, value);
-                        register(`visaCosts.visaDetails.${index}.vipStamping`).onChange({ target: { value } });
+                        setValue(`visaCosts.visaDetails.${index}.vipStamping`, value === "true");
                       }}
                     />
                   )}

@@ -40,6 +40,30 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     onFieldChange(`dependentAuthorityFees.${field}`, value);
   };
 
+  // Initialize spouse default values when spouse is enabled
+  const initializeSpouseDefaults = () => {
+    const defaultValues = {
+      professionalPassportPicture: 25,
+      dependentFileOpening: 320,
+      mandatoryUaeMedicalTest: 700,
+      emiratesIdFee: 1155,
+      immigrationResidencyFeeSpouse: 2860,
+      thirdPartyCosts: 1460
+    };
+    
+    // Set default authority fees if not already set
+    Object.entries(defaultValues).forEach(([field, defaultValue]) => {
+      if (!(authorityFees as any)[field]) {
+        onFieldChange(`dependentAuthorityFees.${field}`, defaultValue);
+      }
+    });
+    
+    // Set default TME service fee if not set
+    if (!dependents.spouse?.tmeServicesFee) {
+      onFieldChange('dependents.spouse.tmeServicesFee', 3490);
+    }
+  };
+
   const handleSpouseVisaCancelationChange = (checked: boolean) => {
     onFieldChange('dependents.spouse.visaCancelation', checked);
   };
@@ -51,6 +75,35 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
   // Handlers for children
   const handleChildrenCountChange = (count: number) => {
     onFieldChange('dependents.children.count', count);
+    
+    // Initialize children defaults when first enabled
+    if (count > 0) {
+      initializeChildrenDefaults();
+    }
+  };
+
+  // Initialize children default values when children are enabled
+  const initializeChildrenDefaults = () => {
+    const defaultValues = {
+      professionalPassportPicture: 25,
+      dependentFileOpening: 320,
+      mandatoryUaeMedicalTest: 700,
+      emiratesIdFee: 1155,
+      immigrationResidencyFeeChild: 2750,
+      thirdPartyCosts: 1460
+    };
+    
+    // Set default authority fees if not already set
+    Object.entries(defaultValues).forEach(([field, defaultValue]) => {
+      if (!(authorityFees as any)[field]) {
+        onFieldChange(`dependentAuthorityFees.${field}`, defaultValue);
+      }
+    });
+    
+    // Set default TME service fee if not set
+    if (!dependents.children?.tmeServicesFee) {
+      onFieldChange('dependents.children.tmeServicesFee', 2930);
+    }
   };
 
   const handleChildrenAuthorityFeeChange = (field: string, value: number) => {
@@ -98,6 +151,13 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
                 <input
                   type="checkbox"
                   {...register('dependents.spouse.required')}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    onFieldChange('dependents.spouse.required', checked);
+                    if (checked) {
+                      initializeSpouseDefaults();
+                    }
+                  }}
                   className="sr-only"
                 />
                 <div 
@@ -139,7 +199,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <div className="bg-slate-100 border border-slate-300 rounded-lg p-4">
                 <NumberInputField
                   label="TME Professional Service Fee - Spouse (AED)"
-                  value={dependents.spouse?.tmeServicesFee}
+                  value={dependents.spouse?.tmeServicesFee || 3490}
                   onChange={handleSpouseTMEServicesFeeChange}
                   placeholder="3,490"
                   className="focus:ring-slate-500"
@@ -236,7 +296,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <div className="bg-slate-200 border border-slate-400 rounded-lg p-4">
                 <NumberInputField
                   label="TME Professional Service Fee per Child (AED)"
-                  value={dependents.children?.tmeServicesFee}
+                  value={dependents.children?.tmeServicesFee || 2930}
                   onChange={handleChildrenTMEServicesFeeChange}
                   placeholder="2,930"
                   className="focus:ring-slate-500"

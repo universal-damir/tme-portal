@@ -19,6 +19,7 @@ interface DependentVisaConfig {
     key: string;
     label: string;
     placeholder: string;
+    defaultValue: number;
   }>;
   visaCancelationLabel: string;
 }
@@ -36,12 +37,12 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
       ring: 'focus:ring-slate-500',
     },
     fields: [
-      { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00' },
-      { key: 'dependentFileOpening', label: 'Dependent File Opening', placeholder: '320.00' },
-      { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test', placeholder: '700.00' },
-      { key: 'emiratesIdFee', label: 'Emirates ID Fee', placeholder: '1,155.00' },
-      { key: 'immigrationResidencyFeeSpouse', label: 'Immigration - Residency Fee (Spouse)', placeholder: '2,860.00' },
-      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460.00' },
+      { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00', defaultValue: 25 },
+      { key: 'dependentFileOpening', label: 'Dependent File Opening', placeholder: '320.00', defaultValue: 320 },
+      { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test', placeholder: '700.00', defaultValue: 700 },
+      { key: 'emiratesIdFee', label: 'Emirates ID Fee', placeholder: '1,155.00', defaultValue: 1155 },
+      { key: 'immigrationResidencyFeeSpouse', label: 'Immigration - Residency Fee (Spouse)', placeholder: '2,860.00', defaultValue: 2860 },
+      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460.00', defaultValue: 1460 },
     ],
     visaCancelationLabel: 'Visa Cancelation (AED 185)',
   },
@@ -54,12 +55,12 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
       ring: 'focus:ring-slate-500',
     },
     fields: [
-      { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00' },
-      { key: 'dependentFileOpening', label: 'Dependent File Opening (if spouse not selected)', placeholder: '320.00' },
-      { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test', placeholder: '700.00' },
-      { key: 'emiratesIdFee', label: 'Emirates ID Fee', placeholder: '1,155.00' },
-      { key: 'immigrationResidencyFeeChild', label: 'Immigration - Residency Fee (Child)', placeholder: '2,750.00' },
-      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460.00' },
+      { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00', defaultValue: 25 },
+      { key: 'dependentFileOpening', label: 'Dependent File Opening (if spouse not selected)', placeholder: '320.00', defaultValue: 320 },
+      { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test', placeholder: '700.00', defaultValue: 700 },
+      { key: 'emiratesIdFee', label: 'Emirates ID Fee', placeholder: '1,155.00', defaultValue: 1155 },
+      { key: 'immigrationResidencyFeeChild', label: 'Immigration - Residency Fee (Child)', placeholder: '2,750.00', defaultValue: 2750 },
+      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460.00', defaultValue: 1460 },
     ],
     visaCancelationLabel: 'Visa Cancelation (AED 185 per child)',
   },
@@ -125,7 +126,7 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
           <NumberInputField
             key={field.key}
             label={field.label}
-            value={authorityFees[field.key]}
+            value={authorityFees[field.key] || field.defaultValue}
             onChange={(value) => onAuthorityFeeChange(field.key, value)}
             placeholder={field.placeholder}
             className={config.colorScheme.ring}

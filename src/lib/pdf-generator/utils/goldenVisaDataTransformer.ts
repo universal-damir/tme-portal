@@ -117,7 +117,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'passport-picture',
       condition: true,
-      description: '1. Professional Passport Picture Fee',
+      description: '1. Professional Passport Picture Cost',
       amount: fees.professionalPassportPicture,
       explanation: 'For professional passport-style photograph.'
     });
@@ -125,15 +125,15 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'dld-approval',
       condition: true,
-      description: '2. DLD (Dubai Land Department) Approval Fee',
+      description: '2. DLD (Dubai Land Department) Approval Cost',
       amount: fees.dldApprovalFee,
-      explanation: 'Dubai Land Department approval fee required for property investment Golden Visa applications.'
+      explanation: 'Approval cost required for property investment Golden Visa applications.'
     });
 
     services.push({
       id: 'medical-test',
       condition: true,
-      description: '3. Mandatory UAE Medical Test Fee',
+      description: '3. Mandatory UAE Medical Test Cost',
       amount: fees.mandatoryUaeMedicalTest,
       explanation: 'Required by UAE authorities for residency visa processing.'
     });
@@ -141,7 +141,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'emirates-id',
       condition: true,
-      description: '4. Emirates ID Fee',
+      description: '4. Emirates ID Cost',
       amount: fees.emiratesIdFee,
       explanation: 'For processing and issuing the Emirates ID card.'
     });
@@ -149,7 +149,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'immigration-residency',
       condition: true,
-      description: '5. Immigration Residency Fee',
+      description: '5. Immigration Residency Cost',
       amount: fees.immigrationResidencyFee,
       explanation: 'For residency visa processing and issuance.'
     });
@@ -158,16 +158,16 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       services.push({
         id: 'visa-cancelation',
         condition: true,
-        description: '6. Visa Cancelation Fee',
+        description: '6. Visa Cancelation Cost',
         amount: fees.visaCancelationFee,
-        explanation: 'Fee for canceling existing visa status before applying for Golden Visa.'
+        explanation: 'For canceling existing visa status before applying for Golden Visa.'
       });
     }
 
     services.push({
       id: 'third-party-costs',
       condition: true,
-      description: fees.visaCancelation ? '7. Third Party Fees' : '6. Third Party Fees',
+      description: fees.visaCancelation ? '7. Third Party Costs' : '6. Third Party Costs',
       amount: fees.thirdPartyCosts,
       explanation: 'Administrative costs charged by various departments.'
     });
@@ -178,7 +178,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'passport-picture',
       condition: true,
-      description: '1. Professional Passport Picture Fee',
+      description: '1. Professional Passport Picture Cost',
       amount: fees.professionalPassportPicture,
       explanation: 'For professional passport-style photograph.'
     });
@@ -186,7 +186,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'medical-test',
       condition: true,
-      description: '2. Mandatory UAE Medical Test Fee',
+      description: '2. Mandatory UAE Medical Test Cost',
       amount: fees.mandatoryUaeMedicalTest,
       explanation: 'Required by UAE authorities for residency visa processing.'
     });
@@ -194,7 +194,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'emirates-id',
       condition: true,
-      description: '3. Emirates ID Fee',
+      description: '3. Emirates ID Cost',
       amount: fees.emiratesIdFee,
       explanation: 'For processing and issuing the Emirates ID card.'
     });
@@ -202,7 +202,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'immigration-residency',
       condition: true,
-      description: '4. Immigration Residency Fee',
+      description: '4. Immigration Residency Cost',
       amount: fees.immigrationResidencyFee,
       explanation: 'For residency visa processing and issuance.'
     });
@@ -211,7 +211,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       services.push({
         id: 'visa-cancelation',
         condition: true,
-        description: '5. Visa Cancelation Fee',
+          description: '5. Visa Cancelation Cost',
         amount: fees.visaCancelationFee,
         explanation: 'For canceling existing visa status before applying for Golden Visa.'
       });
@@ -220,7 +220,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'third-party-costs',
       condition: true,
-      description: fees.visaCancelation ? '6. Third Party Fees' : '5. Third Party Fees',
+      description: fees.visaCancelation ? '6. Third Party Costs' : '5. Third Party Costs',
       amount: fees.thirdPartyCosts,
       explanation: 'Administrative costs charged by various departments.'
     });
@@ -229,9 +229,9 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'government-fees',
       condition: true,
-      description: '1. Government Fees (Medical Test + Emirates ID + Processing)',
+      description: '1. Government Costs (Medical Test + Emirates ID + Processing)',
       amount: goldenVisaData.governmentFee || 0,
-      explanation: 'Government fees including medical examination, Emirates ID processing, and visa application charges.'
+      explanation: 'Government costs including medical examination, Emirates ID processing, and visa application charges.'
     });
   }
 
@@ -290,7 +290,7 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-passport-picture',
       condition: true,
-      description: '1. Professional Passport Picture Fee',
+      description: '1. Professional Passport Picture Cost',
       amount: fees.professionalPassportPicture,
       explanation: 'For professional passport-style photograph.'
     });
@@ -298,7 +298,7 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-file-opening',
       condition: true,
-      description: '2. Dependent File Opening Fee',
+      description: '2. Dependent File Opening Cost',
       amount: fees.dependentFileOpening,
       explanation: 'For opening dependent visa file (applies to first dependent only).'
     });
@@ -306,7 +306,7 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-medical-test',
       condition: true,
-      description: '3. Mandatory UAE Medical Test Fee',
+      description: '3. Mandatory UAE Medical Test Cost',
       amount: fees.mandatoryUaeMedicalTest,
       explanation: 'Required by UAE authorities for spouse visa processing.'
     });
@@ -314,7 +314,7 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-emirates-id',
       condition: true,
-      description: '4. Emirates ID Fee',
+      description: '4. Emirates ID Cost',
       amount: fees.emiratesIdFee,
       explanation: 'For processing and issuing the Emirates ID card.'
     });
@@ -322,7 +322,7 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-immigration-residency',
       condition: true,
-      description: '5. Immigration Residency Fee',
+      description: '5. Immigration Residency Cost',
       amount: fees.immigrationResidencyFeeSpouse,
       explanation: 'For spouse residency visa processing and issuance.'
     });
@@ -338,16 +338,16 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
       services.push({
         id: 'spouse-visa-cancelation',
         condition: true,
-        description: '6. Visa Cancelation Fee',
+        description: '6. Visa Cancelation Cost',
         amount: cancelationFee,
-        explanation: 'Fee for canceling existing visa status before applying for spouse dependent visa (if applicable).'
+        explanation: 'For canceling existing visa status before applying for spouse dependent visa (if applicable).'
       });
     }
 
     services.push({
       id: 'spouse-third-party-costs',
       condition: true,
-      description: hasVisaCancelation ? '7. Third Party Fees' : '6. Third Party Fees',
+      description: hasVisaCancelation ? '7. Third Party Costs' : '6. Third Party Costs',
       amount: fees.thirdPartyCosts,
       explanation: 'Administrative costs charged by various departments.'
     });
@@ -356,9 +356,9 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-government-fees',
       condition: true,
-      description: '1. Government Fees (Medical + Emirates ID + Processing)',
+      description: '1. Government Costs (Medical + Emirates ID + Processing)',
       amount: spouse.governmentFee || 0,
-      explanation: 'Government fees for spouse visa including medical examination, Emirates ID processing, and visa application charges.'
+      explanation: 'Government costs for spouse visa including medical examination, Emirates ID processing, and visa application charges.'
     });
     
     // Check for individual spouse visa cancelation in legacy structure
@@ -366,9 +366,9 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
       services.push({
         id: 'spouse-visa-cancelation',
         condition: true,
-        description: '2. Visa Cancelation Fee',
+        description: '2. Visa Cancelation Cost',
         amount: spouse.visaCancelationFee,
-        explanation: 'Fee for canceling existing visa status before applying for spouse dependent visa (if applicable).'
+        explanation: 'For canceling existing visa status before applying for spouse dependent visa (if applicable).'
       });
     }
   }
@@ -409,7 +409,7 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     services.push({
       id: 'children-passport-picture',
       condition: true,
-      description: '1. Professional Passport Picture Fee',
+      description: '1. Professional Passport Picture Cost',
       amount: fees.professionalPassportPicture * numberOfChildren,
       explanation: `Professional passport-style picture fee required for ${childText} visa documentation.`
     });
@@ -420,7 +420,7 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       services.push({
         id: 'children-file-opening',
         condition: true,
-        description: '2. Dependent File Opening Fee',
+        description: '2. Dependent File Opening Cost',
         amount: fees.dependentFileOpening,
         explanation: 'One-time fee for opening dependent visa file (applies to first dependent only).'
       });
@@ -430,25 +430,25 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     services.push({
       id: 'children-medical-test',
       condition: true,
-      description: `${medicalTestNumber}. Mandatory UAE Medical Test Fee`,
+        description: `${medicalTestNumber}. Mandatory UAE Medical Test Cost`,
       amount: fees.mandatoryUaeMedicalTest * numberOfChildren,
-      explanation: `Medical examination fee required by UAE authorities for ${childText} visa processing.`
+      explanation: `Medical examination cost required by UAE authorities for ${childText} visa processing.`
     });
 
     const emiratesIdNumber = !hasSpouse ? '4' : '3';
     services.push({
       id: 'children-emirates-id',
       condition: true,
-      description: `${emiratesIdNumber}. Emirates ID Fee`,
+      description: `${emiratesIdNumber}. Emirates ID Cost`,
       amount: fees.emiratesIdFee * numberOfChildren,
-      explanation: `Emirates Identity Authority fee for processing and issuing the Emirates ID card for ${childText}.`
+      explanation: `For processing and issuing the Emirates ID card for ${childText}.`
     });
 
     const immigrationNumber = !hasSpouse ? '5' : '4';
     services.push({
       id: 'children-immigration-residency',
       condition: true,
-      description: `${immigrationNumber}. Immigration Residency Fee`,
+      description: `${immigrationNumber}. Immigration Residency Cost`,
       amount: fees.immigrationResidencyFeeChild * numberOfChildren,
       explanation: `For ${childText} residency visa processing and issuance.`
     });
@@ -465,7 +465,7 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       services.push({
         id: 'children-visa-cancelation',
         condition: true,
-        description: `${cancelationNumber}. Visa Cancelation Fee`,
+        description: `${cancelationNumber}. Visa Cancelation Cost`,
         amount: childrenCancelationFee * numberOfChildren,
         explanation: `For canceling existing visa status before applying for ${childText} dependent visa.`
       });
@@ -486,9 +486,9 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     services.push({
       id: 'children-government-fees',
       condition: true,
-      description: '1. Government Fees (Medical + Emirates ID + Processing)',
+      description: '1. Government Costs (Medical + Emirates ID + Processing)',
       amount: (children.governmentFee || 0) * numberOfChildren,
-      explanation: `Government fees for ${childText} visa including medical examination, Emirates ID processing, and visa application charges.`
+      explanation: `Government costs for ${childText} visa including medical examination, Emirates ID processing, and visa application charges.`
     });
     
     // Check for individual children visa cancelation in legacy structure
@@ -496,9 +496,9 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       services.push({
         id: 'children-visa-cancelation',
         condition: true,
-        description: '2. Visa Cancelation Fee',
+        description: '2. Visa Cancelation Cost',
         amount: children.visaCancelationFee * numberOfChildren,
-        explanation: `Fee for canceling existing visa status before applying for ${childText} dependent visa (if applicable).`
+        explanation: `For canceling existing visa status before applying for ${childText} dependent visa (if applicable).`
       });
     }
   }
@@ -545,31 +545,31 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
       services.push({
         id: `child-${childNumber}-passport-picture`,
         condition: true,
-        description: '1. Professional Passport Picture Fee',
+        description: '1. Professional Passport Picture Cost',
         amount: fees.professionalPassportPicture,
-        explanation: 'Professional passport-style picture fee required for child visa documentation.'
+        explanation: 'Professional passport-style picture cost required for child visa documentation.'
       });
 
       services.push({
         id: `child-${childNumber}-medical-test`,
         condition: true,
-        description: '2. Mandatory UAE Medical Test Fee',
+        description: '2. Mandatory UAE Medical Test Cost',
         amount: fees.mandatoryUaeMedicalTest,
-        explanation: 'Medical examination fee required by UAE authorities for child visa processing.'
+        explanation: 'Medical examination cost required by UAE authorities for child visa processing.'
       });
 
       services.push({
         id: `child-${childNumber}-emirates-id`,
         condition: true,
-        description: '3. Emirates ID Fee',
+        description: '3. Emirates ID Cost',
         amount: fees.emiratesIdFee,
-        explanation: 'Emirates Identity Authority fee for processing and issuing the Emirates ID card.'
+        explanation: 'For processing and issuing the Emirates ID card.'
       });
 
       services.push({
         id: `child-${childNumber}-immigration-residency`,
         condition: true,
-        description: '4. Immigration Residency Fee',
+        description: '4. Immigration Residency Cost',
         amount: fees.immigrationResidencyFeeChild,
         explanation: 'For child residency visa processing and issuance.'
       });
@@ -578,9 +578,9 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
         services.push({
           id: `child-${childNumber}-visa-cancelation`,
           condition: true,
-          description: '5. Visa Cancelation Fee',
+          description: '5. Visa Cancelation Cost',
           amount: fees.visaCancelationFee,
-          explanation: 'Fee for canceling existing visa status before applying for child dependent visa.'
+          explanation: 'For canceling existing visa status before applying for child dependent visa.'
         });
       }
 
@@ -596,9 +596,9 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
       services.push({
         id: `child-${childNumber}-government-fees`,
         condition: true,
-        description: '1. Government Fees (Medical + Emirates ID + Processing)',
+        description: '1. Government Costs (Medical + Emirates ID + Processing)',
         amount: children.governmentFee || 0,
-        explanation: 'Comprehensive government fees for child visa including medical examination, Emirates ID processing, and visa application charges.'
+        explanation: 'For child visa including medical examination, Emirates ID processing, and visa application charges.'
       });
     }
 

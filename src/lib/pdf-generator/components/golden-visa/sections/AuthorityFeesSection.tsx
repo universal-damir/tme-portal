@@ -31,7 +31,7 @@ export const AuthorityFeesSection: React.FC<PDFComponentProps> = ({ data }) => {
     <View style={{ marginBottom: 16 }}>
       <CompactCostTable
         data={data}
-        title="Authority Fees Breakdown"
+        title="Authority Costs Breakdown"
         items={authorityItems}
         total={authorityTotal}
         secondaryTotal={authorityTotal / exchangeRate}

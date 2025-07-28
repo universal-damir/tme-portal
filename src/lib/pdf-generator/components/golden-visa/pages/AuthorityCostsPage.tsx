@@ -31,14 +31,14 @@ export const AuthorityCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
     </Text>
   ));
 
-  const introContent = `This page provides a detailed breakdown of all authority fees, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
+  const introContent = `This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
 
   return (
     <Page size="A4" style={styles.page}>
       <HeaderComponent data={data} />
 
       <IntroSection
-        headline="Authority Fees and TME Services Professional Fee"
+        headline="Authority Costs and TME Services Professional Fee"
         content={introContent}
       />
 

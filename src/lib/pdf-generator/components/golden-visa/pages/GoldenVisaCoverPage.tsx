@@ -22,7 +22,7 @@ export const GoldenVisaCoverPage: React.FC<PDFComponentProps> = ({ data }) => {
   // Generate intro content based on visa type and requirements
   const getIntroContent = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      const content = `We are pleased to share a personalized proposal for your Golden Visa dependent services. This document provides a transparent breakdown of fees and services for dependent visa applications only, based on your specific requirements.`;
+      const content = `We are pleased to share a personalized proposal for your Golden Visa dependent services. This document provides a transparent breakdown of costs and fees for dependent visa applications only, based on your specific requirements.`;
       
       return data.clientDetails.addressToCompany ? 
         content :
@@ -37,7 +37,7 @@ ${content}`;
       ? 'Time Deposit'
       : 'Skilled Employee';
 
-    const content = `We are pleased to share a personalized proposal for your ${visaTypeDisplay} Golden Visa application. This document provides a transparent breakdown of fees and services based on the requirements. It is designed to give you clear insight into each cost element so you can plan your application accordingly.`;
+    const content = `We are pleased to share a personalized proposal for your ${visaTypeDisplay} Golden Visa application. This document provides a transparent breakdown of costs and fees based on the requirements. It is designed to give you clear insight into each element so you can plan your application accordingly.`;
     
     return data.clientDetails.addressToCompany ? 
       content :

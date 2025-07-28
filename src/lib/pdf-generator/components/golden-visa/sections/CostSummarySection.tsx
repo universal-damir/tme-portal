@@ -57,7 +57,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       
       // 1. Authority Costs line
       items.push({
-        description: `${itemNumber}. ${getVisaTypeDisplay()} Golden Visa Authority Fees`,
+        description: `${itemNumber}. ${getVisaTypeDisplay()} Golden Visa Authority Costs`,
         amount: authorityTotal,
         secondaryAmount: authorityTotal / exchangeRate,
         isReduction: false
@@ -68,7 +68,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       if (goldenVisaData?.requiresNOC && goldenVisaData?.selectedFreezone && goldenVisaData?.freezoneNocFee) {
         const freezoneLabel = goldenVisaData.selectedFreezone.toUpperCase();
         items.push({
-          description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) Fee`,
+          description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) Cost`,
           amount: goldenVisaData.freezoneNocFee,
           secondaryAmount: goldenVisaData.freezoneNocFee / exchangeRate,
           isReduction: false
@@ -84,7 +84,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       const spouseVisaTotal = spouseVisa.reduce((sum, service) => sum + service.amount, 0);
       
       items.push({
-        description: `${itemNumber}. Dependent (Spouse) Visa Authority Fees`,
+        description: `${itemNumber}. Dependent (Spouse) Visa Authority Costs`,
         amount: spouseVisaTotal,
         secondaryAmount: spouseVisaTotal / exchangeRate,
         isReduction: false
@@ -101,7 +101,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       const childrenVisaTotal = childrenVisa.reduce((sum, service) => sum + service.amount, 0);
       
       items.push({
-        description: `${itemNumber}. Dependent (${childText}) Visa  Authority Fees${numberOfChildren > 1 ? ` (${numberOfChildren} children)` : ''}`,
+        description: `${itemNumber}. Dependent (${childText}) Visa Authority Costs${numberOfChildren > 1 ? ` (${numberOfChildren} children)` : ''}`,
         amount: childrenVisaTotal,
         secondaryAmount: childrenVisaTotal / exchangeRate,
         isReduction: false

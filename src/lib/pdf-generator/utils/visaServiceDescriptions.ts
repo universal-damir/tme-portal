@@ -49,9 +49,9 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'standard-government-fees',
       condition: true,
-      description: `Standard Authority Fees for Visa and Emirates ID Application (${numberOfVisas} ${visaText(numberOfVisas)})`,
+      description: `Standard Authority Costs for Visa and Emirates ID Application (${numberOfVisas} ${visaText(numberOfVisas)})`,
       amount: visaCostData.standardGovernmentFees,
-      explanation: 'Authority fees for visa processing and Emirates ID for standard visa applications.'
+      explanation: 'For visa processing and Emirates ID for standard visa applications.'
     });
   }
 
@@ -60,7 +60,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'reduced-government-fees',
       condition: true,
-      description: `Reduced Authority Fees for Visa and Emirates ID Application (${reducedVisas} ${visaText(reducedVisas)})`,
+      description: `Reduced Authority Costs for Visa and Emirates ID Application (${reducedVisas} ${visaText(reducedVisas)})`,
       amount: visaCostData.reducedGovernmentFees,
       isReduction: true,
       explanation: 'Reduced rate available under the IFZA promotion. This offer is limited to one visa only and may change depending on timing. A prompt decision increases your chances of securing this rate.'
@@ -74,7 +74,7 @@ export const generateCompanyVisaServiceDescriptions = (
       condition: true,
       description: `${authorityConfig?.displayName || 'IFZA'} Investor Visa Cost (${numberOfInvestorVisas} ${visaText(numberOfInvestorVisas)})`,
       amount: visaCostData.investorVisaFees,
-      explanation: 'Fee charged by IFZA for issuing an investor visa.'
+      explanation: 'Charged by IFZA for issuing an investor visa.'
     });
   }
 
@@ -131,7 +131,7 @@ export const generateCompanyVisaServiceDescriptions = (
       condition: true,
       description: `Authority Cost for Visa Status Change (${visaStatusChangeCount} ${visaText(visaStatusChangeCount)})`,
       amount: visaCostData.statusChangeFees,
-      explanation: 'Authority fee for changing visa status from tourist/visit visa to employment residence visa.'
+      explanation: 'For changing visa status from tourist/visit visa to employment residence visa.'
     });
   }
 
@@ -140,9 +140,9 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'vip-stamping-service',
       condition: true,
-      description: `VIP Authority Stamping Fee - Express Visa Stamp (${vipStampingCount} ${visaText(vipStampingCount)})`,
+      description: `VIP Authority Stamping Cost - Express Visa Stamp (${vipStampingCount} ${visaText(vipStampingCount)})`,
       amount: visaCostData.vipStampingFees,
-      explanation: 'Express service for faster visa stamping and processing with priority handling at immigration counters.'
+      explanation: 'For faster visa stamping and processing with priority handling at immigration counters.'
     });
   }
 
@@ -176,9 +176,9 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-standard-fees',
       condition: true,
-      description: 'Standard Authority Fees for Spouse Visa and Emirates ID Application',
+      description: 'Standard Authority Costs for Spouse Visa and Emirates ID Application',
       amount: visaCostData.spouseVisaStandardFees,
-      explanation: 'Authority fees for spouse visa processing and Emirates ID.'
+      explanation: 'For spouse visa processing and Emirates ID.'
     });
   }
 
@@ -187,9 +187,9 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-status-change',
       condition: true,
-      description: 'Authority Cost for Spouse Visa Status Change',
+      description: 'Authority Costs for Spouse Visa Status Change',
       amount: visaCostData.spouseVisaStatusChangeFees,
-      explanation: 'Authority fee for changing spouse visa status from tourist/visit visa to residence visa.'
+      explanation: 'For changing spouse visa status from tourist/visit visa to residence visa.'
     });
   }
 
@@ -250,9 +250,9 @@ export const generateChildVisaServiceDescriptions = (
     services.push({
       id: 'child-visa-standard-fees',
       condition: true,
-      description: `Standard Authority Fees for Child Visa and Emirates ID Application (${numberOfChildVisas} ${visaText(numberOfChildVisas)})`,
+      description: `Standard Authority Costs for Child Visa and Emirates ID Application (${numberOfChildVisas} ${visaText(numberOfChildVisas)})`,
       amount: visaCostData.childVisaStandardFees,
-      explanation: 'Authority fees for child visa processing and Emirates ID.'
+      explanation: 'For child visa processing and Emirates ID.'
     });
   }
 
@@ -263,7 +263,7 @@ export const generateChildVisaServiceDescriptions = (
       condition: true,
       description: `Authority Cost for Child Visa Status Change (${childVisaStatusChange} ${visaText(childVisaStatusChange)})`,
       amount: visaCostData.childVisaStatusChangeFees,
-      explanation: 'Authority fee for changing child visa status from tourist/visit visa to residence visa.'
+      explanation: 'For changing child visa status from tourist/visit visa to residence visa.'
     });
   }
 
@@ -303,7 +303,7 @@ export const generateChildVisaServiceDescriptions = (
       condition: true,
       description: `Child Visa VIP Stamping Service (${childVisaVipStamping} ${visaText(childVisaVipStamping)})`,
       amount: visaCostData.childVisaVipStampingFees,
-      explanation: 'Express service for faster child visa stamping and processing.'
+      explanation: 'For faster child visa stamping and processing.'
     });
   }
 

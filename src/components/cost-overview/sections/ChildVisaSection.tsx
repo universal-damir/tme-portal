@@ -100,11 +100,7 @@ export const ChildVisaSection: React.FC<ChildVisaSectionProps> = ({
 }) => {
   const { visaCosts } = authorityConfig;
   const healthInsurance = visaCosts?.healthInsurance;
-  const [dropdownValues, setDropdownValues] = useState<{[key: string]: string}>({});
-
-  const updateDropdownValue = (key: string, value: string) => {
-    setDropdownValues(prev => ({ ...prev, [key]: value }));
-  };
+  // No need for local dropdown state, we'll use form state directly
 
   // Reset child visa related fields when childVisa is unchecked
   useEffect(() => {
@@ -188,13 +184,20 @@ export const ChildVisaSection: React.FC<ChildVisaSectionProps> = ({
                         { value: "Low Cost", label: `Low Cost (AED ${healthInsurance?.lowCost.toLocaleString()})` },
                         { value: "Silver Package", label: `Silver Package (AED ${healthInsurance?.silverPackage.toLocaleString()})` }
                       ]}
-                      value={dropdownValues['childInsurance'] || "No Insurance"}
+                      value={watchedData.visaCosts?.childVisaDetails?.[0]?.healthInsurance || "No Insurance"}
                       onChange={(value) => {
-                        updateDropdownValue('childInsurance', value);
-                        // Apply to all children
-                        for (let i = 0; i < (watchedData.visaCosts?.numberOfChildVisas || 0); i++) {
-                          register(`visaCosts.childVisaDetails.${i}.healthInsurance`).onChange({ target: { value } });
+                        // Apply insurance selection to all children
+                        const numberOfChildren = watchedData.visaCosts?.numberOfChildVisas || 0;
+                        const currentDetails = watchedData.visaCosts?.childVisaDetails || [];
+                        const updatedDetails = [];
+                        
+                        for (let i = 0; i < numberOfChildren; i++) {
+                          updatedDetails.push({
+                            ...currentDetails[i],
+                            healthInsurance: value
+                          });
                         }
+                        setValue('visaCosts.childVisaDetails', updatedDetails);
                       }}
                     />
                     <p className="text-xs text-gray-500 mt-1">
@@ -202,53 +205,39 @@ export const ChildVisaSection: React.FC<ChildVisaSectionProps> = ({
                     </p>
                   </div>
                   
-                  {/* Status Change Input */}
-                  <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: '#243F7B' }}>
-                      Status Change (AED {visaCosts?.statusChangeFee?.toLocaleString()})
-                    </label>
-                    <motion.input
-                      whileFocus={{ scale: 1.01 }}
-                      type="number"
-                      min="0"
-                      max={watchedData.visaCosts?.numberOfChildVisas || 0}
-                      {...register('visaCosts.childVisaStatusChange', { valueAsNumber: true })}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                      onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                      placeholder="0"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Max: {watchedData.visaCosts?.numberOfChildVisas || 0} children
-                    </p>
-                    {errors.visaCosts?.childVisaStatusChange && (
-                      <p className="text-red-500 text-xs mt-1">{errors.visaCosts.childVisaStatusChange.message}</p>
-                    )}
-                  </div>
+                  {/* Status Change Dropdown */}
+                  <CustomDropdown
+                    label={`Status Change (AED ${visaCosts?.statusChangeFee?.toLocaleString()})`}
+                    options={[
+                      { value: "0", label: "No Status Change" },
+                      ...Array.from({ length: watchedData.visaCosts?.numberOfChildVisas || 0 }, (_, i) => ({
+                        value: String(i + 1),
+                        label: `${i + 1} ${i + 1 === 1 ? 'child' : 'children'}`
+                      }))
+                    ]}
+                    value={String(watchedData.visaCosts?.childVisaStatusChange || 0)}
+                    onChange={(value) => {
+                      setValue('visaCosts.childVisaStatusChange', parseInt(value));
+                    }}
+                    error={errors.visaCosts?.childVisaStatusChange?.message}
+                  />
 
-                  {/* VIP Stamping Input */}
-                  <div>
-                    <label className="block text-xs font-medium mb-1" style={{ color: '#243F7B' }}>
-                      VIP Stamping (AED {visaCosts?.vipStampingFee?.toLocaleString()})
-                    </label>
-                    <motion.input
-                      whileFocus={{ scale: 1.01 }}
-                      type="number"
-                      min="0"
-                      max={watchedData.visaCosts?.numberOfChildVisas || 0}
-                      {...register('visaCosts.childVisaVipStamping', { valueAsNumber: true })}
-                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                      onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                      placeholder="0"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Max: {watchedData.visaCosts?.numberOfChildVisas || 0} children
-                    </p>
-                    {errors.visaCosts?.childVisaVipStamping && (
-                      <p className="text-red-500 text-xs mt-1">{errors.visaCosts.childVisaVipStamping.message}</p>
-                    )}
-                  </div>
+                  {/* VIP Stamping Dropdown */}
+                  <CustomDropdown
+                    label={`VIP Stamping (AED ${visaCosts?.vipStampingFee?.toLocaleString()})`}
+                    options={[
+                      { value: "0", label: "No VIP Stamping" },
+                      ...Array.from({ length: watchedData.visaCosts?.numberOfChildVisas || 0 }, (_, i) => ({
+                        value: String(i + 1),
+                        label: `${i + 1} ${i + 1 === 1 ? 'child' : 'children'}`
+                      }))
+                    ]}
+                    value={String(watchedData.visaCosts?.childVisaVipStamping || 0)}
+                    onChange={(value) => {
+                      setValue('visaCosts.childVisaVipStamping', parseInt(value));
+                    }}
+                    error={errors.visaCosts?.childVisaVipStamping?.message}
+                  />
                 </div>
               </div>
             )}

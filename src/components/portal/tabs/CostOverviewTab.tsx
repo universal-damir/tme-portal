@@ -640,6 +640,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                 watchedData={watchedData}
                 authorityConfig={authorityConfig}
                 visaDetailsArray={visaDetailsArray}
+                setValue={setValue}
               />
             </SectionWithStickySummary>
           )}

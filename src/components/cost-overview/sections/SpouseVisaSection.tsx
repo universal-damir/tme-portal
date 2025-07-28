@@ -100,11 +100,7 @@ export const SpouseVisaSection: React.FC<SpouseVisaSectionProps> = ({
 }) => {
   const { visaCosts } = authorityConfig;
   const healthInsurance = visaCosts?.healthInsurance;
-  const [dropdownValues, setDropdownValues] = useState<{[key: string]: string}>({});
-
-  const updateDropdownValue = (key: string, value: string) => {
-    setDropdownValues(prev => ({ ...prev, [key]: value }));
-  };
+  // No need for local dropdown state, we'll use form state directly
 
   // Reset spouse visa related fields when spouseVisa is unchecked
   useEffect(() => {
@@ -165,85 +161,40 @@ export const SpouseVisaSection: React.FC<SpouseVisaSectionProps> = ({
                   { value: "Low Cost", label: `Low Cost (AED ${healthInsurance?.lowCost.toLocaleString()})` },
                   { value: "Silver Package", label: `Silver Package (AED ${healthInsurance?.silverPackage.toLocaleString()})` }
                 ]}
-                value={dropdownValues['spouseInsurance'] || "No Insurance"}
+                value={watchedData.visaCosts?.spouseVisaInsurance || "No Insurance"}
                 onChange={(value) => {
-                  updateDropdownValue('spouseInsurance', value);
-                  register('visaCosts.spouseVisaInsurance').onChange({ target: { value } });
+                  setValue('visaCosts.spouseVisaInsurance', value);
                 }}
                 error={errors.visaCosts?.spouseVisaInsurance?.message}
               />
               
-              {/* Status Change Checkbox */}
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#243F7B' }}>
-                  Status Change (AED {visaCosts?.statusChangeFee?.toLocaleString()})
-                </label>
-                <motion.label
-                  whileHover={{ scale: 1.02 }}
-                  className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150 h-[42px]"
-                >
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      {...register('visaCosts.spouseVisaStatusChange')}
-                      className="sr-only"
-                    />
-                    <div 
-                      className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                      style={{ 
-                        borderColor: watchedData.visaCosts?.spouseVisaStatusChange ? '#243F7B' : '#d1d5db',
-                        backgroundColor: watchedData.visaCosts?.spouseVisaStatusChange ? '#243F7B' : 'white'
-                      }}
-                    >
-                      {watchedData.visaCosts?.spouseVisaStatusChange && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                        >
-                          <Check className="w-3 h-3 text-white" />
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-700">Enable Status Change</span>
-                </motion.label>
-              </div>
+              {/* Status Change Dropdown */}
+              <CustomDropdown
+                label={`Status Change (AED ${visaCosts?.statusChangeFee?.toLocaleString()})`}
+                options={[
+                  { value: "", label: "No Status Change" },
+                  { value: "true", label: "Enable Status Change" }
+                ]}
+                value={(watchedData.visaCosts?.spouseVisaStatusChange ? "true" : "")}
+                onChange={(value) => {
+                  setValue('visaCosts.spouseVisaStatusChange', value === "true");
+                }}
+                error={errors.visaCosts?.spouseVisaStatusChange?.message}
+              />
               
-              {/* VIP Stamping Checkbox */}
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#243F7B' }}>
-                  VIP Stamping (AED {visaCosts?.vipStampingFee?.toLocaleString()})
-                </label>
-                <motion.label
-                  whileHover={{ scale: 1.02 }}
-                  className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150 h-[42px]"
-                >
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      {...register('visaCosts.spouseVisaVipStamping')}
-                      className="sr-only"
-                    />
-                    <div 
-                      className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                      style={{ 
-                        borderColor: watchedData.visaCosts?.spouseVisaVipStamping ? '#243F7B' : '#d1d5db',
-                        backgroundColor: watchedData.visaCosts?.spouseVisaVipStamping ? '#243F7B' : 'white'
-                      }}
-                    >
-                      {watchedData.visaCosts?.spouseVisaVipStamping && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                        >
-                          <Check className="w-3 h-3 text-white" />
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
-                  <span className="text-sm text-gray-700">Enable VIP Stamping</span>
-                </motion.label>
-              </div>
+              {/* VIP Stamping Dropdown */}
+              <CustomDropdown
+                label={`VIP Stamping (AED ${visaCosts?.vipStampingFee?.toLocaleString()})`}
+                options={[
+                  { value: "", label: "No VIP Stamping" },
+                  { value: "true", label: "Enable VIP Stamping" }
+                ]}
+                value={(watchedData.visaCosts?.spouseVisaVipStamping ? "true" : "")}
+                onChange={(value) => {
+                  setValue('visaCosts.spouseVisaVipStamping', value === "true");
+                }}
+                error={errors.visaCosts?.spouseVisaVipStamping?.message}
+              />
             </div>
           </div>
         )}
