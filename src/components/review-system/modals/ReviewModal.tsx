@@ -5,10 +5,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, XCircle, FileText, Send } from 'lucide-react';
+import { X, CheckCircle, XCircle, FileText, Send, User, MessageSquare, Calendar, Tag } from 'lucide-react';
 import { Application } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
+import { SharedClientInfo } from '@/types/portal';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -41,6 +42,44 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     setIsSubmitting(false);
   };
 
+  // Helper function to generate form title using PDF naming convention
+  const getFormTitle = (): string => {
+    if (!application?.form_data) return application?.title || 'Application';
+    
+    try {
+      const formData = application.form_data as GoldenVisaData;
+      const date = new Date(formData.date || new Date());
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${yy}${mm}${dd}`;
+      
+      let nameForTitle = '';
+      if (formData.companyName) {
+        nameForTitle = formData.companyName;
+      } else if (formData.lastName && formData.firstName) {
+        nameForTitle = `${formData.lastName} ${formData.firstName}`;
+      } else if (formData.firstName) {
+        nameForTitle = formData.firstName;
+      } else if (formData.lastName) {
+        nameForTitle = formData.lastName;
+      } else {
+        nameForTitle = 'Client';
+      }
+      
+      const visaTypeMap: { [key: string]: string } = {
+        'property-investment': 'property',
+        'time-deposit': 'deposit',
+        'skilled-employee': 'skilled'
+      };
+      
+      const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+      return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+    } catch (error) {
+      return application?.title || 'Golden Visa Application';
+    }
+  };
+
   const handlePreviewPDF = async () => {
     if (!application?.form_data) return;
     
@@ -50,7 +89,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       const formData = application.form_data as GoldenVisaData;
       
       // Extract client info from form data
-      const clientInfo = {
+      const clientInfo: SharedClientInfo = {
         firstName: formData.firstName || '',
         lastName: formData.lastName || '',
         companyName: formData.companyName || '',
@@ -75,8 +114,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   };
 
   const handleActionClick = async (action: 'approve' | 'reject') => {
-    if (action === 'reject' && !comments.trim()) {
-      setError('Please provide feedback when sending back for revision');
+    if (action === 'reject' && (!comments.trim() || comments.trim().length < 10)) {
+      setError('Please provide detailed feedback when rejecting (minimum 10 characters)');
       return;
     }
 
@@ -141,20 +180,34 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
             className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
           >
             <div
-              className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto"
+              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col"
               style={{ fontFamily: 'Inter, sans-serif' }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+              <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
                       Review Application
                     </h2>
-                    <p className="text-sm text-gray-600 mt-1 truncate">
-                      {application.title}
+                    <p className="text-sm font-medium text-gray-800 mt-1">
+                      {getFormTitle()}
                     </p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
+                        <span>{application.submitted_by?.full_name || 'Unknown User'}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        <span>{new Date(application.submitted_at || application.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Tag className="w-3 h-3" />
+                        <span className="capitalize">{application.urgency} Priority</span>
+                      </div>
+                    </div>
                   </div>
                   
                   <motion.button
@@ -162,7 +215,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     whileTap={{ scale: 0.95 }}
                     onClick={handleClose}
                     disabled={isSubmitting}
-                    className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
+                    className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50 flex-shrink-0"
                   >
                     <X className="w-5 h-5 text-gray-500" />
                   </motion.button>
@@ -170,7 +223,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               </div>
 
               {/* Content */}
-              <div className="px-6 py-6">
+              <div className="px-6 py-6 overflow-y-auto flex-1">
                 {success ? (
                   /* Success State */
                   <motion.div
@@ -188,6 +241,29 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                   </motion.div>
                 ) : (
                   <div className="space-y-6">
+                    {/* Submitter Message */}
+                    {(() => {
+                      // Get submitter message from temporary storage in form_data
+                      const submitterMessage = application.submitter_message || 
+                        (application.form_data as any)?._submitter_message;
+                      
+                      if (!submitterMessage) return null;
+                      
+                      return (
+                        <div>
+                          <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
+                            <MessageSquare className="w-4 h-4 inline mr-1" />
+                            Message
+                          </label>
+                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p className="text-sm text-gray-700 leading-relaxed">
+                              {submitterMessage}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* PDF Preview Button */}
                     <div className="text-center">
                       <motion.button
@@ -195,10 +271,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={handlePreviewPDF}
-                        className="flex items-center justify-center space-x-3 w-full px-6 py-4 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg"
+                        className="flex items-center justify-center space-x-2 w-1/2 mx-auto px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg"
                         style={{ backgroundColor: '#243F7B' }}
                       >
-                        <FileText className="w-5 h-5" />
+                        <FileText className="w-4 h-4" />
                         <span>Preview PDF</span>
                       </motion.button>
                       <p className="text-xs text-gray-500 mt-2">
@@ -208,13 +284,18 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
 
                     {/* Comments */}
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
-                        Feedback
-                      </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
+                          Feedback
+                        </label>
+                        <span className="text-xs text-gray-500">
+                          {comments.length} characters {comments.length < 10 ? `(${10 - comments.length} more needed for rejection)` : ''}
+                        </span>
+                      </div>
                       <textarea
                         value={comments}
                         onChange={(e) => setComments(e.target.value)}
-                        placeholder="Add your review comments or feedback..."
+                        placeholder="Add your review comments or feedback... (Minimum 10 characters required for rejection)"
                         rows={4}
                         className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 resize-none"
                         onFocus={(e) => e.target.style.borderColor = '#243F7B'}
@@ -235,7 +316,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     )}
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {/* Send Back for Revision */}
                       <motion.button
                         whileHover={!isSubmitting ? { scale: 1.01 } : {}}

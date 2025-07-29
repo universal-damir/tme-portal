@@ -174,8 +174,8 @@ export class ApplicationsService {
       
       const result = await pool.query(`
         SELECT a.*, 
-               sb.full_name as submitted_by_name,
-               r.full_name as reviewer_name
+               sb.id as submitted_by_id_ref, sb.full_name as submitted_by_name, sb.email as submitted_by_email, sb.department as submitted_by_department,
+               r.id as reviewer_id_ref, r.full_name as reviewer_name, r.email as reviewer_email, r.department as reviewer_department
         FROM applications a
         LEFT JOIN users sb ON a.submitted_by_id = sb.id
         LEFT JOIN users r ON a.reviewer_id = r.id
@@ -183,7 +183,41 @@ export class ApplicationsService {
         ORDER BY a.created_at DESC
       `, [applicationId, userId]);
       
-      return result.rows[0] as Application || null;
+      const row = result.rows[0];
+      if (!row) return null;
+      
+      // Transform the flat result into the expected Application structure
+      const application: Application = {
+        id: row.id,
+        type: row.type,
+        title: row.title,
+        form_data: row.form_data,
+        status: row.status,
+        submitted_by_id: row.submitted_by_id,
+        reviewer_id: row.reviewer_id,
+        submitter_message: row.submitter_message,
+        review_comments: row.review_comments,
+        urgency: row.urgency,
+        submitted_at: row.submitted_at,
+        reviewed_at: row.reviewed_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+        // Transform the joined user data into nested objects
+        submitted_by: row.submitted_by_name ? {
+          id: row.submitted_by_id_ref,
+          full_name: row.submitted_by_name,
+          email: row.submitted_by_email,
+          department: row.submitted_by_department
+        } : undefined,
+        reviewer: row.reviewer_name ? {
+          id: row.reviewer_id_ref,
+          full_name: row.reviewer_name,
+          email: row.reviewer_email,
+          department: row.reviewer_department
+        } : undefined
+      };
+      
+      return application;
     }, null, 'get_application_by_id');
   }
   
@@ -201,7 +235,10 @@ export class ApplicationsService {
       await pool.query('BEGIN');
       
       try {
-        // Update application status
+        // Update application status and store submitter message
+        // For now, store submitter message in a temporary way until schema is updated
+        const submitterComments = submission.comments || null;
+        
         await pool.query(`
           UPDATE applications 
           SET status = 'pending_review', 
@@ -210,6 +247,15 @@ export class ApplicationsService {
               submitted_at = CURRENT_TIMESTAMP
           WHERE id = $3 AND submitted_by_id = $4
         `, [submission.reviewer_id, submission.urgency, submission.application_id, userId]);
+        
+        // Store submitter message in form_data temporarily
+        if (submitterComments) {
+          await pool.query(`
+            UPDATE applications 
+            SET form_data = form_data || jsonb_build_object('_submitter_message', $1::text)
+            WHERE id = $2
+          `, [submitterComments, submission.application_id]);
+        }
         
         // Create notification for reviewer
         await NotificationsService.create({

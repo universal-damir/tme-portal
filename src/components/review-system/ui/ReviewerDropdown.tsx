@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, User, Crown, Check, X } from 'lucide-react';
 import { Reviewer } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
+import Image from 'next/image';
 
 interface ReviewerDropdownProps {
   value?: number;
@@ -125,11 +126,21 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
             </>
           ) : selectedReviewer ? (
             <>
-              {selectedReviewer.is_universal ? (
-                <Crown className="w-4 h-4" style={{ color: '#D2BC99' }} />
-              ) : (
-                <User className="w-4 h-4 text-gray-400" />
-              )}
+              <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                <Image
+                  src="/api/photos/default"
+                  alt={selectedReviewer.full_name}
+                  width={24}
+                  height={24}
+                  className="object-cover"
+                  unoptimized
+                />
+                {selectedReviewer.is_universal && (
+                  <div className="absolute -top-1 -right-1">
+                    <Crown className="w-3 h-3" style={{ color: '#D2BC99' }} />
+                  </div>
+                )}
+              </div>
               <div className="flex flex-col items-start min-w-0 flex-1">
                 <span className="text-sm font-medium text-gray-900 truncate">
                   {selectedReviewer.full_name}
@@ -224,11 +235,21 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
                         onClick={(e) => handleSelect(reviewer, e)}
                         className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-200 flex items-center space-x-3"
                       >
-                        {reviewer.is_universal ? (
-                          <Crown className="w-5 h-5" style={{ color: '#D2BC99' }} />
-                        ) : (
-                          <User className="w-5 h-5 text-gray-400" />
-                        )}
+                        <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                          <Image
+                            src="/api/photos/default"
+                            alt={reviewer.full_name}
+                            width={32}
+                            height={32}
+                            className="object-cover"
+                            unoptimized
+                          />
+                          {reviewer.is_universal && (
+                            <div className="absolute -top-1 -right-1">
+                              <Crown className="w-3 h-3" style={{ color: '#D2BC99' }} />
+                            </div>
+                          )}
+                        </div>
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">

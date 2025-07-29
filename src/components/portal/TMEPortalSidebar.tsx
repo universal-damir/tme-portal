@@ -33,6 +33,7 @@ import { usePermissions } from '@/hooks/usePermissions'
 import { NotificationBadge } from '@/components/review-system/ui/NotificationBadge'
 import { NotificationPanel } from '@/components/review-system/ui/NotificationPanel'
 import { ReviewModal } from '@/components/review-system/modals/ReviewModal'
+import { FeedbackModal } from '@/components/review-system/modals/FeedbackModal'
 import { Notification, Application } from '@/types/review-system'
 
 // Base navigation items available to all authenticated users
@@ -103,6 +104,10 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
   const [reviewModalOpen, setReviewModalOpen] = React.useState(false)
   const [selectedApplication, setSelectedApplication] = React.useState<Application | null>(null)
   const [loadingApplication, setLoadingApplication] = React.useState(false)
+  
+  // Feedback modal state - for submitters receiving feedback
+  const [feedbackModalOpen, setFeedbackModalOpen] = React.useState(false)
+  const [feedbackApplication, setFeedbackApplication] = React.useState<Application | null>(null)
 
   const handleNavClick = (url: string, external?: boolean) => {
     if (external) {
@@ -147,7 +152,7 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
         setLoadingApplication(false);
       }
     } else if (notification.type === 'application_approved' || notification.type === 'application_rejected' || notification.type === 'review_completed') {
-      // For submitters: Pre-fill form with their original data
+      // For submitters: Show feedback modal first
       setLoadingApplication(true);
       try {
         // Fetch the application details
@@ -156,17 +161,9 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
           const data = await response.json();
           const application = data.application;
           
-          // Trigger edit event to pre-fill the Golden Visa form
-          const editEvent = new CustomEvent('edit-golden-visa-application', {
-            detail: {
-              applicationId: application.id,
-              formData: application.form_data
-            }
-          });
-          window.dispatchEvent(editEvent);
-          
-          // Switch to Golden Visa tab
-          onTabChange('golden-visa');
+          // Show feedback modal to the submitter
+          setFeedbackApplication(application);
+          setFeedbackModalOpen(true);
         } else {
           console.error('Failed to fetch application:', response.statusText);
         }
@@ -176,6 +173,29 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
         setLoadingApplication(false);
       }
     }
+  };
+
+  // Handle edit form action from feedback modal
+  const handleEditFormFromFeedback = () => {
+    if (!feedbackApplication) return;
+    
+    // Close feedback modal
+    setFeedbackModalOpen(false);
+    
+    // Trigger edit event to pre-fill the Golden Visa form
+    const editEvent = new CustomEvent('edit-golden-visa-application', {
+      detail: {
+        applicationId: feedbackApplication.id,
+        formData: feedbackApplication.form_data
+      }
+    });
+    window.dispatchEvent(editEvent);
+    
+    // Switch to Golden Visa tab
+    onTabChange('golden-visa');
+    
+    // Clear feedback application
+    setFeedbackApplication(null);
   };
 
   // Handle review actions
@@ -233,7 +253,12 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
                 <div className="flex items-center justify-between w-full">
                   <div 
                     className="flex items-center cursor-pointer flex-1"
-                    onClick={() => handleNavClick('#profile')}
+                    onClick={() => {
+                      // Don't navigate to profile if notification panel is open
+                      if (!isNotificationPanelOpen) {
+                        handleNavClick('#profile');
+                      }
+                    }}
                   >
                     <div className="flex items-center justify-center w-8 h-8 mr-2">
                       <Image 
@@ -323,6 +348,17 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
         }}
         application={selectedApplication}
         onReviewAction={handleReviewAction}
+      />
+      
+      {/* Feedback Modal - for submitters receiving feedback */}
+      <FeedbackModal
+        isOpen={feedbackModalOpen}
+        onClose={() => {
+          setFeedbackModalOpen(false);
+          setFeedbackApplication(null);
+        }}
+        application={feedbackApplication}
+        onEditForm={handleEditFormFromFeedback}
       />
     </>
   )

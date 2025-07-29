@@ -591,7 +591,36 @@ const GoldenVisaTab: React.FC = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         applicationId={reviewApp.application?.id?.toString() || 'new'}
-        applicationTitle={`${clientInfo.companyName || `${watchedData.firstName} ${watchedData.lastName}`.trim()} - Golden Visa`}
+        applicationTitle={(() => {
+          // Generate title using PDF naming convention
+          const date = new Date(watchedData.date || new Date());
+          const yy = date.getFullYear().toString().slice(-2);
+          const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+          const dd = date.getDate().toString().padStart(2, '0');
+          const formattedDate = `${yy}${mm}${dd}`;
+          
+          let nameForTitle = '';
+          if (clientInfo.companyName) {
+            nameForTitle = clientInfo.companyName;
+          } else if (watchedData.lastName && watchedData.firstName) {
+            nameForTitle = `${watchedData.lastName} ${watchedData.firstName}`;
+          } else if (watchedData.firstName) {
+            nameForTitle = watchedData.firstName;
+          } else if (watchedData.lastName) {
+            nameForTitle = watchedData.lastName;
+          } else {
+            nameForTitle = 'Client';
+          }
+          
+          const visaTypeMap: { [key: string]: string } = {
+            'property-investment': 'property',
+            'time-deposit': 'deposit',
+            'skilled-employee': 'skilled'
+          };
+          
+          const visaTypeFormatted = visaTypeMap[watchedData.visaType] || watchedData.visaType;
+          return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+        })()}
         onSubmit={reviewApp.submitForReview}
       />
     </div>

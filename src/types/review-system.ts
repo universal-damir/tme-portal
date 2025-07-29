@@ -26,7 +26,8 @@ export interface Application {
   reviewer_id?: number;
   
   // Review details
-  review_comments?: string;
+  submitter_message?: string; // Original message from submitter when submitting for review
+  review_comments?: string; // Reviewer's feedback after review
   urgency: UrgencyLevel;
   
   // Timestamps

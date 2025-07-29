@@ -264,15 +264,23 @@ export const useGoldenVisaApplication = ({
         throw new Error(`Failed to submit for review: ${response.statusText}`);
       }
       
-      const updatedApp = await response.json();
-      setApplication(updatedApp);
+      const result = await response.json();
+      
+      // Update application status locally since API doesn't return updated app
+      if (application) {
+        setApplication({
+          ...application,
+          status: 'pending_review' as const,
+          submitted_at: new Date().toISOString()
+        });
+      }
       
       toast.success('Submitted for Review', {
         description: 'Your Golden Visa application has been submitted for review.'
       });
       
       if (config.debugMode) {
-        console.log('Submitted Golden Visa application for review:', updatedApp.id);
+        console.log('Submitted Golden Visa application for review:', result);
       }
       
       return true;
