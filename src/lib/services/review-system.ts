@@ -257,12 +257,50 @@ export class ApplicationsService {
           `, [submitterComments, submission.application_id]);
         }
         
-        // Get application title for notification
+        // Get application data for notification title generation
         const appResult = await pool.query(`
-          SELECT title FROM applications WHERE id = $1
+          SELECT title, form_data FROM applications WHERE id = $1
         `, [submission.application_id]);
         
-        const applicationTitle = appResult.rows.length > 0 ? appResult.rows[0].title : 'Application';
+        let applicationTitle = 'Application';
+        
+        if (appResult.rows.length > 0) {
+          try {
+            const formData = appResult.rows[0].form_data;
+            
+            // Generate title using same PDF naming convention as GoldenVisaTab
+            const date = new Date(formData.date || new Date());
+            const yy = date.getFullYear().toString().slice(-2);
+            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dd = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${yy}${mm}${dd}`;
+            
+            let nameForTitle = '';
+            if (formData.companyName) {
+              nameForTitle = formData.companyName;
+            } else if (formData.lastName && formData.firstName) {
+              nameForTitle = `${formData.lastName} ${formData.firstName}`;
+            } else if (formData.firstName) {
+              nameForTitle = formData.firstName;
+            } else if (formData.lastName) {
+              nameForTitle = formData.lastName;
+            } else {
+              nameForTitle = 'Client';
+            }
+            
+            const visaTypeMap: { [key: string]: string } = {
+              'property-investment': 'property',
+              'time-deposit': 'deposit', 
+              'skilled-employee': 'skilled'
+            };
+            
+            const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+            applicationTitle = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+          } catch (error) {
+            console.error('Error generating notification title:', error);
+            applicationTitle = appResult.rows[0].title || 'Application';
+          }
+        }
         
         // Create notification for reviewer
         await NotificationsService.create({
