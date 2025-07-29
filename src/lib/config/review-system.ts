@@ -113,7 +113,7 @@ export function getReviewSystemConfig(): ReviewSystemConfig {
     
     // Polling configuration
     notificationPollingInterval: parseInt(
-      getEnvVar('NOTIFICATION_POLLING_INTERVAL') || '30000'
+      getEnvVar('NOTIFICATION_POLLING_INTERVAL') || '60000'
     ),
     maxNotificationsToFetch: parseInt(
       getEnvVar('MAX_NOTIFICATIONS_FETCH') || '50'

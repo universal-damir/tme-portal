@@ -27,8 +27,12 @@ interface NotificationProviderProps {
   children: React.ReactNode;
 }
 
+// Global polling instance check to prevent multiple pollers
+let globalPollingInstance: string | null = null;
+
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const config = useReviewSystemConfig();
+  const instanceId = React.useRef(Math.random().toString(36).substring(7));
   
   const [state, setState] = useState({
     notifications: [] as Notification[],
@@ -50,9 +54,9 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const consecutiveErrorsRef = useRef(0);
   
   // Constants
-  const BASE_INTERVAL = 30000; // 30 seconds
-  const MAX_INTERVAL = 300000; // 5 minutes
-  const MAX_CONSECUTIVE_ERRORS = 5;
+  const BASE_INTERVAL = 60000; // 60 seconds 
+  const MAX_INTERVAL = 600000; // 10 minutes
+  const MAX_CONSECUTIVE_ERRORS = 3;
 
   // Tab visibility detection
   useEffect(() => {
@@ -120,8 +124,8 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
       // Handle different response statuses
       if (response.status === 429) {
-        // Rate limited - increase backoff
-        rateLimitBackoffRef.current = Math.min(rateLimitBackoffRef.current * 2, 10);
+        // Rate limited - aggressive backoff
+        rateLimitBackoffRef.current = Math.min(rateLimitBackoffRef.current * 3, 20);
         currentIntervalRef.current = Math.min(BASE_INTERVAL * rateLimitBackoffRef.current, MAX_INTERVAL);
         consecutiveErrorsRef.current++;
         
@@ -129,14 +133,21 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
           ...prev,
           isLoading: false,
           connectionStatus: 'rate_limited',
-          error: null
+          error: 'Rate limited - reducing polling frequency'
         }));
         
         if (config.debugMode) {
-          console.log(`🔧 Rate limited (429) - backing off to ${currentIntervalRef.current}ms`);
+          console.log(`🔧 Rate limited (429) - aggressive backoff to ${(currentIntervalRef.current / 1000 / 60).toFixed(1)} minutes`);
         }
         
-        // Don't reschedule here - let the normal interval continue
+        // Stop polling temporarily for rate limited cases
+        if (rateLimitBackoffRef.current > 5) {
+          setTimeout(() => {
+            if (isPolling) scheduleNextPoll();
+          }, currentIntervalRef.current);
+          stopPolling();
+        }
+        
         return;
       }
 
@@ -231,6 +242,15 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   const startPolling = useCallback(() => {
     if (!config.canShowNotifications || isPolling) return;
 
+    // Check if another instance is already polling
+    if (globalPollingInstance && globalPollingInstance !== instanceId.current) {
+      if (config.debugMode) {
+        console.log(`🔧 Another notification polling instance is active (${globalPollingInstance}), skipping`);
+      }
+      return;
+    }
+
+    globalPollingInstance = instanceId.current;
     setIsPolling(true);
     
     // Reset intervals on start
@@ -245,7 +265,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     scheduleNextPoll();
 
     if (config.debugMode) {
-      console.log(`🔧 Started centralized notification polling every ${currentIntervalRef.current}ms`);
+      console.log(`🔧 Started centralized notification polling every ${currentIntervalRef.current}ms (instance: ${instanceId.current})`);
     }
   }, [config.canShowNotifications, config.debugMode, isPolling, scheduleNextPoll]); // Removed fetchNotifications
 
@@ -259,10 +279,15 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
       abortControllerRef.current.abort();
     }
     
+    // Clear global instance if this instance was polling
+    if (globalPollingInstance === instanceId.current) {
+      globalPollingInstance = null;
+    }
+    
     setIsPolling(false);
 
     if (config.debugMode) {
-      console.log('🔧 Stopped centralized notification polling');
+      console.log(`🔧 Stopped centralized notification polling (instance: ${instanceId.current})`);
     }
   }, [config.debugMode]);
 

@@ -196,13 +196,6 @@ export function TMEPortalHeader({
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <div className="hidden md:flex flex-col text-right">
-                    <span className="text-sm font-medium">{user.full_name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {user.designation}
-                    </span>
-                  </div>
-                  
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <UserAvatar user={user} size="sm" />
                   </Button>

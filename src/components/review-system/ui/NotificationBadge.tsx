@@ -53,7 +53,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
         ${sizeClasses[size]}
         rounded-full transition-all duration-200
         hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2
-        ${hasNotifications ? 'text-yellow-600' : 'text-gray-500'}
+        ${hasNotifications ? 'text-blue-600' : 'text-gray-400'}
         ${className}
       `}
       style={{
@@ -64,29 +64,12 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
       disabled={isLoading}
       aria-label={`Notifications${hasNotifications ? ` (${unreadCount} unread)` : ''}`}
     >
-      {/* Bell Icon */}
-      <AnimatePresence mode="wait">
-        {hasNotifications ? (
-          <motion.div
-            key="bell-ring"
-            initial={{ rotate: 0 }}
-            animate={{ rotate: [0, -10, 10, -10, 0] }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, repeat: isLoading ? 0 : Infinity, repeatDelay: 3 }}
-          >
-            <BellRing className={sizeClasses[size]} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="bell"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <Bell className={sizeClasses[size]} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Bell Icon - Static, no animation */}
+      {hasNotifications ? (
+        <Bell className={sizeClasses[size]} />
+      ) : (
+        <Bell className={sizeClasses[size]} />
+      )}
 
       {/* Notification Count Badge */}
       <AnimatePresence>
