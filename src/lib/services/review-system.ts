@@ -257,11 +257,18 @@ export class ApplicationsService {
           `, [submitterComments, submission.application_id]);
         }
         
+        // Get application title for notification
+        const appResult = await pool.query(`
+          SELECT title FROM applications WHERE id = $1
+        `, [submission.application_id]);
+        
+        const applicationTitle = appResult.rows.length > 0 ? appResult.rows[0].title : 'Application';
+        
         // Create notification for reviewer
         await NotificationsService.create({
           user_id: submission.reviewer_id,
           type: 'review_requested',
-          title: 'New Application for Review',
+          title: applicationTitle,
           message: submission.comments || 'A new application has been submitted for your review.',
           application_id: submission.application_id
         });
