@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Download, Eye, FileText } from 'lucide-react';
+import { Download, Eye, FileText, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { GoldenVisaData, GOLDEN_VISA_DEFAULTS, GoldenVisaType } from '@/types/golden-visa';
@@ -19,6 +19,8 @@ import {
   NOCRequirementsSection,
   DependentVisasSection
 } from '../../golden-visa';
+import { useGoldenVisaApplication } from '@/hooks/useGoldenVisaApplication';
+import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 
 // Progress tracking interface
 interface PDFGenerationProgress {
@@ -35,6 +37,8 @@ const GoldenVisaTab: React.FC = () => {
     progress: 0,
     isVisible: false
   });
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+
 
   // Form state management
   const {
@@ -85,6 +89,12 @@ const GoldenVisaTab: React.FC = () => {
   });
 
   const watchedData = watch();
+
+  // Review system integration
+  const reviewApp = useGoldenVisaApplication({
+    formData: watchedData,
+    clientName: clientInfo.companyName || `${watchedData.firstName} ${watchedData.lastName}`.trim()
+  });
 
   // Initialize form with shared client context (only once on mount)
   const initializedRef = useRef(false);
@@ -384,6 +394,33 @@ const GoldenVisaTab: React.FC = () => {
     };
   }, [watchedData]);
 
+  // Listen for edit application events from review modal or notifications
+  React.useEffect(() => {
+    const handleEditApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Pre-filling form with application data:', applicationId);
+      
+      // Pre-fill the form with the application data
+      Object.keys(formData).forEach((key) => {
+        if (key in watchedData) {
+          setValue(key as any, formData[key]);
+        }
+      });
+      
+      // Show a toast notification to inform the user
+      toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
+        duration: 4000,
+        position: 'top-center'
+      });
+    };
+
+    window.addEventListener('edit-golden-visa-application', handleEditApplication);
+
+    return () => {
+      window.removeEventListener('edit-golden-visa-application', handleEditApplication);
+    };
+  }, [setValue]);
+
   return (
     <div className="space-y-8" style={{ fontFamily: 'Inter, sans-serif' }}>
 
@@ -479,7 +516,7 @@ const GoldenVisaTab: React.FC = () => {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="text-center"
       >
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <div className="flex justify-center space-x-4">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -498,6 +535,29 @@ const GoldenVisaTab: React.FC = () => {
               <>
                 <Eye className="h-5 w-5" />
                 <span>Preview PDF</span>
+              </>
+            )}
+          </motion.button>
+          
+          {/* Submit for Review Button */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            type="button"
+            onClick={() => setIsReviewModalOpen(true)}
+            disabled={reviewApp.isLoading}
+            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ backgroundColor: '#F59E0B' }}
+          >
+            {reviewApp.isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Send className="h-5 w-5" />
+                <span>Submit for Review</span>
               </>
             )}
           </motion.button>
@@ -525,6 +585,15 @@ const GoldenVisaTab: React.FC = () => {
           </motion.button>
         </div>
       </motion.div>
+      
+      {/* Review Submission Modal */}
+      <ReviewSubmissionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        applicationId={reviewApp.application?.id?.toString() || 'new'}
+        applicationTitle={`${clientInfo.companyName || `${watchedData.firstName} ${watchedData.lastName}`.trim()} - Golden Visa`}
+        onSubmit={reviewApp.submitForReview}
+      />
     </div>
   );
 };

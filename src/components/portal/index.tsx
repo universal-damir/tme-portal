@@ -76,6 +76,22 @@ export default function TMEPortal() {
     }
   }, [user, loading, router])
 
+  // Listen for tab switching events from review modal
+  useEffect(() => {
+    const handleSwitchTab = (event: any) => {
+      const { tab } = event.detail;
+      if (tab) {
+        setActiveTab(tab);
+      }
+    };
+
+    window.addEventListener('switch-tab', handleSwitchTab);
+
+    return () => {
+      window.removeEventListener('switch-tab', handleSwitchTab);
+    };
+  }, [setActiveTab]);
+
   // Show loading while checking authentication
   if (loading) {
     return (

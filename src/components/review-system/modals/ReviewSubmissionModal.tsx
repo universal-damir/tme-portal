@@ -1,0 +1,327 @@
+// Review Submission Modal Component
+// Safe UI component for submitting applications for review
+
+'use client';
+
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Send, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ReviewerDropdown } from '../ui/ReviewerDropdown';
+import { Reviewer, UrgencyLevel } from '@/types/review-system';
+import { useReviewSystemConfig } from '@/lib/config/review-system';
+
+interface ReviewSubmissionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  applicationId: string;
+  applicationTitle: string;
+  onSubmit: (submission: {
+    reviewer_id: number;
+    urgency: UrgencyLevel;
+    comments?: string;
+  }) => Promise<boolean>;
+}
+
+export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
+  isOpen,
+  onClose,
+  applicationId,
+  applicationTitle,
+  onSubmit
+}) => {
+  const config = useReviewSystemConfig();
+  const [selectedReviewer, setSelectedReviewer] = useState<{ id: number; reviewer: Reviewer } | null>(null);
+  const [urgency, setUrgency] = useState<UrgencyLevel>('medium');
+  const [comments, setComments] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // Don't render if feature is disabled
+  if (!config.canShowReviewComponents || !config.showReviewModal) {
+    return null;
+  }
+
+  const resetForm = () => {
+    setSelectedReviewer(null);
+    setUrgency('medium');
+    setComments('');
+    setError(null);
+    setSuccess(false);
+    setIsSubmitting(false);
+  };
+
+  const handleClose = () => {
+    if (!isSubmitting) {
+      resetForm();
+      onClose();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('🔧 ReviewSubmissionModal: Form submitted', { selectedReviewer, urgency, comments });
+    
+    if (!selectedReviewer) {
+      setError('Please select a reviewer');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const success = await onSubmit({
+        reviewer_id: selectedReviewer.id,
+        urgency,
+        comments: comments.trim() || undefined
+      });
+
+      if (success) {
+        setSuccess(true);
+        setTimeout(() => {
+          handleClose();
+        }, 2000);
+      } else {
+        setError('Failed to submit for review. Please try again.');
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const urgencyOptions: { value: UrgencyLevel; label: string; color: string; description: string }[] = [
+    {
+      value: 'low',
+      label: 'Low Priority',
+      color: '#6B7280',
+      description: 'No rush - can be reviewed when convenient'
+    },
+    {
+      value: 'medium',
+      label: 'Medium Priority',
+      color: '#F59E0B',
+      description: 'Standard review timeline expected'
+    },
+    {
+      value: 'high',
+      label: 'High Priority',
+      color: '#EF4444',
+      description: 'Urgent - requires immediate attention'
+    }
+  ];
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backup-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={handleClose}
+          />
+
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+          >
+            <div
+              className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden max-h-[90vh] overflow-y-auto pointer-events-auto"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
+                    Submit for Review
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1 truncate">
+                    {applicationTitle}
+                  </p>
+                </div>
+                
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleClose}
+                  disabled={isSubmitting}
+                  className="p-2 rounded-full hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 py-4">
+              {success ? (
+                /* Success State */
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center py-8"
+                >
+                  <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Submitted Successfully!
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {selectedReviewer?.reviewer.full_name} has been notified and will review your application.
+                  </p>
+                </motion.div>
+              ) : (
+                /* Form */
+                <form 
+                  onSubmit={handleSubmit} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.target !== e.currentTarget) {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="space-y-6"
+                >
+                  {/* Reviewer Selection */}
+                  <ReviewerDropdown
+                    value={selectedReviewer?.id}
+                    onChange={(id, reviewer) => {
+                      console.log('🔧 ReviewSubmissionModal: Reviewer selected', { id, reviewer });
+                      setSelectedReviewer({ id, reviewer });
+                      setError(null);
+                    }}
+                    error={error && !selectedReviewer ? 'Please select a reviewer' : undefined}
+                  />
+
+                  {/* Urgency Selection */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                      Priority Level *
+                    </label>
+                    <div className="space-y-2">
+                      {urgencyOptions.map((option) => (
+                        <motion.label
+                          key={option.value}
+                          whileHover={{ scale: 1.01 }}
+                          className={`
+                            flex items-start space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200
+                            ${urgency === option.value 
+                              ? 'border-[#243F7B] bg-blue-50' 
+                              : 'border-gray-200 hover:border-gray-300'
+                            }
+                          `}
+                        >
+                          <input
+                            type="radio"
+                            name="urgency"
+                            value={option.value}
+                            checked={urgency === option.value}
+                            onChange={(e) => setUrgency(e.target.value as UrgencyLevel)}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span 
+                                className="text-sm font-medium"
+                                style={{ color: urgency === option.value ? '#243F7B' : '#374151' }}
+                              >
+                                {option.label}
+                              </span>
+                              <div 
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: option.color }}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">
+                              {option.description}
+                            </p>
+                          </div>
+                        </motion.label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Comments (Optional) */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                      Comments (Optional)
+                    </label>
+                    <textarea
+                      value={comments}
+                      onChange={(e) => setComments(e.target.value)}
+                      placeholder="Add any specific instructions or context for the reviewer..."
+                      rows={3}
+                      className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 resize-none"
+                      style={{
+                        borderColor: '#e5e7eb'
+                      }}
+                      onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                      onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center space-x-2 p-3 bg-red-50 rounded-lg border border-red-200"
+                    >
+                      <AlertTriangle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                      <p className="text-sm text-red-700">{error}</p>
+                    </motion.div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex space-x-3 pt-4">
+                    <motion.button
+                      whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                      whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                      type="button"
+                      onClick={handleClose}
+                      disabled={isSubmitting}
+                      className="flex-1 px-4 py-3 rounded-lg font-semibold text-gray-700 transition-all duration-200 disabled:opacity-50"
+                      style={{ backgroundColor: '#F3F4F6' }}
+                    >
+                      Cancel
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                      whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                      type="submit"
+                      disabled={isSubmitting || !selectedReviewer}
+                      className="flex-1 px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50 flex items-center justify-center space-x-2"
+                      style={{ backgroundColor: '#243F7B' }}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Submitting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>Submit for Review</span>
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                </form>
+              )}
+            </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+};

@@ -8,7 +8,10 @@
     "dev:docker": "./scripts/dev-docker.sh", 
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:migration": "node scripts/test-review-migration.js",
+    "migrate:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system.sql",
+    "rollback:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system_rollback.sql"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
