@@ -72,6 +72,7 @@ export interface Reviewer {
   full_name: string;
   email: string;
   department: string;
+  employee_code: string;
   is_universal?: boolean; // For UH user Uwe
 }
 

@@ -104,10 +104,6 @@ const NotificationItem: React.FC<{
                 {notification.message}
               </p>
               
-              {/* Timestamp */}
-              <p className="text-xs text-gray-500 mt-2">
-                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-              </p>
             </div>
 
             {/* Actions */}

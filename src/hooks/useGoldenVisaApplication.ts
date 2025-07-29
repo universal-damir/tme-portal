@@ -275,10 +275,6 @@ export const useGoldenVisaApplication = ({
         });
       }
       
-      toast.success('Submitted for Review', {
-        description: 'Your Golden Visa application has been submitted for review.'
-      });
-      
       if (config.debugMode) {
         console.log('Submitted Golden Visa application for review:', result);
       }

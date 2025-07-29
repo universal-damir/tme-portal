@@ -459,7 +459,7 @@ export class ReviewersService {
         // Get department colleagues + UH user Uwe Hohmann
         // Query gets: 1) Same department colleagues (excluding self) 2) UH user Uwe Hohmann
         const reviewersResult = await pool.query(`
-          SELECT id, full_name, email, department, role
+          SELECT id, full_name, email, department, role, employee_code
           FROM users 
           WHERE id != $1 
           AND (department = $2 OR email = 'uwe@TME-Services.com')
@@ -477,6 +477,7 @@ export class ReviewersService {
           full_name: row.full_name,
           email: row.email,
           department: row.department,
+          employee_code: row.employee_code,
           is_universal: row.email === 'uwe@TME-Services.com'
         })) as Reviewer[];
         
@@ -489,6 +490,7 @@ export class ReviewersService {
               full_name: 'UH - Uwe Hohmann',
               email: 'uwe@TME-Services.com',
               department: 'Management',
+              employee_code: 'UH',
               is_universal: true
             },
             {
@@ -496,6 +498,7 @@ export class ReviewersService {
               full_name: 'Test Reviewer',
               email: 'test@TME-Services.com',
               department: userDepartment,
+              employee_code: 'TR',
               is_universal: false
             }
           ];
@@ -513,6 +516,7 @@ export class ReviewersService {
             full_name: 'UH - Uwe Hohmann',
             email: 'uwe@TME-Services.com',
             department: 'Management',
+            employee_code: 'UH',
             is_universal: true
           }
         ];

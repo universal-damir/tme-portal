@@ -256,7 +256,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                         type="button"
                         onClick={handleEditForm}
                         className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
-                        style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}
+                        style={{ 
+                          backgroundColor: isApproved ? '#DCFCE7' : '#FEE2E2', 
+                          color: isApproved ? '#16A34A' : '#DC2626' 
+                        }}
                       >
                         <Edit3 className="w-4 h-4" />
                         <span>Go to Form Editor</span>

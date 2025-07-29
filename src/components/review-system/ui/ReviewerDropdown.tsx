@@ -128,12 +128,21 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
             <>
               <div className="relative w-6 h-6 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                 <Image
-                  src="/api/photos/default"
+                  src={`/api/photos/${encodeURIComponent(selectedReviewer.employee_code)}`}
                   alt={selectedReviewer.full_name}
                   width={24}
                   height={24}
                   className="object-cover"
                   unoptimized
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.className = 'relative w-6 h-6 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0';
+                      parent.innerHTML = `<span class="text-white text-xs font-medium">${selectedReviewer.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}</span>`;
+                    }
+                  }}
                 />
                 {selectedReviewer.is_universal && (
                   <div className="absolute -top-1 -right-1">
@@ -144,10 +153,6 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
               <div className="flex flex-col items-start min-w-0 flex-1">
                 <span className="text-sm font-medium text-gray-900 truncate">
                   {selectedReviewer.full_name}
-                </span>
-                <span className="text-xs text-gray-500 truncate">
-                  {selectedReviewer.department}
-                  {selectedReviewer.is_universal && ' (Universal Access)'}
                 </span>
               </div>
             </>
@@ -237,12 +242,21 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
                       >
                         <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
                           <Image
-                            src="/api/photos/default"
+                            src={`/api/photos/${encodeURIComponent(reviewer.employee_code)}`}
                             alt={reviewer.full_name}
                             width={32}
                             height={32}
                             className="object-cover"
                             unoptimized
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                parent.className = 'relative w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0';
+                                parent.innerHTML = `<span class="text-white text-sm font-medium">${reviewer.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}</span>`;
+                              }
+                            }}
                           />
                           {reviewer.is_universal && (
                             <div className="absolute -top-1 -right-1">
@@ -260,10 +274,6 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
                               <Check className="w-4 h-4" style={{ color: '#243F7B' }} />
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 truncate">
-                            {reviewer.department}
-                            {reviewer.is_universal && ' • Universal Access'}
-                          </p>
                         </div>
                       </motion.button>
                     ))

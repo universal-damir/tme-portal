@@ -24,17 +24,11 @@ import {
   SidebarGroupLabel,
   SidebarGroupContent,
 } from '@/components/ui/sidebar'
-import { Button } from '@/components/ui/button'
 import { TabId } from '@/types/portal'
 import { NavMain } from './navigation/NavMain'
 import { NavUser } from './navigation/NavUser'
 import { useAuth } from '@/contexts/AuthContext'
 import { usePermissions } from '@/hooks/usePermissions'
-import { NotificationBadge } from '@/components/review-system/ui/NotificationBadge'
-import { NotificationPanel } from '@/components/review-system/ui/NotificationPanel'
-import { ReviewModal } from '@/components/review-system/modals/ReviewModal'
-import { FeedbackModal } from '@/components/review-system/modals/FeedbackModal'
-import { Notification, Application } from '@/types/review-system'
 
 // Base navigation items available to all authenticated users
 const baseNavItems = [
@@ -88,8 +82,6 @@ const adminNavItems = [
   },
 ];
 
-const secondaryNavItems: Array<{title: string, url: string, icon: any, external?: boolean}> = [];
-
 interface TMEPortalSidebarProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
@@ -98,16 +90,6 @@ interface TMEPortalSidebarProps {
 export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarProps) {
   const { user } = useAuth()
   const { canAccessFeature } = usePermissions()
-  const [isNotificationPanelOpen, setIsNotificationPanelOpen] = React.useState(false)
-  
-  // Review modal state - centralized here
-  const [reviewModalOpen, setReviewModalOpen] = React.useState(false)
-  const [selectedApplication, setSelectedApplication] = React.useState<Application | null>(null)
-  const [loadingApplication, setLoadingApplication] = React.useState(false)
-  
-  // Feedback modal state - for submitters receiving feedback
-  const [feedbackModalOpen, setFeedbackModalOpen] = React.useState(false)
-  const [feedbackApplication, setFeedbackApplication] = React.useState<Application | null>(null)
 
   const handleNavClick = (url: string, external?: boolean) => {
     if (external) {
@@ -116,114 +98,6 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
     }
     const tabId = url.replace('#', '') as TabId;
     onTabChange(tabId);
-  };
-
-  // Handle notification clicks - different behavior for reviewers vs submitters
-  const handleNotificationClick = async (notification: Notification) => {
-    if (!notification.application_id) {
-      return;
-    }
-
-    // Close notification panel
-    setIsNotificationPanelOpen(false);
-
-    if (notification.type === 'review_requested') {
-      // For reviewers: Open review modal
-      // Close any existing modal first
-      if (reviewModalOpen) {
-        setReviewModalOpen(false);
-        setSelectedApplication(null);
-      }
-
-      setLoadingApplication(true);
-      try {
-        // Fetch the application details
-        const response = await fetch(`/api/applications/${notification.application_id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setSelectedApplication(data.application);
-          setReviewModalOpen(true);
-        } else {
-          console.error('Failed to fetch application:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching application:', error);
-      } finally {
-        setLoadingApplication(false);
-      }
-    } else if (notification.type === 'application_approved' || notification.type === 'application_rejected' || notification.type === 'review_completed') {
-      // For submitters: Show feedback modal first
-      setLoadingApplication(true);
-      try {
-        // Fetch the application details
-        const response = await fetch(`/api/applications/${notification.application_id}`);
-        if (response.ok) {
-          const data = await response.json();
-          const application = data.application;
-          
-          // Show feedback modal to the submitter
-          setFeedbackApplication(application);
-          setFeedbackModalOpen(true);
-        } else {
-          console.error('Failed to fetch application:', response.statusText);
-        }
-      } catch (error) {
-        console.error('Error fetching application:', error);
-      } finally {
-        setLoadingApplication(false);
-      }
-    }
-  };
-
-  // Handle edit form action from feedback modal
-  const handleEditFormFromFeedback = () => {
-    if (!feedbackApplication) return;
-    
-    // Close feedback modal
-    setFeedbackModalOpen(false);
-    
-    // Trigger edit event to pre-fill the Golden Visa form
-    const editEvent = new CustomEvent('edit-golden-visa-application', {
-      detail: {
-        applicationId: feedbackApplication.id,
-        formData: feedbackApplication.form_data
-      }
-    });
-    window.dispatchEvent(editEvent);
-    
-    // Switch to Golden Visa tab
-    onTabChange('golden-visa');
-    
-    // Clear feedback application
-    setFeedbackApplication(null);
-  };
-
-  // Handle review actions
-  const handleReviewAction = async (action: 'approve' | 'reject', comments: string): Promise<boolean> => {
-    if (!selectedApplication) return false;
-
-    try {
-      const response = await fetch(`/api/applications/${selectedApplication.id}/review`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action,
-          comments
-        }),
-      });
-
-      if (response.ok) {
-        return true;
-      } else {
-        console.error('Failed to submit review:', response.statusText);
-        return false;
-      }
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      return false;
-    }
   };
 
   const visibleNavItems = baseNavItems.filter(item => canAccessFeature(item.feature));
@@ -237,8 +111,7 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
   };
 
   return (
-    <>
-      <Sidebar 
+    <Sidebar 
         collapsible="offcanvas" 
         variant="inset"
       >
@@ -253,12 +126,7 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
                 <div className="flex items-center justify-between w-full">
                   <div 
                     className="flex items-center cursor-pointer flex-1"
-                    onClick={() => {
-                      // Don't navigate to profile if notification panel is open
-                      if (!isNotificationPanelOpen) {
-                        handleNavClick('#profile');
-                      }
-                    }}
+                    onClick={() => handleNavClick('#profile')}
                   >
                     <div className="flex items-center justify-center w-8 h-8 mr-2">
                       <Image 
@@ -270,25 +138,6 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
                       />
                     </div>
                     <span className="text-base font-semibold">TME Portal</span>
-                  </div>
-                  
-                  {/* Notification Badge */}
-                  <div className="relative">
-                    <NotificationBadge
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        setIsNotificationPanelOpen(!isNotificationPanelOpen);
-                      }}
-                      size="md"
-                    />
-                    
-                    {/* Notification Panel */}
-                    <NotificationPanel
-                      isOpen={isNotificationPanelOpen}
-                      onClose={() => setIsNotificationPanelOpen(false)}
-                      onNotificationClick={handleNotificationClick}
-                    />
                   </div>
                 </div>
               </SidebarMenuButton>
@@ -338,28 +187,5 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
           {user && <NavUser user={user} />}
         </SidebarFooter>
       </Sidebar>
-      
-      {/* Review Modal - centrally managed */}
-      <ReviewModal
-        isOpen={reviewModalOpen}
-        onClose={() => {
-          setReviewModalOpen(false);
-          setSelectedApplication(null);
-        }}
-        application={selectedApplication}
-        onReviewAction={handleReviewAction}
-      />
-      
-      {/* Feedback Modal - for submitters receiving feedback */}
-      <FeedbackModal
-        isOpen={feedbackModalOpen}
-        onClose={() => {
-          setFeedbackModalOpen(false);
-          setFeedbackApplication(null);
-        }}
-        application={feedbackApplication}
-        onEditForm={handleEditFormFromFeedback}
-      />
-    </>
   )
 } 
