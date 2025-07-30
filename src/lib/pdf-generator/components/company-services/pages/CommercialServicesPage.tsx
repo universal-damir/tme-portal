@@ -53,7 +53,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
             <Text style={styles.sectionTitle}>Commercial Services</Text>
             
             <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-              As an additional offering, we provide comprehensive handling of your company's routine financial tasks - such as reviewing and processing monthly payments for services like Etisalat, du, DEWA, and others, as well as managing salary disbursements via cheque or online banking. This service allows the company's management to focus on core operations and sales activities. It is already in place with many of our clients and is available at a flat monthly rate of AED {formatCurrency(accountingServices.commercialServicesFee!)} {formatSecondaryCurrency(accountingServices.commercialServicesFee!, exchangeRate, secondaryCurrency)}, or alternatively based on actual hours worked.
+              As an additional offering, we provide comprehensive handling of your company's financial tasks - such as reviewing and processing monthly payments for services like Etisalat, du, DEWA, and others, as well as managing salary disbursements via cheque or online banking. This service allows the company's management to focus on core operations and sales activities. It is already in place with many of our clients and is available at a flat monthly rate of AED {formatCurrency(accountingServices.commercialServicesFee!)} {formatSecondaryCurrency(accountingServices.commercialServicesFee!, exchangeRate, secondaryCurrency)}, or alternatively based on actual hours worked.
             </Text>
           </View>
         )}

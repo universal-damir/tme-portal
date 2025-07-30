@@ -217,7 +217,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
                                 type="button"
                                 whileHover={{ backgroundColor: '#f3f4f6' }}
                                 onClick={() => {
-                                  setValue('backOfficeServices.teamSize', key);
+                                  setValue('backOfficeServices.teamSize', key as 'micro' | 'small' | 'medium' | 'large');
                                   setIsDropdownOpen(false);
                                 }}
                                 className="w-full px-3 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors duration-150"
@@ -247,7 +247,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
                   {currentTeamConfig && (
                     <div>
                       <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
-                        {currentTeamConfig.label} - Monthly Pricing
+                        Monthly Pricing
                       </label>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {currentTeamConfig.tiers.map((tier, index) => (

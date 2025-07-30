@@ -30,14 +30,14 @@ const services = [
     description: 'We help you obtain your UAE Visa & Emirates ID'
   },
   {
-    icon: 'compliance.png',
-    title: 'Compliance',
-    description: 'Expert assistance for regulatory\ncompliance in the UAE'
-  },
-  {
     icon: 'backoffice.png',
     title: 'Back-Office (PRO)',
     description: 'Back-Office solutions to optimize your\nbusiness processes'
+  },
+  {
+    icon: 'compliance.png',
+    title: 'Compliance',
+    description: 'Expert assistance for regulatory\ncompliance in the UAE'
   },
   {
     icon: 'restructuring.png',

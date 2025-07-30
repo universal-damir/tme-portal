@@ -82,6 +82,10 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Back-Office (PRO) Services</Text>
       
+      {/* Note */}
+      <Text style={[styles.introText, { marginTop: 12, fontStyle: 'italic' }]}>
+        Note: All pricing is based on monthly fees with a 12-month minimum commitment requirement.
+      </Text>
       {/* Service Description */}
       <Text style={styles.introText}>
         Managing government-related processes in the UAE can be time-consuming and complex. 
@@ -90,7 +94,7 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
       </Text>
       
       <Text style={styles.introText}>
-        These services cover activities like trade license renewal, visa applications and renewals, 
+        These services cover activities like trade lease renewal, visa applications and renewals, 
         labor contracts, and more. By outsourcing these tasks to us, the management team can stay 
         focused on core business operations such as sales and growth.
       </Text>
@@ -125,10 +129,6 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
         </View>
       </View>
 
-      {/* Note */}
-      <Text style={[styles.introText, { marginTop: 12, fontStyle: 'italic' }]}>
-        Note: All pricing is based on monthly fees with a 12-month minimum commitment requirement.
-      </Text>
     </View>
   );
 }; 

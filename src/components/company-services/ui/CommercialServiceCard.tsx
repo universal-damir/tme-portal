@@ -54,7 +54,7 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
-          className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+          className="p-3 bg-white rounded-lg border border-gray-200"
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <div>
@@ -123,7 +123,7 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+          className="p-3 bg-white rounded-lg border border-gray-200"
         >
           <div className="space-y-3">
             <motion.label 
@@ -187,9 +187,9 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
                 <div>
                   <motion.label 
                     whileHover={{ scale: 1.01 }}
-                    className="flex items-start space-x-2 cursor-pointer mb-2"
+                    className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150 mb-2"
                   >
-                    <div className="relative mt-0.5">
+                    <div className="relative">
                       <input
                         type="checkbox"
                         {...register('accountingServices.payrollServicesEnabled')}
@@ -197,17 +197,17 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
                         className="sr-only"
                       />
                       <div 
-                        className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                        className="w-4 h-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center"
                         style={{ 
-                          borderColor: watchedData.accountingServices?.payrollServicesEnabled ? '#243F7B' : '#d1d5db',
-                          backgroundColor: watchedData.accountingServices?.payrollServicesEnabled ? '#243F7B' : 'white'
+                          borderColor: watchedData.accountingServices?.payrollServicesEnabled ? '#243F7B' : '#d1d5db'
                         }}
                       >
                         {watchedData.accountingServices?.payrollServicesEnabled && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-2 h-2 rounded-full bg-white"
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: '#243F7B' }}
                           />
                         )}
                       </div>
@@ -245,7 +245,7 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
-          className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+          className="p-3 bg-white rounded-lg border border-gray-200"
         >
           <div className="space-y-3">
             <motion.label 
@@ -304,9 +304,9 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
                   >
                     <motion.label 
                       whileHover={{ scale: 1.01 }}
-                      className="flex items-start space-x-2 cursor-pointer"
+                      className="flex items-center space-x-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
                     >
-                      <div className="relative mt-0.5">
+                      <div className="relative">
                         <input
                           type="checkbox"
                           {...register(`accountingServices.${service.key}`)}
@@ -314,17 +314,17 @@ export const CommercialServiceCard: React.FC<CommercialServiceCardProps> = ({
                           className="sr-only"
                         />
                         <div 
-                          className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                          className="w-4 h-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center"
                           style={{ 
-                            borderColor: watchedData.accountingServices?.[service.key as keyof typeof watchedData.accountingServices] ? '#243F7B' : '#d1d5db',
-                            backgroundColor: watchedData.accountingServices?.[service.key as keyof typeof watchedData.accountingServices] ? '#243F7B' : 'white'
+                            borderColor: watchedData.accountingServices?.[service.key as keyof typeof watchedData.accountingServices] ? '#243F7B' : '#d1d5db'
                           }}
                         >
                           {watchedData.accountingServices?.[service.key as keyof typeof watchedData.accountingServices] && (
                             <motion.div
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="w-2 h-2 rounded-full bg-white"
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: '#243F7B' }}
                             />
                           )}
                         </div>

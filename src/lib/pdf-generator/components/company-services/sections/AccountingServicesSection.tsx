@@ -55,7 +55,7 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
           </Text>
 
           <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-            Our {serviceType === 'monthly' ? 'monthly' : 'quarterly/yearly'} service fees are based on the number of transactions. Based on your transaction volume and financial requirements, you can choose from one of the following pricing tiers. These options are closely structured to offer flexibility and value as your business grows:
+            Our accounting service fees are based on the number of transactions. Based on your transaction volume, you can <Text style={{ textDecoration: 'underline' }}>choose from one</Text> of the following pricing tiers. These options are closely structured to offer flexibility and value as your business grows:
           </Text>
 
           {/* Monthly Services - Simple Bullet Points */}
@@ -185,13 +185,13 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
           {accountingServices.auditReportFee && accountingServices.auditReportFee > 0 && (
             <>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 4, fontWeight: 'bold' }]}>
-                Audit Coordination:
+                Audit Guiding:
               </Text>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                If an audit report is required by the authority or requested by shareholders, our fee for managing and coordinating the audit process is AED {formatCurrency(accountingServices.auditReportFee)} {formatSecondaryCurrency(accountingServices.auditReportFee, exchangeRate, secondaryCurrency)}.
+                If an audit report is required by the authority or requested by shareholders, our servicefee for managing and guiding the audit process is AED {formatCurrency(accountingServices.auditReportFee)} {formatSecondaryCurrency(accountingServices.auditReportFee, exchangeRate, secondaryCurrency)}.
               </Text>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-              If the accounting is <Text style={{ fontWeight: 'bold' }}>not</Text> handled by us, <Text style={{ fontWeight: 'bold' }}>or</Text> if the audit is conducted by one of the Big Four firms, the audit coordination fee is AED 10,428 {formatSecondaryCurrency(10428, exchangeRate, secondaryCurrency)}.
+              If the accounting is <Text style={{ fontWeight: 'bold' }}>not</Text> handled by us, <Text style={{ fontWeight: 'bold' }}>or</Text> if the audit is conducted by one of the Big Four firms, the audit guiding fee is AED 10,428 {formatSecondaryCurrency(10428, exchangeRate, secondaryCurrency)}.
               </Text>
 
             </>

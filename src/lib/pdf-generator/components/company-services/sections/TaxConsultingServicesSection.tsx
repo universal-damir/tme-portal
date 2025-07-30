@@ -36,12 +36,12 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
           <Text style={styles.sectionTitle}>CIT (Corporate Income Tax)</Text>
           
           <Text style={[styles.introText, { marginBottom: 8 }]}>
-            To comply with UAE requirements, all companies must create an EmaraTax account and complete CIT registration with the FTA (Federal Tax Authority) to obtain a 15-digit CIT TRN (Tax Registration Number).
+            To comply with UAE requirements, <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>ALL</Text> companies <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>MUST</Text> create an EmaraTax account and complete CIT registration with the FTA (Federal Tax Authority) to obtain a 15-digit CIT TRN (Tax Registration Number).
           </Text>
           
           {taxServices.citRegistration && taxServices.citRegistration > 0 && (
             <Text style={[styles.introText, { marginBottom: 8 }]}>
-              Our service fee for this process is AED {formatCurrency(taxServices.citRegistration)} {formatSecondaryCurrency(taxServices.citRegistration, exchangeRate, secondaryCurrency)}.
+              Our service fee for the CIT registration process is AED {formatCurrency(taxServices.citRegistration)} {formatSecondaryCurrency(taxServices.citRegistration, exchangeRate, secondaryCurrency)}.
             </Text>
           )}
           
@@ -52,19 +52,19 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
           {taxServices.citType && (
             <>
               <Text style={[styles.introText, { marginBottom: 8 }]}>
-                All UAE-registered companies must file their CIT return annually, based on their financial year.
+                <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>ALL</Text> UAE-registered companies <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>MUST</Text> file their CIT return annually, based on their financial year.
               </Text>
               
               {/* Conditional text based on CIT type */}
               {taxServices.citType === 'sbr-regular' && (
                 <Text style={[styles.introText, { marginBottom: 8 }]}>
-                  Our fee for the yearly CIT return filing is AED 2,599 {formatSecondaryCurrency(2599, exchangeRate, secondaryCurrency)} if Small Business Relief applies, or AED 5,198 {formatSecondaryCurrency(5198, exchangeRate, secondaryCurrency)} if revenue exceeds AED 3,000,000.
+                  Our service fee for the yearly CIT return filing is AED 2,599 {formatSecondaryCurrency(2599, exchangeRate, secondaryCurrency)} if Small Business Relief applies, or AED 5,198 {formatSecondaryCurrency(5198, exchangeRate, secondaryCurrency)} if revenue exceeds AED 3,000,000.
                 </Text>
               )}
               
               {taxServices.citType === 'qfzp' && (
                 <Text style={[styles.introText, { marginBottom: 8 }]}>
-                  Our fee for the yearly CIT return filing for QFZP (Qualifying Free Zone Person) is AED 10,396 {formatSecondaryCurrency(10396, exchangeRate, secondaryCurrency)}.
+                  Our service fee for the yearly CIT return filing for QFZP (Qualifying Free Zone Person) is AED 10,396 {formatSecondaryCurrency(10396, exchangeRate, secondaryCurrency)}.
                 </Text>
               )}
             </>
@@ -80,20 +80,20 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
           {taxServices.vatRegistration && taxServices.vatRegistration > 0 && (
             <Text style={[styles.introText, { marginBottom: 8 }]}>
               For VAT {taxServices.vatType === 'registration' ? 'registration' : 
-                       taxServices.vatType === 'exception' ? 'exemption' : 'de-registration'} with the FTA to obtain a 15-digit VAT TRN (Tax Registration Number), or VAT TIN (Tax Identification Number), our service fee is AED {formatCurrency(taxServices.vatRegistration)} {formatSecondaryCurrency(taxServices.vatRegistration, exchangeRate, secondaryCurrency)}.
+                       taxServices.vatType === 'exception' ? 'exemption' : 'de-registration'} with the FTA to obtain a 15-digit VAT TRN (Tax Registration Number), or 15-digit VAT TIN (Tax Identification Number), our service fee is AED {formatCurrency(taxServices.vatRegistration)} {formatSecondaryCurrency(taxServices.vatRegistration, exchangeRate, secondaryCurrency)}.
             </Text>
           )}
           
           <Text style={[styles.introText, { marginBottom: 8 }]}>
-          The UAE VAT regulations apply two tax rates - 0% or 5% depending on the nature of the business activity. Businesses with taxable revenue exceeding AED 375,000 MUST register for VAT, while those earning more than AED 187,500 can register voluntarily.
+          The UAE VAT regulations apply two tax rates - 0% or 5% depending on the nature of the business activity. Businesses with taxable revenue exceeding AED 375,000 <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>MUST</Text> register for VAT, while those invoicing more than AED 187,500 <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>CAN</Text> register voluntarily.
           </Text>
           
           
           {taxServices.vatReturnFiling && taxServices.vatReturnFiling > 0 && (
             <Text style={styles.introText}>
               If TME Services handles the accounting:
-              {'\n'}• Our fee for quarterly VAT return filing is AED {formatCurrency(taxServices.vatReturnFiling)} {formatSecondaryCurrency(taxServices.vatReturnFiling, exchangeRate, secondaryCurrency)} per return
-              {'\n'}• For nil VAT return filing, our fee is AED 562 {formatSecondaryCurrency(562, exchangeRate, secondaryCurrency)} per return
+              {'\n'}• Our service fee for quarterly VAT return filing is AED {formatCurrency(taxServices.vatReturnFiling)} {formatSecondaryCurrency(taxServices.vatReturnFiling, exchangeRate, secondaryCurrency)} per return
+              {'\n'}• Our service fee for nil VAT return filing is AED 562 {formatSecondaryCurrency(562, exchangeRate, secondaryCurrency)} per return
             </Text>
           )}
         </View>
@@ -102,10 +102,10 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
       {/* Client-Managed Accounting Section */}
       {taxServices.clientManagedAccounting && (
         <View style={{ marginBottom: 16 }}>
-          <Text style={styles.sectionTitle}>VAT Return Filing – Client-Managed Accounting</Text>
+          <Text style={styles.sectionTitle}>VAT Review – Client-Managed Accounting</Text>
           
           <Text style={[styles.introText, { marginBottom: 8 }]}>
-            If the client handles the accounting (not TME Services), our service includes the review of VAT input/output, revenue, and reverse charge mechanism ledgers, as well as the filing of the VAT return in line with the relevant tax period.
+            If the client handles the accounting (not TME Services), our service includes the review of VAT input/output, and revenue ledgers, as well as the reverse charge mechanism transactions, including the filing of the VAT return in line with the relevant tax period.
           </Text>
           
           <Text style={[styles.introText, { marginBottom: 8 }]}>
@@ -113,7 +113,7 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
           </Text>
           
           <Text style={[styles.introText, { marginBottom: 8, fontWeight: 'bold' }]}>
-            Quarterly VAT Return Filing
+            Quarterly VAT Return Review
           </Text>
           
           <View style={{ marginLeft: 16, marginBottom: 8 }}>
@@ -129,7 +129,7 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
           </View>
           
           <Text style={[styles.introText, { marginBottom: 8, fontWeight: 'bold' }]}>
-            Monthly VAT Return Filing
+            Monthly VAT Return Review
           </Text>
           
           <View style={{ marginLeft: 16, marginBottom: 8 }}>
