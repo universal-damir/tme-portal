@@ -61,6 +61,7 @@ export interface Notification {
   application_id?: string;
   is_read: boolean;
   created_at: string;
+  metadata?: Record<string, any>;
   
   // Populated relations
   application?: Application;

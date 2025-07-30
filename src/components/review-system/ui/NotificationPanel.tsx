@@ -19,6 +19,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Notification, NotificationType, Application } from '@/types/review-system';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
+import { EmployeePhoto } from '@/components/ui/user-avatar';
 
 interface NotificationPanelProps {
   isOpen: boolean;
@@ -34,7 +35,7 @@ const NOTIFICATION_CONFIGS: Record<NotificationType, {
   bgColor: string;
 }> = {
   review_requested: {
-    icon: Eye,
+    icon: Eye, // Will be replaced with profile picture
     color: '#F59E0B', // amber-500
     bgColor: '#FEF3C7' // amber-100
   },
@@ -44,12 +45,12 @@ const NOTIFICATION_CONFIGS: Record<NotificationType, {
     bgColor: '#DBEAFE' // blue-100
   },
   application_approved: {
-    icon: CheckCircle,
+    icon: CheckCircle, // Will be replaced with profile picture
     color: '#10B981', // emerald-500
     bgColor: '#D1FAE5' // emerald-100
   },
   application_rejected: {
-    icon: XCircle,
+    icon: XCircle, // Will be replaced with profile picture
     color: '#EF4444', // red-500
     bgColor: '#FEE2E2' // red-100
   }
@@ -63,6 +64,48 @@ const NotificationItem: React.FC<{
   const config = NOTIFICATION_CONFIGS[notification.type];
   const IconComponent = config.icon;
   const isUnread = !notification.is_read;
+  
+  // Get profile info from metadata
+  const getProfileInfo = () => {
+    if (notification.type === 'review_requested') {
+      return {
+        employeeCode: notification.metadata?.submitter_employee_code,
+        fullName: notification.metadata?.submitter_name || 'Submitter'
+      };
+    } else if (notification.type === 'application_approved' || notification.type === 'application_rejected') {
+      return {
+        employeeCode: notification.metadata?.reviewer_employee_code,
+        fullName: notification.metadata?.reviewer_name || 'Reviewer'
+      };
+    }
+    return null;
+  };
+  
+  const profileInfo = getProfileInfo();
+  const shouldShowProfilePicture = profileInfo && profileInfo.employeeCode;
+  
+  // Parse title for colored text in approved/rejected notifications
+  const renderTitle = () => {
+    const title = notification.title;
+    
+    if (notification.type === 'application_approved' && title.includes('Approved')) {
+      const parts = title.split(' Approved');
+      return (
+        <>
+          {parts[0]} <span style={{ color: '#10B981', fontWeight: 'semibold' }}>Approved</span>{parts[1] || ''}
+        </>
+      );
+    } else if (notification.type === 'application_rejected' && title.includes('Rejected')) {
+      const parts = title.split(' Rejected');
+      return (
+        <>
+          {parts[0]} <span style={{ color: '#EF4444', fontWeight: 'semibold' }}>Rejected</span>{parts[1] || ''}
+        </>
+      );
+    }
+    
+    return title;
+  };
 
   return (
     <motion.div
@@ -79,15 +122,26 @@ const NotificationItem: React.FC<{
       onClick={() => onClickNotification?.(notification)}
     >
       <div className="flex items-start space-x-3">
-        {/* Icon */}
-        <div
-          className="flex-shrink-0 p-2 rounded-full"
-          style={{ backgroundColor: config.bgColor }}
-        >
-          <IconComponent 
-            className="w-4 h-4" 
-            style={{ color: config.color }}
-          />
+        {/* Icon or Profile Picture */}
+        <div className="flex-shrink-0">
+          {shouldShowProfilePicture ? (
+            <EmployeePhoto
+              employeeCode={profileInfo.employeeCode}
+              fullName={profileInfo.fullName}
+              size="md"
+              className="w-8 h-8"
+            />
+          ) : (
+            <div
+              className="p-2 rounded-full"
+              style={{ backgroundColor: config.bgColor }}
+            >
+              <IconComponent 
+                className="w-4 h-4" 
+                style={{ color: config.color }}
+              />
+            </div>
+          )}
         </div>
 
         {/* Content */}
@@ -98,7 +152,7 @@ const NotificationItem: React.FC<{
                 className={`text-sm font-medium ${isUnread ? 'text-gray-900' : 'text-gray-700'}`}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                {notification.title}
+                {renderTitle()}
               </p>
               <p className="text-sm text-gray-600 mt-1 leading-relaxed">
                 {notification.message}

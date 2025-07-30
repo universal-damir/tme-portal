@@ -302,13 +302,24 @@ export class ApplicationsService {
           }
         }
         
+        // Get submitter info for notification
+        const submitterResult = await pool.query(`
+          SELECT full_name, employee_code FROM users WHERE id = $1
+        `, [userId]);
+        
+        const submitterInfo = submitterResult.rows[0];
+        
         // Create notification for reviewer
         await NotificationsService.create({
           user_id: submission.reviewer_id,
           type: 'review_requested',
           title: applicationTitle,
           message: submission.comments || 'A new application has been submitted for your review.',
-          application_id: submission.application_id
+          application_id: submission.application_id,
+          metadata: {
+            submitter_name: submitterInfo?.full_name,
+            submitter_employee_code: submitterInfo?.employee_code
+          }
         });
         
         await pool.query('COMMIT');
@@ -345,21 +356,67 @@ export class ApplicationsService {
           WHERE id = $3 AND reviewer_id = $4
         `, [newStatus, action.comments, action.application_id, userId]);
         
-        // Get application details for notification
+        // Get application details and reviewer info for notification
         const appResult = await pool.query(`
-          SELECT submitted_by_id, title FROM applications WHERE id = $1
+          SELECT a.submitted_by_id, a.title, a.form_data, u.full_name as reviewer_name, u.employee_code as reviewer_employee_code
+          FROM applications a
+          JOIN users u ON a.reviewer_id = u.id
+          WHERE a.id = $1
         `, [action.application_id]);
         
         if (appResult.rows.length > 0) {
           const app = appResult.rows[0];
           
+          // Generate proper application title using same logic as submitForReview
+          let applicationTitle = 'Application';
+          
+          try {
+            const formData = app.form_data;
+            
+            // Generate title using same PDF naming convention as GoldenVisaTab
+            const date = new Date(formData.date || new Date());
+            const yy = date.getFullYear().toString().slice(-2);
+            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dd = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${yy}${mm}${dd}`;
+            
+            let nameForTitle = '';
+            if (formData.companyName) {
+              nameForTitle = formData.companyName;
+            } else if (formData.lastName && formData.firstName) {
+              nameForTitle = `${formData.lastName} ${formData.firstName}`;
+            } else if (formData.firstName) {
+              nameForTitle = formData.firstName;
+            } else if (formData.lastName) {
+              nameForTitle = formData.lastName;
+            } else {
+              nameForTitle = 'Client';
+            }
+            
+            const visaTypeMap: { [key: string]: string } = {
+              'property-investment': 'property',
+              'time-deposit': 'deposit', 
+              'skilled-employee': 'skilled'
+            };
+            
+            const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+            applicationTitle = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+          } catch (error) {
+            console.error('Error generating notification title:', error);
+            applicationTitle = app.title || 'Application';
+          }
+          
           // Create notification for submitter
           await NotificationsService.create({
             user_id: app.submitted_by_id,
             type: action.action === 'approve' ? 'application_approved' : 'application_rejected',
-            title: `Application ${action.action === 'approve' ? 'Approved' : 'Rejected'}`,
-            message: `Your application "${app.title}" has been ${action.action}d.${action.comments ? ` Comments: ${action.comments}` : ''}`,
-            application_id: action.application_id
+            title: `${applicationTitle} ${action.action === 'approve' ? 'Approved' : 'Rejected'}`,
+            message: action.comments,
+            application_id: action.application_id,
+            metadata: {
+              reviewer_name: app.reviewer_name,
+              reviewer_employee_code: app.reviewer_employee_code
+            }
           });
         }
         
@@ -382,6 +439,7 @@ export class NotificationsService {
     title: string;
     message: string;
     application_id?: string;
+    metadata?: Record<string, any>;
   }): Promise<Notification | null> {
     return safeDbOperation(async () => {
       const config = getReviewSystemConfig();
@@ -404,11 +462,27 @@ export class NotificationsService {
         return null;
       }
       
-      const result = await pool.query(`
-        INSERT INTO notifications (user_id, type, title, message, application_id)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING *
-      `, [data.user_id, data.type, data.title, data.message, data.application_id]);
+      // Try to insert with metadata column first (if migration has been run)
+      let result;
+      try {
+        result = await pool.query(`
+          INSERT INTO notifications (user_id, type, title, message, application_id, metadata)
+          VALUES ($1, $2, $3, $4, $5, $6)
+          RETURNING *
+        `, [data.user_id, data.type, data.title, data.message, data.application_id, JSON.stringify(data.metadata || {})]);
+      } catch (error: any) {
+        // If metadata column doesn't exist, fall back to old schema
+        if (error.message && error.message.includes('metadata')) {
+          console.log('Metadata column not found, using legacy notification schema');
+          result = await pool.query(`
+            INSERT INTO notifications (user_id, type, title, message, application_id)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+          `, [data.user_id, data.type, data.title, data.message, data.application_id]);
+        } else {
+          throw error;
+        }
+      }
       
       return result.rows[0] as Notification;
     }, null, 'create_notification');
@@ -535,7 +609,7 @@ export class ReviewersService {
               full_name: 'UH - Uwe Hohmann',
               email: 'uwe@TME-Services.com',
               department: 'Management',
-              employee_code: 'UH',
+              employee_code: '09 UH',
               is_universal: true
             },
             {
