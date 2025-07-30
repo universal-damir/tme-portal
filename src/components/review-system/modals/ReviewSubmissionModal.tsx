@@ -252,7 +252,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
                   {/* Comments (Optional) */}
                   <div>
                     <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                      Comments (Optional)
+                      Comments
                     </label>
                     <textarea
                       value={comments}

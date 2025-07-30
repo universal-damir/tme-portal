@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search');
 
     // Build dynamic query
-    let whereConditions = [];
-    let queryParams = [];
+    const whereConditions = [];
+    const queryParams = [];
     let paramIndex = 1;
 
     if (department) {

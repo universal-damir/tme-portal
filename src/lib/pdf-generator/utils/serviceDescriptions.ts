@@ -130,7 +130,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
 
     if (mofaTotal > 0) {
       let description = 'Power of Attorney';
-      let explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup';
+      const explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup';
       
       if (setupType === 'Corporate Setup') {
         description = 'Government Document & Translation Cost';
@@ -292,7 +292,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
 
     if (mofaTotal > 0) {
       let description = 'MoFA Document Translations';
-      let explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
+      const explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       
       if (setupType === 'Individual Setup') {
         description = 'Power of Attorney';

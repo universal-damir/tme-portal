@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
 
     let queryText = '';
     let queryParams: any[] = [];
-    let auditDetails: any = { action, affected_user_ids: validUserIds };
+    const auditDetails: any = { action, affected_user_ids: validUserIds };
 
     switch (action) {
       case 'activate':

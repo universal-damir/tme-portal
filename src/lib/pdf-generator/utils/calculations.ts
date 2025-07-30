@@ -55,8 +55,8 @@ export const calculateTotals = (data: OfferData, costs: any) => {
     return { setupTotal: 0, yearlyTotal: 0, depositTotal: 0 };
   }
 
-  let setupTotal = costs.initialSetup.total;
-  let yearlyTotal = costs.yearlyRunning.total;
+  const setupTotal = costs.initialSetup.total;
+  const yearlyTotal = costs.yearlyRunning.total;
   let depositTotal = 0;
 
   // Calculate deposits based on authority
