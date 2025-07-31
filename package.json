@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:local": "./scripts/dev-local.sh",
-    "dev:docker": "./scripts/dev-docker.sh", 
+    "dev:docker": "./scripts/dev-docker.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,9 +14,11 @@
     "rollback:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system_rollback.sql"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.18.0",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.1.1",
+    "@microsoft/microsoft-graph-client": "^3.0.7",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-checkbox": "^1.3.2",
     "@radix-ui/react-dialog": "^1.1.14",

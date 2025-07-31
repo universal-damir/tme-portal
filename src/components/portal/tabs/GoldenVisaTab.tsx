@@ -199,6 +199,24 @@ const GoldenVisaTab: React.FC = () => {
     setPdfProgress({ step, progress, isVisible: true });
   };
 
+  // Email generation using reusable component
+  const createOutlookEmailDraft = async (data: GoldenVisaData, pdfBlob: Blob, pdfFilename: string) => {
+    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+    const { generateEmailDraft } = useEmailDraftGenerator();
+
+    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'GOLDEN_VISA');
+    
+    await generateEmailDraft({
+      ...emailProps,
+      onSuccess: (draftId) => {
+        console.log('Email draft created successfully:', draftId);
+      },
+      onError: (error) => {
+        console.error('Email draft creation failed:', error);
+      }
+    });
+  };
+
   // PDF generation using Golden Visa template with progress tracking
   const handleGeneratePDF = async (data: GoldenVisaData) => {
     // Validate required client data
@@ -270,10 +288,13 @@ const GoldenVisaTab: React.FC = () => {
         console.error('Failed to log PDF generation activity:', error);
       }
 
+      // Create Outlook email draft after successful PDF generation
+      await createOutlookEmailDraft(data, blob, filename);
+
       // Success notification
       toast.dismiss(loadingToast);
       toast.success('Golden Visa PDF Generated!', {
-        description: 'Your Golden Visa application document has been downloaded successfully.',
+        description: 'Your Golden Visa application document has been downloaded and email compose window opened.',
         action: {
           label: 'Generate Another',
           onClick: () => handleGeneratePDF(data)
@@ -579,7 +600,7 @@ const GoldenVisaTab: React.FC = () => {
             ) : (
               <>
                 <Download className="h-5 w-5" />
-                <span>Download PDF</span>
+                <span>Download and Send</span>
               </>
             )}
           </motion.button>

@@ -3,7 +3,7 @@ import { createCostCalculator, AuthorityConfig } from '@/lib/business';
 import { OfferData } from '@/types/offer';
 
 export const useCostCalculation = (
-  authorityConfig: AuthorityConfig | null,
+  authorityConfig: AuthorityConfig | null | undefined,
   formData: OfferData
 ) => {
   // Create calculator instance using the factory

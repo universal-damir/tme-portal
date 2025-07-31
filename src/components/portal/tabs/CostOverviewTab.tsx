@@ -75,6 +75,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         companySetupType: '',
         secondaryCurrency: 'EUR',
         exchangeRate: 4.0,
+        clientEmails: [],
       },
       authorityInformation: {
         responsibleAuthority: '',
@@ -111,8 +112,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         mofaActualMemorandumOrArticles: false,
         mofaCommercialRegister: false,
         mofaPowerOfAttorney: false,
-        licenseType: undefined,
-        rentType: undefined,
+        licenseType: 'commercial',
+        rentType: 'business-center',
         officeRentAmount: 0,
         landlordDepositAmount: 0,
         thirdPartyApproval: false,
@@ -172,7 +173,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     authorityInformation?.responsibleAuthority, 
     setValue
   );
-  const { costs, hasCalculations } = useCostCalculation(authorityConfig || null, watchedData);
+  const { costs, hasCalculations } = useCostCalculation(authorityConfig, watchedData);
 
   // Track authority configuration changes
   React.useEffect(() => {
@@ -272,6 +273,24 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Auto-save data loading removed
 
+  // Email generation using reusable component
+  const createOutlookEmailDraft = async (data: OfferData, pdfBlob: Blob, pdfFilename: string) => {
+    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+    const { generateEmailDraft } = useEmailDraftGenerator();
+
+    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'COST_OVERVIEW');
+    
+    await generateEmailDraft({
+      ...emailProps,
+      onSuccess: (draftId) => {
+        console.log('Email draft created successfully:', draftId);
+      },
+      onError: (error) => {
+        console.error('Email draft creation failed:', error);
+      }
+    });
+  };
+
   // PDF generation handlers with progress tracking
   const handleGeneratePDF = async (data: OfferData): Promise<void> => {
     // Validate required data before generating PDF
@@ -353,7 +372,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             details: {
               filename: mainFilename,
               client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
-              authority: data.authorityDetails?.authority || 'Not specified',
+              authority: data.authorityInformation?.responsibleAuthority || 'Not specified',
               has_family_visa: hasFamilyVisaDoc,
               document_type: 'Cost Overview'
             }
@@ -363,12 +382,15 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         console.error('Failed to log PDF generation activity:', error);
       }
 
+      // Create Outlook email draft after successful PDF generation
+      await createOutlookEmailDraft(data, mainPdfBlob, mainFilename);
+
       // Success notification
       toast.dismiss(loadingToast);
       toast.success('PDF Generated Successfully!', {
         description: hasFamilyVisaDoc 
-          ? 'Both main cost overview and family visa documents have been downloaded.'
-          : 'Your cost overview document has been downloaded.',
+          ? 'Both main cost overview and family visa documents have been downloaded. Email compose window opened.'
+          : 'Your cost overview document has been downloaded. Email compose window opened.',
         action: {
           label: 'Generate Another',
           onClick: () => handleGeneratePDF(data)
@@ -473,7 +495,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             details: {
               filename: mainFilename,
               client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
-              authority: data.authorityDetails?.authority || 'Not specified',
+              authority: data.authorityInformation?.responsibleAuthority || 'Not specified',
               has_family_visa: hasFamilyVisaDoc,
               document_type: 'Cost Overview'
             }
@@ -786,10 +808,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                 color: isGenerating ? '#9CA3AF' : '#243F7B',
                 fontFamily: 'Inter, sans-serif'
               }}
-              onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
-              onMouseLeave={(e) => !isGenerating && (e.target.style.transform = 'scale(1)')}
-              onMouseDown={(e) => !isGenerating && (e.target.style.transform = 'scale(0.98)')}
-              onMouseUp={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
+              onMouseEnter={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(1)')}
+              onMouseDown={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(0.98)')}
+              onMouseUp={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
             >
               {isGenerating ? (
                 <>
@@ -816,10 +838,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                 backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B',
                 fontFamily: 'Inter, sans-serif'
               }}
-              onMouseEnter={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
-              onMouseLeave={(e) => !isGenerating && (e.target.style.transform = 'scale(1)')}
-              onMouseDown={(e) => !isGenerating && (e.target.style.transform = 'scale(0.98)')}
-              onMouseUp={(e) => !isGenerating && (e.target.style.transform = 'scale(1.02)')}
+              onMouseEnter={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(1)')}
+              onMouseDown={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(0.98)')}
+              onMouseUp={(e) => !isGenerating && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
             >
               {isGenerating ? (
                 <>
@@ -831,7 +853,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  <span>Download PDF</span>
+                  <span>Download and Send</span>
                 </>
               )}
             </button>

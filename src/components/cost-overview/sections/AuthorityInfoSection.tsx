@@ -24,7 +24,7 @@ interface AuthorityInfoSectionProps {
   validationErrors: ValidationErrors;
   shareCapitalAlert: ShareCapitalAlert;
   activityCodesArray: UseFieldArrayReturn<OfferData, 'activityCodes', 'id'>;
-  authorityConfig?: AuthorityConfig;
+  authorityConfig?: AuthorityConfig | null;
 }
 
 export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({

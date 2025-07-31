@@ -12,8 +12,8 @@ export interface ClientDetails {
 
 export interface AuthorityInformation {
   responsibleAuthority: string;
-  areaInUAE: string;
-  legalEntity: string;
+  areaInUAE?: string;
+  legalEntity?: string;
   shareCapitalAED: number;
   valuePerShareAED: number;
   numberOfShares: number;
@@ -55,7 +55,7 @@ export interface DETLicense {
   mofaPowerOfAttorney?: boolean;
   
   // DET License type selection (mandatory)
-  licenseType?: 'commercial' | 'commercial-real-estate' | 'commercial-investment' | 'instant' | 'industrial';
+  licenseType?: 'commercial' | 'commercial-real-estate' | 'commercial-investment' | 'instant' | 'industrial' | 'professional';
   
   // Office rent selection (mandatory)
   rentType?: 'business-center' | 'office' | 'warehouse' | 'showroom';

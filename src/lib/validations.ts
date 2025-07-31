@@ -62,7 +62,7 @@ export const detLicenseSchema = z.object({
   }).optional(),
   
   // Office rent selection (mandatory)
-  rentType: z.enum(['business-center', 'office', 'warehouse'], {
+  rentType: z.enum(['business-center', 'office', 'warehouse', 'showroom'], {
     required_error: 'Office type selection is required for DET',
     invalid_type_error: 'Please select a valid office type',
   }).optional(),
