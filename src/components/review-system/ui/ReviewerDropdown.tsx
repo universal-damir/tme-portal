@@ -152,7 +152,7 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
               </div>
               <div className="flex flex-col items-start min-w-0 flex-1">
                 <span className="text-sm font-medium text-gray-900 truncate">
-                  {selectedReviewer.full_name}
+                  {selectedReviewer.full_name.split(' ')[0]} {selectedReviewer.employee_code}
                 </span>
               </div>
             </>
@@ -268,7 +268,7 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <p className="text-sm font-medium text-gray-900 truncate">
-                              {reviewer.full_name}
+                              {reviewer.full_name.split(' ')[0]} {reviewer.employee_code}
                             </p>
                             {value === reviewer.id && (
                               <Check className="w-4 h-4" style={{ color: '#243F7B' }} />

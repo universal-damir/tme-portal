@@ -38,9 +38,9 @@ export async function POST(
       );
     }
 
-    if (!['low', 'medium', 'high'].includes(urgency)) {
+    if (!['standard', 'urgent'].includes(urgency)) {
       return NextResponse.json(
-        { error: 'Invalid urgency level. Must be: low, medium, or high' }, 
+        { error: 'Invalid urgency level. Must be: standard or urgent' }, 
         { status: 400 }
       );
     }

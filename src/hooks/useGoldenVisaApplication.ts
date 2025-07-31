@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
 import { GoldenVisaData } from '@/types/golden-visa';
-import { Application, ApplicationStatus } from '@/types/review-system';
+import { Application, ApplicationStatus, UrgencyLevel } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 
 interface UseGoldenVisaApplicationProps {
@@ -25,7 +25,7 @@ interface UseGoldenVisaApplicationReturn {
   saveApplication: () => Promise<boolean>;
   submitForReview: (submission: {
     reviewer_id: number;
-    urgency: 'low' | 'medium' | 'high';
+    urgency: UrgencyLevel;
     comments?: string;
   }) => Promise<boolean>;
   
@@ -234,7 +234,7 @@ export const useGoldenVisaApplication = ({
   // Submit application for review
   const submitForReview = async (submission: {
     reviewer_id: number;
-    urgency: 'low' | 'medium' | 'high';
+    urgency: UrgencyLevel;
     comments?: string;
   }): Promise<boolean> => {
     if (!config.canUseGoldenVisaReview || !application) {

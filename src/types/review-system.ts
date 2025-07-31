@@ -8,7 +8,7 @@ export type ApplicationStatus = 'draft' | 'pending_review' | 'under_review' | 'a
 export type ApplicationType = 'golden-visa' | 'cost-overview' | 'company-services' | 'taxation' | 'corporate-changes';
 
 // Urgency levels
-export type UrgencyLevel = 'low' | 'medium' | 'high';
+export type UrgencyLevel = 'standard' | 'urgent';
 
 // Notification types
 export type NotificationType = 'review_requested' | 'review_completed' | 'application_approved' | 'application_rejected';
@@ -187,19 +187,14 @@ export const STATUS_CONFIGS: Record<ApplicationStatus, StatusConfig> = {
 
 // Urgency level configuration
 export const URGENCY_CONFIGS: Record<UrgencyLevel, { label: string; color: string; priority: number }> = {
-  low: {
-    label: 'Low Priority',
+  standard: {
+    label: 'Standard Priority',
     color: '#6B7280', // gray-500
     priority: 1
   },
-  medium: {
-    label: 'Medium Priority', 
-    color: '#F59E0B', // amber-500
-    priority: 2
-  },
-  high: {
-    label: 'High Priority',
+  urgent: {
+    label: 'Urgent Priority',
     color: '#EF4444', // red-500
-    priority: 3
+    priority: 2
   }
 };

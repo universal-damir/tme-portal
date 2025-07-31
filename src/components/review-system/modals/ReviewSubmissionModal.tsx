@@ -31,7 +31,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
 }) => {
   const config = useReviewSystemConfig();
   const [selectedReviewer, setSelectedReviewer] = useState<{ id: number; reviewer: Reviewer } | null>(null);
-  const [urgency, setUrgency] = useState<UrgencyLevel>('medium');
+  const [isUrgent, setIsUrgent] = useState(false);
   const [comments, setComments] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
 
   const resetForm = () => {
     setSelectedReviewer(null);
-    setUrgency('medium');
+    setIsUrgent(false);
     setComments('');
     setError(null);
     setSuccess(false);
@@ -60,6 +60,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const urgency: UrgencyLevel = isUrgent ? 'urgent' : 'standard';
     console.log('🔧 ReviewSubmissionModal: Form submitted', { selectedReviewer, urgency, comments });
     
     if (!selectedReviewer) {
@@ -92,26 +93,6 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
     }
   };
 
-  const urgencyOptions: { value: UrgencyLevel; label: string; color: string; description: string }[] = [
-    {
-      value: 'low',
-      label: 'Low Priority',
-      color: '#6B7280',
-      description: 'No rush - can be reviewed when convenient'
-    },
-    {
-      value: 'medium',
-      label: 'Medium Priority',
-      color: '#F59E0B',
-      description: 'Standard review timeline expected'
-    },
-    {
-      value: 'high',
-      label: 'High Priority',
-      color: '#EF4444',
-      description: 'Urgent - requires immediate attention'
-    }
-  ];
 
   return (
     <AnimatePresence>
@@ -201,52 +182,44 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
                     error={error && !selectedReviewer ? 'Please select a reviewer' : undefined}
                   />
 
-                  {/* Urgency Selection */}
+                  {/* Urgent Checkbox */}
                   <div>
-                    <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                      Priority Level *
-                    </label>
-                    <div className="space-y-2">
-                      {urgencyOptions.map((option) => (
-                        <motion.label
-                          key={option.value}
-                          whileHover={{ scale: 1.01 }}
-                          className={`
-                            flex items-start space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200
-                            ${urgency === option.value 
-                              ? 'border-[#243F7B] bg-blue-50' 
-                              : 'border-gray-200 hover:border-gray-300'
-                            }
-                          `}
+                    <motion.label
+                      whileHover={{ scale: 1.01 }}
+                      className="flex items-start space-x-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 border-gray-200 hover:border-gray-300"
+                    >
+                      <div className="flex items-center h-[42px]">
+                        <div 
+                          className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                          style={{ 
+                            borderColor: isUrgent ? '#243F7B' : '#d1d5db',
+                            backgroundColor: isUrgent ? '#243F7B' : 'white'
+                          }}
                         >
-                          <input
-                            type="radio"
-                            name="urgency"
-                            value={option.value}
-                            checked={urgency === option.value}
-                            onChange={(e) => setUrgency(e.target.value as UrgencyLevel)}
-                            className="mt-1"
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-2">
-                              <span 
-                                className="text-sm font-medium"
-                                style={{ color: urgency === option.value ? '#243F7B' : '#374151' }}
-                              >
-                                {option.label}
-                              </span>
-                              <div 
-                                className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: option.color }}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-600 mt-1">
-                              {option.description}
-                            </p>
-                          </div>
-                        </motion.label>
-                      ))}
-                    </div>
+                          {isUrgent && (
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isUrgent}
+                          onChange={(e) => setIsUrgent(e.target.checked)}
+                          className="sr-only"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center h-[42px]">
+                          <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                            Urgent
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-1">
+                          Mark as urgent for immediate attention. Default is standard priority.
+                        </p>
+                      </div>
+                    </motion.label>
                   </div>
 
                   {/* Comments (Optional) */}
