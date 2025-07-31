@@ -180,7 +180,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
 
         {/* Total Row */}
         <View style={styles.totalRowYellow}>
-          <Text style={[styles.totalLabel, { color: 'white' }]}>TOTAL</Text>
+          <Text style={[styles.totalLabel, { color: 'white', flex: 5, paddingLeft: 8 }]}>TOTAL</Text>
           <Text style={[styles.totalAmount, { color: 'white' }]}>{formatNumber(totalAmount)}</Text>
           <Text style={[styles.totalAmount, { color: 'white' }]}>{formatNumber(totalAmount / exchangeRate)}</Text>
         </View>

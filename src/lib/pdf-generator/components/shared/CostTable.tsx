@@ -132,7 +132,12 @@ export const CostTable: React.FC<CostTableProps> = ({
           <>
             {/* Total without deposits (only show when deposits exist) */}
             <View style={styles.totalRowCompact}>
-              <Text style={styles.totalLabel}>Total (without deposits)</Text>
+              <Text style={[
+                styles.totalLabel, 
+                theme === 'blue' ? { flex: 6, paddingLeft: 8 } : { flex: 5, paddingLeft: 8 }
+              ]}>
+                Total (without deposits)
+              </Text>
               <Text style={styles.totalAmount}>{formatNumber(total)}</Text>
               <Text style={styles.totalAmount}>{formatNumber(secondaryTotal)}</Text>
             </View>
@@ -172,7 +177,7 @@ export const CostTable: React.FC<CostTableProps> = ({
           <View style={tableTheme.totalRow}>
             <Text style={[
               styles.totalLabel, 
-              theme === 'blue' ? { flex: 4, paddingLeft: 8 } : { flex: 3, paddingLeft: 8 }
+              theme === 'blue' ? { flex: 6, paddingLeft: 8 } : { flex: 5, paddingLeft: 8 }
             ]}>
               {showDeposits && depositsItems.length > 0 ? 'Total (including deposits)' : 'TOTAL'}
             </Text>

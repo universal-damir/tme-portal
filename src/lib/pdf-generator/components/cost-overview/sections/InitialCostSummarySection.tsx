@@ -56,7 +56,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
 
         {/* Total Row */}
         <View style={styles.totalRowGrey}>
-          <Text style={styles.totalLabel}>TOTAL INITIAL COST</Text>
+          <Text style={[styles.totalLabel, { flex: 5, paddingLeft: 8 }]}>TOTAL INITIAL COST</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost)}</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost / exchangeRate)}</Text>
         </View>
