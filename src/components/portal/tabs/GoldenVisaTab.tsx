@@ -291,15 +291,8 @@ const GoldenVisaTab: React.FC = () => {
       // Create Outlook email draft after successful PDF generation
       await createOutlookEmailDraft(data, blob, filename);
 
-      // Success notification
+      // Dismiss loading toast
       toast.dismiss(loadingToast);
-      toast.success('Golden Visa PDF Generated!', {
-        description: 'Your Golden Visa application document has been downloaded and email compose window opened.',
-        action: {
-          label: 'Generate Another',
-          onClick: () => handleGeneratePDF(data)
-        }
-      });
 
     } catch (error) {
       console.error('Error generating PDF:', error);

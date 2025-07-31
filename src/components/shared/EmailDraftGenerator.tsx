@@ -4,13 +4,12 @@
  */
 
 import React from 'react';
-import { toast } from 'sonner';
 
 // Email template interface for customization
 export interface EmailTemplate {
   subject: string;
   greeting: string;
-  bodyContent: string[];
+  bodyContent: readonly string[];
   signature?: string;
   includeColoredText?: boolean;
   fontFamily?: string;
@@ -130,9 +129,6 @@ export const useEmailDraftGenerator = () => {
       const result = await createUserEmailDraft(emailData, userAccessToken);
       
       if (result.success) {
-        toast.success('Email Draft Created!', {
-          description: 'Formatted email draft with attachments has been created in Outlook.'
-        });
         onSuccess?.(result.draftId);
       } else {
         throw new Error(result.error);
@@ -146,9 +142,6 @@ export const useEmailDraftGenerator = () => {
         handleMailtoFallback(recipients, template, attachments);
         onError?.('Graph API failed, used mailto fallback');
       } else {
-        toast.error('Email Draft Failed', {
-          description: 'Unable to create email draft. Please try again or contact IT support.'
-        });
         onError?.(error instanceof Error ? error.message : 'Unknown error');
       }
     }
@@ -204,10 +197,6 @@ const handleMailtoFallback = (
 
   const mailtoUrl = `mailto:${recipients.emails.join(',')}?subject=${encodeURIComponent(processedTemplate.subject)}&body=${encodeURIComponent(emailBody)}`;
   window.open(mailtoUrl, '_blank');
-  
-  toast.warning('Email Draft Fallback', {
-    description: 'Using basic email compose. Please format manually and attach files.'
-  });
 };
 
 // React Component version (if you prefer component over hook)

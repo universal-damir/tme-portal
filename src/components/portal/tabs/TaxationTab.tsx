@@ -105,6 +105,23 @@ const TaxationTab: React.FC = () => {
     setValue('companyType', companyType);
   };
 
+  // Email generation using reusable component
+  const createOutlookEmailDraft = async (data: TaxationData, pdfBlob: Blob, pdfFilename: string) => {
+    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+    const { generateEmailDraft } = useEmailDraftGenerator();
+    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'TAXATION');
+    
+    await generateEmailDraft({
+      ...emailProps,
+      onSuccess: (draftId) => {
+        console.log('Email draft created successfully:', draftId);
+      },
+      onError: (error) => {
+        console.error('Email draft creation failed:', error);
+      }
+    });
+  };
+
   // PDF generation handlers
   const handleGeneratePDF = async (data: TaxationData): Promise<void> => {
     // Validate required data before generating PDF
@@ -131,6 +148,9 @@ const TaxationTab: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Create Outlook email draft with PDF attachment
+      await createOutlookEmailDraft(data, blob, filename);
       
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -205,6 +225,9 @@ const TaxationTab: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Create Outlook email draft with PDF attachment
+      await createOutlookEmailDraft(data, blob, filename);
       
     } catch (error) {
       console.error('Error generating CIT Shareholder Declaration PDF:', error);
@@ -277,6 +300,9 @@ const TaxationTab: React.FC = () => {
       disclaimerLink.click();
       document.body.removeChild(disclaimerLink);
       URL.revokeObjectURL(disclaimerUrl);
+
+      // Create Outlook email draft with CIT Disclaimer PDF attachment
+      await createOutlookEmailDraft(data, disclaimerResult.blob, disclaimerResult.filename);
 
       // Download CIT Shareholder Declaration
       if (shouldShowCITShareholderDeclaration()) {
@@ -415,7 +441,7 @@ const TaxationTab: React.FC = () => {
             ) : (
               <>
                 <Download className="h-5 w-5" />
-                <span>Download All</span>
+                <span>Download and Send All</span>
               </>
             )}
           </motion.button>

@@ -123,6 +123,23 @@ const CompanyServicesTab: React.FC = () => {
     setValue('exchangeRate', rates[currency]);
   };
 
+  // Email generation using reusable component
+  const createOutlookEmailDraft = async (data: CompanyServicesData, pdfBlob: Blob, pdfFilename: string) => {
+    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+    const { generateEmailDraft } = useEmailDraftGenerator();
+    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'COMPANY_SERVICES');
+    
+    await generateEmailDraft({
+      ...emailProps,
+      onSuccess: (draftId) => {
+        console.log('Email draft created successfully:', draftId);
+      },
+      onError: (error) => {
+        console.error('Email draft creation failed:', error);
+      }
+    });
+  };
+
   // PDF generation handlers
   const handleGeneratePDF = async (data: CompanyServicesData): Promise<void> => {
     // Validate required data before generating PDF
@@ -147,6 +164,9 @@ const CompanyServicesTab: React.FC = () => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+
+      // Create Outlook email draft with PDF attachment
+      await createOutlookEmailDraft(data, blob, filename);
 
       // Log PDF generation activity
       try {
@@ -331,7 +351,7 @@ const CompanyServicesTab: React.FC = () => {
             ) : (
               <>
                 <Download className="h-5 w-5" />
-                <span>Download PDF</span>
+                <span>Download and Send</span>
               </>
             )}
           </motion.button>

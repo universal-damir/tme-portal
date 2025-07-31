@@ -385,17 +385,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       // Create Outlook email draft after successful PDF generation
       await createOutlookEmailDraft(data, mainPdfBlob, mainFilename);
 
-      // Success notification
+      // Dismiss loading toast
       toast.dismiss(loadingToast);
-      toast.success('PDF Generated Successfully!', {
-        description: hasFamilyVisaDoc 
-          ? 'Both main cost overview and family visa documents have been downloaded. Email compose window opened.'
-          : 'Your cost overview document has been downloaded. Email compose window opened.',
-        action: {
-          label: 'Generate Another',
-          onClick: () => handleGeneratePDF(data)
-        }
-      });
 
     } catch (error) {
       console.error('Error generating PDF:', error);
