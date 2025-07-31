@@ -1,15 +1,18 @@
 /**
  * Reusable Email Draft Generator Component
- * Creates formatted Outlook email drafts with PDF attachments using Microsoft Graph API
+ * Creates formatted emails with PDF attachments using SMTP with preview modal
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { EmailPreviewModal, EmailPreviewData } from './EmailPreviewModal';
+import { useEmailSender } from '@/hooks/useEmailSender';
 
 // Email template interface for customization
 export interface EmailTemplate {
   subject: string;
   greeting: string;
   bodyContent: readonly string[];
+  previewText?: string; // Short preview text for notifications (up to 100 chars)
   signature?: string;
   includeColoredText?: boolean;
   fontFamily?: string;
@@ -38,18 +41,21 @@ export interface EmailDraftGeneratorProps {
   attachments?: EmailAttachment[];
   onSuccess?: (draftId: string) => void;
   onError?: (error: string) => void;
+  onClose?: () => void; // Add onClose callback
   fallbackToMailto?: boolean;
 }
 
-// Default email templates for different tabs
+// Default email templates for different tabs with Arial 10pt formatting
 export const EMAIL_TEMPLATES = {
   COST_OVERVIEW: {
     subject: '', // Will be set from PDF filename
     greeting: 'Dear {firstName}, this is an offer as we discussed.',
+    previewText: 'Your UAE business setup offer is ready - detailed pricing and services included',
     bodyContent: [
-      '<span style="color: green;">Text example green</span>',
-      '<span style="color: red;">Text example red</span>',
-      '<span style="color: #DAA520;">Text example yellow</span> THIS WILL BE CHANGED LATER. JUST NEED TO TEST IT.'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600; font-weight: bold;">✓ Approved services and pricing</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #cc0000; text-decoration: underline;">⚠ Important terms and conditions</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #DAA520;">⏳ Pending documentation requirements</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc;">ℹ Additional information and next steps</span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -57,12 +63,22 @@ export const EMAIL_TEMPLATES = {
   },
   GOLDEN_VISA: {
     subject: '', // Will be set from PDF filename
-    greeting: 'Dear {firstName}, please find your Golden Visa application details.',
+    greeting: 'Dear {firstName},',
+    previewText: 'Your Golden Visa offer is ready for review - complete documentation and pricing included',
     bodyContent: [
-      'We have prepared your Golden Visa documentation as discussed.',
-      'Please review the attached documents and let us know if you need any clarification.'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">I hope this email finds you well.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Following our discussion regarding your Golden Visa application, I am pleased to provide you with the comprehensive documentation and cost breakdown as requested.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc; font-weight: bold;">📋 What\'s Included:</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Complete Golden Visa application requirements and timeline</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Detailed cost breakdown including government fees and our service charges</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Step-by-step process explanation</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Required documentation checklist</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600; font-weight: bold;">✓ Next Steps:</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please review the attached proposal at your convenience. Should you have any questions or require clarification on any aspect, I would be happy to schedule a call to discuss further.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Thank you for considering TME Services for your Golden Visa application. We look forward to assisting you with this important milestone.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Best regards,<br>TME Services Team</span>'
     ],
-    includeColoredText: false,
+    includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
     fontSize: '10pt'
   },
@@ -70,10 +86,12 @@ export const EMAIL_TEMPLATES = {
     subject: '', // Will be set from PDF filename
     greeting: 'Dear {firstName}, your company services proposal is ready.',
     bodyContent: [
-      'Please find attached the detailed proposal for your company services requirements.',
-      'We look forward to discussing this further with you.'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc; font-weight: bold;">📋 Company Services Proposal</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached the detailed proposal for your company services requirements.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600;">✓ Customized service packages included</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc; text-decoration: underline;">We look forward to discussing this further with you.</span>'
     ],
-    includeColoredText: false,
+    includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
     fontSize: '10pt'
   },
@@ -81,17 +99,23 @@ export const EMAIL_TEMPLATES = {
     subject: '', // Will be set from PDF filename
     greeting: 'Dear {firstName}, your taxation services proposal is attached.',
     bodyContent: [
-      'Please review the taxation services proposal attached to this email.',
-      'Our team is available to answer any questions you may have.'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #cc0000; font-weight: bold;">🏛️ Taxation Services Proposal</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please review the taxation services proposal attached to this email.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600;">✓ Compliance requirements covered</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc;">Our team is available to answer any questions you may have.</span>'
     ],
-    includeColoredText: false,
+    includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
     fontSize: '10pt'
   }
 } as const;
 
-// Email Draft Generator Hook
+// Email Draft Generator Hook with SMTP Preview
 export const useEmailDraftGenerator = () => {
+  const [showPreview, setShowPreview] = useState(false);
+  const [emailPreviewData, setEmailPreviewData] = useState<EmailPreviewData | null>(null);
+  const [currentAttachments, setCurrentAttachments] = useState<EmailAttachment[]>([]);
+  const { sendEmail, loading } = useEmailSender();
   
   const generateEmailDraft = async ({
     recipients,
@@ -99,55 +123,67 @@ export const useEmailDraftGenerator = () => {
     attachments = [],
     onSuccess,
     onError,
-    fallbackToMailto = true
+    onClose
   }: EmailDraftGeneratorProps) => {
     
     try {
-      // Dynamic import to avoid SSR issues
-      const { createUserEmailDraft } = await import('@/lib/graph-api');
-      const { signInAndGetToken, getCachedToken } = await import('@/lib/auth/azure-auth');
-      
-      // Get user access token for Graph API
-      let userAccessToken = await getCachedToken();
-      if (!userAccessToken) {
-        userAccessToken = await signInAndGetToken();
-      }
-
       // Process template variables
       const processedTemplate = processEmailTemplate(template, recipients);
       
-      // Create email data for Graph API
-      const emailData = {
+      // Create formatted HTML email content
+      const htmlContent = createFormattedEmailHTML(processedTemplate);
+      
+      // Prepare email preview data
+      const previewData: EmailPreviewData = {
         to: recipients.emails,
         subject: processedTemplate.subject,
-        clientFirstName: recipients.firstName || 'Client',
-        pdfBlob: attachments[0]?.blob, // Primary attachment (backward compatibility)
-        pdfFilename: attachments[0]?.filename || 'document.pdf'
+        htmlContent,
+        attachments: attachments.map(att => ({
+          filename: att.filename,
+          contentType: att.contentType || 'application/pdf',
+          size: att.blob.size
+        }))
       };
-
-      // Create the email draft using Graph API
-      const result = await createUserEmailDraft(emailData, userAccessToken);
       
-      if (result.success) {
-        onSuccess?.(result.draftId);
-      } else {
-        throw new Error(result.error);
-      }
-
+      // Store data for modal
+      setEmailPreviewData(previewData);
+      setCurrentAttachments(attachments);
+      setShowPreview(true);
+      
     } catch (error) {
-      console.error('Error creating email draft:', error);
-      
-      if (fallbackToMailto) {
-        // Fallback to mailto if Graph API fails
-        handleMailtoFallback(recipients, template, attachments);
-        onError?.('Graph API failed, used mailto fallback');
-      } else {
-        onError?.(error instanceof Error ? error.message : 'Unknown error');
-      }
+      console.error('Error preparing email preview:', error);
+      onError?.(error instanceof Error ? error.message : 'Unknown error');
     }
   };
 
-  return { generateEmailDraft };
+  const handleSendEmail = async (emailData: EmailPreviewData) => {
+    try {
+      await sendEmail(emailData, currentAttachments);
+      // Call success callback if provided
+      // onSuccess?.('email-sent'); // Could be enhanced to return email ID
+    } catch (error) {
+      throw error; // Let modal handle the error display
+    }
+  };
+
+  const closePreview = (onCloseCallback?: () => void) => {
+    setShowPreview(false);
+    setEmailPreviewData(null);
+    setCurrentAttachments([]);
+    // Call the onClose callback if provided
+    if (onCloseCallback) {
+      onCloseCallback();
+    }
+  };
+
+  return { 
+    generateEmailDraft, 
+    showPreview, 
+    emailPreviewData, 
+    handleSendEmail, 
+    closePreview, 
+    loading 
+  };
 };
 
 // Process email template with dynamic variables
@@ -172,43 +208,67 @@ const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipien
   };
 };
 
-// Fallback to mailto if Graph API is not available
-const handleMailtoFallback = (
-  recipients: EmailRecipientData, 
-  template: EmailTemplate, 
-  attachments: EmailAttachment[]
-) => {
-  const processedTemplate = processEmailTemplate(template, recipients);
+// Create formatted HTML email content
+const createFormattedEmailHTML = (template: EmailTemplate): string => {
+  const { greeting, bodyContent, signature, previewText, fontFamily = 'Arial, sans-serif', fontSize = '10pt' } = template;
   
-  // Create plain text version of the email
-  let emailBody = processedTemplate.greeting + '\n\n';
+  let htmlContent = ``;
   
-  processedTemplate.bodyContent.forEach(content => {
-    // Strip HTML tags for plain text
-    const plainText = content.replace(/<[^>]*>/g, '');
-    emailBody += plainText + '\n';
-  });
-
-  if (attachments.length > 0) {
-    emailBody += '\n\nNote: Please attach the downloaded files manually.\n';
+  // Add preview text for email clients (hidden but used for notifications)
+  if (previewText) {
+    htmlContent += `    <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: ${fontFamily}; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">${previewText}</div>\n`;
   }
-
-  emailBody += '\nNote: Please format this email with Arial 10pt font and apply the indicated colors before sending.';
-
-  const mailtoUrl = `mailto:${recipients.emails.join(',')}?subject=${encodeURIComponent(processedTemplate.subject)}&body=${encodeURIComponent(emailBody)}`;
-  window.open(mailtoUrl, '_blank');
+  
+  htmlContent += `
+    <div style="font-family: ${fontFamily}; font-size: ${fontSize}; line-height: 1.4; color: #333;">
+      <p style="margin-bottom: 16px;">${greeting}</p>
+      <br>
+  `;
+  
+  // Add body content with proper spacing
+  bodyContent.forEach((content, index) => {
+    htmlContent += `      <p style="margin-bottom: 12px;">${content}</p>\n`;
+  });
+  
+  // Add signature if provided
+  if (signature) {
+    htmlContent += `      <br>\n      <p style="margin-top: 16px;">${signature}</p>\n`;
+  }
+  
+  htmlContent += `    </div>`;
+  
+  return htmlContent;
 };
 
-// React Component version (if you prefer component over hook)
+// React Component version with Preview Modal
 export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) => {
-  const { generateEmailDraft } = useEmailDraftGenerator();
+  const { 
+    generateEmailDraft, 
+    showPreview, 
+    emailPreviewData, 
+    handleSendEmail, 
+    closePreview, 
+    loading 
+  } = useEmailDraftGenerator();
   
-  // This component doesn't render anything - it's just a utility
+  // Generate email preview when component mounts
   React.useEffect(() => {
     generateEmailDraft(props);
   }, []);
 
-  return null;
+  return (
+    <>
+      {showPreview && emailPreviewData && (
+        <EmailPreviewModal
+          isOpen={showPreview}
+          onClose={() => closePreview(props.onClose)}
+          emailData={emailPreviewData}
+          onSend={handleSendEmail}
+          loading={loading}
+        />
+      )}
+    </>
+  );
 };
 
 // Helper function to create email data from common form data

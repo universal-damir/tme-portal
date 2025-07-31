@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TME Portal</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <link rel="stylesheet" href="taskpane.css">
+    <style>
+        /* Inline critical styles to ensure loading */
+        body {
+            font-family: Arial, sans-serif !important;
+            font-size: 10pt !important;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #243F7B;
+            line-height: 1.4;
+        }
+        .header {
+            background: linear-gradient(135deg, #243F7B 0%, #D2BC99 100%);
+            color: white;
+            padding: 20px;
+            margin: -20px -20px 20px -20px;
+            text-align: center;
+            border-radius: 0 0 12px 12px;
+        }
+        .header h1 {
+            font-family: Arial, sans-serif !important;
+            font-size: 18pt;
+            margin: 0 0 5px 0;
+            font-weight: bold;
+        }
+        .header p {
+            font-family: Arial, sans-serif !important;
+            font-size: 10pt;
+            margin: 0;
+            opacity: 0.9;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+            color: #243F7B;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #243F7B;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error-message {
+            background: #ffe6e6;
+            color: #cc0000;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #cc0000;
+            margin: 10px 0;
+            font-family: Arial, sans-serif !important;
+            font-size: 10pt;
+            display: none;
+        }
+        .success-message {
+            background: #d1edff;
+            color: #0066cc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #0066cc;
+            margin: 10px 0;
+            font-family: Arial, sans-serif !important;
+            font-size: 10pt;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>TME Portal</h1>
+        <p>Generate documents with Arial 10pt formatting and send emails</p>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-buttons">
+        <button class="tab-button active" data-tab="cost-overview">Cost Overview</button>
+        <button class="tab-button" data-tab="golden-visa">Golden Visa</button>
+        <button class="tab-button" data-tab="company-services">Company Services</button>
+        <button class="tab-button" data-tab="taxation">Taxation</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="error-message" class="error-message"></div>
+    <div id="success-message" class="success-message"></div>
+
+    <!-- Cost Overview Form -->
+    <div id="cost-overview" class="form-container">
+        <h2>Cost Overview</h2>
+        <p class="form-description">Generate cost overview documents with professional Arial 10pt formatting</p>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client First Name</label>
+                <input type="text" class="form-input" id="co-firstName" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Client Last Name</label>
+                <input type="text" class="form-input" id="co-lastName" placeholder="Enter last name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Company Name</label>
+            <input type="text" class="form-input" id="co-companyName" placeholder="Enter company name">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client Email</label>
+                <input type="email" class="form-input" id="co-email" placeholder="client@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Authority</label>
+                <select class="form-input" id="co-authority">
+                    <option value="">Select Authority</option>
+                    <option value="adgm">ADGM</option>
+                    <option value="ifza">IFZA</option>
+                    <option value="det">DET</option>
+                    <option value="shams">SHAMS</option>
+                    <option value="dmcc">DMCC</option>
+                    <option value="dafza">DAFZA</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Additional Notes</label>
+            <textarea class="form-input" id="co-notes" rows="3" placeholder="Any additional information for the cost overview"></textarea>
+        </div>
+
+        <button class="generate-button" onclick="generateDocument('cost-overview')">
+            <span class="button-icon">📧</span>
+            Download and Send
+        </button>
+    </div>
+
+    <!-- Golden Visa Form -->
+    <div id="golden-visa" class="form-container hidden">
+        <h2>Golden Visa</h2>
+        <p class="form-description">Generate Golden Visa documents with professional formatting</p>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client First Name</label>
+                <input type="text" class="form-input" id="gv-firstName" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Client Last Name</label>
+                <input type="text" class="form-input" id="gv-lastName" placeholder="Enter last name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Client Email</label>
+            <input type="email" class="form-input" id="gv-email" placeholder="client@example.com">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Visa Type</label>
+                <select class="form-input" id="gv-visaType">
+                    <option value="">Select Visa Type</option>
+                    <option value="investor">Investor Visa</option>
+                    <option value="entrepreneur">Entrepreneur Visa</option>
+                    <option value="talent">Talent Visa</option>
+                    <option value="student">Student Visa</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Investment Amount</label>
+                <input type="text" class="form-input" id="gv-investment" placeholder="e.g., AED 2,000,000">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Visa Requirements</label>
+            <textarea class="form-input" id="gv-requirements" rows="3" placeholder="Specific requirements or notes for the Golden Visa application"></textarea>
+        </div>
+
+        <button class="generate-button" onclick="generateDocument('golden-visa')">
+            <span class="button-icon">📧</span>
+            Download and Send
+        </button>
+    </div>
+
+    <!-- Company Services Form -->
+    <div id="company-services" class="form-container hidden">
+        <h2>Company Services</h2>
+        <p class="form-description">Generate company services proposals with detailed formatting</p>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client First Name</label>
+                <input type="text" class="form-input" id="cs-firstName" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Client Last Name</label>
+                <input type="text" class="form-input" id="cs-lastName" placeholder="Enter last name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Company Name</label>
+            <input type="text" class="form-input" id="cs-companyName" placeholder="Enter company name">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client Email</label>
+                <input type="email" class="form-input" id="cs-email" placeholder="client@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Service Type</label>
+                <select class="form-input" id="cs-serviceType">
+                    <option value="">Select Service</option>
+                    <option value="accounting">Accounting Services</option>
+                    <option value="compliance">Compliance Services</option>
+                    <option value="backoffice">Back Office Services</option>
+                    <option value="tax-consulting">Tax Consulting</option>
+                    <option value="full-package">Full Service Package</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Service Details</label>
+            <textarea class="form-input" id="cs-details" rows="3" placeholder="Specific services required or additional details"></textarea>
+        </div>
+
+        <button class="generate-button" onclick="generateDocument('company-services')">
+            <span class="button-icon">📧</span>
+            Download and Send
+        </button>
+    </div>
+
+    <!-- Taxation Form -->
+    <div id="taxation" class="form-container hidden">
+        <h2>Taxation Services</h2>
+        <p class="form-description">Generate taxation documents with regulatory compliance formatting</p>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client First Name</label>
+                <input type="text" class="form-input" id="tax-firstName" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Client Last Name</label>
+                <input type="text" class="form-input" id="tax-lastName" placeholder="Enter last name">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Company Name</label>
+            <input type="text" class="form-input" id="tax-companyName" placeholder="Enter company name">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Client Email</label>
+                <input type="email" class="form-input" id="tax-email" placeholder="client@example.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tax Service</label>
+                <select class="form-input" id="tax-serviceType">
+                    <option value="">Select Service</option>
+                    <option value="cit">Corporate Income Tax</option>
+                    <option value="vat">VAT Services</option>
+                    <option value="consultation">Tax Consultation</option>
+                    <option value="compliance">Tax Compliance</option>
+                    <option value="planning">Tax Planning</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Tax Requirements</label>
+            <textarea class="form-input" id="tax-requirements" rows="3" placeholder="Specific tax requirements or compliance needs"></textarea>
+        </div>
+
+        <button class="generate-button" onclick="generateDocument('taxation')">
+            <span class="button-icon">📧</span>
+            Download and Send
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p><strong>Generating Document...</strong></p>
+        <p style="font-size: 9pt; opacity: 0.8;">Creating PDF with Arial 10pt formatting and preparing email with color options</p>
+    </div>
+
+    <!-- Email Formatting Info -->
+    <div class="formatting-info">
+        <h3>Email Formatting Features</h3>
+        <div class="formatting-grid">
+            <div class="formatting-item">
+                <span class="format-sample blue">Blue Text</span>
+                <span class="format-desc">Professional information</span>
+            </div>
+            <div class="formatting-item">
+                <span class="format-sample red">Red Text</span>
+                <span class="format-desc">Important notices</span>
+            </div>
+            <div class="formatting-item">
+                <span class="format-sample green">Green Text</span>
+                <span class="format-desc">Approved/positive items</span>
+            </div>
+            <div class="formatting-item">
+                <span class="format-sample yellow">Yellow Text</span>
+                <span class="format-desc">Pending/attention items</span>
+            </div>
+        </div>
+        <p class="format-note">All emails use Arial 10pt font with professional formatting including <strong>bold</strong>, <u>underline</u>, and color options.</p>
+    </div>
+
+    <script src="taskpane.js"></script>
+</body>
+</html>

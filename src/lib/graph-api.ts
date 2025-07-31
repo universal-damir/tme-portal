@@ -136,6 +136,71 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
+// Generate formatted email body using dynamic templates
+const generateFormattedEmailBody = async (emailData: EmailData): Promise<string> => {
+  try {
+    // Import EMAIL_TEMPLATES dynamically
+    const { EMAIL_TEMPLATES } = await import('@/components/shared/EmailDraftGenerator');
+    
+    // Determine document type from subject or use COST_OVERVIEW as default
+    let templateKey = 'COST_OVERVIEW';
+    if (emailData.subject.toLowerCase().includes('golden visa')) {
+      templateKey = 'GOLDEN_VISA';
+    } else if (emailData.subject.toLowerCase().includes('company')) {
+      templateKey = 'COMPANY_SERVICES';
+    } else if (emailData.subject.toLowerCase().includes('tax')) {
+      templateKey = 'TAXATION';
+    }
+    
+    const template = EMAIL_TEMPLATES[templateKey as keyof typeof EMAIL_TEMPLATES];
+    
+    // Process template with client data
+    const firstName = emailData.clientFirstName || 'Client';
+    const processedGreeting = template.greeting.replace(/{firstName}/g, firstName);
+    
+    // Build HTML email with Arial 10pt formatting
+    let emailBody = `
+      <div style="font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; color: #000000;">
+        <p style="margin-bottom: 12px;">${processedGreeting}</p>
+    `;
+    
+    // Add body content with proper formatting
+    template.bodyContent.forEach(content => {
+      emailBody += `<p style="margin-bottom: 8px;">${content}</p>`;
+    });
+    
+    // Add signature
+    emailBody += `
+        <br>
+        <p style="margin-bottom: 8px;">Best regards,</p>
+        <p style="margin-bottom: 4px;"><strong>TME Services Team</strong></p>
+        <p style="margin-bottom: 0; font-size: 9pt; color: #666;">
+          <em>Professional document with Arial 10pt formatting and color coding</em>
+        </p>
+      </div>
+    `;
+    
+    return emailBody;
+    
+  } catch (error) {
+    console.error('Error generating email template:', error);
+    
+    // Fallback template with Arial 10pt and colors
+    return `
+      <div style="font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; color: #000000;">
+        <p style="margin-bottom: 12px;">Dear ${emailData.clientFirstName || 'Client'},</p>
+        <p style="margin-bottom: 8px;"><span style="color: #0066cc; font-weight: bold;">📋 Document Ready</span></p>
+        <p style="margin-bottom: 8px;">Please find attached your requested document as discussed.</p>
+        <p style="margin-bottom: 8px;"><span style="color: #006600;">✓ Professional formatting applied</span></p>
+        <p style="margin-bottom: 8px;"><span style="color: #cc0000; text-decoration: underline;">Please review all details carefully</span></p>
+        <br>
+        <p style="margin-bottom: 8px;">Best regards,</p>
+        <p style="margin-bottom: 4px;"><strong>TME Services Team</strong></p>
+      </div>
+    `;
+  }
+};
+
 // Alternative: Use delegated permissions (user context) instead of app permissions
 export const createUserEmailDraft = async (emailData: EmailData, userAccessToken: string) => {
   try {
@@ -147,20 +212,15 @@ export const createUserEmailDraft = async (emailData: EmailData, userAccessToken
 
     // Same email creation logic but using user's context
     const pdfBase64 = await blobToBase64(emailData.pdfBlob);
+    
+    // Generate properly formatted email body with colors and Arial 10pt
+    const formattedEmailBody = await generateFormattedEmailBody(emailData);
 
     const emailMessage = {
       subject: emailData.subject,
       body: {
         contentType: 'HTML',
-        content: `
-          <div style="font-family: Arial, sans-serif; font-size: 10pt;">
-            <p>Dear ${emailData.clientFirstName}, this is an offer as we discussed.</p>
-            <br>
-            <p><span style="color: green;">Text example green</span></p>
-            <p><span style="color: red;">Text example red</span></p>
-            <p><span style="color: #DAA520;">Text example yellow</span> THIS WILL BE CHANGED LATER. JUST NEED TO TEST IT.</p>
-          </div>
-        `
+        content: formattedEmailBody
       },
       toRecipients: emailData.to.map(email => ({
         emailAddress: {
