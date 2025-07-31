@@ -115,6 +115,8 @@ export const useEmailDraftGenerator = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [emailPreviewData, setEmailPreviewData] = useState<EmailPreviewData | null>(null);
   const [currentAttachments, setCurrentAttachments] = useState<EmailAttachment[]>([]);
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
+  const [pdfFilename, setPdfFilename] = useState<string | null>(null);
   const { sendEmail, loading } = useEmailSender();
   
   const generateEmailDraft = async ({
@@ -148,6 +150,11 @@ export const useEmailDraftGenerator = () => {
       // Store data for modal
       setEmailPreviewData(previewData);
       setCurrentAttachments(attachments);
+      // Store PDF blob and filename if available
+      if (attachments.length > 0) {
+        setPdfBlob(attachments[0].blob);
+        setPdfFilename(attachments[0].filename);
+      }
       setShowPreview(true);
       
     } catch (error) {
@@ -170,6 +177,8 @@ export const useEmailDraftGenerator = () => {
     setShowPreview(false);
     setEmailPreviewData(null);
     setCurrentAttachments([]);
+    setPdfBlob(null);
+    setPdfFilename(null);
     // Call the onClose callback if provided
     if (onCloseCallback) {
       onCloseCallback();
@@ -182,7 +191,9 @@ export const useEmailDraftGenerator = () => {
     emailPreviewData, 
     handleSendEmail, 
     closePreview, 
-    loading 
+    loading,
+    pdfBlob,
+    pdfFilename
   };
 };
 
@@ -248,7 +259,9 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
     emailPreviewData, 
     handleSendEmail, 
     closePreview, 
-    loading 
+    loading,
+    pdfBlob,
+    pdfFilename
   } = useEmailDraftGenerator();
   
   // Generate email preview when component mounts
@@ -265,6 +278,8 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
           emailData={emailPreviewData}
           onSend={handleSendEmail}
           loading={loading}
+          pdfBlob={pdfBlob || undefined}
+          pdfFilename={pdfFilename || undefined}
         />
       )}
     </>

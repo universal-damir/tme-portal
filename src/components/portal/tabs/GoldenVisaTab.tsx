@@ -210,16 +210,6 @@ const GoldenVisaTab: React.FC = () => {
         date: data.date,
       };
       const { blob, filename } = await generateGoldenVisaPDFWithFilename(data, clientInfo);
-      
-      // Download the PDF
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
 
       // Log PDF generation activity
       try {
@@ -495,8 +485,8 @@ const GoldenVisaTab: React.FC = () => {
               </>
             ) : (
               <>
-                <Download className="h-5 w-5" />
-                <span>Download and Send</span>
+                <Send className="h-5 w-5" />
+                <span>Send</span>
               </>
             )}
           </motion.button>

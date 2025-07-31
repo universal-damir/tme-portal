@@ -3,8 +3,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Download, Eye } from 'lucide-react';
+import { Download, Eye, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
 import { TaxationData, TAXATION_DEFAULTS, CompanyType } from '@/types/taxation';
 import { taxationSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
@@ -17,6 +18,7 @@ import {
 const TaxationTab: React.FC = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
 
   // Form state management
   const {
@@ -105,22 +107,7 @@ const TaxationTab: React.FC = () => {
     setValue('companyType', companyType);
   };
 
-  // Email generation using reusable component
-  const createOutlookEmailDraft = async (data: TaxationData, pdfBlob: Blob, pdfFilename: string) => {
-    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-    const { generateEmailDraft } = useEmailDraftGenerator();
-    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'TAXATION');
-    
-    await generateEmailDraft({
-      ...emailProps,
-      onSuccess: (draftId) => {
-        console.log('Email draft created successfully:', draftId);
-      },
-      onError: (error) => {
-        console.error('Email draft creation failed:', error);
-      }
-    });
-  };
+  // Email generation removed - now handled by EmailDraftGenerator component
 
   // PDF generation handlers
   const handleGeneratePDF = async (data: TaxationData): Promise<void> => {
@@ -138,19 +125,28 @@ const TaxationTab: React.FC = () => {
       // Generating Taxation PDF
       
       const { blob, filename } = await generateTaxationPDFWithFilename(data, clientInfo);
-      
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
 
-      // Create Outlook email draft with PDF attachment
-      await createOutlookEmailDraft(data, blob, filename);
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'TAXATION');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          alert('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
+        }
+      });
       
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -215,19 +211,28 @@ const TaxationTab: React.FC = () => {
       // Generating CIT Shareholder Declaration PDF
       
       const { blob, filename } = await generateCITShareholderDeclarationPDFWithFilename(data, clientInfo);
-      
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
 
-      // Create Outlook email draft with PDF attachment
-      await createOutlookEmailDraft(data, blob, filename);
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'TAXATION');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          alert('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
+        }
+      });
       
     } catch (error) {
       console.error('Error generating CIT Shareholder Declaration PDF:', error);
@@ -290,35 +295,33 @@ const TaxationTab: React.FC = () => {
     try {
       const { generateTaxationPDFWithFilename, generateCITShareholderDeclarationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
       
-      // Always download CIT Disclaimer
+      // Always generate CIT Disclaimer
       const disclaimerResult = await generateTaxationPDFWithFilename(data, clientInfo);
-      const disclaimerUrl = URL.createObjectURL(disclaimerResult.blob);
-      const disclaimerLink = document.createElement('a');
-      disclaimerLink.href = disclaimerUrl;
-      disclaimerLink.download = disclaimerResult.filename;
-      document.body.appendChild(disclaimerLink);
-      disclaimerLink.click();
-      document.body.removeChild(disclaimerLink);
-      URL.revokeObjectURL(disclaimerUrl);
 
-      // Create Outlook email draft with CIT Disclaimer PDF attachment
-      await createOutlookEmailDraft(data, disclaimerResult.blob, disclaimerResult.filename);
-
-      // Download CIT Shareholder Declaration
-      if (shouldShowCITShareholderDeclaration()) {
-        // Validate CIT Shareholder specific fields
-        if (data.citShareholderDeclaration?.clientContactNumber && data.citShareholderDeclaration?.designation) {
-          const shareholderResult = await generateCITShareholderDeclarationPDFWithFilename(data, clientInfo);
-          const shareholderUrl = URL.createObjectURL(shareholderResult.blob);
-          const shareholderLink = document.createElement('a');
-          shareholderLink.href = shareholderUrl;
-          shareholderLink.download = shareholderResult.filename;
-          document.body.appendChild(shareholderLink);
-          shareholderLink.click();
-          document.body.removeChild(shareholderLink);
-          URL.revokeObjectURL(shareholderUrl);
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, disclaimerResult.blob, disclaimerResult.filename, 'TAXATION');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          alert('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
         }
-      }
+      });
+
+      // Note: For now, only the main CIT Disclaimer is attached to the email
+      // The shareholder declaration would need separate handling if required
       
     } catch (error) {
       console.error('Error generating PDFs:', error);
@@ -440,13 +443,18 @@ const TaxationTab: React.FC = () => {
               </>
             ) : (
               <>
-                <Download className="h-5 w-5" />
-                <span>Download and Send All</span>
+                <Send className="h-5 w-5" />
+                <span>Send All</span>
               </>
             )}
           </motion.button>
         </div>
       </div>
+      
+      {/* Email Draft Generator with Preview Modal */}
+      {emailDraftProps && (
+        <EmailDraftGenerator {...emailDraftProps} />
+      )}
     </div>
   );
 };

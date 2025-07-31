@@ -3,8 +3,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Download, Eye, FileText } from 'lucide-react';
+import { Download, Eye, FileText, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
 import { CompanyServicesData, COMPANY_SERVICES_DEFAULTS } from '@/types/company-services';
 import { companyServicesSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
@@ -21,6 +22,7 @@ import {
 const CompanyServicesTab: React.FC = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
 
   // Form state management
   const {
@@ -123,22 +125,7 @@ const CompanyServicesTab: React.FC = () => {
     setValue('exchangeRate', rates[currency]);
   };
 
-  // Email generation using reusable component
-  const createOutlookEmailDraft = async (data: CompanyServicesData, pdfBlob: Blob, pdfFilename: string) => {
-    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-    const { generateEmailDraft } = useEmailDraftGenerator();
-    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'COMPANY_SERVICES');
-    
-    await generateEmailDraft({
-      ...emailProps,
-      onSuccess: (draftId) => {
-        console.log('Email draft created successfully:', draftId);
-      },
-      onError: (error) => {
-        console.error('Email draft creation failed:', error);
-      }
-    });
-  };
+  // Email generation removed - now handled by EmailDraftGenerator component
 
   // PDF generation handlers
   const handleGeneratePDF = async (data: CompanyServicesData): Promise<void> => {
@@ -154,19 +141,28 @@ const CompanyServicesTab: React.FC = () => {
       const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator');
       
       const { blob, filename } = await generateCompanyServicesPDFWithFilename(data, clientInfo);
-      
-      // Create download link
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
 
-      // Create Outlook email draft with PDF attachment
-      await createOutlookEmailDraft(data, blob, filename);
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'COMPANY_SERVICES');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          alert('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
+        }
+      });
 
       // Log PDF generation activity
       try {
@@ -350,13 +346,18 @@ const CompanyServicesTab: React.FC = () => {
               </>
             ) : (
               <>
-                <Download className="h-5 w-5" />
-                <span>Download and Send</span>
+                <Send className="h-5 w-5" />
+                <span>Send</span>
               </>
             )}
           </motion.button>
         </div>
       </div>
+      
+      {/* Email Draft Generator with Preview Modal */}
+      {emailDraftProps && (
+        <EmailDraftGenerator {...emailDraftProps} />
+      )}
     </div>
   );
 };

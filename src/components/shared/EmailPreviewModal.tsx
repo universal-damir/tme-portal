@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Edit2, Paperclip } from 'lucide-react';
+import { X, Send, Edit2, Paperclip, Download } from 'lucide-react';
 
 export interface EmailPreviewData {
   to: string[];
@@ -24,6 +24,8 @@ export interface EmailPreviewModalProps {
   emailData: EmailPreviewData;
   onSend: (emailData: EmailPreviewData) => Promise<void>;
   loading?: boolean;
+  pdfBlob?: Blob;
+  pdfFilename?: string;
 }
 
 export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
@@ -31,7 +33,9 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   onClose,
   emailData,
   onSend,
-  loading = false
+  loading = false,
+  pdfBlob,
+  pdfFilename
 }) => {
   const [editableSubject, setEditableSubject] = useState(emailData.subject);
   const [editableRecipients, setEditableRecipients] = useState(emailData.to.join(', '));
@@ -125,6 +129,19 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
       onClose();
     } catch (error) {
       console.error('Failed to send email:', error);
+    }
+  };
+
+  const handleDownload = () => {
+    if (pdfBlob && pdfFilename) {
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = pdfFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -329,6 +346,19 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
             >
               Cancel
             </motion.button>
+            {pdfBlob && pdfFilename && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleDownload}
+                disabled={loading}
+                className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+                style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+              >
+                <Download size={16} />
+                Download
+              </motion.button>
+            )}
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}

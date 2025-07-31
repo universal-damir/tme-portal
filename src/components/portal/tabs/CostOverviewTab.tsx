@@ -4,6 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
+import { Send } from 'lucide-react';
 import { OfferData } from '@/types/offer';
 import { offerDataSchema } from '@/lib/validations';
 import { 
@@ -37,6 +38,9 @@ import { useChatPanel } from '@/hooks/useChatPanel';
 // Import AI Assistant components
 import { ChatInterface } from '@/components/ai-assistant';
 
+// Import Email components
+import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
+
 // Progress tracking interface
 interface PDFGenerationProgress {
   step: string;
@@ -51,6 +55,7 @@ interface CostOverviewTabProps {
 const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
   const chatPanel = useChatPanel();
+  const [emailDraftProps, setEmailDraftProps] = React.useState<EmailDraftGeneratorProps | null>(null);
 
   // Form state management
   const {
@@ -273,23 +278,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Auto-save data loading removed
 
-  // Email generation using reusable component
-  const createOutlookEmailDraft = async (data: OfferData, pdfBlob: Blob, pdfFilename: string) => {
-    const { useEmailDraftGenerator, createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-    const { generateEmailDraft } = useEmailDraftGenerator();
-
-    const emailProps = createEmailDataFromFormData(data, pdfBlob, pdfFilename, 'COST_OVERVIEW');
-    
-    await generateEmailDraft({
-      ...emailProps,
-      onSuccess: (draftId) => {
-        console.log('Email draft created successfully:', draftId);
-      },
-      onError: (error) => {
-        console.error('Email draft creation failed:', error);
-      }
-    });
-  };
+  // Email generation removed - now handled by EmailDraftGenerator component
 
   // PDF generation handlers with progress tracking
   const handleGeneratePDF = async (data: OfferData): Promise<void> => {
@@ -332,27 +321,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       // Step 2: Generate main document
       updateProgress('Generating main cost overview document...', (++currentStep / totalSteps) * 100);
       const { blob: mainPdfBlob, filename: mainFilename } = await generatePDFWithFilename(data);
-      const mainUrl = URL.createObjectURL(mainPdfBlob);
-      const mainLink = document.createElement('a');
-      mainLink.href = mainUrl;
-      mainLink.download = mainFilename;
-      document.body.appendChild(mainLink);
-      mainLink.click();
-      document.body.removeChild(mainLink);
-      URL.revokeObjectURL(mainUrl);
 
       // Step 3: Generate family visa document if needed
       if (hasFamilyVisaDoc) {
         updateProgress('Generating family visa document...', (++currentStep / totalSteps) * 100);
         const { blob: familyPdfBlob, filename: familyFilename } = await generateFamilyVisaPDFWithFilename(data);
-        const familyUrl = URL.createObjectURL(familyPdfBlob);
-        const familyLink = document.createElement('a');
-        familyLink.href = familyUrl;
-        familyLink.download = familyFilename;
-        document.body.appendChild(familyLink);
-        familyLink.click();
-        document.body.removeChild(familyLink);
-        URL.revokeObjectURL(familyUrl);
+        // Family visa will be handled separately - for now we focus on the main document
       }
 
       // Final step: Complete
@@ -382,8 +356,27 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         console.error('Failed to log PDF generation activity:', error);
       }
 
-      // Create Outlook email draft after successful PDF generation
-      await createOutlookEmailDraft(data, mainPdfBlob, mainFilename);
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          toast.error('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
+        }
+      });
 
       // Dismiss loading toast
       toast.dismiss(loadingToast);
@@ -841,10 +834,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
                 </>
               ) : (
                 <>
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Download and Send</span>
+                  <Send className="h-5 w-5" />
+                  <span>Send</span>
                 </>
               )}
             </button>
@@ -887,6 +878,11 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         isLoading={aiAssistant.isLoading}
         error={aiAssistant.error}
       />
+      
+      {/* Email Draft Generator with Preview Modal */}
+      {emailDraftProps && (
+        <EmailDraftGenerator {...emailDraftProps} />
+      )}
     </div>
   );
 };
