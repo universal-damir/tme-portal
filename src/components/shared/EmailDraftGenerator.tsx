@@ -117,6 +117,7 @@ export const useEmailDraftGenerator = () => {
   const [currentAttachments, setCurrentAttachments] = useState<EmailAttachment[]>([]);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfFilename, setPdfFilename] = useState<string | null>(null);
+  const [additionalPdfs, setAdditionalPdfs] = useState<Array<{blob: Blob; filename: string}>>([]);
   const { sendEmail, loading } = useEmailSender();
   
   const generateEmailDraft = async ({
@@ -154,6 +155,17 @@ export const useEmailDraftGenerator = () => {
       if (attachments.length > 0) {
         setPdfBlob(attachments[0].blob);
         setPdfFilename(attachments[0].filename);
+        
+        // Store additional PDFs if available
+        if (attachments.length > 1) {
+          const additionalPdfData = attachments.slice(1).map(att => ({
+            blob: att.blob,
+            filename: att.filename
+          }));
+          setAdditionalPdfs(additionalPdfData);
+        } else {
+          setAdditionalPdfs([]);
+        }
       }
       setShowPreview(true);
       
@@ -179,6 +191,7 @@ export const useEmailDraftGenerator = () => {
     setCurrentAttachments([]);
     setPdfBlob(null);
     setPdfFilename(null);
+    setAdditionalPdfs([]);
     // Call the onClose callback if provided
     if (onCloseCallback) {
       onCloseCallback();
@@ -193,7 +206,8 @@ export const useEmailDraftGenerator = () => {
     closePreview, 
     loading,
     pdfBlob,
-    pdfFilename
+    pdfFilename,
+    additionalPdfs
   };
 };
 
@@ -261,7 +275,8 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
     closePreview, 
     loading,
     pdfBlob,
-    pdfFilename
+    pdfFilename,
+    additionalPdfs
   } = useEmailDraftGenerator();
   
   // Generate email preview when component mounts
@@ -280,6 +295,7 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
           loading={loading}
           pdfBlob={pdfBlob || undefined}
           pdfFilename={pdfFilename || undefined}
+          additionalPdfs={additionalPdfs}
         />
       )}
     </>

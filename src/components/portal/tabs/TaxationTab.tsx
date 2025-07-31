@@ -297,10 +297,50 @@ const TaxationTab: React.FC = () => {
       
       // Always generate CIT Disclaimer
       const disclaimerResult = await generateTaxationPDFWithFilename(data, clientInfo);
+      
+      // Generate CIT Shareholder Declaration if applicable
+      let shareholderResult = null;
+      if (shouldShowCITShareholderDeclaration() && 
+          data.citShareholderDeclaration?.clientContactNumber && 
+          data.citShareholderDeclaration?.designation) {
+        shareholderResult = await generateCITShareholderDeclarationPDFWithFilename(data, clientInfo);
+      }
+
+      // Prepare attachments array
+      const attachments = [
+        {
+          blob: disclaimerResult.blob,
+          filename: disclaimerResult.filename,
+          contentType: 'application/pdf'
+        }
+      ];
+      
+      // Add shareholder declaration if generated
+      if (shareholderResult) {
+        attachments.push({
+          blob: shareholderResult.blob,
+          filename: shareholderResult.filename,
+          contentType: 'application/pdf'
+        });
+      }
 
       // Show email preview modal after successful PDF generation
-      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, disclaimerResult.blob, disclaimerResult.filename, 'TAXATION');
+      const { createEmailDataFromFormData, EMAIL_TEMPLATES } = await import('@/components/shared/EmailDraftGenerator');
+      
+      // Create email props with multiple attachments  
+      const emailProps = {
+        recipients: {
+          emails: data.clientEmails || [],
+          firstName: data.firstName,
+          lastName: data.lastName,
+          companyName: data.companyName
+        },
+        template: {
+          ...EMAIL_TEMPLATES.TAXATION,
+          subject: disclaimerResult.filename.replace('.pdf', '')
+        },
+        attachments
+      };
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
@@ -319,9 +359,6 @@ const TaxationTab: React.FC = () => {
           setEmailDraftProps(null);
         }
       });
-
-      // Note: For now, only the main CIT Disclaimer is attached to the email
-      // The shareholder declaration would need separate handling if required
       
     } catch (error) {
       console.error('Error generating PDFs:', error);
@@ -444,7 +481,7 @@ const TaxationTab: React.FC = () => {
             ) : (
               <>
                 <Send className="h-5 w-5" />
-                <span>Send All</span>
+                <span>Send</span>
               </>
             )}
           </motion.button>

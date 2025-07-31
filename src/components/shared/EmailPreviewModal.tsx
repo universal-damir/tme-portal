@@ -26,6 +26,10 @@ export interface EmailPreviewModalProps {
   loading?: boolean;
   pdfBlob?: Blob;
   pdfFilename?: string;
+  additionalPdfs?: Array<{
+    blob: Blob;
+    filename: string;
+  }>;
 }
 
 export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
@@ -35,7 +39,8 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   onSend,
   loading = false,
   pdfBlob,
-  pdfFilename
+  pdfFilename,
+  additionalPdfs = []
 }) => {
   const [editableSubject, setEditableSubject] = useState(emailData.subject);
   const [editableRecipients, setEditableRecipients] = useState(emailData.to.join(', '));
@@ -132,17 +137,29 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadAll = () => {
+    // Download main PDF
     if (pdfBlob && pdfFilename) {
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = pdfFilename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      handleDownload(pdfBlob, pdfFilename);
     }
+    
+    // Download additional PDFs
+    additionalPdfs.forEach(pdf => {
+      setTimeout(() => {
+        handleDownload(pdf.blob, pdf.filename);
+      }, 100); // Small delay to prevent browser blocking multiple downloads
+    });
   };
 
   if (!isOpen) return null;
@@ -346,18 +363,36 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
             >
               Cancel
             </motion.button>
-            {pdfBlob && pdfFilename && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleDownload}
-                disabled={loading}
-                className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
-                style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
-              >
-                <Download size={16} />
-                Download
-              </motion.button>
+            {(pdfBlob && pdfFilename) && (
+              <>
+                {additionalPdfs.length > 0 ? (
+                  // Multiple PDFs - show "Download All" button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleDownloadAll}
+                    disabled={loading}
+                    className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+                    style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                  >
+                    <Download size={16} />
+                    Download All ({additionalPdfs.length + 1})
+                  </motion.button>
+                ) : (
+                  // Single PDF - show regular download button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleDownload(pdfBlob, pdfFilename)}
+                    disabled={loading}
+                    className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
+                    style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                  >
+                    <Download size={16} />
+                    Download
+                  </motion.button>
+                )}
+              </>
             )}
             <motion.button
               whileHover={{ scale: 1.02 }}
