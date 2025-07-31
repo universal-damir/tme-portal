@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, MessageSquare, FileText, User, Calendar, AlertCircle, CheckCircle, Edit3 } from 'lucide-react';
+import { X, MessageSquare, FileText, User, Calendar, AlertCircle, CheckCircle, Edit3, Send } from 'lucide-react';
 import { Application } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
@@ -103,7 +103,28 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     }
   };
 
-  // Removed handleDownloadPDF function as it's no longer needed
+  const handleSendPDF = () => {
+    if (!application) return;
+    
+    // Navigate to Golden Visa tab and trigger send functionality
+    window.location.hash = '#golden-visa';
+    
+    // Close the feedback modal
+    onClose();
+    
+    // Dispatch event to load form data and trigger PDF generation/email
+    const sendEvent = new CustomEvent('send-approved-application', {
+      detail: {
+        applicationId: application.id,
+        formData: application.form_data
+      }
+    });
+    
+    // Small delay to ensure the tab has loaded before dispatching the event
+    setTimeout(() => {
+      window.dispatchEvent(sendEvent);
+    }, 100);
+  };
 
   const handleEditForm = () => {
     if (onEditForm) {
@@ -248,33 +269,44 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                     )}
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Go to Form Editor button - always show */}
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        type="button"
-                        onClick={handleEditForm}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
-                        style={{ 
-                          backgroundColor: isApproved ? '#DCFCE7' : '#FEE2E2', 
-                          color: isApproved ? '#16A34A' : '#DC2626' 
-                        }}
-                      >
-                        <Edit3 className="w-4 h-4" />
-                        <span>Go to Form Editor</span>
-                      </motion.button>
+                    <div className={isApproved ? "flex justify-center" : "grid grid-cols-2 gap-3"}>
+                      {/* Go to Form Editor button - only show when not approved */}
+                      {!isApproved && (
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          type="button"
+                          onClick={handleEditForm}
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
+                          style={{ 
+                            backgroundColor: '#FEE2E2', 
+                            color: '#DC2626' 
+                          }}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          <span>Go to Form Editor</span>
+                        </motion.button>
+                      )}
                       
                       <motion.button
                         whileHover={{ scale: 1.01 }}
                         whileTap={{ scale: 0.99 }}
                         type="button"
-                        onClick={handlePreviewPDF}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
-                        style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                        onClick={isApproved ? handleSendPDF : handlePreviewPDF}
+                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200"
+                        style={{ backgroundColor: isApproved ? '#243F7B' : '#D2BC99', color: isApproved ? 'white' : '#243F7B' }}
                       >
-                        <FileText className="w-4 h-4" />
-                        <span>Preview PDF</span>
+                        {isApproved ? (
+                          <>
+                            <Send className="w-4 h-4" />
+                            <span>Send</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-4 h-4" />
+                            <span>Preview PDF</span>
+                          </>
+                        )}
                       </motion.button>
                     </div>
                   </div>

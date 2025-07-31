@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, XCircle, FileText, Send, User, MessageSquare, Calendar, Tag } from 'lucide-react';
+import { X, CheckCircle, XCircle, FileText, Send, User, MessageSquare, Calendar, Tag, Edit } from 'lucide-react';
 import { Application } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
@@ -149,6 +149,46 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       resetForm();
       onClose();
     }
+  };
+
+  const handleEditApplication = () => {
+    if (!application?.form_data) return;
+    
+    // Map application types to tab names
+    const tabMapping: Record<string, string> = {
+      'golden-visa': 'golden-visa',
+      'cost-overview': 'cost-overview', 
+      'company-services': 'company-services',
+      'taxation': 'taxation',
+      'corporate-changes': 'corporate-changes'
+    };
+    
+    const targetTab = tabMapping[application.type];
+    
+    // Navigate to the correct tab first
+    if (targetTab) {
+      const tabEvent = new CustomEvent('navigate-to-tab', {
+        detail: { tab: targetTab }
+      });
+      window.dispatchEvent(tabEvent);
+    }
+    
+    // Dispatch event to pre-fill the form based on application type
+    const eventName = `edit-${application.type}-application`;
+    const editEvent = new CustomEvent(eventName, {
+      detail: {
+        applicationId: application.id,
+        formData: application.form_data
+      }
+    });
+    
+    // Delay the form data loading slightly to ensure tab navigation completes
+    setTimeout(() => {
+      window.dispatchEvent(editEvent);
+    }, 100);
+    
+    // Close the review modal
+    handleClose();
   };
 
   useEffect(() => {
@@ -316,7 +356,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     )}
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-3">
                       {/* Send Back for Revision */}
                       <motion.button
                         whileHover={!isSubmitting ? { scale: 1.01 } : {}}
@@ -324,11 +364,26 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         type="button"
                         onClick={() => handleActionClick('reject')}
                         disabled={isSubmitting}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50"
+                        className="flex items-center justify-center space-x-2 w-full px-3 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50"
                         style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}
                       >
                         <Send className="w-4 h-4" />
-                        <span>Send Back for Revision</span>
+                        <span className="hidden sm:inline">Send Back</span>
+                        <span className="sm:hidden">Reject</span>
+                      </motion.button>
+
+                      {/* Edit Application */}
+                      <motion.button
+                        whileHover={!isSubmitting ? { scale: 1.01 } : {}}
+                        whileTap={!isSubmitting ? { scale: 0.99 } : {}}
+                        type="button"
+                        onClick={handleEditApplication}
+                        disabled={isSubmitting}
+                        className="flex items-center justify-center space-x-2 w-full px-3 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50"
+                        style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
                       </motion.button>
 
                       {/* Approve */}
@@ -338,7 +393,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         type="button"
                         onClick={() => handleActionClick('approve')}
                         disabled={isSubmitting}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50"
+                        className="flex items-center justify-center space-x-2 w-full px-3 py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50"
                         style={{ backgroundColor: '#10B981' }}
                       >
                         {isSubmitting ? (

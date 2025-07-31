@@ -76,7 +76,7 @@ export default function TMEPortal() {
     }
   }, [user, loading, router])
 
-  // Listen for tab switching events from review modal
+  // Listen for tab switching events from review modal and other sources
   useEffect(() => {
     const handleSwitchTab = (event: any) => {
       const { tab } = event.detail;
@@ -85,10 +85,13 @@ export default function TMEPortal() {
       }
     };
 
+    // Listen for both event types
     window.addEventListener('switch-tab', handleSwitchTab);
+    window.addEventListener('navigate-to-tab', handleSwitchTab);
 
     return () => {
       window.removeEventListener('switch-tab', handleSwitchTab);
+      window.removeEventListener('navigate-to-tab', handleSwitchTab);
     };
   }, [setActiveTab]);
 

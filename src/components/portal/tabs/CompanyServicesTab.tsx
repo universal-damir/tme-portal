@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
 import { Download, Eye, FileText, Send } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
@@ -246,6 +247,33 @@ const CompanyServicesTab: React.FC = () => {
       setIsGenerating(false);
     }
   };
+
+  // Listen for edit application events from review modal or notifications
+  React.useEffect(() => {
+    const handleEditApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Pre-filling Company Services form with application data:', applicationId);
+      
+      // Pre-fill the form with the application data
+      Object.keys(formData).forEach((key) => {
+        if (key in watchedData) {
+          setValue(key as any, formData[key]);
+        }
+      });
+      
+      // Show a toast notification to inform the user
+      toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
+        duration: 4000,
+        position: 'top-center'
+      });
+    };
+
+    window.addEventListener('edit-company-services-application', handleEditApplication);
+
+    return () => {
+      window.removeEventListener('edit-company-services-application', handleEditApplication);
+    };
+  }, [setValue]);
 
   return (
     <div className="space-y-8">

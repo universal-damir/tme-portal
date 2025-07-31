@@ -364,6 +364,14 @@ const GoldenVisaTab: React.FC = () => {
         }
       });
       
+      // Special handling for client emails to update the component's local state
+      if (formData.clientEmails) {
+        const emailUpdateEvent = new CustomEvent('update-client-emails', {
+          detail: { emails: formData.clientEmails }
+        });
+        window.dispatchEvent(emailUpdateEvent);
+      }
+      
       // Show a toast notification to inform the user
       toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
         duration: 4000,
@@ -371,10 +379,20 @@ const GoldenVisaTab: React.FC = () => {
       });
     };
 
+    const handleSendApprovedApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Sending approved application:', applicationId);
+      
+      // Generate PDF and show email modal using the saved form data
+      handleGeneratePDF(formData);
+    };
+
     window.addEventListener('edit-golden-visa-application', handleEditApplication);
+    window.addEventListener('send-approved-application', handleSendApprovedApplication);
 
     return () => {
       window.removeEventListener('edit-golden-visa-application', handleEditApplication);
+      window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
   }, [setValue]);
 

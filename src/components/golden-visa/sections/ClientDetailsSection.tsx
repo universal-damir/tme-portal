@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { User, Calendar as CalendarIcon, Plus, X, Mail, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
@@ -57,6 +57,21 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
     }
     return [''];
   });
+
+  // Listen for email update events (for edit operations)
+  useEffect(() => {
+    const handleUpdateEmails = (event: any) => {
+      const { emails } = event.detail;
+      if (emails && Array.isArray(emails)) {
+        setEmailInputs(emails.length > 0 ? emails : ['']);
+      }
+    };
+
+    window.addEventListener('update-client-emails', handleUpdateEmails);
+    return () => {
+      window.removeEventListener('update-client-emails', handleUpdateEmails);
+    };
+  }, []);
 
   // Update form data when email inputs change
   useEffect(() => {

@@ -522,6 +522,33 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     };
   }, [watchedData]);
 
+  // Listen for edit application events from review modal or notifications
+  React.useEffect(() => {
+    const handleEditApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Pre-filling Cost Overview form with application data:', applicationId);
+      
+      // Pre-fill the form with the application data
+      Object.keys(formData).forEach((key) => {
+        if (key in watchedData) {
+          setValue(key as any, formData[key]);
+        }
+      });
+      
+      // Show a toast notification to inform the user
+      toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
+        duration: 4000,
+        position: 'top-center'
+      });
+    };
+
+    window.addEventListener('edit-cost-overview-application', handleEditApplication);
+
+    return () => {
+      window.removeEventListener('edit-cost-overview-application', handleEditApplication);
+    };
+  }, [setValue]);
+
   return (
     <div className="space-y-8">
 
