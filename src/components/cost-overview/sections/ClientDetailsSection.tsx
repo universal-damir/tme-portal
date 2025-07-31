@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UseFormRegister, FieldErrors, UseFormSetValue } from 'react-hook-form';
-import { User, Check } from 'lucide-react';
+import { User, Check, Plus, X, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { OfferData } from '@/types/offer';
 import { FormSection } from '../ui/FormSection';
@@ -27,11 +27,52 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   // Check if company name has any meaningful content
   const hasCompanyName = clientDetails?.companyName && clientDetails.companyName.trim().length > 0;
 
+  // Email management state - start with existing emails or just one empty field
+  const [emailInputs, setEmailInputs] = useState<string[]>(() => {
+    if (clientDetails?.clientEmails?.length) {
+      return clientDetails.clientEmails;
+    }
+    return [''];
+  });
+
   useEffect(() => {
     if (!hasCompanyName) {
       setValue('clientDetails.addressToCompany', false);
     }
   }, [hasCompanyName, setValue]);
+
+  // Update form data when email inputs change
+  useEffect(() => {
+    const validEmails = emailInputs.filter(email => email.trim() !== '');
+    setValue('clientDetails.clientEmails', validEmails.length > 0 ? validEmails : ['']);
+  }, [emailInputs, setValue]);
+
+  // Email input handlers
+  const handleEmailChange = (index: number, value: string) => {
+    const newEmails = [...emailInputs];
+    newEmails[index] = value;
+    setEmailInputs(newEmails);
+  };
+
+  const addEmailInput = () => {
+    setEmailInputs([...emailInputs, '']);
+  };
+
+  const removeEmailInput = (index: number) => {
+    if (emailInputs.length > 1) {
+      const newEmails = emailInputs.filter((_, i) => i !== index);
+      setEmailInputs(newEmails);
+    } else {
+      // If it's the last field, just clear it instead of removing
+      setEmailInputs(['']);
+    }
+  };
+
+  // Email validation
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   return (
     <motion.div
@@ -157,6 +198,102 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             </div>
           </div>
 
+          {/* Client Emails Section */}
+          <div>
+            <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+              {emailInputs.length === 1 ? 'Primary Email Address *' : 'Client Email Addresses *'}
+            </label>
+            {emailInputs.length === 1 && (
+              <p className="text-xs text-gray-500 mb-3">Enter client's primary email address</p>
+            )}
+            
+            <div className="space-y-3">
+              {emailInputs.map((email, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-center gap-3"
+                >
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Mail 
+                        className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" 
+                      />
+                      <motion.input
+                        whileFocus={{ scale: 1.01 }}
+                        type="email"
+                        value={email}
+                        onChange={(e) => handleEmailChange(index, e.target.value)}
+                        className={`w-full pl-10 pr-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
+                          email && !validateEmail(email) 
+                            ? 'border-red-300 focus:border-red-500' 
+                            : 'border-gray-200'
+                        }`}
+                        placeholder={index === 0 ? 'Enter primary email address' : `Enter additional email address`}
+                        onFocus={(e) => e.target.style.borderColor = email && !validateEmail(email) ? '#ef4444' : '#243F7B'}
+                        onBlur={(e) => e.target.style.borderColor = email && !validateEmail(email) ? '#fca5a5' : '#e5e7eb'}
+                      />
+                      {email && validateEmail(email) && (
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                        </motion.div>
+                      )}
+                    </div>
+                    {email && !validateEmail(email) && (
+                      <p className="text-red-500 text-xs mt-1">Please enter a valid email address</p>
+                    )}
+                  </div>
+                  
+                  {/* Only show remove button for additional emails (not the primary one) */}
+                  {emailInputs.length > 1 && index > 0 && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="button"
+                      onClick={() => removeEmailInput(index)}
+                      className="p-2 rounded-lg border-2 border-red-200 text-red-500 hover:border-red-300 hover:bg-red-50 transition-all duration-200"
+                    >
+                      <X className="h-4 w-4" />
+                    </motion.button>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Add Another Email Button - Only show when there's one field or when the last field has content */}
+            {(emailInputs.length === 1 || (emailInputs.length > 1 && emailInputs[emailInputs.length - 1].trim() !== '')) && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={addEmailInput}
+                className="mt-3 flex items-center gap-2 text-sm font-medium transition-all duration-200 hover:underline"
+                style={{ color: '#243F7B' }}
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add additional email (optional)</span>
+              </motion.button>
+            )}
+
+            {/* Display validation errors for the email array */}
+            {errors.clientDetails?.clientEmails && (
+              <p className="text-red-500 text-xs mt-2">
+                {Array.isArray(errors.clientDetails.clientEmails) 
+                  ? errors.clientDetails.clientEmails[0]?.message || 'Invalid email format'
+                  : 'Please check email format'
+                }
+              </p>
+            )}
+          </div>
+
+          {/* Separator Line */}
+          <div className="border-t border-gray-200 my-6"></div>
+
           {/* Company Setup Type */}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
@@ -280,20 +417,22 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Exchange Rate (AED to {clientDetails?.secondaryCurrency || 'Currency'}) *
               </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                type="number"
-                step="0.01"
-                {...register('clientDetails.exchangeRate', { valueAsNumber: true })}
-                className="w-28 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                placeholder="4.00"
-                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              />
-              <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1 mt-2 w-fit">
-                <p className="text-xs text-gray-600 font-medium">
-                  {clientDetails?.exchangeRate || '4.00'} AED = 1 {clientDetails?.secondaryCurrency || 'Currency'}
-                </p>
+              <div className="flex items-center gap-3">
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  type="number"
+                  step="0.01"
+                  {...register('clientDetails.exchangeRate', { valueAsNumber: true })}
+                  className="w-28 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                  placeholder="4.00"
+                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+                <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1 h-[42px] flex items-center">
+                  <p className="text-xs text-gray-600 font-medium whitespace-nowrap">
+                    {clientDetails?.exchangeRate || '4.00'} AED = 1 {clientDetails?.secondaryCurrency || 'Currency'}
+                  </p>
+                </div>
               </div>
               {errors.clientDetails?.exchangeRate && (
                 <p className="text-red-500 text-xs mt-1">{errors.clientDetails.exchangeRate.message}</p>

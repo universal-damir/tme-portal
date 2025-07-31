@@ -73,6 +73,7 @@ export interface CompanyServicesData {
   companyName?: string;
   shortCompanyName?: string;
   date: string;
+  clientEmails: string[];
   
   // Secondary currency fields (consistent with other tabs)
   secondaryCurrency: 'EUR' | 'USD' | 'GBP';

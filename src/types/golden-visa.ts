@@ -43,6 +43,7 @@ export interface GoldenVisaData {
   lastName?: string;
   companyName?: string;
   date: string;
+  clientEmails: string[];
   
   // Secondary currency fields (same as cost overview)
   secondaryCurrency: 'EUR' | 'USD' | 'GBP';

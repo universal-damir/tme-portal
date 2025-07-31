@@ -40,6 +40,7 @@ export interface TaxationData {
   companyName: string;
   shortCompanyName: string;
   date: string;
+  clientEmails: string[];
   
   // Company selection
   companyType: CompanyType;

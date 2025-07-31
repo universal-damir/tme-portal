@@ -7,6 +7,7 @@ export interface ClientDetails {
   companySetupType: string;
   secondaryCurrency: string;
   exchangeRate: number;
+  clientEmails: string[];
 }
 
 export interface AuthorityInformation {

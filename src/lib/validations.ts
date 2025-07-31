@@ -9,6 +9,7 @@ export const clientDetailsSchema = z.object({
   companySetupType: z.string().min(1, 'Company setup type is required'),
   secondaryCurrency: z.string().min(1, 'Secondary currency is required'),
   exchangeRate: z.number().min(0.01, 'Exchange rate must be greater than 0').max(1000, 'Exchange rate seems unrealistic'),
+  clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
 });
 
 export const authorityInformationSchema = z.object({
@@ -132,6 +133,7 @@ export const goldenVisaSchema = z.object({
   lastName: z.string().optional(), 
   companyName: z.string().optional(),
   date: z.string().min(1, 'Date is required'),
+  clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
   
   // Secondary currency fields (same as cost overview)
   secondaryCurrency: z.enum(['EUR', 'USD', 'GBP'], {
@@ -247,6 +249,7 @@ export const companyServicesSchema = z.object({
   lastName: z.string().max(50, 'Last name must be less than 50 characters').optional(),
   companyName: z.string().max(100, 'Company name must be less than 100 characters').optional(),
   date: z.string().min(1, 'Date is required'),
+  clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
   secondaryCurrency: z.enum(['EUR', 'USD', 'GBP'], {
     required_error: 'Please select a secondary currency',
   }),
@@ -310,6 +313,7 @@ export const taxationSchema = z.object({
   companyName: z.string().max(100, 'Company name must be less than 100 characters'),
   shortCompanyName: z.string().max(100, 'Short company name must be less than 100 characters'),
   date: z.string().min(1, 'Date is required'),
+  clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
   companyType: z.enum(['tme-fzco', 'management-consultants'], {
     required_error: 'Please select a company type',
   }),

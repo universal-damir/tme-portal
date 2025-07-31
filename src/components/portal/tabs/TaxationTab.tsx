@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Download, Eye } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { TaxationData, TAXATION_DEFAULTS, CompanyType } from '@/types/taxation';
 import { taxationSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
@@ -337,72 +338,87 @@ const TaxationTab: React.FC = () => {
         />
       )}
 
-      {/* Generate and Preview Buttons - Three buttons in one row */}
-      <div className="text-center">
-        <div className="flex gap-3 justify-center items-center max-w-4xl mx-auto">
-          {/* Button 1: Preview CIT Disclaimer */}
-          <button
+      {/* Generate and Preview Buttons */}
+      <div className="text-center" style={{ fontFamily: 'Inter, sans-serif' }}>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          {/* Preview CIT Disclaimer Button */}
+          <motion.button
             type="button"
             onClick={() => handlePreviewPDF(watchedData)}
             disabled={isGenerating}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center space-x-2 text-sm"
+            whileHover={!isGenerating ? { scale: 1.02 } : {}}
+            whileTap={!isGenerating ? { scale: 0.98 } : {}}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
+              color: '#243F7B' 
+            }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <Eye className="h-4 w-4" />
+                <Eye className="h-5 w-5" />
                 <span>Preview CIT Disclaimer</span>
               </>
             )}
-          </button>
+          </motion.button>
 
-          {/* Button 2: Preview Declaration */}
+          {/* Preview Management Declaration Button */}
           {shouldShowCITShareholderDeclaration() && (
-            <button
+            <motion.button
               type="button"
               onClick={() => handlePreviewDeclaration(watchedData)}
               disabled={isGenerating}
-              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center space-x-2 text-sm"
+              whileHover={!isGenerating ? { scale: 1.02 } : {}}
+              whileTap={!isGenerating ? { scale: 0.98 } : {}}
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              style={{ 
+                backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
+                color: '#243F7B' 
+              }}
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                   <span>Generating...</span>
                 </>
               ) : (
                 <>
-                  <Eye className="h-4 w-4" />
-                  <span>
-                    Preview {watchedData.companyType === 'management-consultants' ? 'Mgt Declaration' : 'Mgt Declaration'}
-                  </span>
+                  <Eye className="h-5 w-5" />
+                  <span>Preview Mgt Declaration</span>
                 </>
               )}
-            </button>
+            </motion.button>
           )}
-
-          {/* Button 3: Download All */}
-          <button
+          
+          {/* Download All Button */}
+          <motion.button
             type="button"
             onClick={() => handleDownloadAll(watchedData)}
             disabled={isGenerating}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center space-x-2 text-sm"
+            whileHover={!isGenerating ? { scale: 1.02 } : {}}
+            whileTap={!isGenerating ? { scale: 0.98 } : {}}
+            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: isGenerating ? '#9CA3AF' : '#243F7B' 
+            }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
-                <Download className="h-4 w-4" />
+                <Download className="h-5 w-5" />
                 <span>Download All</span>
               </>
             )}
-          </button>
+          </motion.button>
         </div>
       </div>
     </div>
