@@ -47,6 +47,22 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
     setValue('clientDetails.clientEmails', validEmails.length > 0 ? validEmails : ['']);
   }, [emailInputs, setValue]);
 
+  // Sync local email state with form data changes (e.g., from AI assistant)
+  useEffect(() => {
+    if (clientDetails?.clientEmails && Array.isArray(clientDetails.clientEmails)) {
+      const formEmails = clientDetails.clientEmails.filter(email => email && email.trim() !== '');
+      
+      // Only update if the emails are actually different to avoid infinite loops
+      const currentEmails = emailInputs.filter(email => email.trim() !== '');
+      const emailsChanged = formEmails.length !== currentEmails.length || 
+                          formEmails.some((email, index) => email !== currentEmails[index]);
+      
+      if (emailsChanged) {
+        setEmailInputs(formEmails.length > 0 ? formEmails : ['']);
+      }
+    }
+  }, [clientDetails?.clientEmails, emailInputs]);
+
   // Email input handlers
   const handleEmailChange = (index: number, value: string) => {
     const newEmails = [...emailInputs];

@@ -332,6 +332,9 @@ export function validateMandatoryFields(formData: Partial<OfferData>): {
   if (!formData.clientDetails?.clientEmails || formData.clientDetails.clientEmails.length === 0) {
     missingFields.push('Email address');
   }
+  if (!formData.clientDetails?.companySetupType) {
+    missingFields.push('Shareholder type (Individual or Corporate)');
+  }
 
   // Check mandatory financial information
   if (!formData.authorityInformation?.shareCapitalAED) {
@@ -339,6 +342,13 @@ export function validateMandatoryFields(formData: Partial<OfferData>): {
   }
   if (!formData.authorityInformation?.valuePerShareAED) {
     missingFields.push('Value per share');
+  }
+
+  // Check IFZA-specific requirements
+  if (formData.authorityInformation?.responsibleAuthority?.includes('IFZA')) {
+    if (!formData.ifzaLicense?.visaQuota) {
+      missingFields.push('Visa quota (number of visa slots for IFZA)');
+    }
   }
 
   return {
