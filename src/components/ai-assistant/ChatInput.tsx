@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -78,10 +77,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             placeholder={placeholder}
             disabled={disabled || isLoading}
             className={cn(
-              "min-h-[44px] max-h-[150px] resize-none pr-12 text-sm",
-              "focus:ring-purple-500 focus:border-purple-500",
-              "disabled:opacity-50 disabled:cursor-not-allowed"
+              "min-h-[44px] max-h-[150px] resize-none pr-12 text-sm border-2 border-gray-200 rounded-lg",
+              "disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             )}
+            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             rows={1}
           />
           
@@ -106,20 +106,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           )}
         </div>
 
-        <Button
+        <button
           type="submit"
           disabled={!message.trim() || disabled || isLoading}
           className={cn(
-            "h-11 w-11 p-0 bg-purple-600 hover:bg-purple-700",
+            "h-11 w-11 p-0 rounded-lg transition-all duration-200 flex items-center justify-center",
             "disabled:opacity-50 disabled:cursor-not-allowed"
           )}
+          style={{ backgroundColor: '#243F7B' }}
+          onMouseEnter={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.backgroundColor = '#1e3a6f';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!e.currentTarget.disabled) {
+              e.currentTarget.style.backgroundColor = '#243F7B';
+            }
+          }}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin text-white" />
           ) : (
-            <Send className="h-4 w-4" />
+            <Send className="h-4 w-4 text-white" />
           )}
-        </Button>
+        </button>
       </form>
     </div>
   );

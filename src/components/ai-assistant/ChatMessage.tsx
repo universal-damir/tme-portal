@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { ChatMessage as ChatMessageType } from '@/types/ai-assistant';
-import { Avatar } from '@/components/ui/avatar';
 import { Bot, User, Loader2, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -17,6 +18,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 }) => {
   const isUser = message.role === 'user';
   const isLoading = message.isLoading;
+  const { user } = useAuth();
 
   return (
     <div className={cn(
@@ -25,16 +27,24 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     )}>
       {/* Avatar */}
       {showAvatar && (
-        <Avatar className={cn(
-          "h-8 w-8 flex-shrink-0",
-          isUser ? "bg-blue-100" : "bg-purple-100"
-        )}>
+        <div className="h-8 w-8 flex-shrink-0">
           {isUser ? (
-            <User className="h-4 w-4 text-blue-600" />
+            user ? (
+              <UserAvatar user={user} size="sm" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                <User className="h-4 w-4" style={{ color: '#243F7B' }} />
+              </div>
+            )
           ) : (
-            <Bot className="h-4 w-4 text-purple-600" />
+            <div 
+              className="h-8 w-8 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: '#243F7B' }}
+            >
+              <Bot className="h-4 w-4 text-white" />
+            </div>
           )}
-        </Avatar>
+        </div>
       )}
 
       {/* Message Content */}
@@ -43,15 +53,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         isUser ? "items-end" : "items-start"
       )}>
         {/* Message bubble */}
-        <div className={cn(
-          "px-4 py-2 rounded-lg text-sm leading-relaxed",
-          isUser ? (
-            "bg-blue-600 text-white rounded-br-sm"
-          ) : (
-            "bg-gray-100 text-gray-900 rounded-bl-sm border border-gray-200"
-          ),
-          isLoading && "opacity-70"
-        )}>
+        <div 
+          className={cn(
+            "px-4 py-2 rounded-lg text-sm leading-relaxed",
+            isUser ? (
+              "text-white rounded-br-sm"
+            ) : (
+              "bg-gray-100 text-gray-900 rounded-bl-sm border border-gray-200"
+            ),
+            isLoading && "opacity-70"
+          )}
+          style={isUser ? { backgroundColor: '#243F7B' } : {}}
+        >
           {isLoading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-3 w-3 animate-spin" />

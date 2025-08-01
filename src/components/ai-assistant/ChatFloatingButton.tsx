@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Bot, X, MessageCircle } from 'lucide-react';
+import { X, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ChatFloatingButtonProps {
@@ -24,21 +24,34 @@ export const ChatFloatingButton: React.FC<ChatFloatingButtonProps> = ({
       size="lg"
       className={cn(
         "fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-2xl border-2 z-50",
-        "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700",
-        "border-white/20 hover:border-white/30",
-        "transition-all duration-300 ease-in-out",
-        "hover:scale-110 hover:shadow-purple-500/25",
+        "hover:scale-110 transition-all duration-300 ease-in-out",
         "group active:scale-95",
         isOpen && "rotate-180",
         className
       )}
+      style={{ 
+        backgroundColor: '#243F7B', 
+        borderColor: 'rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 25px 50px -12px rgba(36, 63, 123, 0.25)'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = '#1e3a6f';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = '#243F7B';
+        e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+      }}
     >
-      {/* Icon with animation */}
+      {/* Icon with AI text */}
       <div className="relative flex items-center justify-center">
         {isOpen ? (
           <X className="h-6 w-6 text-white transition-transform duration-300 group-hover:rotate-90" />
         ) : (
-          <MessageCircle className="h-6 w-6 text-white transition-transform duration-300 group-hover:scale-110" />
+          <div className="flex flex-col items-center justify-center">
+            <MessageCircle className="h-5 w-5 text-white transition-transform duration-300 group-hover:scale-110" />
+            <span className="text-xs font-bold text-white mt-0.5">AI</span>
+          </div>
         )}
         
         {/* Unread indicator */}

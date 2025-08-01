@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
-import { toast } from 'sonner';
 import { 
   ChatMessage, 
   AIFormData, 
@@ -54,7 +53,6 @@ export function useAIAssistant({
     setMessages([]);
     setError(null);
     lastMessageRef.current = '';
-    toast.success('Chat history cleared');
   }, []);
 
   const generateMessageId = () => {
@@ -135,9 +133,7 @@ export function useAIAssistant({
       const validation = validateForPDFGeneration(mappedFormData);
       
       if (validation.isValid) {
-        toast.success('Form Updated - Generating PDF Preview', {
-          description: summary,
-        });
+        // Form is valid, auto-generate PDF preview without notification
         
         // Automatically trigger PDF preview generation with merged data
         setTimeout(() => {
@@ -178,24 +174,12 @@ export function useAIAssistant({
         }, 3000); // Longer delay to ensure form fully renders with authority-dependent sections
         
       } else {
-        toast.success('Form Updated', {
-          description: summary,
-          action: {
-            label: 'Complete Form',
-            onClick: () => {
-              toast.info('Complete the form', {
-                description: `Still needed: ${validation.missingFields.join(', ')}`
-              });
-            }
-          }
-        });
+        // Form partially updated, no notification needed
       }
 
     } catch (error) {
       console.error('Error applying form data:', error);
-      toast.error('Failed to update form', {
-        description: 'Please try again or fill the form manually.'
-      });
+      // Error logged to console, no toast notification
     }
   }, [setValue, onFormUpdate, onAutoGeneratePDF]);
 
@@ -275,13 +259,7 @@ export function useAIAssistant({
         isLoading: false,
       });
 
-      toast.error('AI Assistant Error', {
-        description: errorMessage,
-        action: {
-          label: 'Retry',
-          onClick: () => retryLastMessage()
-        }
-      });
+      // Error logged to console, no toast notification
 
     } finally {
       setIsLoading(false);

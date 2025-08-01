@@ -891,9 +891,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         </div>
       )}
 
-      {/* AI Assistant Chat Interface - Bottom Panel Mode */}
+      {/* AI Assistant Chat Interface - Modal Mode */}
       <ChatInterface
-        mode="bottom-panel"
         isOpen={chatPanel.isOpen}
         isMinimized={chatPanel.isMinimized}
         onClose={handleCloseChat}
