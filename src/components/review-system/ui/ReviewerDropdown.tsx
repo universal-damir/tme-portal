@@ -22,7 +22,7 @@ interface ReviewerDropdownProps {
 export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
   value,
   onChange,
-  placeholder = 'Select a reviewer...',
+  placeholder = 'Select a checker...',
   disabled = false,
   error,
   className = ''
@@ -85,7 +85,7 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
     <div className={`relative ${className}`} style={{ fontFamily: 'Inter, sans-serif' }}>
       {/* Label */}
       <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-        Select Reviewer *
+        Select Checker *
       </label>
 
       {/* Dropdown Button */}

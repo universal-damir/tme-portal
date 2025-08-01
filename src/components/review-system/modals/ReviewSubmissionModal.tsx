@@ -64,7 +64,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
     console.log('🔧 ReviewSubmissionModal: Form submitted', { selectedReviewer, urgency, comments });
     
     if (!selectedReviewer) {
-      setError('Please select a reviewer');
+      setError('Please select a checker');
       return;
     }
 
@@ -283,7 +283,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
                       ) : (
                         <>
                           <Send className="w-4 h-4" />
-                          <span>Submit for Review</span>
+                          <span>Submit to Checker</span>
                         </>
                       )}
                     </motion.button>

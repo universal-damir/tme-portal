@@ -193,7 +193,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                     <div className="flex items-center gap-4 text-xs text-gray-600">
                       <div className="flex items-center gap-1">
                         <User className="w-3 h-3" />
-                        <span>Reviewed by {application.reviewer?.full_name || 'Reviewer'}</span>
+                        <span>Checked by {application.reviewer?.full_name || 'Reviewer'}</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
@@ -247,7 +247,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                     <div>
                       <label className="block text-sm font-medium mb-3" style={{ color: '#243F7B' }}>
                         <MessageSquare className="w-4 h-4 inline mr-2" />
-                        Reviewer Comments
+                        Checker Comments
                       </label>
                       <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
                         <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
