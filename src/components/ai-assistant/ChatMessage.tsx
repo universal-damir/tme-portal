@@ -6,6 +6,7 @@ import { Bot, User, Loader2, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserAvatar } from '@/components/ui/user-avatar';
+import { TypingAnimation } from './TypingAnimation';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -66,10 +67,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           style={isUser ? { backgroundColor: '#243F7B' } : {}}
         >
           {isLoading ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              <span className="text-xs">AI is thinking...</span>
-            </div>
+            <TypingAnimation 
+              className="py-1"
+              speed={70}
+              pauseBetweenStages={1000}
+              pauseAfterComplete={1500}
+            />
           ) : (
             <div className="whitespace-pre-wrap break-words">
               {message.content}

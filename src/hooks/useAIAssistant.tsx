@@ -198,10 +198,10 @@ export function useAIAssistant({
       timestamp: new Date(),
     });
 
-    // Add loading AI message
+    // Add loading AI message with dynamic content
     const aiMsg = addMessage({
       role: 'assistant',
-      content: 'Thinking...',
+      content: '',
       timestamp: new Date(),
       isLoading: true,
     });

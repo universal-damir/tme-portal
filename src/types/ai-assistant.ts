@@ -13,6 +13,7 @@ export interface AIFormData {
   clientDetails?: {
     firstName?: string;
     lastName?: string;
+    email?: string;
     companyName?: string;
     companySetupType?: string;
   };

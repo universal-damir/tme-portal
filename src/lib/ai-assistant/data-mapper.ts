@@ -20,6 +20,9 @@ export function mapAIResponseToFormData(aiFormData: AIFormData): Partial<OfferDa
     if (aiFormData.clientDetails.lastName !== undefined) {
       clientDetails.lastName = aiFormData.clientDetails.lastName;
     }
+    if (aiFormData.clientDetails.email !== undefined) {
+      clientDetails.clientEmails = [aiFormData.clientDetails.email];
+    }
     if (aiFormData.clientDetails.companyName !== undefined) {
       clientDetails.companyName = aiFormData.clientDetails.companyName;
     }
@@ -310,6 +313,63 @@ export function generateChangesSummary(aiFormData: AIFormData): string {
 }
 
 /**
+ * Validates that required form data is present for offer completion
+ * Checks mandatory fields: firstName, lastName, email, shareCapital, valuePerShare
+ */
+export function validateMandatoryFields(formData: Partial<OfferData>): {
+  isValid: boolean;
+  missingFields: string[];
+} {
+  const missingFields: string[] = [];
+
+  // Check mandatory client details
+  if (!formData.clientDetails?.firstName) {
+    missingFields.push('First name');
+  }
+  if (!formData.clientDetails?.lastName) {
+    missingFields.push('Last name');
+  }
+  if (!formData.clientDetails?.clientEmails || formData.clientDetails.clientEmails.length === 0) {
+    missingFields.push('Email address');
+  }
+
+  // Check mandatory financial information
+  if (!formData.authorityInformation?.shareCapitalAED) {
+    missingFields.push('Share capital amount');
+  }
+  if (!formData.authorityInformation?.valuePerShareAED) {
+    missingFields.push('Value per share');
+  }
+
+  return {
+    isValid: missingFields.length === 0,
+    missingFields
+  };
+}
+
+/**
+ * Validates investor visa share capital requirements
+ * Minimum 50,000 AED per investor visa
+ */
+export function validateInvestorVisaCapital(
+  shareCapitalAED: number, 
+  numberOfInvestorVisas: number
+): {
+  isValid: boolean;
+  minimumRequired: number;
+  adjustedCapital?: number;
+} {
+  const minimumRequired = numberOfInvestorVisas * 50000;
+  const isValid = shareCapitalAED >= minimumRequired;
+  
+  return {
+    isValid,
+    minimumRequired,
+    adjustedCapital: isValid ? undefined : minimumRequired
+  };
+}
+
+/**
  * Validates that required form data is present for PDF generation
  * More lenient validation for AI-generated forms
  */
@@ -347,5 +407,7 @@ export const formDataMapper = {
   mapAIResponseToFormData,
   applyToForm,
   generateChangesSummary,
+  validateMandatoryFields,
+  validateInvestorVisaCapital,
   validateForPDFGeneration,
 };
