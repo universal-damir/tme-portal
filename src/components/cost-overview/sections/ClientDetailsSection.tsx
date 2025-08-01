@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { UseFormRegister, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { User, Check, Plus, X, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -47,13 +47,17 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
     setValue('clientDetails.clientEmails', validEmails.length > 0 ? validEmails : ['']);
   }, [emailInputs, setValue]);
 
+  // Use ref to track the latest emailInputs value without causing re-renders
+  const emailInputsRef = useRef(emailInputs);
+  emailInputsRef.current = emailInputs;
+
   // Sync local email state with form data changes (e.g., from AI assistant)
   useEffect(() => {
     if (clientDetails?.clientEmails && Array.isArray(clientDetails.clientEmails)) {
       const formEmails = clientDetails.clientEmails.filter(email => email && email.trim() !== '');
       
       // Only update if the emails are actually different to avoid infinite loops
-      const currentEmails = emailInputs.filter(email => email.trim() !== '');
+      const currentEmails = emailInputsRef.current.filter(email => email.trim() !== '');
       const emailsChanged = formEmails.length !== currentEmails.length || 
                           formEmails.some((email, index) => email !== currentEmails[index]);
       
@@ -61,7 +65,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
         setEmailInputs(formEmails.length > 0 ? formEmails : ['']);
       }
     }
-  }, [clientDetails?.clientEmails, emailInputs]);
+  }, [clientDetails?.clientEmails]);
 
   // Email input handlers
   const handleEmailChange = (index: number, value: string) => {
