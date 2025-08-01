@@ -7,6 +7,22 @@ import {
 } from '../../shared';
 import type { PDFComponentProps } from '../../../types';
 
+// Staff photo mapping for smaller file sizes
+const staffPhotoMapping = {
+  'UH': '09 UH.jpg',
+  'MK': '33 MK.jpg',
+  'DH': '13 DH.jpg',
+  'NF': '22 NF.jpg',
+  'TR': '96 TR.jpg',
+  'RJ': '42 RJ.jpg',
+  'DS': '19 DS.jpg',
+  'HH': '14 HH.jpg',
+  'OO': '102 OO.jpg',
+  'YF': '58 YF.jpg',
+  'TZ': '38 TZ.jpg',
+  'DN': '70 DN.jpg',
+};
+
 // Team members data - arranged in 4x3 grid order: UH MK DH NF / TR RJ DS HH / OO YF TZ DN
 const teamMembers = [
   {
@@ -130,7 +146,7 @@ export const MeetTheTeamPage: React.FC<PDFComponentProps> = ({ data }) => {
                   border: '1px solid #e5e7eb'
                 }}>
                   <Image
-                    src={`/department-heads/${member.initials}${member.initials === 'OO' ? '.png' : '.jpg'}`}
+                    src={`/staff-photos/${staffPhotoMapping[member.initials as keyof typeof staffPhotoMapping]}`}
                     style={{
                       width: 69,
                       height: 69,

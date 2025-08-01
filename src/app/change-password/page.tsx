@@ -354,9 +354,9 @@ export default function ChangePasswordPage() {
 
             <div className="mt-6 pt-6 border-t border-gray-200 text-center">
               <p className="text-xs text-gray-500">
-                Need help? Contact your system administrator at{' '}
-                <a href="mailto:uwe@TME-Services.com" className="text-blue-600 hover:text-blue-700">
-                  uwe@TME-Services.com
+                Need help? Contact Damir at{' '}
+                <a href="mailto:damir@TME-Services.com" className="text-blue-600 hover:text-blue-700">
+                  damir@TME-Services.com
                 </a>
               </p>
             </div>
