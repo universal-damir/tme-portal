@@ -44,22 +44,22 @@ export const ChildVisaBreakdown: React.FC<ChildVisaBreakdownProps> = ({
   const childServices = [
     {
       condition: visaCosts.childVisaStandardFees > 0,
-      description: `Standard Authority Fees for Child Visa and Emirates ID Application (${numberOfChildVisas} ${getVisaText(numberOfChildVisas)})`,
+      description: 'Standard Authority Costs',
       amount: visaCosts.childVisaStandardFees
     },
     {
       condition: visaCosts.childVisaStatusChangeFees > 0,
-      description: `Authority Cost for Child Visa Status Change (${childVisaStatusChange} ${getVisaText(childVisaStatusChange)})`,
+      description: 'Visa Status Change Authority Costs',
       amount: visaCosts.childVisaStatusChangeFees
     },
     {
       condition: visaCosts.childVisaVipStampingFees > 0,
-      description: `Child Visa VIP Stamping Service (${childVisaVipStamping} ${getVisaText(childVisaVipStamping)})`,
+      description: 'VIP Visa Stamping Service',
       amount: visaCosts.childVisaVipStampingFees
     },
     {
       condition: visaCosts.childVisaTmeServicesFees > 0,
-      description: `TME Services Professional Fee for Child Visa and Emirates ID (${numberOfChildVisas} ${getVisaText(numberOfChildVisas)})`,
+      description: 'TME Services Professional Fee',
       amount: visaCosts.childVisaTmeServicesFees
     }
   ];
@@ -99,7 +99,7 @@ export const ChildVisaBreakdown: React.FC<ChildVisaBreakdownProps> = ({
     });
     
     Object.entries(insuranceBreakdown).forEach(([type, data]) => {
-      const numberedDescription = formatServiceDescription(serviceNumber++, `Child Visa Health Insurance - ${type} (${data.count} ${getVisaText(data.count)})`);
+      const numberedDescription = formatServiceDescription(serviceNumber++, `Health Insurance - ${type}`);
       serviceElements.push(
         <CostDisplayTableRow
           key={`child-health-insurance-${type}`}

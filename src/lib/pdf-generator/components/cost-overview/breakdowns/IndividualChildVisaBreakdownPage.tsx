@@ -42,7 +42,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
     
     // Standard Authority Costs
     items.push({
-      description: 'Standard Authority Costs for Child Visa and Emirates ID Application',
+      description: 'Standard Authority Costs',
       amount: childVisa.standardFee,
       secondaryAmount: childVisa.standardFee / exchangeRate,
       isReduction: false
@@ -53,7 +53,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
       const childVisaDetail = data.visaCosts?.childVisaDetails?.[childVisa.childNumber - 1];
       const insuranceType = childVisaDetail?.healthInsurance || 'Insurance';
       items.push({
-        description: `Child Visa Health Insurance - ${insuranceType}`,
+        description: `Health Insurance - ${insuranceType}`,
         amount: childVisa.healthInsurance,
         secondaryAmount: childVisa.healthInsurance / exchangeRate,
         isReduction: false
@@ -63,7 +63,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
     // Status change (if selected)
     if (childVisa.statusChangeFee > 0) {
       items.push({
-        description: 'Authority Cost for Child Visa Status Change',
+        description: 'Authority Cost for Status Change',
         amount: childVisa.statusChangeFee,
         secondaryAmount: childVisa.statusChangeFee / exchangeRate,
         isReduction: false
@@ -73,7 +73,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
     // VIP stamping (if selected)
     if (childVisa.vipStampingFee > 0) {
       items.push({
-        description: 'Child Visa VIP Stamping Service',
+        description: 'VIP Visa Stamping Service',
         amount: childVisa.vipStampingFee,
         secondaryAmount: childVisa.vipStampingFee / exchangeRate,
         isReduction: false
@@ -82,7 +82,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
     
     // TME Services fee (always at the bottom)
     items.push({
-      description: 'TME Services Professional Fee for Child Visa and Emirates ID',
+      description: 'TME Services Professional Fee',
       amount: childVisa.tmeServiceFee,
       secondaryAmount: childVisa.tmeServiceFee / exchangeRate,
       isReduction: false

@@ -41,7 +41,7 @@ export const CostTable: React.FC<CostTableProps> = ({
           // Handle bold formatting for banking services
           const renderDescription = () => {
             // Handle bold formatting for banking account descriptions
-            if (item.description.includes('1 personal bank account') || item.description.includes('1 personal bank') || item.description.includes('1 company account') || item.description.includes('1 company bank account') || item.description.includes('personal bank account') || item.description.includes('company account')) {
+            if (item.description.includes('one personal bank account') || item.description.includes('one company bank account') || item.description.includes('one company account') || item.description.includes('1 personal bank account') || item.description.includes('1 personal bank') || item.description.includes('1 company account') || item.description.includes('1 company bank account') || item.description.includes('personal bank account') || item.description.includes('company account')) {
               return (
                 <Text style={
                   (item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction'))
@@ -50,7 +50,25 @@ export const CostTable: React.FC<CostTableProps> = ({
                         ? styles.tableCellDescriptionWide 
                         : styles.tableCellDescription)
                 }>
-                  {item.description.includes('1 personal bank account') ? (
+                  {item.description.includes('one personal bank account') ? (
+                    <>
+                      {item.description.split('one personal bank account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>one personal bank account</Text>
+                      {item.description.split('one personal bank account')[1]}
+                    </>
+                  ) : item.description.includes('one company bank account') ? (
+                    <>
+                      {item.description.split('one company bank account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>one company bank account</Text>
+                      {item.description.split('one company bank account')[1]}
+                    </>
+                  ) : item.description.includes('one company bank account') ? (
+                    <>
+                      {item.description.split('one company account')[0]}
+                      <Text style={{ fontWeight: 'bold' }}>one company account</Text>
+                      {item.description.split('one company bank account')[1]}
+                    </>
+                  ) : item.description.includes('1 personal bank account') ? (
                     <>
                       {item.description.split('1 personal bank account')[0]}
                       <Text style={{ fontWeight: 'bold' }}>1 personal bank account</Text>
@@ -62,7 +80,7 @@ export const CostTable: React.FC<CostTableProps> = ({
                       <Text style={{ fontWeight: 'bold' }}>1 company bank account</Text>
                       {item.description.split('1 company bank account')[1]}
                     </>
-                  ) : item.description.includes('1 company account') ? (
+                  ) : item.description.includes('1 company bank account') ? (
                     <>
                       {item.description.split('1 company account')[0]}
                       <Text style={{ fontWeight: 'bold' }}>1 company account</Text>
@@ -90,6 +108,21 @@ export const CostTable: React.FC<CostTableProps> = ({
                     item.description
                   )}
                 </Text>
+              );
+            }
+            
+            // Handle multi-line descriptions for IFZA License Cost with Unit Lease Agreement
+            if (item.description.includes('\n- Unit Lease Agreement')) {
+              const parts = item.description.split('\n');
+              return (
+                <View style={
+                  theme === 'blue' 
+                    ? styles.tableCellDescriptionWide 
+                    : styles.tableCellDescription
+                }>
+                  <Text style={{ fontSize: 9, color: '#374151' }}>{parts[0]}</Text>
+                  <Text style={{ fontSize: 8, color: '#6b7280', marginTop: 2 }}>{parts[1].replace(/\s+0\.00$/, '')}</Text>
+                </View>
               );
             }
             
@@ -136,7 +169,7 @@ export const CostTable: React.FC<CostTableProps> = ({
                 styles.totalLabel, 
                 theme === 'blue' ? { flex: 6, paddingLeft: 8 } : { flex: 5, paddingLeft: 8 }
               ]}>
-                Total (without deposits)
+                Total (Without Deposits)
               </Text>
               <Text style={styles.totalAmount}>{formatNumber(total)}</Text>
               <Text style={styles.totalAmount}>{formatNumber(secondaryTotal)}</Text>
@@ -179,7 +212,7 @@ export const CostTable: React.FC<CostTableProps> = ({
               styles.totalLabel, 
               theme === 'blue' ? { flex: 6, paddingLeft: 8 } : { flex: 5, paddingLeft: 8 }
             ]}>
-              {showDeposits && depositsItems.length > 0 ? 'Total (including deposits)' : 'TOTAL'}
+              {showDeposits && depositsItems.length > 0 ? 'Total (Including Deposits)' : 'TOTAL'}
             </Text>
             <Text style={styles.totalAmount}>
               {formatNumber(showDeposits && depositsItems.length > 0 ? total + depositsTotal : total)}

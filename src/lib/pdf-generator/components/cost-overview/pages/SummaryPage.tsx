@@ -14,7 +14,7 @@ export const SummaryPage: React.FC<PDFComponentProps> = ({ data }) => {
         <Text style={styles.introHeadline}>Summary</Text>
         
         <Text style={[styles.introText, { marginBottom: 8 }]}>
-          Thank you for considering this cost overview.
+          We hope this overview gives you a clear understanding of the expected costs.
         </Text>
         
         <Text style={[styles.introText, { marginBottom: 8 }]}>
@@ -22,11 +22,11 @@ export const SummaryPage: React.FC<PDFComponentProps> = ({ data }) => {
         </Text>
         
         <Text style={[styles.introText, { marginBottom: 8 }]}>
-          Should you have any questions or need further clarification on any of the listed items, please don't hesitate to reach out.
+          Should you have any questions or need further clarification, please don't hesitate to reach out or contact us.
         </Text>
         
         <Text style={styles.introText}>
-        The basis of our service fee and costs are in AED. All government cost will ALWAYS be charged on cost basis.
+        The basis of our professional fee and costs are in AED. All government cost will ALWAYS be charged on cost basis.
         </Text>
 
         <Text style={styles.introText}>
@@ -38,7 +38,7 @@ export const SummaryPage: React.FC<PDFComponentProps> = ({ data }) => {
         </Text>
 
         <Text style={styles.introText}>
-          We look forward to assisting you through each step of the process and ensuring a smooth and compliant setup tailored to your goals.
+          We look forward to assisting you through each step of the process and ensuring a smooth and compliant setup tailored to your requirements.
         </Text>
 
       </View>

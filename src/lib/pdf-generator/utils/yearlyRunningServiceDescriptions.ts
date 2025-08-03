@@ -81,7 +81,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'tme-yearly-fee',
         condition: true,
-        description: 'TME Services Professional Yearly Renewal Fee',
+        description: 'TME Services Professional Fee (Including VAT)',
         amount: yearlyRunningData.tmeYearlyFee,
         explanation: 'Our professional service fee for managing annual license renewals, government liaison, and ongoing compliance support.'
       });
@@ -142,7 +142,7 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-tme-yearly-fee',
       condition: true,
-      description: 'TME Yearly Service Fee',
+      description: 'TME Services Professional Fee (Including VAT)',
       amount: 3360,
       explanation: 'Our professional service fee for managing annual license renewals, government liaison, and ongoing compliance support with DET.'
     });

@@ -38,7 +38,9 @@ export const InitialSetupPage: React.FC<PDFComponentProps> = ({ data }) => {
       .forEach((service) => {
         explanationElements.push(
           <Text key={service.id} style={[styles.introText, { marginBottom: 4 }]}>
-            <Text style={{ fontWeight: 'bold' }}>{service.number}. {service.description.replace(/^\d+\.\s/, '')}:</Text>{' '}
+            <Text style={{ fontWeight: 'bold' }}>
+              {service.number}. {service.id === 'ifza-license-fee' ? 'IFZA License Cost' : service.description.replace(/^\d+\.\s/, '')}:
+            </Text>{' '}
             {service.explanation}
           </Text>
         );
@@ -119,7 +121,7 @@ export const InitialSetupPage: React.FC<PDFComponentProps> = ({ data }) => {
     return authority;
   };
 
-  const introContent = `Below is a detailed breakdown of the one-time initial setup costs associated with setting up your company in ${getAuthorityDisplayName()}. These figures reflect all the requirements discussed. Each line item is briefly explained to give you clarity on what is covered.`;
+  const introContent = `Below is a detailed breakdown of the one-time initial setup costs associated with setting up your company in ${getAuthorityDisplayName()}. Each line item is briefly explained to give you clarity on what is covered.`;
 
   // Always show explanations under the table for better layout
   const explanationElements = generateExplanations();

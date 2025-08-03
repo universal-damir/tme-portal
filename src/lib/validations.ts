@@ -35,6 +35,7 @@ export const ifzaLicenseSchema = z.object({
   mofaActualMemorandumOrArticles: z.boolean().optional(),
   mofaCommercialRegister: z.boolean().optional(),
   mofaPowerOfAttorney: z.boolean().optional(),
+  unitLeaseAgreement: z.boolean().optional(),
   rentOfficeRequired: z.boolean().optional(),
   officeRentAmount: z.number().min(0, 'Office rent amount must be 0 or greater').optional(),
   depositWithLandlord: z.boolean().optional(),
@@ -122,6 +123,7 @@ export const additionalServicesSchema = z.object({
   personalBank: z.number().min(0, 'Personal bank fee must be 0 or greater').optional(),
   digitalBank: z.number().min(0, 'Digital bank fee must be 0 or greater').optional(),
   traditionalBank: z.number().min(0, 'Traditional bank fee must be 0 or greater').optional(),
+  accountingFrequency: z.enum(['yearly', 'quarterly', 'monthly']).optional(),
   accountingFee: z.number().min(0, 'Accounting fee must be 0 or greater').optional(),
 
 }).optional();

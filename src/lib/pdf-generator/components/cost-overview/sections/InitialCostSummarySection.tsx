@@ -22,7 +22,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Initial Cost Summary</Text>
       <Text style={styles.introText}>
-      This represents the overall cost for the initial company setup and company visas. A detailed cost breakdown is provided later in the offer for full transparency.
+      This represents the overall cost for the initial company setup{(data.visaCosts?.numberOfVisas && data.visaCosts.numberOfVisas > 0) ? ` and company ${data.visaCosts.numberOfVisas === 1 ? 'visa' : 'visas'}` : ''}. A detailed cost breakdown is provided later in the offer for full transparency.
       </Text>
       <View style={styles.costTable}>
         {/* Table Header */}
@@ -37,7 +37,9 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
           <Text style={styles.tableCellDescription}>
             {(() => {
               const licenseYears = data.ifzaLicense?.licenseYears || 1;
-              const isIFZAMultiYear = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)' && licenseYears > 1;
+              const isIFZA = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
+              const isIFZAMultiYear = isIFZA && licenseYears > 1;
+              
               return isIFZAMultiYear ? `Company Setup Cost (For ${licenseYears} years)` : 'Company Setup Cost';
             })()}
           </Text>

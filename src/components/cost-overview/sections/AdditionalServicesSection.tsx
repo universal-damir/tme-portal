@@ -1,18 +1,94 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Building2 } from 'lucide-react';
+import { Building2, ChevronDown } from 'lucide-react';
 import { CostInputField } from '../ui/CostInputField';
 import { FormattedInputState, FormattedInputHandlers } from '../hooks/useFormattedInputs';
+import { useFormContext } from 'react-hook-form';
 
 interface AdditionalServicesSectionProps {
   formattedInputs: FormattedInputState;
   handlers: FormattedInputHandlers;
+  updateFormattedInput?: (key: keyof FormattedInputState, value: string) => void;
 }
 
 export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps> = ({
   formattedInputs,
-  handlers
+  handlers,
+  updateFormattedInput
 }) => {
+  const formContext = useFormContext();
+  const { watch, setValue } = formContext || {};
+  const watchedData = watch ? watch() : {};
+  
+  // Local state for accounting frequency to ensure UI updates immediately
+  const [localAccountingFrequency, setLocalAccountingFrequency] = useState<'yearly' | 'quarterly' | 'monthly'>('yearly');
+
+  // Handle accounting frequency change and set default values
+  const handleAccountingFrequencyChange = (frequency: 'yearly' | 'quarterly' | 'monthly') => {
+    // Update local state immediately for UI responsiveness
+    setLocalAccountingFrequency(frequency);
+    
+    // Determine the new amount based on frequency
+    let newFormattedAmount = '';
+    let newNumericAmount = 0;
+    
+    if (frequency === 'yearly') {
+      newFormattedAmount = '6,393.00';
+      newNumericAmount = 6393;
+    } else if (frequency === 'monthly') {
+      newFormattedAmount = '2,183.00';
+      newNumericAmount = 2183;
+    } else if (frequency === 'quarterly') {
+      newFormattedAmount = '';
+      newNumericAmount = 0;
+    }
+    
+    // Update form using setValue if available
+    if (setValue) {
+      setValue('additionalServices.accountingFrequency', frequency, { shouldValidate: true });
+      setValue('additionalServices.accountingFee', newNumericAmount, { shouldValidate: true });
+    }
+    
+    // Update formatted input directly
+    if (updateFormattedInput) {
+      updateFormattedInput('accountingFeeFormatted', newFormattedAmount);
+    }
+    
+    // Force a manual trigger of the accounting input handler as final backup
+    const syntheticEvent = {
+      target: { value: newFormattedAmount }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    try {
+      handlers.handleAccountingFeeChange(syntheticEvent);
+    } catch (error) {
+      console.error('Failed to trigger accounting handler:', error);
+    }
+  };
+
+  // Sync local state with form data
+  useEffect(() => {
+    const formFrequency = watchedData?.additionalServices?.accountingFrequency;
+    if (formFrequency && formFrequency !== localAccountingFrequency) {
+      setLocalAccountingFrequency(formFrequency);
+    }
+  }, [watchedData?.additionalServices?.accountingFrequency, localAccountingFrequency]);
+
+  // Set default values on component mount
+  useEffect(() => {
+    if (!setValue) return;
+    
+    if (!watchedData?.additionalServices?.accountingFrequency) {
+      setValue('additionalServices.accountingFrequency', 'yearly');
+      setLocalAccountingFrequency('yearly');
+    }
+    if (!watchedData?.additionalServices?.accountingFee && localAccountingFrequency === 'yearly') {
+      setValue('additionalServices.accountingFee', 6393);
+      if (updateFormattedInput) {
+        updateFormattedInput('accountingFeeFormatted', '6,393.00');
+      }
+    }
+  }, [setValue, watchedData?.additionalServices?.accountingFrequency, watchedData?.additionalServices?.accountingFee, localAccountingFrequency, updateFormattedInput]);
 
   return (
     <motion.div 
@@ -73,12 +149,42 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <CostInputField
-                label="Accounting (Yearly)"
-                value={formattedInputs.accountingFeeFormatted}
-                onChange={handlers.handleAccountingFeeChange}
-                placeholder="6,293.00"
-              />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
+                    Accounting
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={localAccountingFrequency}
+                      onChange={(e) => handleAccountingFrequencyChange(e.target.value as 'yearly' | 'quarterly' | 'monthly')}
+                      className="px-2 py-1 rounded border border-gray-300 text-xs focus:outline-none focus:border-blue-500 appearance-none bg-white pr-6"
+                      style={{ fontFamily: 'Inter, sans-serif', color: '#243F7B' }}
+                    >
+                      <option value="yearly">Yearly</option>
+                      <option value="quarterly">Quarterly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                    <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formattedInputs.accountingFeeFormatted}
+                    onChange={handlers.handleAccountingFeeChange}
+                    placeholder={localAccountingFrequency === 'quarterly' ? 'Enter amount' : 
+                                localAccountingFrequency === 'yearly' ? '6,393.00' : '2,183.00'}
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 pointer-events-none">
+                    AED
+                  </span>
+                </div>
+              </div>
             </motion.div>
 
             <motion.div

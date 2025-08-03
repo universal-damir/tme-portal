@@ -64,6 +64,23 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
     }
   }, [watchedData.ifzaLicense?.rentOfficeRequired, setValue]);
 
+  // Clear rent office when unit lease agreement is checked
+  useEffect(() => {
+    if (watchedData.ifzaLicense?.unitLeaseAgreement && watchedData.ifzaLicense?.rentOfficeRequired) {
+      setValue('ifzaLicense.rentOfficeRequired', false);
+      setValue('ifzaLicense.officeRentAmount', 0);
+      setValue('ifzaLicense.depositWithLandlord', false);
+      setValue('ifzaLicense.depositAmount', 0);
+    }
+  }, [watchedData.ifzaLicense?.unitLeaseAgreement, setValue]);
+
+  // Set unit lease agreement to true by default
+  useEffect(() => {
+    if (watchedData.ifzaLicense?.unitLeaseAgreement === undefined) {
+      setValue('ifzaLicense.unitLeaseAgreement', true);
+    }
+  }, [watchedData.ifzaLicense?.unitLeaseAgreement, setValue]);
+
   // Set default TME Services fee
   useEffect(() => {
     const defaultFee = clientDetails?.companySetupType === 'Individual Setup' 
@@ -153,9 +170,8 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
 
       {/* Additional Services and Office Requirements - 2 Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Additional Services */}
+        {/* Left Column: Cross Border, Power of Attorney, Third-party */}
         <div className="bg-white rounded-lg p-3 border border-gray-200">
-          
           <div className="space-y-2">
             {/* Cross Border License */}
             {initialSetup.crossBorderLicense && (
@@ -169,9 +185,26 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
               />
             )}
 
-            {/* Visual separator */}
-            {initialSetup.crossBorderLicense && (clientDetails?.companySetupType === 'Corporate Setup' || (clientDetails?.companySetupType === 'Individual Setup' && initialSetup.mofaTranslations.powerOfAttorney)) && (
-              <div className="border-t border-gray-200 my-3"></div>
+            {/* Separator after Cross Border */}
+            {initialSetup.crossBorderLicense && (
+              <div className="border-t border-gray-200 my-2"></div>
+            )}
+
+            {/* Power of Attorney for Individual */}
+            {clientDetails?.companySetupType === 'Individual Setup' && initialSetup.mofaTranslations.powerOfAttorney && (
+              <TMECheckbox
+                name="ifzaLicense.mofaPowerOfAttorney"
+                register={register}
+                setValue={setValue}
+                checked={watchedData.ifzaLicense?.mofaPowerOfAttorney || false}
+                label="Power of Attorney"
+                cost={initialSetup.mofaTranslations.powerOfAttorney.toLocaleString()}
+              />
+            )}
+
+            {/* Separator after Power of Attorney */}
+            {clientDetails?.companySetupType === 'Individual Setup' && initialSetup.mofaTranslations.powerOfAttorney && (
+              <div className="border-t border-gray-200 my-2"></div>
             )}
 
             {/* Document Services for Corporate */}
@@ -217,27 +250,59 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                     cost={initialSetup.mofaTranslations.commercialRegister.toLocaleString()}
                   />
                 )}
+                
+                {/* Separator after Corporate documents */}
+                <div className="border-t border-gray-200 my-2"></div>
               </>
             )}
 
-            {/* Power of Attorney for Individual */}
-            {clientDetails?.companySetupType === 'Individual Setup' && initialSetup.mofaTranslations.powerOfAttorney && (
+            {/* Third-party Approval */}
+            <div className="space-y-2">
               <TMECheckbox
-                name="ifzaLicense.mofaPowerOfAttorney"
+                name="ifzaLicense.thirdPartyApproval"
                 register={register}
                 setValue={setValue}
-                checked={watchedData.ifzaLicense?.mofaPowerOfAttorney || false}
-                label="Power of Attorney"
-                cost={initialSetup.mofaTranslations.powerOfAttorney.toLocaleString()}
+                checked={watchedData.ifzaLicense?.thirdPartyApproval || false}
+                label="Third-party Approval (NOC)"
               />
-            )}
+              {watchedData.ifzaLicense?.thirdPartyApproval && (
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  type="text"
+                  value={watchedData.ifzaLicense?.thirdPartyApprovalAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.ifzaLicense?.thirdPartyApprovalAmount || 0))}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const parsed = parseFormattedNumber(value);
+                    setValue('ifzaLicense.thirdPartyApprovalAmount', parsed);
+                  }}
+                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                  placeholder="Enter amount"
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#243F7B';
+                    e.target.select();
+                  }}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Office Requirements & Third-party Costs */}
+        {/* Right Column: Unit Lease Agreement, Rent Office, Deposit */}
         <div className="bg-white rounded-lg p-3 border border-gray-200">
-          
           <div className="space-y-4">
+            {/* Unit Lease Agreement */}
+            <div className="space-y-2">
+              <TMECheckbox
+                name="ifzaLicense.unitLeaseAgreement"
+                register={register}
+                setValue={setValue}
+                checked={watchedData.ifzaLicense?.unitLeaseAgreement ?? true}
+                label="Unit Lease Agreement"
+              />
+            </div>
+
+            {/* Rent Office from Authority */}
             <div className="space-y-2">
               <TMECheckbox
                 name="ifzaLicense.rentOfficeRequired"
@@ -245,6 +310,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                 setValue={setValue}
                 checked={watchedData.ifzaLicense?.rentOfficeRequired || false}
                 label="Rent Office from Authority"
+                disabled={watchedData.ifzaLicense?.unitLeaseAgreement}
               />
               {watchedData.ifzaLicense?.rentOfficeRequired && (
                 <motion.input
@@ -267,6 +333,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
               )}
             </div>
 
+            {/* Deposit with Landlord */}
             <div className="space-y-2">
               <TMECheckbox
                 name="ifzaLicense.depositWithLandlord"
@@ -290,35 +357,6 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                   placeholder={watchedData.ifzaLicense?.officeRentAmount ? 
                     Math.round(watchedData.ifzaLicense.officeRentAmount * 0.05).toLocaleString() : 
                     "Auto-calculated (5% of rent)"}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#243F7B';
-                    e.target.select();
-                  }}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                />
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <TMECheckbox
-                name="ifzaLicense.thirdPartyApproval"
-                register={register}
-                setValue={setValue}
-                checked={watchedData.ifzaLicense?.thirdPartyApproval || false}
-                label="Third-party Approval (NOC)"
-              />
-              {watchedData.ifzaLicense?.thirdPartyApproval && (
-                <motion.input
-                  whileFocus={{ scale: 1.01 }}
-                  type="text"
-                  value={watchedData.ifzaLicense?.thirdPartyApprovalAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.ifzaLicense?.thirdPartyApprovalAmount || 0))}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const parsed = parseFormattedNumber(value);
-                    setValue('ifzaLicense.thirdPartyApprovalAmount', parsed);
-                  }}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                  placeholder="Enter amount"
                   onFocus={(e) => {
                     e.target.style.borderColor = '#243F7B';
                     e.target.select();

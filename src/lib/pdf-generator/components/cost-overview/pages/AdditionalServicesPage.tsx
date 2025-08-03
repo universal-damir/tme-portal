@@ -100,7 +100,7 @@ export const AdditionalServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           <Text style={styles.introHeadline}>Summary</Text>
           
           <Text style={[styles.introText, { marginBottom: 8 }]}>
-            Thank you for considering this cost overview.
+            We hope this overview gives you a clear understanding of the expected costs.
           </Text>
           
           <Text style={[styles.introText, { marginBottom: 8 }]}>

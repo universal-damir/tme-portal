@@ -58,7 +58,7 @@ export const VisaCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
 
   const companyVisaCostItems = generateCompanyVisaCostItems();
 
-  const introContent = `Below is a breakdown of the typical costs associated with obtaining 2-year UAE employment residence visa. This overview includes mandatory services, with pricing noted per visa where applicable. The final selection depends on your needs, and not all items may be required for every application.`;
+  const introContent = `Below is a breakdown of the typical costs associated with obtaining 2-year UAE employment residence visa. This overview includes mandatory services, with pricing noted per visa where applicable.`;
 
   // Calculate totals for different visa types
   const companyVisaTotal = costs?.visaCosts.total || 0;

@@ -153,7 +153,7 @@ export const generateCompanyVisaServiceDescriptions = (
       condition: true,
       description: `TME Services Professional Fee for Visa and Emirates ID Application (${numberOfVisas} ${visaText(numberOfVisas)})`,
       amount: visaCostData.tmeServicesFees,
-      explanation: 'Our professional service fee for managing the complete visa and Emirates ID application process, including document preparation and Authority liaison.'
+      explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant Authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
   }
 
@@ -167,27 +167,27 @@ export const generateSpouseVisaServiceDescriptions = (
 ): VisaServiceItem[] => {
   const services: VisaServiceItem[] = [];
   
-  if (!visaCostData || visaCostData.spouseVisaTotal === 0) return services;
+  if (!visaCostData) return services;
+  
+  // Check if spouse visa is enabled in the form data
+  const hasSpouseVisa = data.visaCosts?.spouseVisa === true;
+  if (!hasSpouseVisa) return services;
 
-  const visaText = (count: number) => count === 1 ? 'visa' : 'visas';
-
-  // 1. Standard Authority Costs for Spouse Visa and Emirates ID Application
-  if (visaCostData.spouseVisaStandardFees > 0) {
-    services.push({
-      id: 'spouse-visa-standard-fees',
-      condition: true,
-      description: 'Standard Authority Costs for Spouse Visa and Emirates ID Application',
-      amount: visaCostData.spouseVisaStandardFees,
-      explanation: 'For spouse visa processing and Emirates ID.'
-    });
-  }
+  // 1. Standard Authority Costs for Spouse Visa and Emirates ID Application (always show if spouse visa selected)
+  services.push({
+    id: 'spouse-visa-standard-fees',
+    condition: true,
+    description: 'Standard Authority Costs',
+    amount: visaCostData.spouseVisaStandardFees || 0,
+    explanation: 'For spouse visa processing and Emirates ID.'
+  });
 
   // 2. Authority Cost for Spouse Visa Status Change
   if (visaCostData.spouseVisaStatusChangeFees > 0) {
     services.push({
       id: 'spouse-visa-status-change',
       condition: true,
-      description: 'Authority Costs for Spouse Visa Status Change',
+      description: 'Visa Status Change Authority Costs',
       amount: visaCostData.spouseVisaStatusChangeFees,
       explanation: 'For changing spouse visa status from tourist/visit visa to residence visa.'
     });
@@ -199,7 +199,7 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-health-insurance',
       condition: true,
-      description: `Spouse Visa Health Insurance - ${insuranceType}`,
+      description: `Health Insurance - ${insuranceType}`,
       amount: visaCostData.spouseVisaHealthInsurance,
       explanation: 'Mandatory health insurance coverage for spouse visa holder.'
     });
@@ -210,22 +210,20 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-vip-stamping',
       condition: true,
-      description: 'Spouse Visa VIP Stamping Service',
+      description: 'VIP Visa Stamping Service',
       amount: visaCostData.spouseVisaVipStampingFees,
       explanation: 'Express service for faster spouse visa stamping and processing.'
     });
   }
 
-  // 5. TME Services Professional Fee for Spouse Visa and Emirates ID (ALWAYS LAST)
-  if (visaCostData.spouseVisaTmeServicesFees > 0) {
-    services.push({
-      id: 'spouse-visa-tme-services',
-      condition: true,
-      description: 'TME Services Professional Fee for Spouse Visa and Emirates ID',
-      amount: visaCostData.spouseVisaTmeServicesFees,
-      explanation: 'Our professional service fee for managing the spouse visa application process.'
-    });
-  }
+  // 5. TME Services Professional Fee for Spouse Visa and Emirates ID (ALWAYS LAST - always show if spouse visa selected)
+  services.push({
+    id: 'spouse-visa-tme-services',
+    condition: true,
+    description: 'TME Services Professional Fee',
+    amount: visaCostData.spouseVisaTmeServicesFees || 0,
+    explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant Authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+  });
 
   return services.filter(service => service.condition);
 };
@@ -238,30 +236,27 @@ export const generateChildVisaServiceDescriptions = (
 ): VisaServiceItem[] => {
   const services: VisaServiceItem[] = [];
   
-  if (!visaCostData || visaCostData.childVisaTotal === 0) return services;
+  if (!visaCostData) return services;
+  
+  // Check if child visa is enabled in the form data
+  const hasChildVisa = data.visaCosts?.childVisa === true;
+  if (!hasChildVisa) return services;
 
-  const numberOfChildVisas = data.visaCosts?.numberOfChildVisas || 0;
-  const childVisaStatusChange = data.visaCosts?.childVisaStatusChange || 0;
-  const childVisaVipStamping = data.visaCosts?.childVisaVipStamping || 0;
-  const visaText = (count: number) => count === 1 ? 'visa' : 'visas';
-
-  // 1. Standard Authority Costs for Child Visa and Emirates ID Application
-  if (visaCostData.childVisaStandardFees > 0) {
-    services.push({
-      id: 'child-visa-standard-fees',
-      condition: true,
-      description: `Standard Authority Costs for Child Visa and Emirates ID Application (${numberOfChildVisas} ${visaText(numberOfChildVisas)})`,
-      amount: visaCostData.childVisaStandardFees,
-      explanation: 'For child visa processing and Emirates ID.'
-    });
-  }
+  // 1. Standard Authority Costs for Child Visa and Emirates ID Application (always show if child visa selected)
+  services.push({
+    id: 'child-visa-standard-fees',
+    condition: true,
+    description: 'Standard Authority Costs',
+    amount: visaCostData.childVisaStandardFees || 0,
+    explanation: 'For child visa processing and Emirates ID.'
+  });
 
   // 2. Authority Cost for Child Visa Status Change
   if (visaCostData.childVisaStatusChangeFees > 0) {
     services.push({
       id: 'child-visa-status-change',
       condition: true,
-      description: `Authority Cost for Child Visa Status Change (${childVisaStatusChange} ${visaText(childVisaStatusChange)})`,
+      description: 'Visa Status Change Authority Costs',
       amount: visaCostData.childVisaStatusChangeFees,
       explanation: 'For changing child visa status from tourist/visit visa to residence visa.'
     });
@@ -289,7 +284,7 @@ export const generateChildVisaServiceDescriptions = (
       services.push({
         id: `child-visa-health-insurance-${type.toLowerCase().replace(/\s+/g, '-')}`,
         condition: true,
-        description: `Child Visa Health Insurance - ${type} (${insuranceData.count} ${visaText(insuranceData.count)})`,
+        description: `Health Insurance - ${type}`,
         amount: insuranceData.count * insuranceData.cost,
         explanation: `Mandatory health insurance coverage providing ${type.toLowerCase()} level medical benefits for child visa holders.`
       });
@@ -301,22 +296,20 @@ export const generateChildVisaServiceDescriptions = (
     services.push({
       id: 'child-visa-vip-stamping',
       condition: true,
-      description: `Child Visa VIP Stamping Service (${childVisaVipStamping} ${visaText(childVisaVipStamping)})`,
+      description: 'VIP Visa Stamping Service',
       amount: visaCostData.childVisaVipStampingFees,
       explanation: 'For faster child visa stamping and processing.'
     });
   }
 
-  // 5. TME Services Professional Fee for Child Visa and Emirates ID (ALWAYS LAST)
-  if (visaCostData.childVisaTmeServicesFees > 0) {
-    services.push({
-      id: 'child-visa-tme-services',
-      condition: true,
-      description: `TME Services Professional Fee for Child Visa and Emirates ID (${numberOfChildVisas} ${visaText(numberOfChildVisas)})`,
-      amount: visaCostData.childVisaTmeServicesFees,
-      explanation: 'Our professional service fee for managing the child visa application process.'
-    });
-  }
+  // 5. TME Services Professional Fee for Child Visa and Emirates ID (ALWAYS LAST - always show if child visa selected)
+  services.push({
+    id: 'child-visa-tme-services',
+    condition: true,
+    description: 'TME Services Professional Fee',
+    amount: visaCostData.childVisaTmeServicesFees || 0,
+    explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant Authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+  });
 
   return services.filter(service => service.condition);
 };

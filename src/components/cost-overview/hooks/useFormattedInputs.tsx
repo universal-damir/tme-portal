@@ -367,6 +367,14 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
     handleRadioClick,
   };
 
+  // Function to update formatted inputs directly
+  const updateFormattedInput = useCallback((key: keyof FormattedInputState, value: string) => {
+    setFormattedInputs(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  }, []);
+
   return {
     formattedInputs,
     handlers,
@@ -374,5 +382,6 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
     shareCapitalAlert,
     formatNumberWithSeparators,
     parseFormattedNumber,
+    updateFormattedInput,
   };
 }; 

@@ -35,8 +35,13 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
       {isTbcEnabled ? (
         <View style={styles.contentArea}>
           <Text style={[styles.introText, { textAlign: 'center', fontStyle: 'italic', color: '#d97706' }]}>
-            Activities will be confirmed at a later stage.
+            Business activities will be confirmed at a later stage.
           </Text>
+          {isIfzaSelected && (
+            <Text style={[styles.introText, { textAlign: 'center', color: '#243F7B', marginTop: 4 }]}>
+              Visit this link to browse IFZA's business activities: <Text style={{ fontWeight: 'bold' }}>https://activities.ifza.com/</Text>
+            </Text>
+          )}
         </View>
       ) : (
         <View style={styles.activityTable}>

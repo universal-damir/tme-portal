@@ -40,30 +40,30 @@ export const SpouseVisaBreakdown: React.FC<SpouseVisaBreakdownProps> = ({
   const spouseServices = [
     {
       condition: visaCosts.spouseVisaStandardFees > 0,
-      description: 'Standard Authority Fees for Spouse Visa and Emirates ID Application',
+      description: 'Standard Authority Costs',
       amount: visaCosts.spouseVisaStandardFees
     },
     {
       condition: visaCosts.spouseVisaStatusChangeFees > 0,
-      description: 'Authority Cost for Spouse Visa Status Change',
+      description: 'Visa Status Change Authority Costs',
       amount: visaCosts.spouseVisaStatusChangeFees
     },
     {
       condition: visaCosts.spouseVisaHealthInsurance > 0,
       description: (() => {
         const insuranceType = watchedData.visaCosts?.spouseVisaInsurance;
-        return insuranceType ? `Spouse Visa Health Insurance - ${insuranceType}` : 'Spouse Visa Health Insurance';
+        return insuranceType ? `Health Insurance - ${insuranceType}` : 'Health Insurance';
       })(),
       amount: visaCosts.spouseVisaHealthInsurance
     },
     {
       condition: visaCosts.spouseVisaVipStampingFees > 0,
-      description: 'Spouse Visa VIP Stamping Service',
+      description: 'VIP Visa Stamping Service',
       amount: visaCosts.spouseVisaVipStampingFees
     },
     {
       condition: visaCosts.spouseVisaTmeServicesFees > 0,
-      description: 'TME Services Professional Fee for Spouse Visa and Emirates ID Application',
+      description: 'TME Services Professional Fee',
       amount: visaCosts.spouseVisaTmeServicesFees
     }
   ];

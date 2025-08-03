@@ -130,10 +130,11 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
 
     if (mofaTotal > 0) {
       let description = 'Power of Attorney';
-      const explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup';
+      let explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       
       if (setupType === 'Corporate Setup') {
-        description = 'Government Document & Translation Cost';
+        description = 'Document Translation Cost';
+        explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       }
 
       services.push({
@@ -180,14 +181,33 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       // For multi-year licenses, show the total amount for all years
       const totalLicenseAmount = annualAmount * licenseYears;
       
+      const baseDescription = isMultiYearIFZA 
+        ? `IFZA License Cost (for ${licenseYears} years)`
+        : 'IFZA License Cost';
+      
+      const descriptionWithSubText = data.ifzaLicense?.unitLeaseAgreement 
+        ? `${baseDescription} (unit lease agreement included)`
+        : baseDescription;
+
       services.push({
         id: 'ifza-license-fee',
         condition: true,
-        description: isMultiYearIFZA 
-          ? `IFZA License Cost (for ${licenseYears} years)`
-          : 'IFZA License Cost',
+        description: descriptionWithSubText,
         amount: totalLicenseAmount,
-        explanation: `IFZA license cost including visa quota for ${data.ifzaLicense?.visaQuota || 0} visas.`
+        explanation: (() => {
+          const visaCount = data.ifzaLicense?.visaQuota || 0;
+          const hasUnitLease = data.ifzaLicense?.unitLeaseAgreement;
+          
+          if (visaCount === 0 && hasUnitLease) {
+            return 'IFZA license cost, including unit lease agreement.';
+          } else if (visaCount > 0 && hasUnitLease) {
+            return `IFZA license cost including visa quota for ${visaCount} ${visaCount === 1 ? 'visa' : 'visas'}. Unit lease agreement is included.`;
+          } else if (visaCount > 0) {
+            return `IFZA license cost including visa quota for ${visaCount} ${visaCount === 1 ? 'visa' : 'visas'}.`;
+          } else {
+            return 'IFZA license cost.';
+          }
+        })()
       });
 
       // Multi-year discount (appears right after license fee)
@@ -292,12 +312,14 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
 
     if (mofaTotal > 0) {
       let description = 'MoFA Document Translations';
-      const explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
+      let explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       
       if (setupType === 'Individual Setup') {
         description = 'Power of Attorney';
+        explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       } else if (setupType === 'Corporate Setup') {
-        description = 'Government Document & Translation Cost';
+        description = 'Document Translation Cost';
+        explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       }
 
       services.push({

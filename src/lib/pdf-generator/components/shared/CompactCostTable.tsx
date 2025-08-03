@@ -15,12 +15,12 @@ export const CompactCostTable: React.FC<{
   const secondaryCurrency = data.clientDetails.secondaryCurrency;
 
   return (
-    <View style={{ marginBottom: 8 }}>
+    <View style={{ marginBottom: 6 }}>
       {/* Title - simple text, no background */}
       <Text style={{ 
         fontSize: 11, 
         fontWeight: 'bold', 
-        marginBottom: 6,
+        marginBottom: 4,
         color: '#374151',
         textAlign: 'left'
       }}>
@@ -37,15 +37,19 @@ export const CompactCostTable: React.FC<{
         <View style={{
           flexDirection: 'row',
           backgroundColor: '#0ea5e9',
-          padding: 6,
-          borderBottom: '1px solid #e5e7eb'
+          paddingTop: 4,
+          paddingBottom: 4,
+          paddingLeft: 6,
+          paddingRight: 6,
+          borderBottom: '1px solid #e5e7eb',
+          minHeight: 20
         }}>
           <Text style={{
             flex: 3,
             fontSize: 10,
             fontWeight: 'bold',
             color: 'white',
-            paddingLeft: 6
+            paddingLeft: 2
           }}>
             Description
           </Text>
@@ -55,7 +59,7 @@ export const CompactCostTable: React.FC<{
             fontWeight: 'bold',
             color: 'white',
             textAlign: 'right',
-            paddingRight: 6
+            paddingRight: 2
           }}>
             AED
           </Text>
@@ -65,25 +69,30 @@ export const CompactCostTable: React.FC<{
             fontWeight: 'bold',
             color: 'white',
             textAlign: 'right',
-            paddingRight: 6
+            paddingRight: 2
           }}>
             {secondaryCurrency}
           </Text>
         </View>
 
-        {/* Table Rows - compact spacing */}
+        {/* Table Rows - compact spacing with consistent heights */}
         {items.map((item, index) => (
           <View key={`cost-item-${index}`} style={{
             flexDirection: 'row',
-            padding: 4,
-            borderBottom: index < items.length - 1 ? '1px solid #f3f4f6' : 'none'
+            paddingTop: 3,
+            paddingBottom: 3,
+            paddingLeft: 6,
+            paddingRight: 6,
+            borderBottom: index < items.length - 1 ? '1px solid #f3f4f6' : 'none',
+            minHeight: 16,
+            alignItems: 'center'
           }}>
             <Text style={{
               flex: 3,
               fontSize: 9,
               color: item.isReduction ? '#dc2626' : '#374151',
-              paddingLeft: 6,
-              lineHeight: 1.3
+              paddingLeft: 2,
+              lineHeight: 1.2
             }}>
               {item.description}
             </Text>
@@ -92,7 +101,7 @@ export const CompactCostTable: React.FC<{
               fontSize: 9,
               color: item.isReduction ? '#dc2626' : '#374151',
               textAlign: 'right',
-              paddingRight: 6
+              paddingRight: 2
             }}>
               {item.isReduction ? '-' : ''}{formatNumber(item.amount)}
             </Text>
@@ -101,7 +110,7 @@ export const CompactCostTable: React.FC<{
               fontSize: 9,
               color: item.isReduction ? '#dc2626' : '#374151',
               textAlign: 'right',
-              paddingRight: 6
+              paddingRight: 2
             }}>
               {item.isReduction ? '-' : ''}{formatNumber(item.secondaryAmount)}
             </Text>
@@ -112,16 +121,21 @@ export const CompactCostTable: React.FC<{
         <View style={{
           flexDirection: 'row',
           backgroundColor: '#0ea5e9',
-          padding: 8,
-          marginTop: 4,
-          borderRadius: 4
+          paddingTop: 6,
+          paddingBottom: 6,
+          paddingLeft: 6,
+          paddingRight: 6,
+          marginTop: 2,
+          borderRadius: 4,
+          minHeight: 22,
+          alignItems: 'center'
         }}>
           <Text style={{
             flex: 3,
             fontSize: 10,
             fontWeight: 'bold',
             color: 'white',
-            paddingLeft: 6
+            paddingLeft: 2
           }}>
             TOTAL
           </Text>
@@ -131,7 +145,7 @@ export const CompactCostTable: React.FC<{
             fontWeight: 'bold',
             color: 'white',
             textAlign: 'right',
-            paddingRight: 6
+            paddingRight: 2
           }}>
             {formatNumber(total)}
           </Text>
@@ -141,7 +155,7 @@ export const CompactCostTable: React.FC<{
             fontWeight: 'bold',
             color: 'white',
             textAlign: 'right',
-            paddingRight: 6
+            paddingRight: 2
           }}>
             {formatNumber(secondaryTotal)}
           </Text>

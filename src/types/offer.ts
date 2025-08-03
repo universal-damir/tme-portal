@@ -34,6 +34,7 @@ export interface IFZALicense {
   mofaActualMemorandumOrArticles?: boolean;
   mofaCommercialRegister?: boolean;
   mofaPowerOfAttorney?: boolean;
+  unitLeaseAgreement?: boolean;
   rentOfficeRequired?: boolean;
   officeRentAmount?: number;
   depositWithLandlord?: boolean;
@@ -118,6 +119,7 @@ export interface AdditionalServices {
   personalBank?: number;
   digitalBank?: number;
   traditionalBank?: number;
+  accountingFrequency?: 'yearly' | 'quarterly' | 'monthly';
   accountingFee?: number;
 
 }

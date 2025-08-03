@@ -21,7 +21,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'company-stamp',
       condition: true,
-      description: 'One-time TME Services Professional Fee and cost for Company stamp preparation and production (Two stamps)',
+      description: 'One-time fee for company stamp preparation and production (two stamps)',
       amount: data.additionalServices.companyStamp,
       explanation: 'Professional service fee covering the design, preparation, and production of two company stamps required for official business documentation and transactions.'
     });
@@ -32,7 +32,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'emirates-post',
       condition: true,
-      description: 'One-time TME Services Professional Fee for registration with Emirates Post P.O. Box',
+      description: 'One-time fee for registration with Emirates Post P.O.Box',
       amount: data.additionalServices.emiratesPost,
       explanation: 'One-time P.O.Box registration fee for establishing a business postal address with Emirates Post for official correspondence and deliveries.'
     });
@@ -43,7 +43,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'cit-registration',
       condition: true,
-      description: 'One-time TME Services Professional Fee for CIT (Corporate Income Tax) Registration',
+      description: 'One-time fee for CIT (Corporate Income Tax) registration',
       amount: data.additionalServices.citRegistration,
       explanation: 'Professional service fee for registering your company with the Federal Tax Authority for Corporate Income Tax compliance, including documentation preparation and submission.'
     });
@@ -54,7 +54,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'vat-registration',
       condition: true,
-      description: 'One-time TME Professional Service Fee for VAT (Value Added Tax) Registration or Exception',
+      description: 'One-time fee for VAT (Value Added Tax) registration or exception',
       amount: data.additionalServices.vatRegistration,
       explanation: 'Professional service fee for VAT registration with the Federal Tax Authority or applying for VAT exemption, including preparation of required documentation and compliance setup.'
     });
@@ -65,7 +65,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'personal-bank-account',
       condition: true,
-      description: 'One-time TME Services Professional Fee for 1 personal bank account application with a UAE bank',
+      description: 'One-time fee for one personal bank account application with a UAE bank',
       amount: data.additionalServices.personalBank,
       explanation: 'Professional assistance for opening a personal bank account, including documentation preparation, bank liaison, and application support.'
     });
@@ -76,7 +76,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'digital-bank-account',
       condition: true,
-      description: 'One-time TME Services Professional Fee for 1 company bank account application with the digital bank WIO',
+      description: 'One-time fee for one company bank account application with the UAE digital bank WIO or similar',
       amount: data.additionalServices.digitalBank,
       explanation: 'Professional service for opening a digital banking account with WIO Bank, including application preparation and process facilitation.'
     });
@@ -87,20 +87,27 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'traditional-bank-account',
       condition: true,
-      description: 'One-time TME Services Professional Fee for 1 company account application with a traditional UAE bank',
+      description: 'One-time fee for one company bank account application with a traditional UAE bank',
       amount: data.additionalServices.traditionalBank,
       explanation: 'Professional assistance for opening a corporate bank account with traditional banks, including documentation preparation and bank introduction services.'
     });
   }
 
-  // Yearly Accounting Fee
+  // Accounting Fee (based on frequency)
   if (data.additionalServices.accountingFee && data.additionalServices.accountingFee > 0) {
+    const frequency = data.additionalServices.accountingFrequency || 'yearly';
+    const frequencyLabels = {
+      yearly: 'Yearly',
+      quarterly: 'Quarterly', 
+      monthly: 'Monthly'
+    };
+    
     services.push({
-      id: 'yearly-accounting-fee',
+      id: 'accounting-fee',
       condition: true,
-      description: 'Yearly Accounting Fee based on 360 Transactions per Year',
+      description: `${frequencyLabels[frequency]} accounting fee based on 360 transactions per year`,
       amount: data.additionalServices.accountingFee,
-      explanation: 'Annual accounting and bookkeeping services based on 360 transactions per year, including financial record maintenance and basic reporting.'
+      explanation: `${frequencyLabels[frequency]} accounting and bookkeeping services based on 360 transactions per year, including financial record maintenance and basic reporting.`
     });
   }
 
@@ -109,7 +116,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'cit-return-filing',
       condition: true,
-      description: 'Yearly TME Services Professional Fee for CIT (Corporate Income Tax) Return Filing',
+      description: 'Yearly fee for CIT (Corporate Income Tax) return filing',
       amount: data.additionalServices.citReturnFiling,
       explanation: 'Professional service fee for preparing and filing annual Corporate Income Tax returns with the Federal Tax Authority, including tax calculation and submission support.'
     });
