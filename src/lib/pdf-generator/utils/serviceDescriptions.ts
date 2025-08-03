@@ -84,20 +84,22 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         condition: true,
         description: `DET license cost - ${licenseTypeName.toLowerCase()}`,
         amount: licenseCost,
-        explanation: `License cost for ${licenseTypeName} license with the Department of Economy and Tourism-Dubai (DET).`
+        explanation: `${licenseTypeName} license with the DET (Dubai Department of Economy and Tourism).`
       });
     }
 
     // 5. Business Center arrangement cost (or Office/Warehouse rent)
     if (data.detLicense?.rentType && data.detLicense?.officeRentAmount) {
       const officeRentDescription = data.detLicense.rentType === 'business-center' 
-        ? 'Business Center arrangement cost'
+        ? 'Business center arrangement cost (Ejari)'
         : data.detLicense.rentType === 'office' 
         ? 'Office rent (differs on location & availability)'
+        : data.detLicense.rentType === 'showroom'
+        ? 'Showroom rent (differs on location & availability)'
         : 'Warehouse rent (differs on location & availability)';
         
       const officeRentExplanation = data.detLicense.rentType === 'business-center' 
-        ? 'Annual business center service cost for your business center arrangement.'
+        ? 'Business center arrangement cost for your business center arrangement. (Ejari)'
         : `Annual rental cost for your ${data.detLicense.rentType}.`;
       
       services.push({

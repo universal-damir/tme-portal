@@ -81,7 +81,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
               transition={{ duration: 0.3, delay: 0.1 }}
             >
               <CostInputField
-                label="Company Stamp (Two stamps)"
+                label="Company Stamp"
                 value={formattedInputs.companyStampFormatted}
                 onChange={handlers.handleCompanyStampChange}
                 placeholder="600.00"
@@ -109,7 +109,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
             >
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
+                  <label className="block text-sm font-medium">
                     Accounting
                   </label>
                   <div className="relative">

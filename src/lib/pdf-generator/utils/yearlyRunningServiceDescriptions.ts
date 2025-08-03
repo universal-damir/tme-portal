@@ -39,7 +39,7 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: 'GDRFA (Immigration establishment card) renewal cost',
         amount: yearlyRunningData.immigrationRenewal,
-        explanation: 'Mandatory Renewal Cost.'
+        explanation: 'Mandatory renewal cost.'
       });
     }
 
@@ -94,9 +94,9 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-license-renewal',
       condition: true,
-      description: 'DET license renewal cost',
+      description: 'DET registration renewal cost',
       amount: 13000,
-      explanation: 'Annual renewal cost for your business license with the Department of Economy and Tourism-Dubai (DET).'
+      explanation: 'Annual renewal cost with the DET (Dubai Department of Economy and Tourism).'
     });
 
     // 2. DET Immigration Renewal
@@ -105,7 +105,7 @@ export const generateYearlyRunningServiceDescriptions = (
       condition: true,
       description: 'GDRFA (Immigration establishment card) renewal cost',
       amount: 2000,
-      explanation: 'Annual renewal cost for the immigration establishment card required for visa processing and employee sponsorship with DET.'
+      explanation: 'Mandatory renewal cost.'
     });
 
     // 3. DET Office Rent
@@ -114,8 +114,10 @@ export const generateYearlyRunningServiceDescriptions = (
         ? 'Office rent (differs on location & availability) renewal cost'
         : data.detLicense.rentType === 'warehouse'
         ? 'Warehouse rent (differs on location & availability) renewal cost'
+        : data.detLicense.rentType === 'showroom'
+        ? 'Showroom rent (differs on location & availability) renewal cost'
         : data.detLicense.rentType === 'business-center'
-        ? 'Business center arrangement cost'
+        ? 'Business center arrangement cost (Ejari)'
         : 'Office rent';
         
       services.push({
