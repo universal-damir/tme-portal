@@ -216,7 +216,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
 
             // Create mapping of child visa service descriptions to explanations
             const childVisaServiceExplanations: { [key: string]: string } = {
-              'standard authority fees for child visa and emirates id application': 'Government fees for child visa processing and Emirates ID application.',
+              'standard authority fees for child visa and emirates id application': 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.',
               'child visa health insurance - low cost': 'Mandatory health insurance coverage for child visa holders as per UAE regulations.',
               'child visa health insurance - silver package': 'Mandatory health insurance coverage for child visa holders as per UAE regulations.',
               'child visa health insurance - no insurance': 'Mandatory health insurance coverage for child visa holders as per UAE regulations.',
@@ -293,7 +293,7 @@ export const IndividualChildVisaBreakdownPage: React.FC<PDFComponentProps> = ({ 
 
         // Create mapping of child visa service descriptions to explanations
         const childVisaServiceExplanations: { [key: string]: string } = {
-          'standard authority fees for child visa and emirates id application': 'Government fees for child visa processing and Emirates ID application.',
+          'standard authority fees for child visa and emirates id application': 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.',
           'child visa health insurance - low cost': 'Mandatory health insurance coverage for child visa holders as per UAE regulations.',
           'child visa health insurance - silver package': 'Mandatory health insurance coverage for child visa holders as per UAE regulations.',
           'child visa health insurance - no insurance': 'Mandatory health insurance coverage for child visa holders as per UAE regulations.',

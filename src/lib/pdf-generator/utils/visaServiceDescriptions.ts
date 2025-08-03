@@ -51,7 +51,7 @@ export const generateCompanyVisaServiceDescriptions = (
       condition: true,
       description: `Standard authority costs (${numberOfVisas} ${visaText(numberOfVisas)})`,
       amount: visaCostData.standardGovernmentFees,
-      explanation: 'For visa processing and Emirates ID for standard visa applications.'
+      explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
     });
   }
 
@@ -179,7 +179,7 @@ export const generateSpouseVisaServiceDescriptions = (
     condition: true,
     description: 'Standard authority costs',
     amount: visaCostData.spouseVisaStandardFees || 0,
-    explanation: 'For spouse visa processing and Emirates ID.'
+    explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
   });
 
   // 2. Authority Cost for Spouse Visa Status Change
@@ -248,7 +248,7 @@ export const generateChildVisaServiceDescriptions = (
     condition: true,
     description: 'Standard authority costs',
     amount: visaCostData.childVisaStandardFees || 0,
-    explanation: 'For child visa processing and Emirates ID.'
+    explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
   });
 
   // 2. Authority Cost for Child Visa Status Change

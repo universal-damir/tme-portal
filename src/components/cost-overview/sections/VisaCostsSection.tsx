@@ -281,7 +281,8 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                         { value: "", label: "No Investor Visa" },
                         { value: "true", label: "Enable Investor Visa" }
                       ]}
-                      value={(watchedData.visaCosts?.visaDetails?.[index]?.investorVisa?.toString() || "")}
+                      value={watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === true ? "true" : 
+                             watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === "employment" ? "employment" : ""}
                       onChange={(value) => {
                         const boolValue = value === "true" ? true : (value === "employment" ? "employment" : false);
                         setValue(`visaCosts.visaDetails.${index}.investorVisa`, boolValue);

@@ -40,7 +40,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
               const isIFZA = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
               const isIFZAMultiYear = isIFZA && licenseYears > 1;
               
-              return isIFZAMultiYear ? `Company Setup Cost (For ${licenseYears} years)` : 'Company Setup Cost';
+              return isIFZAMultiYear ? `Company setup cost (For ${licenseYears} years)` : 'Company setup cost';
             })()}
           </Text>
           <Text style={styles.tableCellAmount}>{formatNumber(setupTotal)}</Text>
@@ -50,7 +50,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
         {/* Company Visa Cost Row - Only show if visa cost > 0 */}
         {companyVisaTotal > 0 && (
           <View style={styles.tableRow}>
-            <Text style={styles.tableCellDescription}>Company Visa Cost</Text>
+            <Text style={styles.tableCellDescription}>Company visa cost</Text>
             <Text style={styles.tableCellAmount}>{formatNumber(companyVisaTotal)}</Text>
             <Text style={styles.tableCellAmount}>{formatNumber(companyVisaTotal / exchangeRate)}</Text>
           </View>
@@ -58,7 +58,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
 
         {/* Total Row */}
         <View style={styles.totalRowGrey}>
-          <Text style={[styles.totalLabel, { flex: 5, paddingLeft: 8 }]}>Total Initial Cost</Text>
+          <Text style={[styles.totalLabel, { flex: 5, paddingLeft: 8 }]}>Total initial cost</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost)}</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost / exchangeRate)}</Text>
         </View>
