@@ -19,7 +19,7 @@ export const ClientInfoSection: React.FC<PDFComponentProps> = ({ data }) => {
         <View style={styles.row}>
           <Text style={styles.label}>Company Name:</Text>
           <Text style={styles.value}>
-            {data.clientDetails.companyName || '--'}
+            {data.clientDetails.companyName || '-'}
           </Text>
         </View>
         <View style={styles.row}>

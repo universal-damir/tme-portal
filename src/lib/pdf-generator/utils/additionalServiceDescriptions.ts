@@ -21,9 +21,9 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'company-stamp',
       condition: true,
-      description: 'One-time fee for company stamp preparation and production (two stamps)',
+      description: 'One-time cost for company stamp preparation and production (two stamps)',
       amount: data.additionalServices.companyStamp,
-      explanation: 'Professional service fee covering the design, preparation, and production of two company stamps required for official business documentation and transactions.'
+      explanation: 'Professional service fee covering the design, preparation, and cost for production of two company stamps required for official business documentation and transactions.'
     });
   }
 
@@ -32,9 +32,9 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'emirates-post',
       condition: true,
-      description: 'One-time fee for registration with Emirates Post P.O.Box',
+      description: 'One-time cost for registration with Emirates Post P.O.Box',
       amount: data.additionalServices.emiratesPost,
-      explanation: 'One-time P.O.Box registration fee for establishing a business postal address with Emirates Post for official correspondence and deliveries.'
+      explanation: 'One-time P.O.Box registration cost for establishing a business postal address with Emirates Post for official correspondence and deliveries.'
     });
   }
 
@@ -105,7 +105,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'accounting-fee',
       condition: true,
-      description: `${frequencyLabels[frequency]} accounting fee based on 360 transactions per year`,
+      description: `${frequencyLabels[frequency]} accounting fee`,
       amount: data.additionalServices.accountingFee,
       explanation: `${frequencyLabels[frequency]} accounting and bookkeeping services based on 360 transactions per year, including financial record maintenance and basic reporting.`
     });

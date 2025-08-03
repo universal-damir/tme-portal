@@ -17,54 +17,12 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
   updateFormattedInput
 }) => {
   const formContext = useFormContext();
-  const { watch, setValue } = formContext || {};
+  const { watch, setValue, register } = formContext || {};
   const watchedData = watch ? watch() : {};
   
   // Local state for accounting frequency to ensure UI updates immediately
   const [localAccountingFrequency, setLocalAccountingFrequency] = useState<'yearly' | 'quarterly' | 'monthly'>('yearly');
 
-  // Handle accounting frequency change and set default values
-  const handleAccountingFrequencyChange = (frequency: 'yearly' | 'quarterly' | 'monthly') => {
-    // Update local state immediately for UI responsiveness
-    setLocalAccountingFrequency(frequency);
-    
-    // Determine the new amount based on frequency
-    let newFormattedAmount = '';
-    let newNumericAmount = 0;
-    
-    if (frequency === 'yearly') {
-      newFormattedAmount = '6,393.00';
-      newNumericAmount = 6393;
-    } else if (frequency === 'monthly') {
-      newFormattedAmount = '2,183.00';
-      newNumericAmount = 2183;
-    } else if (frequency === 'quarterly') {
-      newFormattedAmount = '';
-      newNumericAmount = 0;
-    }
-    
-    // Update form using setValue if available
-    if (setValue) {
-      setValue('additionalServices.accountingFrequency', frequency, { shouldValidate: true });
-      setValue('additionalServices.accountingFee', newNumericAmount, { shouldValidate: true });
-    }
-    
-    // Update formatted input directly
-    if (updateFormattedInput) {
-      updateFormattedInput('accountingFeeFormatted', newFormattedAmount);
-    }
-    
-    // Force a manual trigger of the accounting input handler as final backup
-    const syntheticEvent = {
-      target: { value: newFormattedAmount }
-    } as React.ChangeEvent<HTMLInputElement>;
-    
-    try {
-      handlers.handleAccountingFeeChange(syntheticEvent);
-    } catch (error) {
-      console.error('Failed to trigger accounting handler:', error);
-    }
-  };
 
   // Sync local state with form data
   useEffect(() => {
@@ -83,9 +41,9 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
       setLocalAccountingFrequency('yearly');
     }
     if (!watchedData?.additionalServices?.accountingFee && localAccountingFrequency === 'yearly') {
-      setValue('additionalServices.accountingFee', 6393);
+      setValue('additionalServices.accountingFee', 6293);
       if (updateFormattedInput) {
-        updateFormattedInput('accountingFeeFormatted', '6,393.00');
+        updateFormattedInput('accountingFeeFormatted', '6,293.00');
       }
     }
   }, [setValue, watchedData?.additionalServices?.accountingFrequency, watchedData?.additionalServices?.accountingFee, localAccountingFrequency, updateFormattedInput]);
@@ -126,7 +84,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="Company Stamp (Two stamps)"
                 value={formattedInputs.companyStampFormatted}
                 onChange={handlers.handleCompanyStampChange}
-                placeholder="646.00"
+                placeholder="600.00"
                 description=""
               />
             </motion.div>
@@ -157,7 +115,11 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                   <div className="relative">
                     <select
                       value={localAccountingFrequency}
-                      onChange={(e) => handleAccountingFrequencyChange(e.target.value as 'yearly' | 'quarterly' | 'monthly')}
+                      onChange={(e) => {
+                        const frequency = e.target.value as 'yearly' | 'quarterly' | 'monthly';
+                        setLocalAccountingFrequency(frequency);
+                        handlers.handleAccountingFrequencyChange(frequency);
+                      }}
                       className="px-2 py-1 rounded border border-gray-300 text-xs focus:outline-none focus:border-blue-500 appearance-none bg-white pr-6"
                       style={{ fontFamily: 'Inter, sans-serif', color: '#243F7B' }}
                     >
@@ -173,8 +135,8 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                     type="text"
                     value={formattedInputs.accountingFeeFormatted}
                     onChange={handlers.handleAccountingFeeChange}
-                    placeholder={localAccountingFrequency === 'quarterly' ? 'Enter amount' : 
-                                localAccountingFrequency === 'yearly' ? '6,393.00' : '2,183.00'}
+                    placeholder={localAccountingFrequency === 'quarterly' ? '2,098.00' : 
+                                localAccountingFrequency === 'yearly' ? '6,293.00' : '2,183.00'}
                     className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
                     style={{ fontFamily: 'Inter, sans-serif' }}
                     onFocus={(e) => e.target.style.borderColor = '#243F7B'}
@@ -196,7 +158,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="CIT Registration"
                 value={formattedInputs.citRegistrationFormatted}
                 onChange={handlers.handleCitRegistrationChange}
-                placeholder="3,070.00"
+                placeholder="2,921.00"
               />
             </motion.div>
 
@@ -209,7 +171,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="CIT Return Filing (Yearly)"
                 value={formattedInputs.citReturnFilingFormatted}
                 onChange={handlers.handleCitReturnFilingChange}
-                placeholder="5,458.00"
+                placeholder="5,198.00"
               />
             </motion.div>
 
@@ -222,7 +184,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="VAT Registration/Exception"
                 value={formattedInputs.vatRegistrationFormatted}
                 onChange={handlers.handleVatRegistrationChange}
-                placeholder="3,810.00"
+                placeholder="3,625.00"
               />
             </motion.div>
 
@@ -235,7 +197,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="Digital Bank WIO Account"
                 value={formattedInputs.digitalBankFormatted}
                 onChange={handlers.handleDigitalBankChange}
-                placeholder="3,150.00"
+                placeholder="3,000.00"
               />
             </motion.div>
 
@@ -248,7 +210,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="Traditional UAE Bank Account"
                 value={formattedInputs.traditionalBankFormatted}
                 onChange={handlers.handleTraditionalBankChange}
-                placeholder="7,350.00"
+                placeholder="7,000.00"
               />
             </motion.div>
 
@@ -261,7 +223,7 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                 label="Personal Bank Account"
                 value={formattedInputs.personalBankFormatted}
                 onChange={handlers.handlePersonalBankChange}
-                placeholder="3,150.00"
+                placeholder="3,000.00"
               />
             </motion.div>
 

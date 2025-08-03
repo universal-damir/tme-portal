@@ -145,11 +145,11 @@ export const COMPANY_SERVICES_DEFAULTS = {
       // Bank account opening
       bankAccountOpening: false,
       personalUAEBank: false,
-      personalUAEBankFee: 3150,
+      personalUAEBankFee: 3000,
       digitalBankWIO: false,
-      digitalBankWIOFee: 3150,
+      digitalBankWIOFee: 3000,
       traditionalUAEBank: false,
-      traditionalUAEBankFee: 7350,
+      traditionalUAEBankFee: 7000,
     },
     backOfficeServices: {
       enabled: false,

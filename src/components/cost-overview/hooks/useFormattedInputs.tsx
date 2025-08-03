@@ -33,6 +33,7 @@ export interface FormattedInputHandlers {
   handleDigitalBankChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleTraditionalBankChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAccountingFeeChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAccountingFrequencyChange: (frequency: 'yearly' | 'quarterly' | 'monthly') => void;
   handleRadioClick: (fieldName: string, value: string) => void;
 }
 
@@ -96,14 +97,14 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
   const [formattedInputs, setFormattedInputs] = useState<FormattedInputState>({
     shareCapitalFormatted: '',
     valuePerShareFormatted: '',
-    companyStampFormatted: '646.00',
+    companyStampFormatted: '600.00',
     emiratesPostFormatted: '1,500.00',
-    citRegistrationFormatted: '3,070.00',
-    citReturnFilingFormatted: '5,458.00',
-    vatRegistrationFormatted: '3,810.00',
-    personalBankFormatted: '3,150.00',
-    digitalBankFormatted: '3,150.00',
-    traditionalBankFormatted: '7,350.00',
+    citRegistrationFormatted: '2,921.00',
+    citReturnFilingFormatted: '5,198.00',
+    vatRegistrationFormatted: '3,625.00',
+    personalBankFormatted: '3,000.00',
+    digitalBankFormatted: '3,000.00',
+    traditionalBankFormatted: '7,000.00',
     accountingFeeFormatted: '6,293.00',
   });
 
@@ -364,6 +365,21 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
     handleDigitalBankChange: createInputHandler('digitalBankFormatted', 'additionalServices.digitalBank'),
     handleTraditionalBankChange: createInputHandler('traditionalBankFormatted', 'additionalServices.traditionalBank'),
     handleAccountingFeeChange: createInputHandler('accountingFeeFormatted', 'additionalServices.accountingFee'),
+    handleAccountingFrequencyChange: useCallback((frequency: 'yearly' | 'quarterly' | 'monthly') => {
+      setValue('additionalServices.accountingFrequency', frequency);
+      
+      // Update amount based on frequency
+      if (frequency === 'yearly') {
+        setValue('additionalServices.accountingFee', 6293);
+        setFormattedInputs(prev => ({ ...prev, accountingFeeFormatted: '6,293.00' }));
+      } else if (frequency === 'quarterly') {
+        setValue('additionalServices.accountingFee', 2098);
+        setFormattedInputs(prev => ({ ...prev, accountingFeeFormatted: '2,098.00' }));
+      } else if (frequency === 'monthly') {
+        setValue('additionalServices.accountingFee', 2183);
+        setFormattedInputs(prev => ({ ...prev, accountingFeeFormatted: '2,183.00' }));
+      }
+    }, [setValue]),
     handleRadioClick,
   };
 
