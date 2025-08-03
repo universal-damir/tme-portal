@@ -197,7 +197,7 @@ export const calculateIndividualChildVisaCosts = (data: OfferData, authorityConf
     const childVisaCosts = {
       childNumber: i + 1,
       standardFee: authorityConfig.visaCosts.childVisaStandardFee || 3170,
-      tmeServiceFee: authorityConfig.visaCosts.childVisaTmeServiceFee || 1569,
+      tmeServiceFee: authorityConfig.visaCosts.childVisaTmeServiceFee || 1681,
       healthInsurance: 0,
       statusChangeFee: 0,
       vipStampingFee: 0,

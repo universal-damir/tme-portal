@@ -49,12 +49,12 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
   // Set default TME Services fee based on setup type
   useEffect(() => {
     const defaultFee = clientDetails?.companySetupType === 'Individual Setup' 
-      ? 11550  // Individual Setup
-      : 33600; // Corporate Shareholder
+      ? (authorityConfig?.initialSetup?.individualTmeServicesFee || 11000)  // Individual Setup
+      : (authorityConfig?.initialSetup?.defaultTmeServicesFee || 32000); // Corporate Shareholder
     if (defaultFee > 0) {
       setValue('detLicense.tmeServicesFee', defaultFee);
     }
-  }, [clientDetails?.companySetupType, watchedData.detLicense?.tmeServicesFee, setValue]);
+  }, [clientDetails?.companySetupType, watchedData.detLicense?.tmeServicesFee, setValue, authorityConfig]);
 
   // Set default office rent amount based on rent type
   useEffect(() => {
@@ -412,8 +412,8 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
               type="text"
               value={formatNumberWithSeparators(String(watchedData.detLicense?.tmeServicesFee || 
                 (clientDetails?.companySetupType === 'Individual Setup' 
-                  ? 11550 
-                  : 33600)))}
+                  ? (authorityConfig?.initialSetup?.individualTmeServicesFee || 11000)
+                  : (authorityConfig?.initialSetup?.defaultTmeServicesFee || 32000))))}
               onChange={(e) => {
                 const value = e.target.value;
                 const parsed = parseFormattedNumber(value);

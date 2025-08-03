@@ -82,7 +82,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
     );
     
     return tmeServices.map(service => ({
-      description: 'TME Services Professional Fee',
+      description: 'TME Services professional fee',
       amount: service.amount,
       secondaryAmount: service.amount / exchangeRate,
       isReduction: service.isReduction
@@ -94,7 +94,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
     if (!costs?.visaCosts || !authorityConfig) {
       return [
         {
-          description: `1. Standard Authority Costs`,
+          description: `1. Standard authority costs`,
           amount: 0,
           secondaryAmount: 0,
           isReduction: false
@@ -116,7 +116,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
 
       // Standard Authority Costs
       items.push({
-        description: `${serviceNumber++}. Standard Authority Costs`,
+        description: `${serviceNumber++}. Standard authority costs`,
         amount: standardFee,
         secondaryAmount: standardFee / exchangeRate,
         isReduction: false
@@ -130,7 +130,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
       // Status Change (if this child needs it)
       if (childNumber <= childVisaStatusChange && authorityConfig?.visaCosts?.statusChangeFee) {
         items.push({
-          description: `${serviceNumber++}. Visa Status Change Authority Costs`,
+          description: `${serviceNumber++}. Visa status change authority costs`,
           amount: authorityConfig.visaCosts.statusChangeFee,
           secondaryAmount: authorityConfig.visaCosts.statusChangeFee / exchangeRate,
           isReduction: false
@@ -144,7 +144,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
           ? (authorityConfig?.visaCosts?.healthInsurance?.lowCost || 1000)
           : (authorityConfig?.visaCosts?.healthInsurance?.silverPackage || 6000);
         items.push({
-          description: `${serviceNumber++}. Health Insurance - ${childVisaDetail.healthInsurance}`,
+          description: `${serviceNumber++}. Health insurance (${childVisaDetail.healthInsurance.toLowerCase()})`,
           amount: insuranceCost,
           secondaryAmount: insuranceCost / exchangeRate,
           isReduction: false
@@ -154,7 +154,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
       // VIP Stamping (if this child needs it)
       if (childNumber <= childVisaVipStamping && authorityConfig?.visaCosts?.vipStampingFee) {
         items.push({
-          description: `${serviceNumber++}. VIP Visa Stamping Service`,
+          description: `${serviceNumber++}. VIP visa stamping service`,
           amount: authorityConfig.visaCosts.vipStampingFee,
           secondaryAmount: authorityConfig.visaCosts.vipStampingFee / exchangeRate,
           isReduction: false
@@ -169,7 +169,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
 
     // Standard Authority Costs
     items.push({
-      description: `${serviceNumber++}. Standard Authority Costs`,
+      description: `${serviceNumber++}. Standard authority costs`,
       amount: childVisa.standardFee,
       secondaryAmount: childVisa.standardFee / exchangeRate,
       isReduction: false
@@ -178,7 +178,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
     // Status Change (if applicable)
     if (childVisa.statusChangeFee > 0) {
       items.push({
-        description: `${serviceNumber++}. Visa Status Change Authority Costs`,
+        description: `${serviceNumber++}. Visa status change authority costs`,
         amount: childVisa.statusChangeFee,
         secondaryAmount: childVisa.statusChangeFee / exchangeRate,
         isReduction: false
@@ -190,7 +190,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
       const childVisaDetail = data.visaCosts?.childVisaDetails?.[childNumber - 1];
       const insuranceType = childVisaDetail?.healthInsurance || 'Insurance';
       items.push({
-        description: `${serviceNumber++}. Health Insurance - ${insuranceType}`,
+        description: `${serviceNumber++}. Health insurance (${insuranceType.toLowerCase()})`,
         amount: childVisa.healthInsurance,
         secondaryAmount: childVisa.healthInsurance / exchangeRate,
         isReduction: false
@@ -200,7 +200,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
     // VIP Stamping (if applicable)
     if (childVisa.vipStampingFee > 0) {
       items.push({
-        description: `${serviceNumber++}. VIP Visa Stamping Service`,
+        description: `${serviceNumber++}. VIP visa stamping service`,
         amount: childVisa.vipStampingFee,
         secondaryAmount: childVisa.vipStampingFee / exchangeRate,
         isReduction: false
@@ -215,7 +215,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
     if (!costs?.visaCosts || !authorityConfig) {
       return [
         {
-          description: 'TME Services Professional Fee',
+          description: 'TME Services professional fee',
           amount: 0,
           secondaryAmount: 0,
           isReduction: false
@@ -231,7 +231,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
       const tmeServiceFee = authorityConfig?.visaCosts?.childVisaTmeServiceFee || 0;
       return [
         {
-          description: 'TME Services Professional Fee',
+          description: 'TME Services professional fee',
           amount: tmeServiceFee,
           secondaryAmount: tmeServiceFee / exchangeRate,
           isReduction: false
@@ -241,7 +241,7 @@ export const FamilyVisaDocument: React.FC<PDFComponentProps> = ({ data }) => {
 
     return [
       {
-        description: 'TME Services Professional Fee',
+        description: 'TME Services professional fee',
         amount: childVisa.tmeServiceFee,
         secondaryAmount: childVisa.tmeServiceFee / exchangeRate,
         isReduction: false

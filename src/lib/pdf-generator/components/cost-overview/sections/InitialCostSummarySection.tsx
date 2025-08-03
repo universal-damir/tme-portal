@@ -27,7 +27,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
       <View style={styles.costTable}>
         {/* Table Header */}
         <View style={styles.tableHeaderGrey}>
-          <Text style={styles.tableHeaderDescription}>DESCRIPTION</Text>
+          <Text style={styles.tableHeaderDescription}>Description</Text>
           <Text style={styles.tableHeaderCurrency}>AED</Text>
           <Text style={styles.tableHeaderCurrency}>{secondaryCurrency}</Text>
         </View>
@@ -58,7 +58,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
 
         {/* Total Row */}
         <View style={styles.totalRowGrey}>
-          <Text style={[styles.totalLabel, { flex: 5, paddingLeft: 8 }]}>TOTAL INITIAL COST</Text>
+          <Text style={[styles.totalLabel, { flex: 5, paddingLeft: 8 }]}>Total Initial Cost</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost)}</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost / exchangeRate)}</Text>
         </View>

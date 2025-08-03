@@ -212,7 +212,7 @@ export const CostTable: React.FC<CostTableProps> = ({
               styles.totalLabel, 
               theme === 'blue' ? { flex: 6, paddingLeft: 8 } : { flex: 5, paddingLeft: 8 }
             ]}>
-              {showDeposits && depositsItems.length > 0 ? 'Total (Including Deposits)' : 'TOTAL'}
+              {showDeposits && depositsItems.length > 0 ? 'Total (Including Deposits)' : 'Total'}
             </Text>
             <Text style={styles.totalAmount}>
               {formatNumber(showDeposits && depositsItems.length > 0 ? total + depositsTotal : total)}

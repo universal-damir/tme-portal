@@ -77,7 +77,7 @@ export const IndividualChildVisaBreakdown: React.FC<IndividualChildVisaBreakdown
                   serviceElements.push(
                     <CostDisplayTableRow
                       key="standard-fee"
-                      description={formatServiceDescription(serviceNumber++, 'Standard Authority Costs')}
+                      description={formatServiceDescription(serviceNumber++, 'Standard authority costs')}
                       aedAmount={childVisa.standardFee}
                       exchangeRate={exchangeRate}
                       className="text-sm"
@@ -89,7 +89,7 @@ export const IndividualChildVisaBreakdown: React.FC<IndividualChildVisaBreakdown
                     serviceElements.push(
                       <CostDisplayTableRow
                         key="status-change"
-                        description={formatServiceDescription(serviceNumber++, 'Visa Status Change Authority Costs')}
+                        description={formatServiceDescription(serviceNumber++, 'Visa status change authority costs')}
                         aedAmount={childVisa.statusChangeFee}
                         exchangeRate={exchangeRate}
                         className="text-sm"
@@ -103,7 +103,7 @@ export const IndividualChildVisaBreakdown: React.FC<IndividualChildVisaBreakdown
                     serviceElements.push(
                       <CostDisplayTableRow
                         key="health-insurance"
-                        description={formatServiceDescription(serviceNumber++, `Health Insurance - ${insuranceType}`)}
+                        description={formatServiceDescription(serviceNumber++, `Health insurance (${insuranceType.toLowerCase()})`)}
                         aedAmount={childVisa.healthInsuranceFee}
                         exchangeRate={exchangeRate}
                         className="text-sm"
@@ -116,7 +116,7 @@ export const IndividualChildVisaBreakdown: React.FC<IndividualChildVisaBreakdown
                     serviceElements.push(
                       <CostDisplayTableRow
                         key="vip-stamping"
-                        description={formatServiceDescription(serviceNumber++, 'VIP Visa Stamping Service')}
+                        description={formatServiceDescription(serviceNumber++, 'VIP visa stamping service')}
                         aedAmount={childVisa.vipStampingFee}
                         exchangeRate={exchangeRate}
                         className="text-sm"
@@ -128,7 +128,7 @@ export const IndividualChildVisaBreakdown: React.FC<IndividualChildVisaBreakdown
                   serviceElements.push(
                     <CostDisplayTableRow
                       key="tme-service"
-                      description={formatServiceDescription(serviceNumber++, 'TME Services Professional Fee')}
+                      description={formatServiceDescription(serviceNumber++, 'TME Services professional fee')}
                       aedAmount={childVisa.tmeServiceFee}
                       exchangeRate={exchangeRate}
                       className="text-sm"

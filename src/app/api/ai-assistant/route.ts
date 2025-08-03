@@ -158,9 +158,10 @@ To provide accurate cost calculations, you need these key fields:
 - DET legal entity: "LLC (Limited Liability Company)"
 - Company setup type: "Corporate Setup" (unless specified otherwise)
 - License years: 1 (unless multi-year requested)
-- TME services fee for IFZA Corporate: 33600 AED
-- TME services fee for IFZA Individual: 9450 AED
-- TME services fee for DET: varies by license type
+- TME services fee for IFZA Corporate: 32000 AED
+- TME services fee for IFZA Individual: 9000 AED
+- TME services fee for DET Corporate: 32000 AED
+- TME services fee for DET Individual: 11000 AED
 
 ## Common Request Patterns:
 - "2 visa quote, IFZA" → 2 employment visas with IFZA authority + default share capital
@@ -187,8 +188,8 @@ To provide accurate cost calculations, you need these key fields:
    - DET: "LLC (Limited Liability Company)"
 9. **Setup Type & TME Fee Logic**:
    - If form has companySetupType: PRESERVE it and use appropriate TME fee
-   - If no companySetupType: default to "Corporate Setup" (33600 AED)
-   - Individual Setup → 9450 AED, Corporate Setup → 33600 AED
+   - If no companySetupType: default to "Corporate Setup" (32000 AED)
+   - Individual Setup → 9000 AED, Corporate Setup → 32000 AED
 10. **Activities Handling (CRITICAL)**:
    - If user mentions specific activities (e.g. "trading", "consulting"): ask for details or clarification
    - If user mentions "TBC", "activities to be confirmed", or similar: set activitiesToBeConfirmed: true
@@ -248,7 +249,7 @@ Response:
     "ifzaLicense": {
       "visaQuota": 3,
       "licenseYears": 1,
-      "tmeServicesFee": 33600,
+      "tmeServicesFee": 32000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -280,7 +281,7 @@ Response:
     "ifzaLicense": {
       "visaQuota": 2,
       "licenseYears": 1,
-      "tmeServicesFee": 33600,
+      "tmeServicesFee": 32000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -317,7 +318,7 @@ Response:
     "ifzaLicense": {
       "visaQuota": 2,
       "licenseYears": 1,
-      "tmeServicesFee": 9450,
+      "tmeServicesFee": 9000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -348,7 +349,7 @@ Response:
     "ifzaLicense": {
       "visaQuota": 2,
       "licenseYears": 1,
-      "tmeServicesFee": 9450,
+      "tmeServicesFee": 9000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -380,7 +381,7 @@ Response:
     },
     "detLicense": {
       "licenseType": "commercial",
-      "tmeServicesFee": 33600,
+      "tmeServicesFee": 32000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -421,7 +422,7 @@ Response:
     "ifzaLicense": {
       "visaQuota": 2,
       "licenseYears": 1,
-      "tmeServicesFee": 33600,
+      "tmeServicesFee": 32000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -454,7 +455,7 @@ Response:
       "licenseType": "commercial",
       "rentType": "office",
       "officeRentAmount": 12000,
-      "tmeServicesFee": 33600,
+      "tmeServicesFee": 32000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -479,7 +480,7 @@ Response:
       "licenseType": "industrial",
       "rentType": "warehouse",
       "officeRentAmount": 15000,
-      "tmeServicesFee": 33600,
+      "tmeServicesFee": 32000,
       "activitiesToBeConfirmed": true
     },
     "visaCosts": {
@@ -552,8 +553,8 @@ CRITICAL INSTRUCTIONS:
    - If NO companyName exists and user doesn't mention one: leave empty
    - NEVER create fake company names like "Client Company" or similar
 7. **TME Services Fee Logic**:
-   - If companySetupType is "Individual Setup": use 9450 AED
-   - If companySetupType is "Corporate Setup": use 33600 AED
+   - If companySetupType is "Individual Setup": use 9000 AED
+   - If companySetupType is "Corporate Setup": use 32000 AED
    - If already set in form: DON'T override
 8. **Activities Logic**:
    - If user mentions specific activities: ask for clarification or set them

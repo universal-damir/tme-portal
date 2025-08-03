@@ -49,7 +49,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'standard-government-fees',
       condition: true,
-      description: `Standard Authority Costs for Visa and Emirates ID Application (${numberOfVisas} ${visaText(numberOfVisas)})`,
+      description: `Standard authority costs (${numberOfVisas} ${visaText(numberOfVisas)})`,
       amount: visaCostData.standardGovernmentFees,
       explanation: 'For visa processing and Emirates ID for standard visa applications.'
     });
@@ -60,7 +60,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'reduced-government-fees',
       condition: true,
-      description: `Reduced Authority Costs for Visa and Emirates ID Application (${reducedVisas} ${visaText(reducedVisas)})`,
+      description: `Reduced authority costs (${reducedVisas} ${visaText(reducedVisas)})`,
       amount: visaCostData.reducedGovernmentFees,
       isReduction: true,
       explanation: 'Reduced rate available under the IFZA promotion. This offer is limited to one visa only and may change depending on timing. A prompt decision increases your chances of securing this rate.'
@@ -72,7 +72,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'investor-visa-fees',
       condition: true,
-      description: `${authorityConfig?.displayName || 'IFZA'} Investor Visa Cost (${numberOfInvestorVisas} ${visaText(numberOfInvestorVisas)})`,
+      description: `${authorityConfig?.displayName || 'IFZA'} investor visa cost (${numberOfInvestorVisas} ${visaText(numberOfInvestorVisas)})`,
       amount: visaCostData.investorVisaFees,
       explanation: 'Charged by IFZA for issuing an investor visa.'
     });
@@ -100,7 +100,7 @@ export const generateCompanyVisaServiceDescriptions = (
       services.push({
         id: `health-insurance-${type.toLowerCase().replace(/\s+/g, '-')}`,
         condition: true,
-        description: `Health Insurance - ${type} (${insuranceData.count} ${visaText(insuranceData.count)}) Approximately`,
+        description: `Health insurance (${type.toLowerCase()}) (${insuranceData.count} ${visaText(insuranceData.count)})`,
         amount: insuranceData.count * insuranceData.cost,
         explanation: `Mandatory health insurance coverage providing ${type.toLowerCase()} level medical benefits for visa holders.`
       });
@@ -118,7 +118,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'employee-insurance',
       condition: true,
-      description: `Employee Insurance per employee per visa (${numberOfEmploymentVisas} ${visaText(numberOfEmploymentVisas)})`,
+      description: `Employee insurance per employee per visa (${numberOfEmploymentVisas} ${visaText(numberOfEmploymentVisas)})`,
       amount: employeeInsuranceCost,
       explanation: 'Mandatory insurance coverage for employees as per UAE labor law requirements.'
     });
@@ -129,7 +129,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'visa-status-change',
       condition: true,
-      description: `Authority Cost for Visa Status Change (${visaStatusChangeCount} ${visaText(visaStatusChangeCount)})`,
+      description: `Authority cost for visa status change (${visaStatusChangeCount} ${visaText(visaStatusChangeCount)})`,
       amount: visaCostData.statusChangeFees,
       explanation: 'For changing visa status from tourist/visit visa to employment residence visa.'
     });
@@ -140,7 +140,7 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'vip-stamping-service',
       condition: true,
-      description: `VIP Authority Stamping Cost - Express Visa Stamp (${vipStampingCount} ${visaText(vipStampingCount)})`,
+      description: `VIP authority stamping cost - express visa stamp (${vipStampingCount} ${visaText(vipStampingCount)})`,
       amount: visaCostData.vipStampingFees,
       explanation: 'For faster visa stamping and processing with priority handling at immigration counters.'
     });
@@ -151,9 +151,9 @@ export const generateCompanyVisaServiceDescriptions = (
     services.push({
       id: 'tme-services-professional-fee',
       condition: true,
-      description: `TME Services Professional Fee for Visa and Emirates ID Application (${numberOfVisas} ${visaText(numberOfVisas)})`,
+      description: `TME Services professional fee (${numberOfVisas} ${visaText(numberOfVisas)})`,
       amount: visaCostData.tmeServicesFees,
-      explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant Authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
   }
 
@@ -177,7 +177,7 @@ export const generateSpouseVisaServiceDescriptions = (
   services.push({
     id: 'spouse-visa-standard-fees',
     condition: true,
-    description: 'Standard Authority Costs',
+    description: 'Standard authority costs',
     amount: visaCostData.spouseVisaStandardFees || 0,
     explanation: 'For spouse visa processing and Emirates ID.'
   });
@@ -187,7 +187,7 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-status-change',
       condition: true,
-      description: 'Visa Status Change Authority Costs',
+      description: 'Visa status change authority costs',
       amount: visaCostData.spouseVisaStatusChangeFees,
       explanation: 'For changing spouse visa status from tourist/visit visa to residence visa.'
     });
@@ -199,7 +199,7 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-health-insurance',
       condition: true,
-      description: `Health Insurance - ${insuranceType}`,
+      description: `Health insurance (${insuranceType.toLowerCase()})`,
       amount: visaCostData.spouseVisaHealthInsurance,
       explanation: 'Mandatory health insurance coverage for spouse visa holder.'
     });
@@ -210,7 +210,7 @@ export const generateSpouseVisaServiceDescriptions = (
     services.push({
       id: 'spouse-visa-vip-stamping',
       condition: true,
-      description: 'VIP Visa Stamping Service',
+      description: 'VIP visa stamping service',
       amount: visaCostData.spouseVisaVipStampingFees,
       explanation: 'Express service for faster spouse visa stamping and processing.'
     });
@@ -220,9 +220,9 @@ export const generateSpouseVisaServiceDescriptions = (
   services.push({
     id: 'spouse-visa-tme-services',
     condition: true,
-    description: 'TME Services Professional Fee',
+    description: 'TME Services professional fee',
     amount: visaCostData.spouseVisaTmeServicesFees || 0,
-    explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant Authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+    explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
   });
 
   return services.filter(service => service.condition);
@@ -246,7 +246,7 @@ export const generateChildVisaServiceDescriptions = (
   services.push({
     id: 'child-visa-standard-fees',
     condition: true,
-    description: 'Standard Authority Costs',
+    description: 'Standard authority costs',
     amount: visaCostData.childVisaStandardFees || 0,
     explanation: 'For child visa processing and Emirates ID.'
   });
@@ -256,7 +256,7 @@ export const generateChildVisaServiceDescriptions = (
     services.push({
       id: 'child-visa-status-change',
       condition: true,
-      description: 'Visa Status Change Authority Costs',
+      description: 'Visa status change authority costs',
       amount: visaCostData.childVisaStatusChangeFees,
       explanation: 'For changing child visa status from tourist/visit visa to residence visa.'
     });
@@ -284,7 +284,7 @@ export const generateChildVisaServiceDescriptions = (
       services.push({
         id: `child-visa-health-insurance-${type.toLowerCase().replace(/\s+/g, '-')}`,
         condition: true,
-        description: `Health Insurance - ${type}`,
+        description: `Health insurance (${type.toLowerCase()})`,
         amount: insuranceData.count * insuranceData.cost,
         explanation: `Mandatory health insurance coverage providing ${type.toLowerCase()} level medical benefits for child visa holders.`
       });
@@ -296,7 +296,7 @@ export const generateChildVisaServiceDescriptions = (
     services.push({
       id: 'child-visa-vip-stamping',
       condition: true,
-      description: 'VIP Visa Stamping Service',
+      description: 'VIP visa stamping service',
       amount: visaCostData.childVisaVipStampingFees,
       explanation: 'For faster child visa stamping and processing.'
     });
@@ -306,9 +306,9 @@ export const generateChildVisaServiceDescriptions = (
   services.push({
     id: 'child-visa-tme-services',
     condition: true,
-    description: 'TME Services Professional Fee',
+    description: 'TME Services professional fee',
     amount: visaCostData.childVisaTmeServicesFees || 0,
-    explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant Authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+    explanation: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
   });
 
   return services.filter(service => service.condition);

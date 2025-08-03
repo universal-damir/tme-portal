@@ -43,12 +43,14 @@ export const CompleteCostOverviewPage: React.FC<PDFComponentProps> = ({ data }) 
   const hasVisas = shouldShowVisaCosts(data);
   
   // Dynamic headline and paragraph based on visa selection
+  const numberOfVisas = data.visaCosts?.numberOfVisas || 0;
+  const visaText = numberOfVisas === 1 ? 'visa' : 'visas';
   const headline = hasVisas 
-    ? "Complete Cost Overview for Company Setup, Visas, and Yearly Running Costs, and Additional Services"
+    ? `Complete Cost Overview for Company Setup, ${visaText.charAt(0).toUpperCase() + visaText.slice(1)}, and Yearly Running Costs, and Additional Services`
     : "Complete Cost Overview for Company Setup, Yearly Running Costs, and Additional Services";
     
   const introText = hasVisas
-    ? "For your convenience, here is an overview of all costs related to setting up your business and obtaining visas. It also includes annual expenses for maintaining your business after the first year, along with additional services we offer for your reference."
+    ? `For your convenience, here is an overview of all costs related to setting up your business and obtaining ${visaText}. It also includes annual expenses for maintaining your business after the first year, along with additional services we offer for your reference.`
     : "For your convenience, here is an overview of all costs related to setting up your business. It also includes annual expenses for maintaining your business after the first year, along with additional services we offer for your reference.";
 
   // Generate dynamic titles to match individual pages
@@ -436,7 +438,7 @@ export const CompleteCostOverviewPage: React.FC<PDFComponentProps> = ({ data }) 
         {/* Total */}
         {showTotal && (
           <View style={themeStyles.totalRow}>
-            <Text style={compactTableStyles.totalLabel}>TOTAL</Text>
+            <Text style={compactTableStyles.totalLabel}>Total</Text>
             <Text style={compactTableStyles.totalAmount}>{formatNumber(total)}</Text>
             <Text style={compactTableStyles.totalAmount}>{formatNumber(secondaryTotal)}</Text>
           </View>
@@ -455,10 +457,16 @@ export const CompleteCostOverviewPage: React.FC<PDFComponentProps> = ({ data }) 
     <Page size="A4" style={styles.page}>
       <HeaderComponent data={data} />
 
-      <IntroSection
-        headline={headline}
-        content={introText}
-      />
+      {/* Custom intro section with new format */}
+      <View style={styles.introSection}>
+        {/* Main headline */}
+        <Text style={[styles.introHeadline, { marginBottom: 8 }]}>Complete Cost Overview</Text>
+        
+       
+        
+        {/* Content paragraph */}
+        <Text style={styles.introText}>{introText}</Text>
+      </View>
 
       {/* Initial Setup Table */}
       {shouldShowInitialSetup(data.authorityInformation.responsibleAuthority) && (

@@ -26,7 +26,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'ifza-license-renewal',
         condition: true,
-        description: 'IFZA License Renewal Cost',
+        description: 'IFZA license renewal cost',
         amount: yearlyRunningData.baseLicenseRenewal + yearlyRunningData.visaQuotaRenewal,
         explanation: `Annual renewal cost for your business license issued by ${data.authorityInformation.responsibleAuthority}.`
       });
@@ -37,7 +37,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'immigration-renewal',
         condition: true,
-        description: 'GDRFA (Immigration Establishment Card) Renewal Cost',
+        description: 'GDRFA (Immigration establishment card) renewal cost',
         amount: yearlyRunningData.immigrationRenewal,
         explanation: 'Mandatory Renewal Cost.'
       });
@@ -48,7 +48,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'cross-border-renewal',
         condition: true,
-        description: 'IFZA Cross Border Renewal Cost',
+        description: 'IFZA cross border license renewal cost',
         amount: yearlyRunningData.crossBorderRenewal,
         explanation: 'Annual renewal cost required for conducting both professional and commercial activities across UAE borders.'
       });
@@ -59,7 +59,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'third-party-approval',
         condition: true,
-        description: 'Third-party Approval (NOC) Renewal Cost',
+        description: 'Third-party approval (NOC) renewal cost',
         amount: yearlyRunningData.thirdPartyApproval,
         explanation: 'Annual renewal cost for third-party approvals or NOC (No Objection Certificate) required for specific business activities.'
       });
@@ -70,7 +70,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'office-rent',
         condition: true,
-        description: 'IFZA Office Rent',
+        description: 'IFZA office rent',
         amount: yearlyRunningData.officeRent,
         explanation: 'Annual office rental cost. The amount varies depending on location, size, and availability of suitable office spaces.'
       });
@@ -81,7 +81,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'tme-yearly-fee',
         condition: true,
-        description: 'TME Services Professional Fee (Including VAT)',
+        description: 'TME Services professional fee',
         amount: yearlyRunningData.tmeYearlyFee,
         explanation: 'Our professional service fee for managing annual license renewals, government liaison, and ongoing compliance support.'
       });
@@ -94,7 +94,7 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-license-renewal',
       condition: true,
-      description: 'DET License Cost (Annual Renewal)',
+      description: 'DET license renewal cost',
       amount: 13000,
       explanation: 'Annual renewal cost for your business license with the Department of Economy and Tourism-Dubai (DET).'
     });
@@ -103,7 +103,7 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-immigration-renewal',
       condition: true,
-      description: 'GDRFA (Immigration) renewal cost Establishment Card for visa',
+      description: 'GDRFA (Immigration establishment card) renewal cost',
       amount: 2000,
       explanation: 'Annual renewal cost for the immigration establishment card required for visa processing and employee sponsorship with DET.'
     });
@@ -111,12 +111,12 @@ export const generateYearlyRunningServiceDescriptions = (
     // 3. DET Office Rent
     if (data.detLicense?.rentType && data.detLicense?.officeRentAmount) {
       const rentDescription = data.detLicense.rentType === 'office' 
-        ? 'Office rent (differs on location & availability)'
+        ? 'Office rent (differs on location & availability) renewal cost'
         : data.detLicense.rentType === 'warehouse'
-        ? 'Warehouse rent (differs on location & availability)'
+        ? 'Warehouse rent (differs on location & availability) renewal cost'
         : data.detLicense.rentType === 'business-center'
-        ? 'Business Center arrangement cost'
-        : 'Office Rent';
+        ? 'Business center arrangement cost'
+        : 'Office rent';
         
       services.push({
         id: 'det-office-rent',
@@ -132,7 +132,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'det-third-party-approval',
         condition: true,
-        description: 'Activities Required Third-party Approval',
+        description: 'Third-party approval (NOC) renewal cost',
         amount: data.detLicense.thirdPartyApprovalAmount,
         explanation: 'Annual renewal cost for third-party approvals required for specific business activities under DET jurisdiction.'
       });
@@ -142,8 +142,8 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-tme-yearly-fee',
       condition: true,
-      description: 'TME Services Professional Fee (Including VAT)',
-      amount: 3360,
+      description: 'TME Services professional fee',
+      amount: authorityConfig?.yearlyRunning?.tmeYearlyFee || 3000,
       explanation: 'Our professional service fee for managing annual license renewals, government liaison, and ongoing compliance support with DET.'
     });
   }

@@ -44,22 +44,22 @@ export const ChildVisaBreakdown: React.FC<ChildVisaBreakdownProps> = ({
   const childServices = [
     {
       condition: visaCosts.childVisaStandardFees > 0,
-      description: 'Standard Authority Costs',
+      description: 'Standard authority costs',
       amount: visaCosts.childVisaStandardFees
     },
     {
       condition: visaCosts.childVisaStatusChangeFees > 0,
-      description: 'Visa Status Change Authority Costs',
+      description: 'Visa status change authority costs',
       amount: visaCosts.childVisaStatusChangeFees
     },
     {
       condition: visaCosts.childVisaVipStampingFees > 0,
-      description: 'VIP Visa Stamping Service',
+      description: 'VIP visa stamping service',
       amount: visaCosts.childVisaVipStampingFees
     },
     {
       condition: visaCosts.childVisaTmeServicesFees > 0,
-      description: 'TME Services Professional Fee',
+      description: 'TME Services professional fee',
       amount: visaCosts.childVisaTmeServicesFees
     }
   ];
@@ -99,7 +99,7 @@ export const ChildVisaBreakdown: React.FC<ChildVisaBreakdownProps> = ({
     });
     
     Object.entries(insuranceBreakdown).forEach(([type, data]) => {
-      const numberedDescription = formatServiceDescription(serviceNumber++, `Health Insurance - ${type}`);
+      const numberedDescription = formatServiceDescription(serviceNumber++, `Health insurance (${type.toLowerCase()})`);
       serviceElements.push(
         <CostDisplayTableRow
           key={`child-health-insurance-${type}`}

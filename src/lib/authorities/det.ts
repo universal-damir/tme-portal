@@ -35,8 +35,8 @@ export const DET_CONFIG: AuthorityConfig = {
       powerOfAttorney: 2000, // Individual setup: Power of Attorney (same as IFZA)
     },
     
-    defaultTmeServicesFee: 33600, // Corporate setup default
-    individualTmeServicesFee: 11550, // Individual setup
+    defaultTmeServicesFee: 32000, // Corporate setup default
+    individualTmeServicesFee: 11000, // Individual setup
     
     // Office rent configurations
     defaultOfficeRent: 12000, // Suggested amount for any office selection
@@ -47,7 +47,7 @@ export const DET_CONFIG: AuthorityConfig = {
   visaCosts: {
     standardVisaFee: 6000, // Standard Government Fee for Visa and Emirates ID Application
     reducedVisaFee: 1375,  // Discount amount (standard 6000 - discount 1375 = 4625 actual reduced fee)
-    tmeVisaServiceFee: 3150, // TME Services Professional Fee per visa
+    tmeVisaServiceFee: 3000, // TME Services Professional Fee per visa
     investorVisaFee: 0, // No additional cost for investor visas
     employmentVisaEmployeeInsurance: 190, // Employee Insurance per employee per visa
     statusChangeFee: 1600,
@@ -55,11 +55,11 @@ export const DET_CONFIG: AuthorityConfig = {
     
     // Spouse visa costs (same as IFZA)
     spouseVisaStandardFee: 4020, // Standard Authority Fees for Spouse Visa and Emirates ID Application
-    spouseVisaTmeServiceFee: 2737, // TME Services Professional Fee for Spouse Visa and Emirates ID Application
+    spouseVisaTmeServiceFee: 2238, // TME Services Professional Fee for Spouse Visa and Emirates ID Application
     
     // Child visa costs (same as IFZA)
     childVisaStandardFee: 3170, // Standard Authority Fees for Child Visa and Emirates ID Application
-    childVisaTmeServiceFee: 1569, // TME Services Professional Fee for Child Visa and Emirates ID Application
+    childVisaTmeServiceFee: 1681, // TME Services Professional Fee for Child Visa and Emirates ID Application
     
     healthInsurance: {
       lowCost: 1000,
@@ -72,7 +72,7 @@ export const DET_CONFIG: AuthorityConfig = {
     visaQuotaRenewalCost: 0, // DET doesn't have visa quota renewal
     crossBorderRenewal: 0, // DET doesn't have cross border renewal
     immigrationRenewalFee: 2000, // GDRFA (Immigration) renewal fee Establishment Card for visa
-    tmeYearlyFee: 3360, // TME Services Professional Yearly Fee for license and lease renewal (including VAT)
+    tmeYearlyFee: 3000, // TME Services Professional Yearly Fee for license and lease renewal (including VAT)
     // officeRent: Dynamic based on user selection in initial setup
   },
   

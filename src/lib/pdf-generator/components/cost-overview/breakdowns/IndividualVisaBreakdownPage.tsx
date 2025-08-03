@@ -52,7 +52,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       
       // 1. Standard Authority Fee
       items.push({
-        description: 'Standard Authority Costs for Visa and Emirates ID Application',
+        description: 'Standard authority costs',
         amount: standardFee,
         secondaryAmount: standardFee / exchangeRate,
         isReduction: false
@@ -61,7 +61,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       // 2. Reduced Authority Fee (as discount)
       const actualReducedFee = standardFee - reductionAmount;
       items.push({
-        description: 'Reduced Authority Costs for Visa and Emirates ID Application',
+        description: 'Reduced authority costs',
         amount: actualReducedFee, // Positive value, isReduction will handle display
         secondaryAmount: actualReducedFee / exchangeRate,
         isReduction: true
@@ -69,7 +69,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
     } else {
       // For standard visas, show only standard fee
       items.push({
-        description: 'Standard Authority Costs for Visa and Emirates ID Application',
+        description: 'Standard authority costs',
         amount: visa.governmentFee,
         secondaryAmount: visa.governmentFee / exchangeRate,
         isReduction: false
@@ -81,7 +81,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       const visaDetail = data.visaCosts?.visaDetails?.[visa.visaNumber - 1];
       const insuranceType = visaDetail?.healthInsurance || 'Insurance';
       items.push({
-        description: `Health Insurance - ${insuranceType}`,
+        description: `Health insurance (${insuranceType.toLowerCase()})`,
         amount: visa.healthInsurance,
         secondaryAmount: visa.healthInsurance / exchangeRate,
         isReduction: false
@@ -91,7 +91,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
     // Status change (if selected)
     if (visa.statusChangeFee > 0) {
       items.push({
-        description: 'Authority Cost for Visa Status Change',
+        description: 'Authority cost for visa status change',
         amount: visa.statusChangeFee,
         secondaryAmount: visa.statusChangeFee / exchangeRate,
         isReduction: false
@@ -101,7 +101,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
     // VIP stamping (if selected)
     if (visa.vipStampingFee > 0) {
       items.push({
-        description: 'VIP Authority Stamping Fee - Express Visa Stamp',
+        description: 'VIP authority stamping cost - express visa stamp',
         amount: visa.vipStampingFee,
         secondaryAmount: visa.vipStampingFee / exchangeRate,
         isReduction: false
@@ -111,7 +111,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
     // Investor visa fee (if this is an investor visa)
     if (visa.investorVisaFee > 0) {
       items.push({
-        description: `${authorityConfig?.displayName || 'Authority'} Investor Visa Cost`,
+        description: `${authorityConfig?.displayName || 'Authority'} investor visa cost`,
         amount: visa.investorVisaFee,
         secondaryAmount: visa.investorVisaFee / exchangeRate,
         isReduction: false
@@ -123,7 +123,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       const employeeInsurance = authorityConfig?.visaCosts.employmentVisaEmployeeInsurance || 190;
       
       items.push({
-        description: 'Employee Insurance per employee per visa',
+        description: 'Employee insurance per employee per visa',
         amount: employeeInsurance,
         secondaryAmount: employeeInsurance / exchangeRate,
         isReduction: false
@@ -132,7 +132,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
     
     // TME Services fee (always at the bottom)
     items.push({
-      description: 'TME Services Professional Fee for Visa and Emirates ID Application',
+      description: 'TME Services professional fee',
       amount: visa.tmeServiceFee,
       secondaryAmount: visa.tmeServiceFee / exchangeRate,
       isReduction: false
@@ -214,10 +214,10 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
           })}
 
           {/* Summary only on the last page - light blue styling */}
-          {groupIndex === visaGroups.length - 1 && (
+          {groupIndex === visaGroups.length - 1 && numberOfVisas > 1 && (
             <View style={{
               flexDirection: 'row',
-              backgroundColor: '#0ea5e9',
+              backgroundColor: '#243F7B',
               padding: 8,
               marginTop: 8,
               borderRadius: 4
@@ -229,7 +229,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
                 fontWeight: 'bold', 
                 color: 'white' 
               }}>
-                Total for all {numberOfVisas} {visaText(numberOfVisas)}
+                Total for {numberOfVisas} {visaText(numberOfVisas)}
               </Text>
               <Text style={{ 
                 flex: 1, 

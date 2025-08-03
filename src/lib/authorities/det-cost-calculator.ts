@@ -59,8 +59,8 @@ export class DetCostCalculator extends CostCalculator {
       costs.reducedGovernmentFees = 0; // DET has no reduced visa option
       costs.governmentFees = costs.standardGovernmentFees;
 
-      // TME Services fees: Use config values with fallback to 3150
-      const tmeVisaFee = this.config.visaCosts.tmeVisaServiceFee || 3150;
+      // TME Services fees: Use config values with fallback to 3000
+      const tmeVisaFee = this.config.visaCosts.tmeVisaServiceFee || 3000;
       costs.tmeServicesFees = numberOfVisas * tmeVisaFee;
 
       // Health insurance costs (reuse base class logic)

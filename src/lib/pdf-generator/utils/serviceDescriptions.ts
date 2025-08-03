@@ -26,14 +26,14 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     // 5. Business Center arrangement cost
     // 6. Third-party Approval (NOC)
     // 7. Power Of Attorney
-    // 8. TME Services Professional Fee (Including VAT)
+    // 8. TME Services Professional Fee
     // 9. Price Reduction
 
     // 1. Registration fee Dubai Department of Economy and Tourism (DET)
     services.push({
       id: 'det-registration',
       condition: true,
-      description: 'Registration fee Dubai Department of Economy and Tourism (DET)',
+      description: 'DET registration cost',
       amount: 2000,
       explanation: 'Cost for obtaining the business license issued by DET (Department of Economy and Tourism).'
     });
@@ -42,16 +42,16 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     services.push({
       id: 'gdrfa-registration',
       condition: true,
-      description: 'GDRFA Cost (Immigration Establishment Card)',
+      description: 'GDRFA cost (Immigration establishment card)',
       amount: 2000,
-      explanation: 'Mandatory registration for the Establishment Card.'
+      explanation: 'Mandatory registration for the establishment card.'
     });
 
     // 3. Registration fee MoHRE (Labour)
     services.push({
       id: 'mohre-registration',
       condition: true,
-      description: 'Registration fee MoHRE (Labour)',
+      description: 'MoHRE (Labour) registration cost',
       amount: 1000,
       explanation: 'Mandatory registration fee with the MoHRE (Ministry of Human Resources and Emiratisation).'
     });
@@ -82,7 +82,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'det-license-fee',
         condition: true,
-        description: `DET License Cost - ${licenseTypeName}`,
+        description: `DET license cost - ${licenseTypeName.toLowerCase()}`,
         amount: licenseCost,
         explanation: `License cost for ${licenseTypeName} license with the Department of Economy and Tourism-Dubai (DET).`
       });
@@ -114,7 +114,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'third-party-approval',
         condition: true,
-        description: 'Third-party Approval (NOC)',
+        description: 'Third-party approval cost (NOC)',
         amount: data.detLicense.thirdPartyApprovalAmount,
         explanation: 'Includes mandatory approvals or NOCs (No Objection Certificates) from relevant external authorities like Dubai Sport Council, Dubai Civil Aviation Authority, Dubai Municipality etc.'
       });
@@ -129,11 +129,11 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     if (data.detLicense?.mofaPowerOfAttorney) mofaTotal += 2000;
 
     if (mofaTotal > 0) {
-      let description = 'Power of Attorney';
+      let description = 'PoA (Power of Attorney) cost';
       let explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       
       if (setupType === 'Corporate Setup') {
-        description = 'Document Translation Cost';
+        description = 'Document translation cost';
         explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       }
 
@@ -146,14 +146,14 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       });
     }
 
-    // 8. TME Services Professional Fee (Including VAT)
+    // 8. TME Services Professional Fee
     if (data.detLicense?.tmeServicesFee) {
       services.push({
         id: 'tme-services-fee',
         condition: true,
-        description: 'TME Services Professional Fee (Including VAT)',
+        description: 'TME Services professional fee',
         amount: data.detLicense.tmeServicesFee,
-        explanation: 'Our service fee for managing the initial setup process, including VAT.'
+        explanation: 'Our service fee for managing the initial setup process.'
       });
     }
 
@@ -162,10 +162,10 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'price-reduction',
         condition: true,
-        description: 'TME Services Professional Fee Reduction (Including VAT)',
+        description: 'TME Services professional fee reduction',
         amount: data.detLicense.reductionAmount,
         isReduction: true,
-        explanation: 'A reduction applied to our professional fee as discussed, including VAT.'
+        explanation: 'A reduction applied to our professional fee.'
       });
     }
 
@@ -182,11 +182,11 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       const totalLicenseAmount = annualAmount * licenseYears;
       
       const baseDescription = isMultiYearIFZA 
-        ? `IFZA License Cost (for ${licenseYears} years)`
-        : 'IFZA License Cost';
+        ? `IFZA license cost (for ${licenseYears} years)`
+        : 'IFZA license cost';
       
       const descriptionWithSubText = data.ifzaLicense?.unitLeaseAgreement 
-        ? `${baseDescription} (unit lease agreement included)`
+        ? `${baseDescription} (Unit lease agreement included)`
         : baseDescription;
 
       services.push({
@@ -228,7 +228,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         services.push({
           id: 'ifza-license-discount',
           condition: true,
-          description: `IFZA License Cost Reduction (${discountPercentage}%)`,
+          description: `IFZA license cost reduction (${discountPercentage}%)`,
           amount: discountAmount,
           isReduction: true,
           explanation: `Multi-year license discount of ${discountPercentage}% for ${licenseYears}-year license term.`
@@ -252,10 +252,10 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'gdrfa-registration',
         condition: true,
         description: isMultiYearIFZA 
-          ? `GDRFA Cost (Immigration Establishment Card) (for ${licenseYears} years)`
-          : 'GDRFA Cost (Immigration Establishment Card)',
+          ? `GDRFA cost (Immigration establishment card) (for ${licenseYears} years)`
+          : 'GDRFA cost (Immigration establishment card)',
         amount: gdrfaAmount,
-        explanation: `Mandatory registration for the Establishment Card.`
+        explanation: `Mandatory registration for the establishment card.`
       });
     }
 
@@ -267,8 +267,8 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'cross-border-license',
         condition: true,
         description: isMultiYearIFZA 
-          ? `IFZA Cross Border Cost (for ${licenseYears} years)`
-          : 'IFZA Cross Border Cost',
+          ? `IFZA cross border license cost (for ${licenseYears} years)`
+          : 'IFZA cross border license cost',
         amount: crossBorderAmount,
         explanation: `Additional cost required for conducting both professional and commercial activities.`
       });
@@ -281,7 +281,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'office-rent',
         condition: true,
-        description: isMultiYearIFZA ? `IFZA Office Rent (for ${licenseYears} years)` : 'IFZA Office Rent',
+        description: isMultiYearIFZA ? `IFZA office rent (for ${licenseYears} years)` : 'IFZA office rent',
         amount: totalOfficeRentAmount,
         explanation: `${isMultiYearIFZA ? 'Total' : 'Annual'} cost for renting a physical office space as per authority requirements.`
       });
@@ -295,8 +295,8 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'third-party-approval',
         condition: true,
         description: isMultiYearIFZA 
-          ? `Third-party Approval (NOC) (for ${licenseYears} years)`
-          : 'Third-party Approval (NOC)',
+          ? `Third-party approval cost (NOC) (for ${licenseYears} years)`
+          : 'Third-party approval cost (NOC)',
         amount: totalThirdPartyAmount,
         explanation: `Includes mandatory approvals or NOCs (No Objection Certificates) from relevant external authorities like Dubai Sport Council, Dubai Civil Aviation Authority, Dubai Municipality etc.`
       });
@@ -311,14 +311,14 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     if (data.ifzaLicense?.mofaPowerOfAttorney) mofaTotal += 2000;
 
     if (mofaTotal > 0) {
-      let description = 'MoFA Document Translations';
+      let description = 'MoFA document translations';
       let explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       
       if (setupType === 'Individual Setup') {
-        description = 'Power of Attorney';
+        description = 'PoA (Power of Attorney) cost';
         explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       } else if (setupType === 'Corporate Setup') {
-        description = 'Document Translation Cost';
+        description = 'Document translation cost';
         explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       }
 
@@ -342,7 +342,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'additional-activities',
         condition: true,
-        description: `IFZA Additional Business Activities Cost (${additionalActivities} additional ${additionalActivities === 1 ? 'activity' : 'activities'})`,
+        description: `IFZA additional business activities cost (${additionalActivities} additional ${additionalActivities === 1 ? 'activity' : 'activities'})`,
         amount: additionalCost,
         explanation: 'IFZA charges AED 1,000 for each additional business activity beyond the first 3 activities included in the base license fee.'
       });
@@ -353,9 +353,9 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'tme-services-fee',
         condition: true,
-        description: 'TME Services Professional Fee (Including VAT)',
+        description: 'TME Services professional fee',
         amount: data.ifzaLicense.tmeServicesFee,
-        explanation: 'Our service fee for managing the initial setup process, including VAT.'
+        explanation: 'Our service fee for managing the initial setup process.'
       });
     }
 
@@ -364,10 +364,10 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       services.push({
         id: 'price-reduction',
         condition: true,
-        description: 'TME Services Professional Fee Reduction (Including VAT)',
+        description: 'TME Services professional fee reduction',
         amount: data.ifzaLicense.reductionAmount,
         isReduction: true,
-        explanation: 'A reduction applied to our professional fee as discussed, including VAT.'
+        explanation: 'A reduction applied to our professional fee.'
       });
     }
   }
@@ -383,7 +383,7 @@ export const generateDepositExplanations = (data: OfferData): Array<{ id: string
   if (data.ifzaLicense?.depositWithLandlord && (data.ifzaLicense?.depositAmount || 0) > 0) {
     deposits.push({
       id: 'ifza-deposit',
-      title: 'Deposit with Landlord',
+      title: 'Deposit with landlord',
       explanation: 'A refundable security deposit required by the landlord for the office rent.'
     });
   }
@@ -395,7 +395,7 @@ export const generateDepositExplanations = (data: OfferData): Array<{ id: string
     if (data.detLicense?.officeRentAmount) {
       deposits.push({
         id: 'det-landlord-deposit',
-        title: 'Landlord Deposit (5% of rent)',
+        title: 'Landlord deposit (5% of rent)',
         explanation: 'A refundable security deposit equivalent to 5% of the annual rent amount.'
       });
     }
@@ -403,7 +403,7 @@ export const generateDepositExplanations = (data: OfferData): Array<{ id: string
     if (data.detLicense?.rentType === 'office' || data.detLicense?.rentType === 'warehouse') {
       deposits.push({
         id: 'det-dewa-deposit',
-        title: 'DEWA Deposit',
+        title: 'DEWA deposit',
         explanation: 'Refundable utility connection deposit required by Dubai Electricity and Water Authority.'
       });
     }

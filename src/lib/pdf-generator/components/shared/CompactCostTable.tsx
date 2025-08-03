@@ -137,7 +137,7 @@ export const CompactCostTable: React.FC<{
             color: 'white',
             paddingLeft: 2
           }}>
-            TOTAL
+            Total
           </Text>
           <Text style={{
             flex: 1,

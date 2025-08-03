@@ -127,7 +127,7 @@ export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
       depositsElements.push(
         <CostDisplayTableRow
           key="ifza-deposit"
-          description="Deposit with Landlord"
+          description="Deposit with landlord"
           aedAmount={ifzaDepositAmount}
           exchangeRate={exchangeRate}
         />
@@ -140,7 +140,7 @@ export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
         depositsElements.push(
           <CostDisplayTableRow
             key="det-landlord-deposit"
-            description="Landlord Deposit (5% of rent)"
+            description="Landlord deposit (5% of rent)"
             aedAmount={detLandlordDeposit}
             exchangeRate={exchangeRate}
           />
@@ -150,7 +150,7 @@ export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
         depositsElements.push(
           <CostDisplayTableRow
             key="det-dewa-deposit"
-            description="DEWA Deposit"
+            description="DEWA deposit"
             aedAmount={detDewaDeposit}
             exchangeRate={exchangeRate}
           />

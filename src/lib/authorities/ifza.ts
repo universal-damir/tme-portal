@@ -21,15 +21,15 @@ export const IFZA_CONFIG: AuthorityConfig = {
       powerOfAttorney: 2000,
     },
     
-    defaultTmeServicesFee: 33600, // Corporate setup default
-    individualTmeServicesFee: 9450, // Individual setup
+    defaultTmeServicesFee: 32000, // Corporate setup default
+    individualTmeServicesFee: 9000, // Individual setup
     additionalActivityCost: 1000, // Cost per additional activity beyond 3
   },
   
   visaCosts: {
     standardVisaFee: 5125, // Standard Government Fee for Visa and Emirates ID Application
     reducedVisaFee: 1375,  // Discount amount (standard 5125 - discount 1375 = 3750 actual reduced fee)
-    tmeVisaServiceFee: 3150, // TME Services Professional Fee per visa
+    tmeVisaServiceFee: 3000, // TME Services Professional Fee per visa
     investorVisaFee: 1000,
     statusChangeFee: 1600,
     vipStampingFee: 1500,
@@ -37,11 +37,11 @@ export const IFZA_CONFIG: AuthorityConfig = {
     // Spouse visa costs
     spouseVisaApplicationFee: 2737, // Application Fee for Spouse Visa (mandatory if selected)
     spouseVisaStandardFee: 4020, // Standard Authority Fees for Spouse Visa and Emirates ID Application (mandatory if selected)
-    spouseVisaTmeServiceFee: 2737, // TME Services Professional Fee for Spouse Visa and Emirates ID Application
+    spouseVisaTmeServiceFee: 2238, // TME Services Professional Fee for Spouse Visa and Emirates ID Application
     
     // Child visa costs
     childVisaStandardFee: 3170, // Standard Authority Fees for Visa and Emirates ID Application
-    childVisaTmeServiceFee: 1569, // TME services service fee
+    childVisaTmeServiceFee: 1681, // TME services service fee
     
     healthInsurance: {
       lowCost: 1000,
@@ -54,7 +54,7 @@ export const IFZA_CONFIG: AuthorityConfig = {
     visaQuotaRenewalCost: 2000, // cost per visa in quota for renewal
     crossBorderRenewal: 2000,
     immigrationRenewalFee: 2200, // GDRFA (Immigration) renewal fee Establishment Card for visa
-    tmeYearlyFee: 3150, // TME Services Professional Yearly Fee (License and Lease Renewal)
+    tmeYearlyFee: 3000, // TME Services Professional Yearly Fee (License and Lease Renewal)
   },
   
   features: {

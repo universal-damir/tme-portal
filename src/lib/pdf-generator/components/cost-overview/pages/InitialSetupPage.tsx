@@ -39,7 +39,7 @@ export const InitialSetupPage: React.FC<PDFComponentProps> = ({ data }) => {
         explanationElements.push(
           <Text key={service.id} style={[styles.introText, { marginBottom: 4 }]}>
             <Text style={{ fontWeight: 'bold' }}>
-              {service.number}. {service.id === 'ifza-license-fee' ? 'IFZA License Cost' : service.description.replace(/^\d+\.\s/, '')}:
+              {service.number}. {service.description.replace(/^\d+\.\s/, '')}:
             </Text>{' '}
             {service.explanation}
           </Text>
@@ -68,7 +68,7 @@ export const InitialSetupPage: React.FC<PDFComponentProps> = ({ data }) => {
     // IFZA deposits
     if (data.ifzaLicense?.depositWithLandlord && (data.ifzaLicense?.depositAmount || 0) > 0) {
       deposits.push({
-        description: 'Deposit with Landlord',
+        description: 'Deposit with landlord',
         amount: data.ifzaLicense.depositAmount || 0,
         secondaryAmount: (data.ifzaLicense.depositAmount || 0) / exchangeRate
       });
@@ -79,7 +79,7 @@ export const InitialSetupPage: React.FC<PDFComponentProps> = ({ data }) => {
         data.detLicense?.rentType && data.detLicense.rentType !== 'business-center') {
       if (data.detLicense?.officeRentAmount) {
         deposits.push({
-          description: 'Landlord Deposit (5% of rent)',
+          description: 'Landlord deposit (5% of rent)',
           amount: data.detLicense.officeRentAmount * 0.05,
           secondaryAmount: (data.detLicense.officeRentAmount * 0.05) / exchangeRate
         });
@@ -87,13 +87,13 @@ export const InitialSetupPage: React.FC<PDFComponentProps> = ({ data }) => {
       
       if (data.detLicense?.rentType === 'office') {
         deposits.push({
-          description: 'DEWA Deposit',
+          description: 'DEWA deposit',
           amount: 2000,
           secondaryAmount: 2000 / exchangeRate
         });
       } else if (data.detLicense?.rentType === 'warehouse') {
         deposits.push({
-          description: 'DEWA Deposit',
+          description: 'DEWA deposit',
           amount: 4000,
           secondaryAmount: 4000 / exchangeRate
         });

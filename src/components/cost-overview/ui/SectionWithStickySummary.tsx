@@ -287,11 +287,11 @@ export const SectionWithStickySummary: React.FC<SectionWithStickySummaryProps> =
         <div className="mt-4 pt-3 border-t border-gray-200">
           <div className="text-sm font-semibold text-gray-700 mb-2">Deposits</div>
           <div className="space-y-2">
-            {shouldShowIfzaDeposits && renderCostLine('Deposit with Landlord', ifzaDepositAmount)}
+            {shouldShowIfzaDeposits && renderCostLine('Deposit with landlord', ifzaDepositAmount)}
             {shouldShowDetDeposits && (
               <>
-                {detLandlordDeposit > 0 && renderCostLine('Landlord Deposit', detLandlordDeposit)}
-                {detDewaDeposit > 0 && renderCostLine('DEWA Deposit', detDewaDeposit)}
+                {detLandlordDeposit > 0 && renderCostLine('Landlord deposit', detLandlordDeposit)}
+                {detDewaDeposit > 0 && renderCostLine('DEWA deposit', detDewaDeposit)}
               </>
             )}
           </div>

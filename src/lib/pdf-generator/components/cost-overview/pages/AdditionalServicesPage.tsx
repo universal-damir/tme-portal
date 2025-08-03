@@ -99,32 +99,35 @@ export const AdditionalServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
         <View style={[styles.section, { marginTop: 32 }]}>
           <Text style={styles.introHeadline}>Summary</Text>
           
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
             We hope this overview gives you a clear understanding of the expected costs.
           </Text>
           
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
             We appreciate the opportunity to support your business setup and ongoing operations.
           </Text>
           
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
             Should you have any questions or need further clarification on any of the listed items, please don't hesitate to reach out.
           </Text>
           
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
-            The basis of our service fee and costs are in AED. All government cost will ALWAYS be charged on cost basis.
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
+            The basis of our service fee and costs are in AED. All government cost will always be charged on cost basis.
           </Text>
 
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
-            The above mentioned cost amounts in AED are estimated costs at the time of the application.
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
+            The above-mentioned cost amounts in AED are estimated costs at the time of the application. At the time of invoicing we will charge the actual costs based on invoices and receipts.
           </Text>
 
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
-            At the time of invoicing we will charge the actual costs based on invoices and receipts.
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
+          A fee of 2%, for internal administration and regulatory compliance, will be applied on the TME Services invoice value.
           </Text>
-
+          <Text style={[styles.introText, { marginBottom: 5 }]}>
+          All of the above-mentioned TME Services professional fees exclude VAT, which will be charged as applicable, currently 5%.
+          </Text>
+          
           <Text style={styles.introText}>
-            We look forward to assisting you through each step of the process and ensuring a smooth and compliant setup tailored to your goals.
+            We look forward to assisting you through each step of the process and ensuring a smooth and compliant setup tailored to your requirements.
           </Text>
         </View>
 
