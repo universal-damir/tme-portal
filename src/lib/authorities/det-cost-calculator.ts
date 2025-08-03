@@ -50,63 +50,65 @@ export class DetCostCalculator extends CostCalculator {
     };
 
     const numberOfVisas = data.visaCosts?.numberOfVisas || 0;
-    if (numberOfVisas === 0) return costs;
 
-    // DET-specific visa fees: Use config values with fallback to 6000
-    const detVisaFee = this.config.visaCosts.standardVisaFee || 6000;
-    costs.standardGovernmentFees = numberOfVisas * detVisaFee;
-    costs.reducedGovernmentFees = 0; // DET has no reduced visa option
-    costs.governmentFees = costs.standardGovernmentFees;
+    // Company visa calculations (only run if numberOfVisas > 0)
+    if (numberOfVisas > 0) {
+      // DET-specific visa fees: Use config values with fallback to 6000
+      const detVisaFee = this.config.visaCosts.standardVisaFee || 6000;
+      costs.standardGovernmentFees = numberOfVisas * detVisaFee;
+      costs.reducedGovernmentFees = 0; // DET has no reduced visa option
+      costs.governmentFees = costs.standardGovernmentFees;
 
-    // TME Services fees: Use config values with fallback to 3150
-    const tmeVisaFee = this.config.visaCosts.tmeVisaServiceFee || 3150;
-    costs.tmeServicesFees = numberOfVisas * tmeVisaFee;
+      // TME Services fees: Use config values with fallback to 3150
+      const tmeVisaFee = this.config.visaCosts.tmeVisaServiceFee || 3150;
+      costs.tmeServicesFees = numberOfVisas * tmeVisaFee;
 
-    // Health insurance costs (reuse base class logic)
-    costs.healthInsurance = this.calculateHealthInsuranceCosts(data);
+      // Health insurance costs (reuse base class logic)
+      costs.healthInsurance = this.calculateHealthInsuranceCosts(data);
 
-    // Investor visa fees: DET doesn't support investor visas
-    costs.investorVisaFees = 0;
+      // Investor visa fees: DET doesn't support investor visas
+      costs.investorVisaFees = 0;
 
-    // Employment visa fees (DET specific rates) - Updated to use per-visa selections
-    const employmentVisaCount = data.visaCosts?.visaDetails?.filter(visa => 
-      visa.investorVisa === "employment"
-    ).length || 0;
-
-    if (employmentVisaCount > 0) {
-      // Use config values with fallbacks
-      const employeeRate = this.config.visaCosts.employmentVisaEmployeeInsurance || 190;
-      
-      const employeeInsuranceCost = employmentVisaCount * employeeRate;
-      costs.employmentVisaFees = employeeInsuranceCost;
-    }
-
-    // Visa status change fees - Updated to count per-visa selections
-    if (this.config.features.supportsVisaStatusChange && this.config.visaCosts.statusChangeFee) {
-      // Count from per-visa selections (handle both string "true" and boolean true)
-      const perVisaStatusChanges = data.visaCosts?.visaDetails?.filter(visa => 
-        visa.statusChange === true || (visa.statusChange as any) === "true"
+      // Employment visa fees (DET specific rates) - Updated to use per-visa selections
+      const employmentVisaCount = data.visaCosts?.visaDetails?.filter(visa => 
+        visa.investorVisa === "employment"
       ).length || 0;
-      
-      // Fallback to old way for backward compatibility
-      const legacyStatusChanges = data.visaCosts?.visaStatusChange || 0;
-      
-      const totalStatusChanges = perVisaStatusChanges > 0 ? perVisaStatusChanges : legacyStatusChanges;
-      costs.statusChangeFees = totalStatusChanges * this.config.visaCosts.statusChangeFee;
-    }
 
-    // VIP stamping fees - Updated to count per-visa selections
-    if (this.config.features.supportsVipStamping && this.config.visaCosts.vipStampingFee) {
-      // Count from per-visa selections (handle both string "true" and boolean true)
-      const perVisaVipStamping = data.visaCosts?.visaDetails?.filter(visa => 
-        visa.vipStamping === true || (visa.vipStamping as any) === "true"
-      ).length || 0;
-      
-      // Fallback to old way for backward compatibility
-      const legacyVipStamping = data.visaCosts?.vipStampingVisas || 0;
-      
-      const totalVipStamping = perVisaVipStamping > 0 ? perVisaVipStamping : legacyVipStamping;
-      costs.vipStampingFees = totalVipStamping * this.config.visaCosts.vipStampingFee;
+      if (employmentVisaCount > 0) {
+        // Use config values with fallbacks
+        const employeeRate = this.config.visaCosts.employmentVisaEmployeeInsurance || 190;
+        
+        const employeeInsuranceCost = employmentVisaCount * employeeRate;
+        costs.employmentVisaFees = employeeInsuranceCost;
+      }
+
+      // Visa status change fees - Updated to count per-visa selections
+      if (this.config.features.supportsVisaStatusChange && this.config.visaCosts.statusChangeFee) {
+        // Count from per-visa selections (handle both string "true" and boolean true)
+        const perVisaStatusChanges = data.visaCosts?.visaDetails?.filter(visa => 
+          visa.statusChange === true || (visa.statusChange as any) === "true"
+        ).length || 0;
+        
+        // Fallback to old way for backward compatibility
+        const legacyStatusChanges = data.visaCosts?.visaStatusChange || 0;
+        
+        const totalStatusChanges = perVisaStatusChanges > 0 ? perVisaStatusChanges : legacyStatusChanges;
+        costs.statusChangeFees = totalStatusChanges * this.config.visaCosts.statusChangeFee;
+      }
+
+      // VIP stamping fees - Updated to count per-visa selections
+      if (this.config.features.supportsVipStamping && this.config.visaCosts.vipStampingFee) {
+        // Count from per-visa selections (handle both string "true" and boolean true)
+        const perVisaVipStamping = data.visaCosts?.visaDetails?.filter(visa => 
+          visa.vipStamping === true || (visa.vipStamping as any) === "true"
+        ).length || 0;
+        
+        // Fallback to old way for backward compatibility
+        const legacyVipStamping = data.visaCosts?.vipStampingVisas || 0;
+        
+        const totalVipStamping = perVisaVipStamping > 0 ? perVisaVipStamping : legacyVipStamping;
+        costs.vipStampingFees = totalVipStamping * this.config.visaCosts.vipStampingFee;
+      }
     }
 
     // Spouse visa calculations (now supported in DET)

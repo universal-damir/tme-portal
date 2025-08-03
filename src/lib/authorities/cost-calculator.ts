@@ -244,85 +244,87 @@ export class CostCalculator {
     };
 
     const numberOfVisas = data.visaCosts?.numberOfVisas || 0;
-    if (numberOfVisas === 0) return costs;
 
-    // Government fees calculation
-    const reducedVisas = data.visaCosts?.reducedVisaCost || 0;
-    
-    // Show all visas at standard rate first
-    costs.standardGovernmentFees = numberOfVisas * this.config.visaCosts.standardVisaFee;
-    
-    // Calculate the actual reduced fee amount (positive value)
-    // The display logic will handle showing it as negative for reductions
-    const actualReducedFeePerVisa = this.config.visaCosts.standardVisaFee - this.config.visaCosts.reducedVisaFee;
-    costs.reducedGovernmentFees = reducedVisas > 0 ? (reducedVisas * actualReducedFeePerVisa) : 0;
-    
-    costs.governmentFees = costs.standardGovernmentFees - costs.reducedGovernmentFees;
-
-    // TME Services fees (same for all visas)
-    costs.tmeServicesFees = numberOfVisas * this.config.visaCosts.tmeVisaServiceFee;
-
-    // Health insurance costs
-    costs.healthInsurance = this.calculateHealthInsuranceCosts(data);
-
-    // Investor visa fees - Count per-visa selections (with legacy fallback)
-    if (this.config.features.hasInvestorVisas && this.config.visaCosts.investorVisaFee) {
-      // Primary method: count per-visa selections (handle both string "true" and boolean true)
-      const perVisaInvestorVisas = data.visaCosts?.visaDetails?.filter(visa => 
-        visa.investorVisa === true || (visa.investorVisa as any) === "true"
-      ).length || 0;
+    // Company visa calculations (only run if numberOfVisas > 0)
+    if (numberOfVisas > 0) {
+      // Government fees calculation
+      const reducedVisas = data.visaCosts?.reducedVisaCost || 0;
       
-      // Fallback to legacy field for backward compatibility with existing data
-      const legacyInvestorVisas = data.visaCosts?.numberOfInvestorVisas || 0;
+      // Show all visas at standard rate first
+      costs.standardGovernmentFees = numberOfVisas * this.config.visaCosts.standardVisaFee;
       
-      // Use per-visa count if any exist, otherwise use legacy for backward compatibility
-      const totalInvestorVisas = perVisaInvestorVisas > 0 ? perVisaInvestorVisas : legacyInvestorVisas;
-      costs.investorVisaFees = totalInvestorVisas * this.config.visaCosts.investorVisaFee;
-    }
+      // Calculate the actual reduced fee amount (positive value)
+      // The display logic will handle showing it as negative for reductions
+      const actualReducedFeePerVisa = this.config.visaCosts.standardVisaFee - this.config.visaCosts.reducedVisaFee;
+      costs.reducedGovernmentFees = reducedVisas > 0 ? (reducedVisas * actualReducedFeePerVisa) : 0;
+      
+      costs.governmentFees = costs.standardGovernmentFees - costs.reducedGovernmentFees;
 
-    // Employment visa fees (DET specific) - Updated to support both legacy and per-visa selection
-    let employmentVisaCount = 0;
-    
-    // For DET: Check per-visa employment selections
-    if (this.config.id === 'det') {
-      employmentVisaCount = data.visaCosts?.visaDetails?.filter(visa => 
-        visa.investorVisa === "employment"
-      ).length || 0;
-    }
-    // Note: Other authorities don't currently use employment visas, so no legacy support needed
-    
-    if (employmentVisaCount > 0 && 
-        this.config.visaCosts.employmentVisaEmployeeInsurance) {
-      const employeeInsuranceCost = employmentVisaCount * this.config.visaCosts.employmentVisaEmployeeInsurance;
-      costs.employmentVisaFees = employeeInsuranceCost;
-    }
+      // TME Services fees (same for all visas)
+      costs.tmeServicesFees = numberOfVisas * this.config.visaCosts.tmeVisaServiceFee;
 
-    // Visa status change fees - Updated to count per-visa selections
-    if (this.config.features.supportsVisaStatusChange && this.config.visaCosts.statusChangeFee) {
-      // Count from per-visa selections (handle both string "true" and boolean true)
-      const perVisaStatusChanges = data.visaCosts?.visaDetails?.filter(visa => 
-        visa.statusChange === true || (visa.statusChange as any) === "true"
-      ).length || 0;
-      
-      // Fallback to old way for backward compatibility
-      const legacyStatusChanges = data.visaCosts?.visaStatusChange || 0;
-      
-      const totalStatusChanges = perVisaStatusChanges > 0 ? perVisaStatusChanges : legacyStatusChanges;
-      costs.statusChangeFees = totalStatusChanges * this.config.visaCosts.statusChangeFee;
-    }
+      // Health insurance costs
+      costs.healthInsurance = this.calculateHealthInsuranceCosts(data);
 
-    // VIP stamping fees - Updated to count per-visa selections
-    if (this.config.features.supportsVipStamping && this.config.visaCosts.vipStampingFee) {
-      // Count from per-visa selections (handle both string "true" and boolean true)
-      const perVisaVipStamping = data.visaCosts?.visaDetails?.filter(visa => 
-        visa.vipStamping === true || (visa.vipStamping as any) === "true"
-      ).length || 0;
+      // Investor visa fees - Count per-visa selections (with legacy fallback)
+      if (this.config.features.hasInvestorVisas && this.config.visaCosts.investorVisaFee) {
+        // Primary method: count per-visa selections (handle both string "true" and boolean true)
+        const perVisaInvestorVisas = data.visaCosts?.visaDetails?.filter(visa => 
+          visa.investorVisa === true || (visa.investorVisa as any) === "true"
+        ).length || 0;
+        
+        // Fallback to legacy field for backward compatibility with existing data
+        const legacyInvestorVisas = data.visaCosts?.numberOfInvestorVisas || 0;
+        
+        // Use per-visa count if any exist, otherwise use legacy for backward compatibility
+        const totalInvestorVisas = perVisaInvestorVisas > 0 ? perVisaInvestorVisas : legacyInvestorVisas;
+        costs.investorVisaFees = totalInvestorVisas * this.config.visaCosts.investorVisaFee;
+      }
+
+      // Employment visa fees (DET specific) - Updated to support both legacy and per-visa selection
+      let employmentVisaCount = 0;
       
-      // Fallback to old way for backward compatibility
-      const legacyVipStamping = data.visaCosts?.vipStampingVisas || 0;
+      // For DET: Check per-visa employment selections
+      if (this.config.id === 'det') {
+        employmentVisaCount = data.visaCosts?.visaDetails?.filter(visa => 
+          visa.investorVisa === "employment"
+        ).length || 0;
+      }
+      // Note: Other authorities don't currently use employment visas, so no legacy support needed
       
-      const totalVipStamping = perVisaVipStamping > 0 ? perVisaVipStamping : legacyVipStamping;
-      costs.vipStampingFees = totalVipStamping * this.config.visaCosts.vipStampingFee;
+      if (employmentVisaCount > 0 && 
+          this.config.visaCosts.employmentVisaEmployeeInsurance) {
+        const employeeInsuranceCost = employmentVisaCount * this.config.visaCosts.employmentVisaEmployeeInsurance;
+        costs.employmentVisaFees = employeeInsuranceCost;
+      }
+
+      // Visa status change fees - Updated to count per-visa selections
+      if (this.config.features.supportsVisaStatusChange && this.config.visaCosts.statusChangeFee) {
+        // Count from per-visa selections (handle both string "true" and boolean true)
+        const perVisaStatusChanges = data.visaCosts?.visaDetails?.filter(visa => 
+          visa.statusChange === true || (visa.statusChange as any) === "true"
+        ).length || 0;
+        
+        // Fallback to old way for backward compatibility
+        const legacyStatusChanges = data.visaCosts?.visaStatusChange || 0;
+        
+        const totalStatusChanges = perVisaStatusChanges > 0 ? perVisaStatusChanges : legacyStatusChanges;
+        costs.statusChangeFees = totalStatusChanges * this.config.visaCosts.statusChangeFee;
+      }
+
+      // VIP stamping fees - Updated to count per-visa selections
+      if (this.config.features.supportsVipStamping && this.config.visaCosts.vipStampingFee) {
+        // Count from per-visa selections (handle both string "true" and boolean true)
+        const perVisaVipStamping = data.visaCosts?.visaDetails?.filter(visa => 
+          visa.vipStamping === true || (visa.vipStamping as any) === "true"
+        ).length || 0;
+        
+        // Fallback to old way for backward compatibility
+        const legacyVipStamping = data.visaCosts?.vipStampingVisas || 0;
+        
+        const totalVipStamping = perVisaVipStamping > 0 ? perVisaVipStamping : legacyVipStamping;
+        costs.vipStampingFees = totalVipStamping * this.config.visaCosts.vipStampingFee;
+      }
     }
 
     // Spouse visa calculations (for authorities that support it)

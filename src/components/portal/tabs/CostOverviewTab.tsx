@@ -173,7 +173,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   // Auto-save removed to prevent infinite re-rendering issues
 
   // Custom hooks
-  const { formattedInputs, handlers, validationErrors, shareCapitalAlert, formatNumberWithSeparators, parseFormattedNumber } = useFormattedInputs(setValue, watchedData);
+  const { formattedInputs, handlers, validationErrors, shareCapitalAlert, formatNumberWithSeparators, parseFormattedNumber, updateFormattedInput } = useFormattedInputs(setValue, watchedData);
   const { authorityConfig, isAuthoritySelected } = useAuthorityConfig(
     authorityInformation?.responsibleAuthority, 
     setValue
@@ -689,7 +689,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               authorityConfig={authorityConfig}
               gradientColors="bg-gradient-to-r from-pink-50 to-rose-50 border-pink-200"
               iconColor="bg-pink-500"
-              showSummary={!!(costs?.visaCosts && watchedData.visaCosts?.spouseVisa)}
+              showSummary={hasCalculations && !!(costs?.visaCosts && watchedData.visaCosts?.spouseVisa)}
               visaType="spouse"
             >
               <SpouseVisaSection 
@@ -712,7 +712,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               authorityConfig={authorityConfig}
               gradientColors="bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200"
               iconColor="bg-purple-500"
-              showSummary={!!(costs?.visaCosts && watchedData.visaCosts?.childVisa)}
+              showSummary={hasCalculations && !!(costs?.visaCosts && watchedData.visaCosts?.childVisa)}
               visaType="child"
             >
               <ChildVisaSection 
@@ -745,6 +745,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             <AdditionalServicesSection 
               formattedInputs={formattedInputs}
               handlers={handlers}
+              updateFormattedInput={updateFormattedInput}
             />
           </SectionWithStickySummary>
 
