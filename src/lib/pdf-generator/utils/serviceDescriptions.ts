@@ -42,7 +42,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     services.push({
       id: 'gdrfa-registration',
       condition: true,
-      description: 'GDRFA cost (Immigration establishment card)',
+      description: 'GDRFA cost (Immigration Establishment Card)',
       amount: 2000,
       explanation: 'Mandatory registration for the establishment card.'
     });
@@ -51,7 +51,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     services.push({
       id: 'mohre-registration',
       condition: true,
-      description: 'MoHRE (Labour) registration cost',
+      description: 'MoHRE registration cost (Labour card)',
       amount: 1000,
       explanation: 'Mandatory registration fee with the MoHRE (Ministry of Human Resources and Emiratisation).'
     });
@@ -254,8 +254,8 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'gdrfa-registration',
         condition: true,
         description: isMultiYearIFZA 
-          ? `GDRFA cost (Immigration establishment card) (for ${licenseYears} years)`
-          : 'GDRFA cost (Immigration establishment card)',
+          ? `GDRFA cost (Immigration Establishment Card) (for ${licenseYears} years)`
+          : 'GDRFA cost (Immigration Establishment Card)',
         amount: gdrfaAmount,
         explanation: `Mandatory registration for the establishment card.`
       });
