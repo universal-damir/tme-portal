@@ -42,7 +42,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     services.push({
       id: 'gdrfa-registration',
       condition: true,
-      description: 'GDRFA cost (Immigration Establishment Card)',
+      description: 'GDRFA registration cost (Immigration Establishment Card)',
       amount: 2000,
       explanation: 'Mandatory registration for the establishment card.'
     });
@@ -99,7 +99,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         : 'Warehouse rent (differs on location & availability)';
         
       const officeRentExplanation = data.detLicense.rentType === 'business-center' 
-        ? 'Business center arrangement cost for your business center arrangement. (Ejari)'
+        ? 'For your business center arrangement. (Ejari)'
         : `Annual rental cost for your ${data.detLicense.rentType}.`;
       
       services.push({
@@ -254,8 +254,8 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         id: 'gdrfa-registration',
         condition: true,
         description: isMultiYearIFZA 
-          ? `GDRFA cost (Immigration Establishment Card) (for ${licenseYears} years)`
-          : 'GDRFA cost (Immigration Establishment Card)',
+          ? `GDRFA registration cost (Immigration Establishment Card) (for ${licenseYears} years)`
+          : 'GDRFA registration cost (Immigration Establishment Card)',
         amount: gdrfaAmount,
         explanation: `Mandatory registration for the establishment card.`
       });

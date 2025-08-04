@@ -125,7 +125,9 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: rentDescription,
         amount: data.detLicense.officeRentAmount,
-        explanation: `Annual ${data.detLicense.rentType === 'business-center' ? 'business center service' : 'rental'} cost for your ${data.detLicense.rentType === 'business-center' ? 'business center arrangement' : data.detLicense.rentType}.`
+        explanation: data.detLicense.rentType === 'business-center' 
+          ? 'For your business center arrangement. (Ejari)'
+          : `Annual rental cost for your ${data.detLicense.rentType}.`
       });
     }
 
