@@ -7,8 +7,7 @@ import {
   IntroSection
 } from '../../shared';
 import { 
-  AuthorityFeesSection,
-  TMEServicesSection
+  AuthorityFeesSection
 } from '@/lib/pdf-generator/components/golden-visa/sections';
 import { generateGoldenVisaExplanations } from '../../../utils/goldenVisaDataTransformer';
 import type { PDFComponentProps } from '../../../types';
@@ -38,15 +37,12 @@ export const AuthorityCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
       <HeaderComponent data={data} />
 
       <IntroSection
-        headline="Authority Costs and TME Services Professional Fee"
+        headline="Golden Visa Costs Breakdown"
         content={introContent}
       />
 
-      {/* Authority Fees Section */}
+      {/* Authority Fees Section (now includes TME Services) */}
       <AuthorityFeesSection data={data} />
-
-      {/* TME Services Section */}
-      <TMEServicesSection data={data} />
 
       {/* Explanations Section - Compact spacing like cost overview */}
       {explanationElements.length > 0 && (

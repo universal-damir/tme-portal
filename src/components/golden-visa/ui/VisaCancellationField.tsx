@@ -4,11 +4,11 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { NumberInputField } from '../../portal/tabs/NumberInputField';
-import { VISA_CANCELATION_COLORS, getFieldPlaceholder } from '../utils/goldenVisaConfig';
+import { VISA_CANCELLATION_COLORS, getFieldPlaceholder } from '../utils/goldenVisaConfig';
 
-interface VisaCancelationFieldProps {
+interface VisaCancellationFieldProps {
   /**
-   * Whether the visa cancelation checkbox is checked
+   * Whether the visa cancellation checkbox is checked
    */
   checked: boolean;
   
@@ -18,7 +18,7 @@ interface VisaCancelationFieldProps {
   onCheckedChange: (checked: boolean) => void;
   
   /**
-   * Current visa cancelation fee value
+   * Current visa cancellation fee value
    */
   fee?: number;
   
@@ -53,19 +53,19 @@ interface VisaCancelationFieldProps {
   showFeeInput?: boolean;
 }
 
-export const VisaCancelationField: React.FC<VisaCancelationFieldProps> = ({
+export const VisaCancellationField: React.FC<VisaCancellationFieldProps> = ({
   checked,
   onCheckedChange,
   fee,
   onFeeChange,
-  label = 'Visa Cancelation (AED 185)',
-  feeLabel = 'Visa Cancelation Fee',
-  description = 'Check the box if visa cancelation is required',
+  label = 'Visa cancellation (AED 185)',
+  feeLabel = 'Visa cancellation fee',
+  description = 'Check the box if visa cancellation is required',
   className = '',
   showFeeInput = true,
 }) => {
-  const colors = VISA_CANCELATION_COLORS;
-  const placeholder = getFieldPlaceholder('visaCancelationFee');
+  const colors = VISA_CANCELLATION_COLORS;
+  const placeholder = getFieldPlaceholder('visaCancellationFee');
 
   // Handle checkbox change with auto-population
   const handleCheckboxChange = (isChecked: boolean) => {

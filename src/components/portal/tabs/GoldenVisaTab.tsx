@@ -413,7 +413,7 @@ const GoldenVisaTab: React.FC = () => {
         register={register}
       />
 
-      {/* Golden Visa Type Selection with Integrated Authority Costs and TME Fee */}
+      {/* Golden Visa Type Selection with Authority Costs on Right */}
       <VisaTypeSection
         register={register}
         errors={errors}
@@ -424,8 +424,6 @@ const GoldenVisaTab: React.FC = () => {
         data={watchedData}
         onFieldChange={(path, value) => setValue(path as any, value)}
       />
-
-
 
       {/* Dependents Section */}
       <DependentVisasSection

@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { NumberInputField } from '../../portal/tabs/NumberInputField';
-import { VisaCancelationField } from './VisaCancelationField';
+import { VisaCancellationField } from './VisaCancellationField';
 
 /**
- * Configuration for dependent visa types
+ * Configuration for dependent visa types - simplified structure
  */
 interface DependentVisaConfig {
   title: string;
@@ -15,17 +15,16 @@ interface DependentVisaConfig {
     text: string;
     ring: string;
   };
-  fields: Array<{
+  authorityFields: Array<{
     key: string;
     label: string;
     placeholder: string;
-    defaultValue: number;
   }>;
-  visaCancelationLabel: string;
+  visaCancellationLabel: string;
 }
 
 /**
- * Configurations for different dependent types
+ * Simplified configurations for different dependent types
  */
 const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
   spouse: {
@@ -36,15 +35,11 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
       text: 'text-slate-800',
       ring: 'focus:ring-slate-500',
     },
-    fields: [
-      { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00', defaultValue: 25 },
-      { key: 'dependentFileOpening', label: 'Dependent File Opening', placeholder: '320.00', defaultValue: 320 },
-      { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test', placeholder: '700.00', defaultValue: 700 },
-      { key: 'emiratesIdFee', label: 'Emirates ID Fee', placeholder: '1,155.00', defaultValue: 1155 },
-      { key: 'immigrationResidencyFeeSpouse', label: 'Immigration - Residency Fee (Spouse)', placeholder: '2,860.00', defaultValue: 2860 },
-      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460.00', defaultValue: 1460 },
+    authorityFields: [
+      { key: 'standardAuthorityCostsSpouse', label: 'Standard Authority Costs', placeholder: '4,710' },
+      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460' },
     ],
-    visaCancelationLabel: 'Visa Cancelation (AED 185)',
+    visaCancellationLabel: 'Visa cancellation (AED 185)',
   },
   children: {
     title: 'Children Authority Costs Breakdown (per child)',
@@ -54,15 +49,11 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
       text: 'text-slate-800',
       ring: 'focus:ring-slate-500',
     },
-    fields: [
-      { key: 'professionalPassportPicture', label: 'Professional Passport Picture', placeholder: '25.00', defaultValue: 25 },
-      { key: 'dependentFileOpening', label: 'Dependent File Opening (if spouse not selected)', placeholder: '320.00', defaultValue: 320 },
-      { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test', placeholder: '700.00', defaultValue: 700 },
-      { key: 'emiratesIdFee', label: 'Emirates ID Fee', placeholder: '1,155.00', defaultValue: 1155 },
-      { key: 'immigrationResidencyFeeChild', label: 'Immigration - Residency Fee (Child)', placeholder: '2,750.00', defaultValue: 2750 },
-      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460.00', defaultValue: 1460 },
+    authorityFields: [
+      { key: 'standardAuthorityCostsChild', label: 'Standard Authority Costs', placeholder: '4,604' },
+      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460' },
     ],
-    visaCancelationLabel: 'Visa Cancelation (AED 185 per child)',
+    visaCancellationLabel: 'Visa cancellation (AED 185 per child)',
   },
 };
 
@@ -78,14 +69,14 @@ interface DependentVisaCardProps {
   authorityFees: Record<string, number | undefined>;
   
   /**
-   * Current visa cancelation state
+   * Current visa cancellation state
    */
-  visaCancelation: boolean;
+  visaCancellation?: boolean;
   
   /**
-   * Current visa cancelation fee
+   * Current visa cancellation fee
    */
-  visaCancelationFee?: number;
+  visaCancellationFee?: number;
   
   /**
    * Handler for authority fee field changes
@@ -93,57 +84,62 @@ interface DependentVisaCardProps {
   onAuthorityFeeChange: (field: string, value: number) => void;
   
   /**
-   * Handler for visa cancelation checkbox changes
+   * Handler for visa cancellation checkbox changes
    */
-  onVisaCancelationChange: (checked: boolean) => void;
+  onVisaCancellationChange: (checked: boolean) => void;
   
   /**
-   * Handler for visa cancelation fee changes
+   * Handler for visa cancellation fee changes
    */
-  onVisaCancelationFeeChange: (fee: number) => void;
+  onVisaCancellationFeeChange?: (fee: number) => void;
 }
 
 export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
   type,
   authorityFees,
-  visaCancelation,
-  visaCancelationFee,
+  visaCancellation = false,
+  visaCancellationFee = 0,
   onAuthorityFeeChange,
-  onVisaCancelationChange,
-  onVisaCancelationFeeChange,
+  onVisaCancellationChange,
+  onVisaCancellationFeeChange,
 }) => {
   const config = DEPENDENT_CONFIGS[type];
-
+  const { colorScheme } = config;
+  
   return (
-    <div className={`${config.colorScheme.bg} ${config.colorScheme.border} rounded-lg p-4`}>
-      <h4 className={`text-sm font-semibold ${config.colorScheme.text} mb-3`}>
+    <div 
+      className={`p-6 rounded-lg border-2 ${colorScheme.bg} ${colorScheme.border} space-y-6`}
+      style={{ fontFamily: 'Inter, sans-serif' }}
+    >
+      <h3 className={`text-lg font-semibold ${colorScheme.text}`}>
         {config.title}
-      </h4>
+      </h3>
       
       {/* Authority Fee Fields */}
-      <div className="grid grid-cols-1 gap-4">
-        {config.fields.map((field) => (
-          <NumberInputField
-            key={field.key}
-            label={field.label}
-            value={authorityFees[field.key] || field.defaultValue}
-            onChange={(value) => onAuthorityFeeChange(field.key, value)}
-            placeholder={field.placeholder}
-            className={config.colorScheme.ring}
-          />
+      <div className="space-y-4">
+        {config.authorityFields.map((field) => (
+          <div key={field.key} className="max-w-sm">
+            <NumberInputField
+              label={field.label}
+              value={authorityFees[field.key] as number}
+              onChange={(value) => onAuthorityFeeChange(field.key, value)}
+              placeholder={field.placeholder}
+              className={colorScheme.ring}
+            />
+          </div>
         ))}
       </div>
-      
-      {/* Visa Cancelation Section */}
-      <div className="mt-4">
-        <VisaCancelationField
-          checked={visaCancelation}
-          onCheckedChange={onVisaCancelationChange}
-          fee={visaCancelationFee}
-          onFeeChange={onVisaCancelationFeeChange}
-          label={config.visaCancelationLabel}
-        />
-      </div>
+
+      {/* Visa Cancellation Section */}
+      <VisaCancellationField
+        checked={visaCancellation}
+        onCheckedChange={onVisaCancellationChange}
+        fee={visaCancellationFee}
+        onFeeChange={onVisaCancellationFeeChange}
+        label={config.visaCancellationLabel}
+        description="Check the box if visa cancellation is required"
+      />
+
     </div>
   );
-}; 
+};

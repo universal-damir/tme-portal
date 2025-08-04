@@ -28,9 +28,9 @@ export const VISA_TYPE_COLORS = {
 } as const;
 
 /**
- * Visa cancelation color scheme (consistent across all visa types)
+ * Visa cancellation color scheme (consistent across all visa types)
  */
-export const VISA_CANCELATION_COLORS = {
+export const VISA_CANCELLATION_COLORS = {
   primary: 'yellow',
   ring: 'focus:ring-yellow-500',
   text: 'text-yellow-600',
@@ -71,7 +71,7 @@ export const AUTHORITY_FEE_PLACEHOLDERS = {
   immigrationResidencyFeeChild: '2,750.00',
   thirdPartyCosts: '1,460.00',
   dependentFileOpening: '320.00',
-  visaCancelationFee: '185',
+  visaCancellationFee: '185',
 } as const;
 
 /**
@@ -84,21 +84,21 @@ export const AUTHORITY_FEE_FIELDS = {
     { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test Fee' },
     { key: 'emiratesIdFee', label: 'Emirates ID Fee' },
     { key: 'immigrationResidencyFee', label: 'Immigration - Residency Fee' },
-    { key: 'thirdPartyCosts', label: 'Third Party Costs' },
+    { key: 'thirdPartyCosts', label: 'Third party costs' },
   ],
   'time-deposit': [
     { key: 'professionalPassportPicture', label: 'Professional Passport Picture Fee' },
     { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test Fee' },
     { key: 'emiratesIdFee', label: 'Emirates ID Fee' },
     { key: 'immigrationResidencyFee', label: 'Immigration - Residency Fee' },
-    { key: 'thirdPartyCosts', label: 'Third Party Costs' },
+    { key: 'thirdPartyCosts', label: 'Third party costs' },
   ],
   'skilled-employee': [
     { key: 'professionalPassportPicture', label: 'Professional Passport Picture Fee' },
     { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test Fee' },
     { key: 'emiratesIdFee', label: 'Emirates ID Fee' },
     { key: 'immigrationResidencyFee', label: 'Immigration - Residency Fee' },
-    { key: 'thirdPartyCosts', label: 'Third Party Costs' },
+    { key: 'thirdPartyCosts', label: 'Third party costs' },
   ],
 } as const;
 
@@ -107,10 +107,9 @@ export const AUTHORITY_FEE_FIELDS = {
  */
 export const DEPENDENT_FEE_FIELDS = [
   { key: 'professionalPassportPicture', label: 'Professional Passport Picture Fee' },
-  { key: 'dependentFileOpening', label: 'Dependent File Opening' },
   { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test Fee' },
   { key: 'emiratesIdFee', label: 'Emirates ID Fee' },
-  { key: 'thirdPartyCosts', label: 'Third Party Costs' },
+  { key: 'thirdPartyCosts', label: 'Third party costs' },
 ] as const;
 
 /**

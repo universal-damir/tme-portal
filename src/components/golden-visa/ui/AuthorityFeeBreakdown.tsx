@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { NumberInputField } from '../../portal/tabs/NumberInputField';
-import { VisaCancelationField } from './VisaCancelationField';
+import { VisaCancellationField } from './VisaCancellationField';
 import { VISA_TYPE_COLORS, getFieldPlaceholder } from '../utils/goldenVisaConfig';
 import { GoldenVisaType } from '@/types/golden-visa';
 
@@ -16,34 +16,19 @@ interface AuthorityFeeField {
 }
 
 /**
- * Field configurations for different visa types
+ * Field configurations for different visa types - simplified structure
  */
 const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
   'property-investment': [
-    {
-      key: 'professionalPassportPicture',
-      label: 'Professional Passport Picture',
-      placeholder: '25.00',
-    },
     {
       key: 'dldApprovalFee',
       label: 'DLD (Dubai Land Department) Approval Cost',
       placeholder: '4,020.00',
     },
     {
-      key: 'mandatoryUaeMedicalTest',
-      label: 'Mandatory UAE Medical Test',
-      placeholder: '700.00',
-    },
-    {
-      key: 'emiratesIdFee',
-      label: 'Emirates ID Cost',
-      placeholder: '1,155.00',
-    },
-    {
-      key: 'immigrationResidencyFee',
-      label: 'Immigration - Residency Cost',
-      placeholder: '3,160.00',
+      key: 'standardAuthorityCosts',
+      label: 'Standard Authority Costs',
+      placeholder: '5,010',
     },
     {
       key: 'thirdPartyCosts',
@@ -53,24 +38,9 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
   ],
   'time-deposit': [
     {
-      key: 'professionalPassportPicture',
-      label: 'Professional Passport Picture',
-      placeholder: '25.00',
-    },
-    {
-      key: 'mandatoryUaeMedicalTest',
-      label: 'Mandatory UAE Medical Test',
-      placeholder: '700.00',
-    },
-    {
-      key: 'emiratesIdFee',
-      label: 'Emirates ID Cost',
-      placeholder: '1,155.00',
-    },
-    {
-      key: 'immigrationResidencyFee',
-      label: 'Immigration - Residency Cost',
-      placeholder: '3,160.00',
+      key: 'standardAuthorityCosts',
+      label: 'Standard Authority Costs',
+      placeholder: '5,010',
     },
     {
       key: 'thirdPartyCosts',
@@ -80,24 +50,9 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
   ],
   'skilled-employee': [
     {
-      key: 'professionalPassportPicture',
-      label: 'Professional Passport Picture',
-      placeholder: '25.00',
-    },
-    {
-      key: 'mandatoryUaeMedicalTest',
-      label: 'Mandatory UAE Medical Test',
-      placeholder: '700.00',
-    },
-    {
-      key: 'emiratesIdFee',
-      label: 'Emirates ID Cost',
-      placeholder: '1,155.00',
-    },
-    {
-      key: 'immigrationResidencyFee',
-      label: 'Immigration - Residency Cost',
-      placeholder: '3,160.00',
+      key: 'standardAuthorityCosts',
+      label: 'Standard Authority Costs',
+      placeholder: '5,010',
     },
     {
       key: 'thirdPartyCosts',
@@ -126,22 +81,22 @@ interface AuthorityFeeBreakdownProps {
   onFieldChange: (field: string, value: number) => void;
   
   /**
-   * Handler for visa cancelation checkbox changes
+   * Handler for visa cancellation checkbox changes
    */
-  onVisaCancelationChange: (checked: boolean) => void;
+  onVisaCancellationChange: (checked: boolean) => void;
   
   /**
-   * Handler for visa cancelation fee changes
+   * Handler for visa cancellation fee changes
    */
-  onVisaCancelationFeeChange?: (fee: number) => void;
+  onVisaCancellationFeeChange?: (fee: number) => void;
 }
 
 export const AuthorityFeeBreakdown: React.FC<AuthorityFeeBreakdownProps> = ({
   visaType,
   data,
   onFieldChange,
-  onVisaCancelationChange,
-  onVisaCancelationFeeChange,
+  onVisaCancellationChange,
+  onVisaCancellationFeeChange,
 }) => {
   const colors = VISA_TYPE_COLORS[visaType];
   const fields = FIELD_CONFIGS[visaType];
@@ -149,30 +104,33 @@ export const AuthorityFeeBreakdown: React.FC<AuthorityFeeBreakdownProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Authority Fee Fields */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Authority Fee Fields - Single row layout */}
+      <div className="grid grid-cols-1 gap-4">
         {fields.map((field) => (
-          <NumberInputField
-            key={field.key}
-            label={field.label}
-            value={data[field.key] as number}
-            onChange={(value) => onFieldChange(field.key, value)}
-            placeholder={field.placeholder}
-            className={ringClass}
-          />
+          <div key={field.key} className="max-w-sm">
+            <NumberInputField
+              label={field.label}
+              value={data[field.key] as number}
+              onChange={(value) => onFieldChange(field.key, value)}
+              placeholder={field.placeholder}
+              className={ringClass}
+            />
+          </div>
         ))}
       </div>
 
-      {/* Visa Cancelation Section - constrained to match grid column width */}
+      {/* Visa cancellation section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <VisaCancelationField
-          checked={data.visaCancelation as boolean || false}
-          onCheckedChange={onVisaCancelationChange}
-          fee={data.visaCancelationFee as number}
-          onFeeChange={onVisaCancelationFeeChange}
+        <VisaCancellationField
+          checked={data.visaCancellation as boolean || false}
+          onCheckedChange={onVisaCancellationChange}
+          fee={data.visaCancellationFee as number}
+          onFeeChange={onVisaCancellationFeeChange}
+          label="Visa Cancellation (AED 185)"
+          description="Check the box if visa cancellation is required"
         />
         <div></div> {/* Empty div to maintain grid structure */}
       </div>
     </div>
   );
-}; 
+};

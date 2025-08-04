@@ -160,20 +160,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
 
   const explanations = generateExplanations();
 
-  // Count the number of table sections to determine styling
-  const sectionCount = 
-    (hasSpouse ? 1 : 0) + 
-    (hasChildren && numberOfChildren === 1 ? 1 : 0) +
-    (hasChildren && numberOfChildren > 1 ? numberOfChildren : 0); // individual child breakdowns only
-
-  // Set spacing based on section count
-  const introSpacing = sectionCount === 1 ? 8 : 1;
-  const tableSpacing = sectionCount === 1 ? 12 : 3;
-  const explanationMarginTop = sectionCount === 1 ? 8 : 1;
-  const explanationMarginBottom = sectionCount === 1 ? 12 : 4;
-  const explanationInnerMarginTop = sectionCount === 1 ? 6 : 1;
-  const explanationTextMarginBottom = sectionCount === 1 ? 4 : 1;
-  const explanationFontSize = sectionCount === 1 ? 10 : 8;
+  // Spacing will be determined per page based on content
 
   // Create array of all tables to render
   const tables = [];
@@ -221,63 +208,135 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
 
   // Always put explanations on the last page with tables (never separate page)
 
-  // Split tables into pages (max 2 tables per page)
-  const tablesPerPage = 2;
+  // Check if visa cancellation is enabled (affects content length and pagination)
+  const hasVisaCancellation = Boolean(
+    goldenVisaData.dependentAuthorityFees?.visaCancelation ||
+    goldenVisaData.dependents?.spouse?.visaCancelation ||
+    goldenVisaData.dependents?.children?.visaCancelation
+  );
+
+  // Smart pagination based on content:
+  // - Spouse + 1 child: all on one page (unless visa cancellation with 2+ children)
+  // - Spouse + 2+ children with visa cancellation: spouse on page 1, children on separate pages (max 3 per page)
+  // - Spouse + 2+ children without visa cancellation: spouse + 2 children on page 1, rest on page 2
+  // - Just children: 1-2 children on one page, 3+ children split (max 3 per page if visa cancellation)
   const pageGroups = [];
-  for (let i = 0; i < tables.length; i += tablesPerPage) {
-    pageGroups.push(tables.slice(i, i + tablesPerPage));
+  
+  if (hasSpouse && hasChildren) {
+    if (hasVisaCancellation && numberOfChildren >= 2) {
+      // Special case: visa cancellation with 2+ children - spouse on page 1, children on separate pages (max 3 per page)
+      const spouseTable = tables.find(t => t.key === 'spouse');
+      const childrenTables = tables.filter(t => t.key !== 'spouse');
+      
+      if (spouseTable) {
+        pageGroups.push([spouseTable]);
+        
+        // Split children into groups of 3 per page
+        for (let i = 0; i < childrenTables.length; i += 3) {
+          pageGroups.push(childrenTables.slice(i, i + 3));
+        }
+      } else {
+        pageGroups.push(tables);
+      }
+    } else if (numberOfChildren <= 2) {
+      // Spouse + 1-2 children: all on one page (when no visa cancellation or only 1 child)
+      pageGroups.push(tables);
+    } else {
+      // Spouse + 3+ children without visa cancellation: spouse on first page, children on second page
+      const spouseTable = tables.find(t => t.key === 'spouse');
+      const childrenTables = tables.filter(t => t.key !== 'spouse');
+      
+      if (spouseTable) {
+        pageGroups.push([spouseTable]);
+        pageGroups.push(childrenTables);
+      } else {
+        pageGroups.push(tables);
+      }
+    }
+  } else if (hasChildren && !hasSpouse) {
+    if (hasVisaCancellation && numberOfChildren >= 3) {
+      // Children only with visa cancellation: max 3 children per page
+      for (let i = 0; i < tables.length; i += 3) {
+        pageGroups.push(tables.slice(i, i + 3));
+      }
+    } else if (numberOfChildren <= 2) {
+      // 1-2 children: all on one page
+      pageGroups.push(tables);  
+    } else {
+      // 3+ children without visa cancellation: split into groups of 2
+      for (let i = 0; i < tables.length; i += 2) {
+        pageGroups.push(tables.slice(i, i + 2));
+      }
+    }
+  } else {
+    // Just spouse or fallback: use tables as is
+    pageGroups.push(tables);
   }
 
   return (
     <>
-      {pageGroups.map((pageTable, pageIndex) => (
-        <Page key={`page-${pageIndex}`} size="A4" style={styles.page}>
-          <HeaderComponent data={data} />
+      {pageGroups.map((pageTable, pageIndex) => {
+        // Calculate spacing based on content of this specific page
+        const tablesOnThisPage = pageTable.length;
+        const hasExplanationsOnThisPage = pageIndex === pageGroups.length - 1 && explanations.length > 0;
+        
+        // Use consistent spacing like main visa holder
+        const introSpacing = 8;
+        const tableSpacing = 12;
+        const explanationMarginTop = 8;
+        const explanationMarginBottom = 16;
+        const explanationInnerMarginTop = 6;
+        const explanationTextMarginBottom = 6;
+        
+        return (
+          <Page key={`page-${pageIndex}`} size="A4" style={styles.page}>
+            <HeaderComponent data={data} />
 
-          {/* Intro Section - only on first page */}
-          {pageIndex === 0 && (
-            <View style={{ marginBottom: introSpacing }}>
-              <IntroSection
-                headline="Dependent Visa Cost Breakdown"
-                content={generateIntroContent()}
-              />
-            </View>
-          )}
-
-          {/* Render tables for this page */}
-          {pageTable.map((table) => (
-            <View key={table.key} style={{ marginBottom: tableSpacing }}>
-              <CompactCostTable
-                data={data}
-                title={table.title}
-                items={table.items}
-                total={table.total}
-                secondaryTotal={table.secondaryTotal}
-              />
-            </View>
-          ))}
-
-          {/* Explanations Section - always on last page with tables */}
-          {pageIndex === pageGroups.length - 1 && explanations.length > 0 && (
-            <View style={{ marginTop: explanationMarginTop, marginBottom: explanationMarginBottom }}>
-              <Text style={styles.introHeadline}>Service Explanations</Text>
-              <View style={{ marginTop: explanationInnerMarginTop }}>
-                {explanations.map((explanation, index) => (
-                  <Text key={`explanation-${explanation.id}-${index}`} style={[styles.introText, { marginBottom: explanationTextMarginBottom, fontSize: explanationFontSize }]}>
-                    <Text style={{ fontWeight: 'bold' }}>{explanation.title}:</Text>{' '}
-                    {explanation.explanation}
-                  </Text>
-                ))}
+            {/* Intro Section - only on first page */}
+            {pageIndex === 0 && (
+              <View style={{ marginBottom: introSpacing }}>
+                <IntroSection
+                  headline="Dependent Visa Cost Breakdown"
+                  content={generateIntroContent()}
+                />
               </View>
-            </View>
-          )}
+            )}
 
-          {/* Spacer to push footer to bottom */}
-          <View style={{ flex: 1 }} />
+            {/* Render tables for this page */}
+            {pageTable.map((table) => (
+              <View key={table.key} style={{ marginBottom: tableSpacing }}>
+                <CompactCostTable
+                  data={data}
+                  title={table.title}
+                  items={table.items}
+                  total={table.total}
+                  secondaryTotal={table.secondaryTotal}
+                />
+              </View>
+            ))}
 
-          <FooterComponent />
-        </Page>
-      ))}
+            {/* Explanations Section - always on last page with tables */}
+            {hasExplanationsOnThisPage && (
+              <View style={{ marginTop: explanationMarginTop, marginBottom: explanationMarginBottom }}>
+                <Text style={styles.introHeadline}>Service Explanations</Text>
+                <View style={{ marginTop: explanationInnerMarginTop }}>
+                  {explanations.map((explanation, index) => (
+                    <Text key={`explanation-${explanation.id}-${index}`} style={[styles.introText, { marginBottom: explanationTextMarginBottom }]}>
+                      <Text style={{ fontWeight: 'bold' }}>{explanation.title}:</Text>{' '}
+                      {explanation.explanation}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Spacer to push footer to bottom */}
+            <View style={{ flex: 1 }} />
+
+            <FooterComponent />
+          </Page>
+        );
+      })}
 
 
     </>

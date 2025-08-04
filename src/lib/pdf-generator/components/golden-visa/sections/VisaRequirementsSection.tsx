@@ -49,7 +49,7 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
             </Text>
             
             <Text style={styles.introText}>
-              3. <Text style={{ fontWeight: 'bold' }}>Processing Time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to begin the visa process.
+              3. <Text style={{ fontWeight: 'bold' }}>Processing Time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
             </Text>
             
             <Text style={styles.introText}>
@@ -57,7 +57,7 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
             </Text>
             
             <Text style={styles.introText}>
-              5. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment.{"\n"} You will receive your appointment details in advance for both appointments. Original passport is required for both appointments.
+              5. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
             </Text>
           </>
         );
@@ -76,7 +76,7 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
             </Text>
             
             <Text style={styles.introText}>
-              3. <Text style={{ fontWeight: 'bold' }}>Processing Time:</Text> Approximately 10 - 15 working days.
+              3. <Text style={{ fontWeight: 'bold' }}>Processing Time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
             </Text>
             
             <Text style={styles.introText}>
@@ -84,7 +84,7 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
             </Text>
             
             <Text style={styles.introText}>
-              5. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment.{"\n"} You will receive your appointment details in advance for both appointments. Original passport is required for both appointments.
+              5. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
             </Text>
           </>
         );
@@ -141,7 +141,7 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
             </Text>
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '10.' : '9.'} <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment.{"\n"} You will receive your appointment details in advance for both appointments. Original passport is required for both appointments.
+              {requiresNOC && selectedFreezone ? '10.' : '9.'} <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
             </Text>
           </>
         );

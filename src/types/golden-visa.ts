@@ -6,6 +6,7 @@ export type FreezoneType = 'dmcc' | 'adgm' | 'difc' | 'ifza' | 'abu-dhabi' | 'da
 export interface PropertyAuthorityFeesData {
   professionalPassportPicture: number;
   dldApprovalFee: number;
+  standardAuthorityCosts: number;
   mandatoryUaeMedicalTest: number;
   emiratesIdFee: number;
   immigrationResidencyFee: number;
@@ -17,6 +18,7 @@ export interface PropertyAuthorityFeesData {
 export interface SkilledEmployeeAuthorityFeesData {
   professionalPassportPicture: number;
   // No DLD fee for skilled/employee
+  standardAuthorityCosts: number;
   mandatoryUaeMedicalTest: number;
   emiratesIdFee: number;
   immigrationResidencyFee: number;
@@ -28,6 +30,8 @@ export interface SkilledEmployeeAuthorityFeesData {
 export interface DependentAuthorityFeesData {
   professionalPassportPicture: number;
   dependentFileOpening: number; // Replaces DLD for dependents - only applies once
+  standardAuthorityCostsSpouse: number;
+  standardAuthorityCostsChild: number;
   mandatoryUaeMedicalTest: number;
   emiratesIdFee: number;
   immigrationResidencyFeeSpouse: number;
@@ -122,17 +126,18 @@ export const GOLDEN_VISA_DEFAULTS = {
   dependents: {
     spouse: {
       governmentFee: 6730,
-      tmeServicesFee: 3490 // Updated from 3317 to 3490
+      tmeServicesFee: 2240 // Updated from 3490 to 2240
     },
     child: {
       governmentFee: 5500,
-      tmeServicesFee: 2930 // Updated from 2782 to 2930
+      tmeServicesFee: 1690 // Updated from 2930 to 1690
     }
   },
   // New authority fee defaults for Property Investment Golden Visa
   propertyAuthorityFees: {
     professionalPassportPicture: 25.00,
     dldApprovalFee: 4020.00,
+    standardAuthorityCosts: 5010.00,
     mandatoryUaeMedicalTest: 700.00,
     emiratesIdFee: 1155.00,
     immigrationResidencyFee: 3160.00,
@@ -143,6 +148,7 @@ export const GOLDEN_VISA_DEFAULTS = {
   // New authority fee defaults for Skilled/Employee Golden Visa (no DLD)
   skilledEmployeeAuthorityFees: {
     professionalPassportPicture: 25.00,
+    standardAuthorityCosts: 5010.00,
     mandatoryUaeMedicalTest: 700.00,
     emiratesIdFee: 1155.00,
     immigrationResidencyFee: 3160.00,
@@ -153,6 +159,7 @@ export const GOLDEN_VISA_DEFAULTS = {
   // New authority fee defaults for Time Deposit Golden Visa (same as skilled employee - no DLD)
   timeDepositAuthorityFees: {
     professionalPassportPicture: 25.00,
+    standardAuthorityCosts: 5010.00,
     mandatoryUaeMedicalTest: 700.00,
     emiratesIdFee: 1155.00,
     immigrationResidencyFee: 3160.00,
@@ -164,6 +171,8 @@ export const GOLDEN_VISA_DEFAULTS = {
   dependentAuthorityFees: {
     professionalPassportPicture: 25.00,
     dependentFileOpening: 320.00, // Applies only once - either spouse or child
+    standardAuthorityCostsSpouse: 4710.00,
+    standardAuthorityCostsChild: 4604.00,
     mandatoryUaeMedicalTest: 700.00,
     emiratesIdFee: 1155.00,
     immigrationResidencyFeeSpouse: 2860.00,

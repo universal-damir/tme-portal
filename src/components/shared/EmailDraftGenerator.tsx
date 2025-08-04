@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Reusable Email Draft Generator Component
  * Creates formatted emails with PDF attachments using SMTP with preview modal

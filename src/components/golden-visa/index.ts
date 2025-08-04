@@ -2,7 +2,7 @@
 export * from './utils/goldenVisaConfig';
 
 // UI Components
-export * from './ui/VisaCancelationField';
+export * from './ui/VisaCancellationField';
 export * from './ui/AuthorityFeeBreakdown';
 export * from './ui/DependentVisaCard';
 export * from './ui/ChildrenCounter';

@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Building2 } from 'lucide-react';
+import { Building2, FileText } from 'lucide-react';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { AuthorityFeeBreakdown } from '../ui/AuthorityFeeBreakdown';
+import { NumberInputField } from '../../portal/tabs/NumberInputField';
 
 import { GoldenVisaType, GoldenVisaData } from '@/types/golden-visa';
 
@@ -68,30 +69,58 @@ export const AuthorityFeesSection: React.FC<AuthorityFeesSectionProps> = ({
     onFieldChange(`${config.dataPath}.${field}`, value);
   };
 
-  // Handler for visa cancelation checkbox
-  const handleVisaCancelationChange = (checked: boolean) => {
-    onFieldChange(`${config.dataPath}.visaCancelation`, checked);
+  // Handler for visa cancellation checkbox
+  const handleVisaCancellationChange = (checked: boolean) => {
+    onFieldChange(`${config.dataPath}.visaCancellation`, checked);
   };
 
-  // Handler for visa cancelation fee
-  const handleVisaCancelationFeeChange = (fee: number) => {
-    onFieldChange(`${config.dataPath}.visaCancelationFee`, fee);
+  // Handler for visa cancellation fee
+  const handleVisaCancellationFeeChange = (fee: number) => {
+    onFieldChange(`${config.dataPath}.visaCancellationFee`, fee);
+  };
+
+  // Handler for TME services fee
+  const handleTMEServicesChange = (value: number) => {
+    onFieldChange('tmeServicesFee', value);
   };
 
   return (
-    <FormSection
-      title={config.title}
-      description={config.description}
-      icon={Building2}
-      iconColor={config.iconColor}
-    >
-      <AuthorityFeeBreakdown
-        visaType={visaType}
-        data={authorityData}
-        onFieldChange={handleFieldChange}
-        onVisaCancelationChange={handleVisaCancelationChange}
-        onVisaCancelationFeeChange={handleVisaCancelationFeeChange}
-      />
-    </FormSection>
+    <div className="space-y-6">
+      {/* Authority Costs Section */}
+      <FormSection
+        title={config.title}
+        description={config.description}
+        icon={Building2}
+        iconColor={config.iconColor}
+      >
+        <AuthorityFeeBreakdown
+          visaType={visaType}
+          data={authorityData}
+          onFieldChange={handleFieldChange}
+          onVisaCancellationChange={handleVisaCancellationChange}
+          onVisaCancellationFeeChange={handleVisaCancellationFeeChange}
+        />
+      </FormSection>
+
+      {/* TME Professional Services Section */}
+      <FormSection
+        title="TME Professional Service Fee"
+        description="Professional service fees for Golden Visa processing"
+        icon={FileText}
+        iconColor="text-slate-600"
+      >
+        <div className="grid grid-cols-1 gap-4">
+          <div className="max-w-sm">
+            <NumberInputField
+              label="TME Professional Service Fee (AED)"
+              value={data.tmeServicesFee}
+              onChange={handleTMEServicesChange}
+              placeholder="4,820"
+              className="focus:ring-slate-500"
+            />
+          </div>
+        </div>
+      </FormSection>
+    </div>
   );
-}; 
+};

@@ -37,7 +37,7 @@ ${content}`;
       ? 'Time Deposit'
       : 'Skilled Employee';
 
-    const content = `We are pleased to share a personalized proposal for your ${visaTypeDisplay} Golden Visa application. This document provides a transparent breakdown of costs and fees based on the requirements. It is designed to give you clear insight into each element so you can plan your application accordingly.`;
+    const content = `We are pleased to share a personalized proposal for your Golden Visa through ${visaTypeDisplay} application. This document provides a transparent breakdown of costs and fees based on the requirements.`;
     
     return data.clientDetails.addressToCompany ? 
       content :
@@ -49,7 +49,7 @@ ${content}`;
   // Generate headline based on visa type and requirements
   const getHeadline = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      return 'Golden Visa Dependent Services Proposal';
+      return 'Golden Visa (10 Years) Dependent Services Proposal';
     }
 
     const visaTypeDisplay = goldenVisaData?.visaType === 'property-investment' 
@@ -58,7 +58,7 @@ ${content}`;
       ? 'Time Deposit'
       : 'Skilled Employee';
 
-    return `${visaTypeDisplay} Golden Visa Proposal`;
+    return `Golden Visa (10 Years) ${visaTypeDisplay} Proposal`;
   };
 
   return (

@@ -45,6 +45,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     const defaultValues = {
       professionalPassportPicture: 25,
       dependentFileOpening: 320,
+      standardAuthorityCostsSpouse: 4710,
       mandatoryUaeMedicalTest: 700,
       emiratesIdFee: 1155,
       immigrationResidencyFeeSpouse: 2860,
@@ -60,7 +61,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     
     // Set default TME service fee if not set
     if (!dependents.spouse?.tmeServicesFee) {
-      onFieldChange('dependents.spouse.tmeServicesFee', 3490);
+      onFieldChange('dependents.spouse.tmeServicesFee', 2240);
     }
   };
 
@@ -87,6 +88,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     const defaultValues = {
       professionalPassportPicture: 25,
       dependentFileOpening: 320,
+      standardAuthorityCostsChild: 4604,
       mandatoryUaeMedicalTest: 700,
       emiratesIdFee: 1155,
       immigrationResidencyFeeChild: 2750,
@@ -102,7 +104,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     
     // Set default TME service fee if not set
     if (!dependents.children?.tmeServicesFee) {
-      onFieldChange('dependents.children.tmeServicesFee', 2930);
+      onFieldChange('dependents.children.tmeServicesFee', 1690);
     }
   };
 
@@ -188,11 +190,11 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <DependentVisaCard
                 type="spouse"
                 authorityFees={authorityFees}
-                visaCancelation={dependents.spouse?.visaCancelation || false}
-                visaCancelationFee={dependents.spouse?.visaCancelationFee}
+                visaCancellation={dependents.spouse?.visaCancelation || false}
+                visaCancellationFee={dependents.spouse?.visaCancelationFee}
                 onAuthorityFeeChange={handleSpouseAuthorityFeeChange}
-                onVisaCancelationChange={handleSpouseVisaCancelationChange}
-                onVisaCancelationFeeChange={handleSpouseVisaCancelationFeeChange}
+                onVisaCancellationChange={handleSpouseVisaCancelationChange}
+                onVisaCancellationFeeChange={handleSpouseVisaCancelationFeeChange}
               />
               
               {/* TME Professional Service Fee for Spouse */}
@@ -285,11 +287,11 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <DependentVisaCard
                 type="children"
                 authorityFees={authorityFees}
-                visaCancelation={dependents.children?.visaCancelation || false}
-                visaCancelationFee={dependents.children?.visaCancelationFee}
+                visaCancellation={dependents.children?.visaCancelation || false}
+                visaCancellationFee={dependents.children?.visaCancelationFee}
                 onAuthorityFeeChange={handleChildrenAuthorityFeeChange}
-                onVisaCancelationChange={handleChildrenVisaCancelationChange}
-                onVisaCancelationFeeChange={handleChildrenVisaCancelationFeeChange}
+                onVisaCancellationChange={handleChildrenVisaCancelationChange}
+                onVisaCancellationFeeChange={handleChildrenVisaCancelationFeeChange}
               />
               
               {/* TME Professional Service Fee for Children */}

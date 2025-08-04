@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { FileText, Check, Building2, Shield, ChevronDown } from 'lucide-react';
+import { Check, Shield, ChevronDown, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
-import { AuthorityFeeBreakdown } from '../ui/AuthorityFeeBreakdown';
-import { NumberInputField } from '../../portal/tabs/NumberInputField';
+import { AuthorityFeesSection } from './AuthorityFeesSection';
 import { GoldenVisaType, GoldenVisaData } from '@/types/golden-visa';
 import { FREEZONE_OPTIONS } from '../utils/goldenVisaConfig';
 
@@ -27,29 +26,6 @@ const VISA_TYPE_OPTIONS = [
   },
 ] as const;
 
-/**
- * Configuration for authority costs section per visa type
- */
-const AUTHORITY_CONFIG = {
-  'property-investment': {
-    title: 'Authority Costs',
-    description: 'Property Investment fees',
-    iconColor: 'text-purple-600',
-    dataPath: 'propertyAuthorityFees',
-  },
-  'time-deposit': {
-    title: 'Authority Costs',
-    description: 'Time Deposit fees',
-    iconColor: 'text-orange-600',
-    dataPath: 'skilledEmployeeAuthorityFees',
-  },
-  'skilled-employee': {
-    title: 'Authority Costs',
-    description: 'Skilled Employee fees',
-    iconColor: 'text-green-600',
-    dataPath: 'skilledEmployeeAuthorityFees',
-  },
-} as const;
 
 interface VisaTypeSectionProps {
   /**
@@ -358,71 +334,19 @@ export const VisaTypeSection: React.FC<VisaTypeSectionProps> = ({
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: 0.2 }}
-                    className="border-2 border-gray-200 rounded-lg p-4 bg-white shadow-sm"
                   >
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Building2 className={`w-5 h-5 ${AUTHORITY_CONFIG[currentVisaType].iconColor}`} />
-                      <h4 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
-                        {AUTHORITY_CONFIG[currentVisaType].title}
-                      </h4>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      {AUTHORITY_CONFIG[currentVisaType].description}
-                    </p>
-                    
-                    <AuthorityFeeBreakdown
+                    <AuthorityFeesSection
                       visaType={currentVisaType}
-                      data={data[AUTHORITY_CONFIG[currentVisaType].dataPath as keyof GoldenVisaData] as Record<string, number | boolean | undefined> || {}}
-                      onFieldChange={(field: string, value: number) => 
-                        onFieldChange(`${AUTHORITY_CONFIG[currentVisaType].dataPath}.${field}`, value)
-                      }
-                      onVisaCancelationChange={(checked: boolean) => 
-                        onFieldChange(`${AUTHORITY_CONFIG[currentVisaType].dataPath}.visaCancelation`, checked)
-                      }
-                      onVisaCancelationFeeChange={(fee: number) => 
-                        onFieldChange(`${AUTHORITY_CONFIG[currentVisaType].dataPath}.visaCancelationFee`, fee)
-                      }
+                      data={data}
+                      onFieldChange={onFieldChange}
                     />
                   </motion.div>
                 )}
               </div>
+
             </motion.div>
           )}
 
-          {/* TME Professional Service Fee - Full width at bottom */}
-          {primaryVisaRequired && currentVisaType && data && onFieldChange && (
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 }}
-              className="mt-6 bg-slate-50 border border-slate-200 rounded-lg p-4"
-            >
-              <div className="flex items-center space-x-2 mb-4">
-                <FileText className="w-5 h-5 text-gray-600" />
-                <h4 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
-                  TME Professional Service Fee
-                </h4>
-              </div>
-              <p className="text-sm text-gray-600 mb-4">
-                Professional service fees for Golden Visa processing
-              </p>
-              
-              <div className="max-w-md">
-                <NumberInputField
-                  label="TME Professional Service Fee (AED)"
-                  value={data.tmeServicesFee}
-                  onChange={(value) => onFieldChange('tmeServicesFee', value)}
-                  placeholder="4,820"
-                  required
-                  error={errors.tmeServicesFee?.message}
-                  className="focus:ring-slate-500"
-                />
-                <p className="text-xs text-gray-500 mt-2">
-                  Golden Visa (all types): AED 4,820
-                </p>
-              </div>
-            </motion.div>
-          )}
         </div>
         {errors.visaType && (
           <p className="text-red-500 text-sm mt-2">{errors.visaType.message}</p>
