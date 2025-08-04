@@ -94,7 +94,7 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-license-renewal',
       condition: true,
-      description: 'DET registration renewal cost',
+      description: 'DET license renewal cost',
       amount: 13000,
       explanation: 'Annual renewal cost with the DET (Dubai Department of Economy and Tourism).'
     });
