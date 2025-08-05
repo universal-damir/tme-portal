@@ -4,12 +4,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Download, Eye, FileText, Send } from 'lucide-react';
+import { Download, Eye, FileText, Send, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
+import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 import { CompanyServicesData, COMPANY_SERVICES_DEFAULTS } from '@/types/company-services';
 import { companyServicesSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
+import { useCompanyServicesApplication } from '@/hooks/useCompanyServicesApplication';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { 
   ClientDetailsSection,
@@ -24,6 +26,7 @@ const CompanyServicesTab: React.FC = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // Form state management
   const {
@@ -64,6 +67,12 @@ const CompanyServicesTab: React.FC = () => {
   });
 
   const watchedData = watch();
+
+  // Review system integration
+  const reviewApp = useCompanyServicesApplication({
+    formData: watchedData,
+    clientName: watchedData.companyName || `${watchedData.firstName} ${watchedData.lastName}`.trim() || 'Client'
+  });
 
   // Initialize form with shared client context (only once on mount)
   const initializedRef = useRef(false);
@@ -268,12 +277,22 @@ const CompanyServicesTab: React.FC = () => {
       });
     };
 
+    const handleSendApprovedApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Sending approved Company Services application:', applicationId);
+      
+      // Generate PDF and show email modal using the saved form data
+      handleGeneratePDF(formData);
+    };
+
     window.addEventListener('edit-company-services-application', handleEditApplication);
+    window.addEventListener('send-approved-application', handleSendApprovedApplication);
 
     return () => {
       window.removeEventListener('edit-company-services-application', handleEditApplication);
+      window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, [setValue]);
+  }, [setValue, handleGeneratePDF]);
 
   return (
     <div className="space-y-8">
@@ -337,21 +356,48 @@ const CompanyServicesTab: React.FC = () => {
             disabled={isGenerating}
             whileHover={!isGenerating ? { scale: 1.02 } : {}}
             whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3 border-2"
             style={{ 
-              backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
-              color: '#243F7B' 
+              backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+              borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
+              color: isGenerating ? '#9CA3AF' : '#243F7B'
             }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
                 <span>Generating...</span>
               </>
             ) : (
               <>
                 <Eye className="h-5 w-5" />
                 <span>Preview PDF</span>
+              </>
+            )}
+          </motion.button>
+
+          {/* Submit for Review Button */}
+          <motion.button
+            type="button"
+            onClick={() => setIsReviewModalOpen(true)}
+            disabled={reviewApp.isLoading}
+            whileHover={!reviewApp.isLoading ? { scale: 1.02 } : {}}
+            whileTap={!reviewApp.isLoading ? { scale: 0.98 } : {}}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#D2BC99', 
+              color: '#243F7B' 
+            }}
+          >
+            {reviewApp.isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <UserCheck className="h-5 w-5" />
+                <span>Submit for Review</span>
               </>
             )}
           </motion.button>
@@ -382,6 +428,44 @@ const CompanyServicesTab: React.FC = () => {
         </div>
       </div>
       
+      {/* Review Submission Modal */}
+      <ReviewSubmissionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        applicationId={reviewApp.application?.id?.toString() || 'new'}
+        applicationTitle={(() => {
+          // Use the same filename generation as PDF export for consistency
+          try {
+            const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+            const filename = generateCompanyServicesFilename(watchedData, clientInfo);
+            return filename.replace('.pdf', '');
+          } catch (error) {
+            // Fallback to basic format if generation fails
+            const date = new Date(watchedData.date || new Date());
+            const yy = date.getFullYear().toString().slice(-2);
+            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dd = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${yy}${mm}${dd}`;
+            
+            let nameForTitle = '';
+            if (watchedData.companyName) {
+              nameForTitle = watchedData.companyName;
+            } else if (watchedData.lastName && watchedData.firstName) {
+              nameForTitle = `${watchedData.lastName} ${watchedData.firstName}`;
+            } else if (watchedData.firstName) {
+              nameForTitle = watchedData.firstName;
+            } else if (watchedData.lastName) {
+              nameForTitle = watchedData.lastName;
+            } else {
+              nameForTitle = 'Client';
+            }
+            
+            return `${formattedDate} ${nameForTitle} company services`;
+          }
+        })()}
+        onSubmit={reviewApp.submitForReview}
+      />
+
       {/* Email Draft Generator with Preview Modal */}
       {emailDraftProps && (
         <EmailDraftGenerator {...emailDraftProps} />

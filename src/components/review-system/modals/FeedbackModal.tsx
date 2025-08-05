@@ -6,10 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, FileText, User, Calendar, AlertCircle, CheckCircle, Edit3, Send } from 'lucide-react';
+import { toast } from 'sonner';
 import { Application } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { OfferData } from '@/types/offer';
+import { CompanyServicesData } from '@/types/company-services';
 import { SharedClientInfo } from '@/types/portal';
 
 interface FeedbackModalProps {
@@ -28,6 +30,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const config = useReviewSystemConfig();
   // Removed viewMode state as we're removing the tabs
   const [error, setError] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isSendLoading, setIsSendLoading] = useState(false);
 
   // Don't render if feature is disabled
   if (!config.canShowReviewComponents) {
@@ -91,6 +95,28 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         
         const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
         return `${formattedDate} ${nameForTitle} offer ${authority}`;
+      } else if (application.type === 'company-services') {
+        const formData = application.form_data as CompanyServicesData;
+        const date = new Date(formData.date || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        let nameForTitle = '';
+        if (formData.companyName) {
+          nameForTitle = formData.companyName;
+        } else if (formData.lastName && formData.firstName) {
+          nameForTitle = `${formData.lastName} ${formData.firstName}`;
+        } else if (formData.firstName) {
+          nameForTitle = formData.firstName;
+        } else if (formData.lastName) {
+          nameForTitle = formData.lastName;
+        } else {
+          nameForTitle = 'Client';
+        }
+        
+        return `${formattedDate} TME Services ${nameForTitle}`;
       }
       
       return application?.title || 'Application';
@@ -104,6 +130,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     
     try {
       setError(null);
+      setIsPreviewLoading(true);
+      
+      // Show toast notification about PDF generation and new window
+      toast.info('Generating PDF preview...', {
+        description: 'PDF will open in a new window when ready',
+        duration: 3000
+      });
       
       if (application.type === 'golden-visa') {
         const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
@@ -140,18 +173,56 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 1000);
+      } else if (application.type === 'company-services') {
+        const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator/utils/companyServicesGenerator');
+        const formData = application.form_data as CompanyServicesData;
+        
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          shortCompanyName: formData.shortCompanyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateCompanyServicesPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
       } else {
         setError('PDF preview not supported for this application type.');
+        return;
       }
+      
+      // Show success toast when PDF is successfully generated and opened
+      toast.success('PDF preview opened in new window', {
+        duration: 2000
+      });
       
     } catch (error) {
       console.error('Error generating PDF preview:', error);
       setError('Failed to generate PDF preview. Please try again.');
+    } finally {
+      setIsPreviewLoading(false);
     }
   };
 
   const handleSendPDF = () => {
     if (!application) return;
+    
+    setIsSendLoading(true);
+    
+    // Show toast notification about form opening
+    toast.info('Opening form...', {
+      description: 'Navigating to form with your approved data',
+      duration: 2000
+    });
     
     // Navigate to appropriate tab based on application type
     const tabMapping: Record<string, string> = {
@@ -178,6 +249,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     // Small delay to ensure the tab has loaded before dispatching the event
     setTimeout(() => {
       window.dispatchEvent(sendEvent);
+      // Reset loading state after a reasonable delay
+      setTimeout(() => {
+        setIsSendLoading(false);
+      }, 1500);
     }, 100);
   };
 
@@ -190,6 +265,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   const resetState = () => {
     setError(null);
+    setIsPreviewLoading(false);
+    setIsSendLoading(false);
   };
 
   useEffect(() => {
@@ -348,19 +425,34 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                         whileTap={{ scale: 0.99 }}
                         type="button"
                         onClick={isApproved ? handleSendPDF : handlePreviewPDF}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200"
+                        disabled={isApproved ? isSendLoading : isPreviewLoading}
+                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{ backgroundColor: isApproved ? '#243F7B' : '#D2BC99', color: isApproved ? 'white' : '#243F7B' }}
                       >
                         {isApproved ? (
-                          <>
-                            <Send className="w-4 h-4" />
-                            <span>Send</span>
-                          </>
+                          isSendLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Opening form...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              <span>Send</span>
+                            </>
+                          )
                         ) : (
-                          <>
-                            <FileText className="w-4 h-4" />
-                            <span>Preview PDF</span>
-                          </>
+                          isPreviewLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                              <span>Generating PDF...</span>
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="w-4 h-4" />
+                              <span>Preview PDF</span>
+                            </>
+                          )
                         )}
                       </motion.button>
                     </div>

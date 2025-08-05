@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Send } from 'lucide-react';
+import { Send, Eye, UserCheck } from 'lucide-react';
 import { OfferData } from '@/types/offer';
 import { offerDataSchema } from '@/lib/validations';
 import { 
@@ -847,9 +847,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               type="button"
               onClick={() => handlePreviewPDF(watchedData)}
               disabled={isGenerating}
-              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3 border-2"
               style={{ 
-                backgroundColor: isGenerating ? '#E5E7EB' : '#D2BC99',
+                backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+                borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
                 color: isGenerating ? '#9CA3AF' : '#243F7B',
                 fontFamily: 'Inter, sans-serif'
               }}
@@ -860,15 +861,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
                   <span>Generating...</span>
                 </>
               ) : (
                 <>
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
+                  <Eye className="h-5 w-5" />
                   <span>Preview PDF</span>
                 </>
               )}
@@ -879,9 +877,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               type="button"
               onClick={() => setIsReviewModalOpen(true)}
               disabled={reviewApp.isLoading}
-              className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
               style={{ 
-                backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#F59E0B',
+                backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#D2BC99',
+                color: '#243F7B',
                 fontFamily: 'Inter, sans-serif'
               }}
               onMouseEnter={(e) => !reviewApp.isLoading && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
@@ -891,12 +890,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             >
               {reviewApp.isLoading ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                   <span>Saving...</span>
                 </>
               ) : (
                 <>
-                  <Send className="h-5 w-5" />
+                  <UserCheck className="h-5 w-5" />
                   <span>Submit for Review</span>
                 </>
               )}

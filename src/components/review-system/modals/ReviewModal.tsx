@@ -10,7 +10,9 @@ import { Application } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { OfferData } from '@/types/offer';
+import { CompanyServicesData } from '@/types/company-services';
 import { SharedClientInfo } from '@/types/portal';
+import { toast } from 'sonner';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -30,6 +32,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
 
   // Don't render if feature is disabled
   if (!config.canShowReviewComponents || !config.allowReviewActions) {
@@ -41,6 +44,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     setError(null);
     setSuccess(false);
     setIsSubmitting(false);
+    setIsPreviewLoading(false);
   };
 
   // Helper function to generate form title using PDF naming convention
@@ -100,6 +104,28 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         
         const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
         return `${formattedDate} ${nameForTitle} offer ${authority}`;
+      } else if (application.type === 'company-services') {
+        const formData = application.form_data as CompanyServicesData;
+        const date = new Date(formData.date || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        let nameForTitle = '';
+        if (formData.companyName) {
+          nameForTitle = formData.companyName;
+        } else if (formData.lastName && formData.firstName) {
+          nameForTitle = `${formData.lastName} ${formData.firstName}`;
+        } else if (formData.firstName) {
+          nameForTitle = formData.firstName;
+        } else if (formData.lastName) {
+          nameForTitle = formData.lastName;
+        } else {
+          nameForTitle = 'Client';
+        }
+        
+        return `${formattedDate} TME Services ${nameForTitle}`;
       }
       
       return application?.title || 'Application';
@@ -112,6 +138,14 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     if (!application?.form_data) return;
     
     try {
+      setIsPreviewLoading(true);
+      setError(null);
+      
+      // Show toast notification about PDF generation
+      toast.info('Generating PDF preview...', {
+        description: 'PDF will open in a new window when ready',
+        duration: 3000
+      });
       if (application.type === 'golden-visa') {
         // Generate Golden Visa PDF for review
         const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
@@ -150,13 +184,45 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 1000);
+      } else if (application.type === 'company-services') {
+        // Generate Company Services PDF for review
+        const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator/utils/companyServicesGenerator');
+        const formData = application.form_data as CompanyServicesData;
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          shortCompanyName: formData.shortCompanyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateCompanyServicesPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
       } else {
         setError('PDF preview not supported for this application type.');
+        return;
       }
+      
+      // Show success toast when PDF is successfully generated and opened
+      toast.success('PDF preview opened in new window', {
+        duration: 2000
+      });
       
     } catch (error) {
       console.error('Error generating PDF for review:', error);
       setError('Failed to generate PDF for review. Please try again.');
+    } finally {
+      setIsPreviewLoading(false);
     }
   };
 
@@ -354,15 +420,25 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     {/* PDF Preview Button */}
                     <div className="text-center">
                       <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={!isPreviewLoading ? { scale: 1.02 } : {}}
+                        whileTap={!isPreviewLoading ? { scale: 0.98 } : {}}
                         type="button"
                         onClick={handlePreviewPDF}
-                        className="flex items-center justify-center space-x-2 w-1/2 mx-auto px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg"
-                        style={{ backgroundColor: '#243F7B' }}
+                        disabled={isPreviewLoading}
+                        className="flex items-center justify-center space-x-2 w-1/2 mx-auto px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ backgroundColor: isPreviewLoading ? '#9CA3AF' : '#243F7B' }}
                       >
-                        <FileText className="w-4 h-4" />
-                        <span>Preview PDF</span>
+                        {isPreviewLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Generating...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="w-4 h-4" />
+                            <span>Preview PDF</span>
+                          </>
+                        )}
                       </motion.button>
                       <p className="text-xs text-gray-500 mt-2">
                         Opens in new tab for review

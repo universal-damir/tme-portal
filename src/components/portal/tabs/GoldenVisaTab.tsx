@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Download, Eye, FileText, Send } from 'lucide-react';
+import { Download, Eye, FileText, Send, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Progress } from '@/components/ui/progress';
 import { GoldenVisaData, GOLDEN_VISA_DEFAULTS, GoldenVisaType } from '@/types/golden-visa';
@@ -441,17 +441,21 @@ const GoldenVisaTab: React.FC = () => {
       >
         <div className="flex justify-center space-x-4">
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isGenerating ? { scale: 1.02 } : {}}
+            whileTap={!isGenerating ? { scale: 0.98 } : {}}
             type="button"
             onClick={() => handlePreviewPDF(watchedData)}
             disabled={isGenerating}
-            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3"
-            style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3 border-2"
+            style={{ 
+              backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+              borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
+              color: isGenerating ? '#9CA3AF' : '#243F7B'
+            }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
                 <span>Generating...</span>
               </>
             ) : (
@@ -464,22 +468,25 @@ const GoldenVisaTab: React.FC = () => {
           
           {/* Submit for Review Button */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!reviewApp.isLoading ? { scale: 1.02 } : {}}
+            whileTap={!reviewApp.isLoading ? { scale: 0.98 } : {}}
             type="button"
             onClick={() => setIsReviewModalOpen(true)}
             disabled={reviewApp.isLoading}
-            className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
-            style={{ backgroundColor: '#F59E0B' }}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#D2BC99', 
+              color: '#243F7B' 
+            }}
           >
             {reviewApp.isLoading ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                 <span>Saving...</span>
               </>
             ) : (
               <>
-                <Send className="h-5 w-5" />
+                <UserCheck className="h-5 w-5" />
                 <span>Submit for Review</span>
               </>
             )}

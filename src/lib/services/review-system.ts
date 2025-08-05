@@ -50,6 +50,11 @@ function generateApplicationTitle(applicationType: string, formData: any): strin
     const title = generateCostOverviewTitle(formData);
     console.log('🔧 Generated Cost Overview title:', title);
     return title;
+  } else if (applicationType === 'company-services') {
+    console.log('🔧 Calling generateCompanyServicesTitle...');
+    const title = generateCompanyServicesTitle(formData);
+    console.log('🔧 Generated Company Services title:', title);
+    return title;
   }
   
   console.log('🔧 No matching type, using fallback. Type was:', applicationType);
@@ -132,6 +137,33 @@ function generateCostOverviewTitle(formData: any): string {
     const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
     
     return `${formattedDate} ${nameForTitle} offer ${authority}`;
+  }
+}
+
+function generateCompanyServicesTitle(formData: any): string {
+  // Use the same detailed filename generation as PDF export for consistency
+  try {
+    const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+    const filename = generateCompanyServicesFilename(formData, {});
+    return filename.replace('.pdf', '');
+  } catch (error) {
+    console.warn('Failed to generate detailed title, using fallback:', error);
+    
+    // Fallback to basic format - customize for company services
+    const date = new Date(formData.date || new Date());
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    const firstName = formData.firstName || '';
+    const lastName = formData.lastName || '';
+    const companyName = formData.companyName || '';
+    
+    const nameForTitle = companyName || 
+      (firstName && lastName ? `${lastName} ${firstName}` : firstName || lastName || 'CLIENT');
+    
+    return `${formattedDate} TME Services ${nameForTitle}`;
   }
 }
 
