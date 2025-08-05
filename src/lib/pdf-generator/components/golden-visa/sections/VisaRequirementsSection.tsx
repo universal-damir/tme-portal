@@ -16,20 +16,26 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
 
   // Get freezone display name with full description
   const getFreezoneDisplayName = (freezone: string) => {
-    switch (freezone?.toLowerCase()) {
-      case 'dmcc':
-        return 'DMCC (Dubai Multi Commodities Centre)';
-      case 'ifza':
-        return 'IFZA (International Freezone Authority)';
-      case 'difc':
-        return 'DIFC (Dubai International Financial Centre)';
-      case 'dafza':
-        return 'DAFZA (Dubai Airport Free Zone Authority)';
-      case 'jafza':
-        return 'JAFZA (Jebel Ali Free Zone Authority)';
-      default:
-        return freezone?.toUpperCase() || 'Free Zone Authority';
-    }
+    // Import the helper function dynamically since we can't import at top level in PDF components
+    const freezoneOptions = [
+      { value: 'det', label: 'DET' },
+      { value: 'difc', label: 'DIFC (Dubai International Financial Centre)' },
+      { value: 'dmcc', label: 'DMCC (Dubai Multi Commodities Centre)' },
+      { value: 'dso', label: 'DSO (Dubai Silicon Oasis)' },
+      { value: 'dwc', label: 'DWC (Dubai World Central)' },
+      { value: 'dwtc', label: 'DWTC (Dubai World Trade Centre)' },
+      { value: 'ecda', label: 'ECDA (Expo City Dubai Authority)' },
+      { value: 'ifza', label: 'IFZA (International Free Zone Authority)' },
+      { value: 'jafza', label: 'JAFZA (Jebel Ali Free Zone Authority)' },
+      { value: 'meydan', label: 'Meydan Free Zone' },
+      { value: 'fujairah', label: 'Fujairah Free Zone' },
+      { value: 'rakmc', label: 'RAKMC (Ras Al Khaimah Maritime City)' },
+      { value: 'hamriyah', label: 'Hamriyah Free Zone' },
+      { value: 'uaq', label: 'Umm Al Quwain Free Zone' },
+    ];
+    
+    const foundFreezone = freezoneOptions.find(f => f.value === freezone?.toLowerCase());
+    return foundFreezone?.label || freezone?.toUpperCase() || 'Free Zone Authority';
   };
 
   // Generate requirements based on visa type (keeping current content)
@@ -94,14 +100,18 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
         const requiresNOC = goldenVisaData?.requiresNOC;
         const selectedFreezone = goldenVisaData?.selectedFreezone;
         
+        // Check if Salary Certificate is required and get freezone name
+        const requiresSalaryCertificate = goldenVisaData?.requiresSalaryCertificate;
+        const selectedSalaryCertificateFreezone = goldenVisaData?.selectedSalaryCertificateFreezone;
+        
         return (
           <>
             <Text style={styles.introText}>
-              1. <Text style={{ fontWeight: 'bold' }}>Educational qualification:</Text> Bachelor's or Master's certificate with transcript. Must be attested and legalized by the UAE Embassy in the country of origin.
+              1. <Text style={{ fontWeight: 'bold' }}>Educational qualification:</Text> Bachelor's or Master's certificate with transcript. Requires a multi-stage attestation process, ending with authentication by the UAE Embassy in the country of origin.
             </Text>
-            
+
             <Text style={styles.introText}>
-              2. <Text style={{ fontWeight: 'bold' }}>Equivalency certificate:</Text> Issued by the Ministry of Education Dubai.
+              2. <Text style={{ fontWeight: 'bold' }}>Equivalency certificate:</Text> This document must be obtained by the client from the Ministry of Education in Dubai.{"\n"} 
               <Link 
               src="https://www.moe.gov.ae/En/EServices/ServiceCard/Pages/Pre-Assessment.aspx"
               style={[styles.introText, { color: '#2563eb', textDecoration: 'underline', marginLeft: 15, marginTop: 2 }]}
@@ -116,32 +126,44 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
             
             {requiresNOC && selectedFreezone && (
               <Text style={styles.introText}>
-                4. <Text style={{ fontWeight: 'bold' }}>Freezone NOC:</Text> A No Objection Certificate from <Text>{getFreezoneDisplayName(selectedFreezone)}</Text>.
+                4. <Text style={{ fontWeight: 'bold' }}>Freezone NOC:</Text> A Non-Objection Certificate from <Text>{getFreezoneDisplayName(selectedFreezone)}</Text>.
+              </Text>
+            )}
+            
+            {requiresSalaryCertificate && selectedSalaryCertificateFreezone && (
+              <Text style={styles.introText}>
+                {requiresNOC && selectedFreezone ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>Freezone Salary Certificate:</Text> A salary certificate from <Text>{getFreezoneDisplayName(selectedSalaryCertificateFreezone)}</Text>.
               </Text>
             )}
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>Company NOC:</Text> A No Objection Certificate from your current employer, in <Text>English and Arabic</Text>.
+              {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '6.' : 
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>Company NOC:</Text> A Non-Objection Certificate from your current employer, in <Text>English and Arabic</Text>.
             </Text>
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '6.' : '5.'} <Text style={{ fontWeight: 'bold' }}>Bank statements:</Text> 6 months of personal bank statements reflecting a <Text>monthly salary of AED 30,000 or more</Text>.
+              {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '7.' : 
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '6.' : '5.'} <Text style={{ fontWeight: 'bold' }}>Bank statements:</Text> 6 months of personal bank statements reflecting a <Text>monthly salary of AED 30,000 or more</Text>.
             </Text>
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '7.' : '6.'} <Text style={{ fontWeight: 'bold' }}>Residence proof:</Text> Valid Ejari or title deed.
+              {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '8.' : 
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '7.' : '6.'} <Text style={{ fontWeight: 'bold' }}>Residence proof:</Text> Valid Ejari or title deed.
             </Text>
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '8.' : '7.'} <Text style={{ fontWeight: 'bold' }}>Processing time:</Text> Approximately 10 - 15 working days.
+              {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '9.' : 
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '8.' : '7.'} <Text style={{ fontWeight: 'bold' }}>Processing time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
             </Text>
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '9.' : '8.'} <Text style={{ fontWeight: 'bold' }}>Health insurance:</Text> Required. Must be either UAE-registered or international health insurance.
+              {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '10.' : 
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '9.' : '8.'} <Text style={{ fontWeight: 'bold' }}>Health insurance:</Text> Required. Must be either UAE-registered or international health insurance.
             </Text>
             
             <Text style={styles.introText}>
-              {requiresNOC && selectedFreezone ? '10.' : '9.'} <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
+              {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '11.' : 
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '10.' : '9.'} <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
             </Text>
           </>
         );

@@ -5,8 +5,9 @@ import { Check, Shield, ChevronDown, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { AuthorityFeesSection } from './AuthorityFeesSection';
+import { NumberInputField } from '@/components/portal/tabs/NumberInputField';
 import { GoldenVisaType, GoldenVisaData } from '@/types/golden-visa';
-import { FREEZONE_OPTIONS } from '../utils/goldenVisaConfig';
+import { FREEZONE_OPTIONS, getFreezoneCost } from '../utils/goldenVisaConfig';
 
 /**
  * Available visa types with their display labels
@@ -85,15 +86,30 @@ export const VisaTypeSection: React.FC<VisaTypeSectionProps> = ({
   onFieldChange,
 }) => {
   const [isFreezoneDropdownOpen, setIsFreezoneDropdownOpen] = useState(false);
+  const [isSalaryCertificateDropdownOpen, setIsSalaryCertificateDropdownOpen] = useState(false);
 
   const handleFreezoneSelect = (freezoneValue: string) => {
     if (onFieldChange) {
       onFieldChange('selectedFreezone', freezoneValue);
+      // Auto-populate the NOC fee based on the selected freezone
+      const cost = getFreezoneCost(freezoneValue);
+      onFieldChange('freezoneNocFee', cost);
     }
     setIsFreezoneDropdownOpen(false);
   };
 
+  const handleSalaryCertificateFreezoneSelect = (freezoneValue: string) => {
+    if (onFieldChange) {
+      onFieldChange('selectedSalaryCertificateFreezone', freezoneValue);
+      // Auto-populate the salary certificate fee based on the selected freezone
+      const cost = getFreezoneCost(freezoneValue);
+      onFieldChange('salaryCertificateFee', cost);
+    }
+    setIsSalaryCertificateDropdownOpen(false);
+  };
+
   const selectedFreezone = FREEZONE_OPTIONS.find(f => f.value === data?.selectedFreezone);
+  const selectedSalaryCertificateFreezone = FREEZONE_OPTIONS.find(f => f.value === data?.selectedSalaryCertificateFreezone);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -309,13 +325,140 @@ export const VisaTypeSection: React.FC<VisaTypeSectionProps> = ({
                                 className="mt-2"
                               >
                                 <NumberInputField
-                                  label={`${selectedFreezone?.label || 'Freezone'} NOC (AED)`}
+                                  label={`${selectedFreezone?.pdfLabel || 'Freezone'} NOC (AED)`}
                                   value={data.freezoneNocFee}
                                   onChange={(value) => onFieldChange('freezoneNocFee', value)}
-                                  placeholder="2,020"
+                                  placeholder={selectedFreezone?.cost?.toLocaleString() || "2,020"}
                                   required
                                   error={errors.freezoneNocFee?.message}
                                   className="focus:ring-blue-500"
+                                />
+                              </motion.div>
+                            )}
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* Salary Certificate Requirements - Only show for skilled-employee */}
+                    {option.value === 'skilled-employee' && currentVisaType === 'skilled-employee' && data && onFieldChange && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.3 }}
+                        className="ml-8 mt-3 p-3 bg-green-50 border border-green-200 rounded-lg"
+                      >
+                        <div className="flex items-center space-x-2 mb-3">
+                          <FileText className="w-4 h-4 text-green-600" />
+                          <span className="text-sm font-medium text-green-800">Salary Certificate Requirements</span>
+                        </div>
+                        
+                        {/* Salary Certificate Checkbox */}
+                        <motion.label 
+                          whileHover={{ scale: 1.01 }}
+                          className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-green-100 transition-colors duration-150"
+                        >
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              {...register('requiresSalaryCertificate')}
+                              className="sr-only"
+                            />
+                            <div 
+                              className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                              style={{ 
+                                borderColor: data.requiresSalaryCertificate ? '#243F7B' : '#d1d5db',
+                                backgroundColor: data.requiresSalaryCertificate ? '#243F7B' : 'white'
+                              }}
+                            >
+                              {data.requiresSalaryCertificate && (
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                >
+                                  <Check className="w-2.5 h-2.5 text-white" />
+                                </motion.div>
+                              )}
+                            </div>
+                          </div>
+                          <span className="text-xs font-medium text-green-800">
+                            Requires Salary Certificate
+                          </span>
+                        </motion.label>
+
+                        {/* Salary Certificate Freezone Selection */}
+                        {data.requiresSalaryCertificate && (
+                          <motion.div 
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            transition={{ duration: 0.3 }}
+                            className="mt-3 space-y-2"
+                          >
+                            <label className="block text-xs font-medium text-green-800">
+                              Select Freezone for Salary Certificate *
+                            </label>
+                            <div className="relative">
+                              <motion.button
+                                whileHover={{ scale: 1.01 }}
+                                whileTap={{ scale: 0.99 }}
+                                type="button"
+                                onClick={() => setIsSalaryCertificateDropdownOpen(!isSalaryCertificateDropdownOpen)}
+                                className="w-full px-3 py-2 rounded-lg border-2 border-green-200 bg-white text-left flex items-center justify-between focus:outline-none transition-all duration-200 text-sm"
+                                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                                onBlur={(e) => e.target.style.borderColor = '#bbf7d0'}
+                              >
+                                <span className={selectedSalaryCertificateFreezone ? 'text-gray-900' : 'text-gray-500'}>
+                                  {selectedSalaryCertificateFreezone ? selectedSalaryCertificateFreezone.label : 'Select freezone for salary certificate'}
+                                </span>
+                                <motion.div
+                                  animate={{ rotate: isSalaryCertificateDropdownOpen ? 180 : 0 }}
+                                  transition={{ duration: 0.2 }}
+                                >
+                                  <ChevronDown className="w-4 h-4 text-gray-400" />
+                                </motion.div>
+                              </motion.button>
+                              
+                              {isSalaryCertificateDropdownOpen && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -10 }}
+                                  className="absolute z-10 w-full mt-1 bg-white border-2 border-green-200 rounded-lg shadow-lg max-h-40 overflow-y-auto"
+                                >
+                                  {FREEZONE_OPTIONS.map((freezone) => (
+                                    <motion.button
+                                      key={freezone.value}
+                                      whileHover={{ backgroundColor: '#dcfce7' }}
+                                      type="button"
+                                      onClick={() => handleSalaryCertificateFreezoneSelect(freezone.value)}
+                                      className="w-full px-3 py-2 text-left hover:bg-green-50 first:rounded-t-lg last:rounded-b-lg transition-colors duration-150 text-sm"
+                                    >
+                                      {freezone.label}
+                                    </motion.button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </div>
+                            {errors.selectedSalaryCertificateFreezone && (
+                              <p className="text-red-500 text-xs">{errors.selectedSalaryCertificateFreezone.message}</p>
+                            )}
+
+                            {/* Salary Certificate Fee Field */}
+                            {data.selectedSalaryCertificateFreezone && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="mt-2"
+                              >
+                                <NumberInputField
+                                  label={`${selectedSalaryCertificateFreezone?.pdfLabel || 'Freezone'} Salary Certificate (AED)`}
+                                  value={data.salaryCertificateFee}
+                                  onChange={(value) => onFieldChange('salaryCertificateFee', value)}
+                                  placeholder={selectedSalaryCertificateFreezone?.cost?.toLocaleString() || "2,020"}
+                                  required
+                                  error={errors.salaryCertificateFee?.message}
+                                  className="focus:ring-green-500"
                                 />
                               </motion.div>
                             )}

@@ -72,6 +72,11 @@ export interface GoldenVisaData {
   selectedFreezone?: FreezoneType;
   nocCost?: number;
   
+  // Salary Certificate specific fields
+  requiresSalaryCertificate?: boolean;
+  selectedSalaryCertificateFreezone?: FreezoneType;
+  salaryCertificateFee?: number;
+  
   // Legacy government and service fees (editable with defaults from docs)
   governmentFee: number;
   tmeServicesFee: number;

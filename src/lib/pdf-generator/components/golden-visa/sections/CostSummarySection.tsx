@@ -6,6 +6,7 @@ import {
   generateGoldenVisaSpouseVisaBreakdown,
   generateGoldenVisaChildrenVisaBreakdown 
 } from '../../../utils/goldenVisaDataTransformer';
+import { getFreezonePdfLabel } from '@/components/golden-visa/utils/goldenVisaConfig';
 import type { PDFComponentProps, CostItem } from '../../../types';
 
 // CostSummarySection - Overview table for cover page
@@ -66,7 +67,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       
       // 2. NOC fee as separate line (only for skilled employee with NOC)
       if (goldenVisaData?.requiresNOC && goldenVisaData?.selectedFreezone && goldenVisaData?.freezoneNocFee) {
-        const freezoneLabel = goldenVisaData.selectedFreezone.toUpperCase();
+        const freezoneLabel = getFreezonePdfLabel(goldenVisaData.selectedFreezone);
         items.push({
           description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) cost`,
           amount: goldenVisaData.freezoneNocFee,
@@ -75,9 +76,21 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
         });
         itemNumber++;
       }
+      
+      // 3. Salary Certificate fee as separate line (only for skilled employee with salary certificate)
+      if (goldenVisaData?.requiresSalaryCertificate && goldenVisaData?.selectedSalaryCertificateFreezone && goldenVisaData?.salaryCertificateFee) {
+        const freezoneLabel = getFreezonePdfLabel(goldenVisaData.selectedSalaryCertificateFreezone);
+        items.push({
+          description: `${itemNumber}. ${freezoneLabel} salary certificate cost`,
+          amount: goldenVisaData.salaryCertificateFee,
+          secondaryAmount: goldenVisaData.salaryCertificateFee / exchangeRate,
+          isReduction: false
+        });
+        itemNumber++;
+      }
     }
     
-    // 3. Spouse Visa (if selected)
+    // 4. Spouse Visa (if selected)
     const hasSpouse = Boolean(goldenVisaData?.dependents?.spouse?.required);
     if (hasSpouse) {
       const spouseVisa = generateGoldenVisaSpouseVisaBreakdown(goldenVisaData);
@@ -92,7 +105,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       itemNumber++;
     }
     
-    // 4. Children Visa (if selected)
+    // 5. Children Visa (if selected)
     const hasChildren = Boolean((goldenVisaData?.dependents?.children?.count || 0) > 0);
     if (hasChildren) {
       const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
