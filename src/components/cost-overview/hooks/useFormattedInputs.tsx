@@ -88,7 +88,8 @@ export const getInvestorVisaCount = (watchedData?: OfferData): number => {
   // Count visas where investorVisa is true (boolean) or "true" (string)
   // For IFZA: "true" = Enable Investor Visa
   // For DET: "true" = Investor Visa (vs "employment" = Employment Visa)
-  return watchedData.visaCosts.visaDetails.filter(visa => 
+  const visaDetails = watchedData.visaCosts.visaDetails || [];
+  return visaDetails.filter(visa => 
     visa?.investorVisa === true || visa?.investorVisa === "true"
   ).length;
 };
@@ -242,116 +243,71 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
     setValue(`clientDetails.${fieldName}` as any, value);
   }, [setValue]);
 
-  // Watch specific visa investorVisa fields directly 
-  const visa0InvestorVisa = watchedData?.visaCosts?.visaDetails?.[0]?.investorVisa;
-  const visa1InvestorVisa = watchedData?.visaCosts?.visaDetails?.[1]?.investorVisa;
-  const visa2InvestorVisa = watchedData?.visaCosts?.visaDetails?.[2]?.investorVisa;
-  
+  // Simple investor visa validation with manual trigger
   useEffect(() => {
-    // CRITICAL: Don't interfere if user is actively typing
+    // Don't interfere if user is actively typing
     if (isUserTypingRef.current) {
       return;
     }
-
-    const currentInvestorVisaCount = getInvestorVisaCount(watchedData);
+    
+    const visaDetails = watchedData?.visaCosts?.visaDetails || [];
     const currentShareCapital = watchedData?.authorityInformation?.shareCapitalAED || 0;
     
-    // Clear any existing alerts first
-    setShareCapitalAlert({
-      shouldHighlight: false,
-      message: null,
-    });
+    // Count how many investor visas are selected
+    const investorVisaCount = visaDetails.filter(visa => visa?.investorVisa === true).length;
+    const requiredCapital = investorVisaCount * 50000;
     
-    if (currentInvestorVisaCount > 0) {
-      const requiredShareCapital = currentInvestorVisaCount * 50000;
+    // Trigger validation if there are investor visas and insufficient capital
+    if (investorVisaCount > 0 && currentShareCapital > 0 && currentShareCapital < requiredCapital) {
+      // Set validation error for red border and text
+      const errorMessage = investorVisaCount === 1 
+        ? `Minimum share capital requirement for investor visa is AED 50,000`
+        : `Minimum share capital requirement for ${investorVisaCount} investor visas is AED ${requiredCapital.toLocaleString()}`;
+        
+      setValidationErrors(prev => ({
+        ...prev,
+        shareCapitalError: errorMessage
+      }));
       
-      // Alert user if current amount is below required
-      if (currentShareCapital < requiredShareCapital) {
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
-          // Try multiple selectors to find the share capital field with improved targeting
-          let shareCapitalField = document.querySelector('input[name="authorityInformation.shareCapitalAED"]') as HTMLInputElement;
-          
-          // If not found, try by placeholder text
-          if (!shareCapitalField) {
-            shareCapitalField = document.querySelector('input[placeholder*="10,000"], input[placeholder*="Share capital"]') as HTMLInputElement;
-          }
-          
-          // Try finding by parent label or nearby text
-          if (!shareCapitalField) {
-            const labels = document.querySelectorAll('label, span, div');
-            for (const label of labels) {
-              if (label.textContent?.toLowerCase().includes('share capital')) {
-                const nearbyInput = label.parentElement?.querySelector('input[type="text"]') as HTMLInputElement;
-                if (nearbyInput) {
-                  shareCapitalField = nearbyInput;
-                  break;
-                }
-              }
-            }
-          }
-          
-          // Last resort: find input in authority info section
-          if (!shareCapitalField) {
-            const authoritySection = document.querySelector('[data-section="authority-info"], .authority-info');
-            if (authoritySection) {
-              shareCapitalField = authoritySection.querySelector('input[type="text"]') as HTMLInputElement;
-            }
-          }
-          
-          if (shareCapitalField) {
-            shareCapitalField.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-            
-            // Add a visual highlight to the container
-            const container = shareCapitalField.closest('div');
-            if (container) {
-              container.style.animation = 'pulse 2s ease-in-out';
-              container.style.border = '2px solid #ff6b6b';
-              setTimeout(() => {
-                container.style.border = '';
-              }, 3000);
-            }
-            
-            // Focus the field after a short delay
-            setTimeout(() => {
-              (shareCapitalField as HTMLInputElement).focus();
-              (shareCapitalField as HTMLInputElement).select();
-            }, 600);
-          }
-
-          // Set alert state with improved message
-          setShareCapitalAlert({
-            shouldHighlight: true,
-            message: `💡 Minimum AED ${requiredShareCapital.toLocaleString()} required for ${currentInvestorVisaCount} investor visa${currentInvestorVisaCount > 1 ? 's' : ''}.`,
+      // Focus and highlight the share capital field (only once when first triggered)
+      setTimeout(() => {
+        const shareCapitalField = document.querySelector('input[placeholder="100,000"]') as HTMLInputElement;
+        if (shareCapitalField && document.activeElement !== shareCapitalField) {
+          // Scroll to the field with smooth animation
+          shareCapitalField.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
           });
-
-          // Clear alert after 4 seconds
+          
+          // Add visual highlight effect
+          const originalTransition = shareCapitalField.style.transition;
+          shareCapitalField.classList.add('ring-4', 'ring-red-400', 'ring-opacity-75');
+          shareCapitalField.style.transition = 'all 0.3s ease';
+          shareCapitalField.style.transform = 'scale(1.02)';
+          
+          // Focus the field
           setTimeout(() => {
-            setShareCapitalAlert({
-              shouldHighlight: false,
-              message: null,
-            });
+            shareCapitalField.focus();
+            shareCapitalField.select();
+          }, 600);
+          
+          // Remove highlight after 4 seconds
+          setTimeout(() => {
+            shareCapitalField.classList.remove('ring-4', 'ring-red-400', 'ring-opacity-75');
+            shareCapitalField.style.transform = '';
+            shareCapitalField.style.transition = originalTransition;
           }, 4000);
-        }, 100);
-      } else {
-        // Share capital is adequate, clear any validation errors
-        setValidationErrors(prev => ({
-          ...prev,
-          shareCapitalError: null
-        }));
-      }
-    } else {
-      // No investor visas selected, ensure no related validation errors
+        }
+      }, 100);
+    } else if (investorVisaCount > 0 && currentShareCapital >= requiredCapital) {
+      // Clear validation error only when sufficient capital for all investor visas
       setValidationErrors(prev => ({
         ...prev,
         shareCapitalError: null
       }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visa0InvestorVisa, visa1InvestorVisa, visa2InvestorVisa, watchedData?.authorityInformation?.shareCapitalAED]);
+  }, [JSON.stringify(watchedData?.visaCosts?.visaDetails), watchedData?.authorityInformation?.shareCapitalAED]);
 
   const handlers: FormattedInputHandlers = {
     handleShareCapitalChange,

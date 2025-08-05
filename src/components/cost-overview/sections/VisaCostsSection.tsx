@@ -125,6 +125,25 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
     }
   }, [watchedData.visaCosts?.numberOfVisas, setValue, watchedData.visaCosts?.visaDetails]);
 
+  // Clear visa fields when visa quota becomes 0 (IFZA only)
+  useEffect(() => {
+    if (authorityId === 'ifza') {
+      const visaQuota = watchedData.ifzaLicense?.visaQuota || 0;
+      const currentReducedVisas = watchedData.visaCosts?.reducedVisaCost || 0;
+      const currentStandardVisas = watchedData.visaCosts?.numberOfVisas || 0;
+      
+      // If visa quota is 0, clear both visa fields if they have values
+      if (visaQuota < 1) {
+        if (currentReducedVisas > 0) {
+          setValue('visaCosts.reducedVisaCost', 0);
+        }
+        if (currentStandardVisas > 0) {
+          setValue('visaCosts.numberOfVisas', 0);
+        }
+      }
+    }
+  }, [authorityId, watchedData.ifzaLicense?.visaQuota, watchedData.visaCosts?.reducedVisaCost, watchedData.visaCosts?.numberOfVisas, setValue]);
+
   // Only show if authority supports visas
   if (!visaCosts) {
     return null;
@@ -158,15 +177,22 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                   type="number"
                   min="0"
                   max={watchedData.ifzaLicense?.visaQuota || 0}
+                  disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
                   {...register('visaCosts.numberOfVisas', { valueAsNumber: true })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                   onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                   placeholder="0"
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  Enter the number of visas required - Maximum: {watchedData.ifzaLicense?.visaQuota || 0} (based on visa quota)
-                </p>
+                {(watchedData.ifzaLicense?.visaQuota || 0) < 1 ? (
+                  <p className="text-xs text-gray-600 mt-2">
+                    Set visa quota in License Fees section to enable visa fields
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-2">
+                    Enter the number of visas required - Maximum: {watchedData.ifzaLicense?.visaQuota || 0} (based on visa quota)
+                  </p>
+                )}
                 {errors.visaCosts?.numberOfVisas && (
                   <p className="text-red-500 text-xs mt-1">{errors.visaCosts.numberOfVisas.message}</p>
                 )}
@@ -184,8 +210,9 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                   type="number"
                   min="0"
                   max={maxReducedVisas}
+                  disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
                   {...register('visaCosts.reducedVisaCost', { valueAsNumber: true })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
                   onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                   placeholder="0"

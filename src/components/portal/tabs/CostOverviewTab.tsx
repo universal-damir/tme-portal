@@ -72,10 +72,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     control,
     reset,
     trigger,
+    clearErrors,
     formState: { errors },
   } = useForm<OfferData>({
     resolver: zodResolver(offerDataSchema),
-    mode: 'onChange',
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       clientDetails: {
         firstName: '',
@@ -116,6 +118,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         tmeServicesFee: 0,
         applyPriceReduction: false,
         reductionAmount: 0,
+        activitiesToBeConfirmed: true,
       },
       detLicense: {
         mofaOwnersDeclaration: false,
@@ -132,7 +135,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         tmeServicesFee: 0,
         applyPriceReduction: false,
         reductionAmount: 0,
-        activitiesToBeConfirmed: false,
+        activitiesToBeConfirmed: true,
       },
       visaCosts: {
         numberOfVisas: 0,
@@ -176,6 +179,49 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   // Watch form data for real-time updates
   const watchedData = watch();
   const { authorityInformation } = watchedData;
+  
+  // Clear errors when specific fields change to provide immediate feedback
+  React.useEffect(() => {
+    if (watchedData.clientDetails?.firstName) {
+      clearErrors('clientDetails.firstName');
+    }
+  }, [watchedData.clientDetails?.firstName, clearErrors]);
+  
+  React.useEffect(() => {
+    if (watchedData.clientDetails?.lastName) {
+      clearErrors('clientDetails.lastName');
+    }
+  }, [watchedData.clientDetails?.lastName, clearErrors]);
+  
+  React.useEffect(() => {
+    if (watchedData.clientDetails?.companySetupType) {
+      clearErrors('clientDetails.companySetupType');
+    }
+  }, [watchedData.clientDetails?.companySetupType, clearErrors]);
+  
+  React.useEffect(() => {
+    if (watchedData.authorityInformation?.responsibleAuthority) {
+      clearErrors('authorityInformation.responsibleAuthority');
+    }
+  }, [watchedData.authorityInformation?.responsibleAuthority, clearErrors]);
+  
+  React.useEffect(() => {
+    if (watchedData.authorityInformation?.valuePerShareAED && watchedData.authorityInformation.valuePerShareAED > 0) {
+      clearErrors('authorityInformation.valuePerShareAED');
+    }
+  }, [watchedData.authorityInformation?.valuePerShareAED, clearErrors]);
+  
+  React.useEffect(() => {
+    if (watchedData.authorityInformation?.shareCapitalAED && watchedData.authorityInformation.shareCapitalAED > 0) {
+      clearErrors('authorityInformation.shareCapitalAED');
+    }
+  }, [watchedData.authorityInformation?.shareCapitalAED, clearErrors]);
+  
+  React.useEffect(() => {
+    if (watchedData.clientDetails?.clientEmails && watchedData.clientDetails.clientEmails.length > 0) {
+      clearErrors('clientDetails.clientEmails');
+    }
+  }, [watchedData.clientDetails?.clientEmails, clearErrors]);
 
   // Auto-save removed to prevent infinite re-rendering issues
 
@@ -295,26 +341,180 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Email generation removed - now handled by EmailDraftGenerator component
 
+  // Helper function to scroll to and highlight the first error field
+  const scrollToFirstError = (validationError: any) => {
+    const errors = validationError.errors || [];
+    if (errors.length === 0) return;
+    
+    // Prioritize errors - mandatory fields first, then others
+    const priorityOrder = [
+      'clientDetails.firstName',
+      'clientDetails.lastName', 
+      'clientDetails.companySetupType',
+      'authorityInformation.responsibleAuthority',
+      'authorityInformation.valuePerShareAED',
+      'authorityInformation.shareCapitalAED',
+      'clientDetails.clientEmails',
+      'visaCosts.reducedVisaCost',
+      'ifzaLicense.visaQuota',
+      'activityCodes' // Activity codes should be last priority
+    ];
+    
+    // Sort errors by priority
+    const sortedErrors = [...errors].sort((a, b) => {
+      const aPath = a.path.join('.');
+      const bPath = b.path.join('.');
+      const aIndex = priorityOrder.findIndex(p => aPath.startsWith(p));
+      const bIndex = priorityOrder.findIndex(p => bPath.startsWith(p));
+      
+      // If both found in priority list, use that order
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      // If only one found, prioritize it
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      // If neither found, keep original order
+      return 0;
+    });
+    
+    const firstError = sortedErrors[0];
+    const fieldPath = firstError.path;
+    const pathStr = fieldPath.join('.');
+    
+    // Enhanced field mapping with multiple selector strategies
+    const getFieldElement = (path: string[]) => {
+      const pathStr = path.join('.');
+      
+      // Primary selectors - exact field targeting
+      const selectors = [
+        `input[name="${pathStr}"]`,
+        `select[name="${pathStr}"]`,
+        `textarea[name="${pathStr}"]`,
+        `[data-field="${pathStr}"]`,
+        // Radio button groups
+        `input[name="${pathStr}"][type="radio"]`,
+        // Custom dropdown button for authority
+        pathStr === 'authorityInformation.responsibleAuthority' ? 'button[type="button"]:has(+ div):not([data-radix-collection-item])' : null,
+        // Company setup type radio group container
+        pathStr === 'clientDetails.companySetupType' ? 'input[name="clientDetails.companySetupType"][type="radio"]' : null,
+        // Client emails section
+        pathStr === 'clientDetails.clientEmails' ? 'input[type="email"]' : null,
+      ].filter(Boolean);
+      
+      // Try each selector until we find an element
+      for (const selector of selectors) {
+        const element = document.querySelector(selector as string);
+        if (element) {
+          return element;
+        }
+      }
+      
+      // Fallback: try to find by partial name match
+      const fallbackElement = document.querySelector(`[name*="${fieldPath[fieldPath.length - 1]}"]`);
+      if (fallbackElement) {
+        return fallbackElement;
+      }
+      
+      return null;
+    };
+    
+    let fieldElement = getFieldElement(fieldPath);
+    
+    // Special handling for authority dropdown - find the button
+    if (!fieldElement && pathStr === 'authorityInformation.responsibleAuthority') {
+      // Look for the authority dropdown button by its text content
+      const buttons = document.querySelectorAll('button[type="button"]');
+      for (const button of buttons) {
+        if (button.textContent?.includes('Select responsible authority') || 
+            button.textContent?.includes('responsible authority')) {
+          fieldElement = button;
+          break;
+        }
+      }
+    }
+    
+    // Special handling for company setup type - find the first radio in the group
+    if (!fieldElement && pathStr === 'clientDetails.companySetupType') {
+      fieldElement = document.querySelector('input[name="clientDetails.companySetupType"]');
+    }
+    
+    if (fieldElement) {
+      // Scroll to the field with smooth animation
+      fieldElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+      
+      // Add visual highlight effect with enhanced styling
+      const originalTransition = (fieldElement as HTMLElement).style.transition;
+      fieldElement.classList.add('ring-4', 'ring-red-400', 'ring-opacity-75');
+      (fieldElement as HTMLElement).style.transition = 'all 0.3s ease';
+      (fieldElement as HTMLElement).style.transform = 'scale(1.02)';
+      
+      // For custom dropdowns and radio groups, also highlight the container
+      const container = fieldElement.closest('.space-y-4, .grid, .flex');
+      if (container && container !== fieldElement) {
+        container.classList.add('bg-red-50', 'rounded-lg');
+      }
+      
+      // Focus the field if it's focusable
+      if (fieldElement instanceof HTMLInputElement || 
+          fieldElement instanceof HTMLSelectElement || 
+          fieldElement instanceof HTMLButtonElement ||
+          fieldElement instanceof HTMLTextAreaElement) {
+        setTimeout(() => {
+          fieldElement.focus();
+        }, 600); // Slightly longer delay to ensure scroll completes
+      }
+      
+      // Remove highlight after 4 seconds
+      setTimeout(() => {
+        fieldElement.classList.remove('ring-4', 'ring-red-400', 'ring-opacity-75');
+        (fieldElement as HTMLElement).style.transform = '';
+        (fieldElement as HTMLElement).style.transition = originalTransition;
+        
+        // Remove container highlight
+        if (container && container !== fieldElement) {
+          container.classList.remove('bg-red-50', 'rounded-lg');
+        }
+      }, 4000);
+      
+      // Field found and scrolled successfully
+    } else {
+      // Could not find field element
+      // Try to scroll to the section containing this field type
+      const sectionSelectors = [
+        pathStr.includes('clientDetails') ? 'h3:contains("Client Details")' : null,
+        pathStr.includes('authorityInformation') ? 'h3:contains("Authority Information")' : null,
+        pathStr.includes('visaCosts') ? 'h3:contains("Visa")' : null,
+        pathStr.includes('ifzaLicense') ? 'h3:contains("License")' : null,
+      ].filter(Boolean);
+      
+      // Simple fallback - scroll to top of form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   // PDF generation handlers with progress tracking
   const handleGeneratePDF = async (data: OfferData): Promise<void> => {
-    // Validate required data before generating PDF
+    // Validate the entire form data using Zod schema
+    try {
+      await offerDataSchema.parseAsync(data);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+
+    // Additional basic checks for backwards compatibility
     if (!data || !data.clientDetails || !data.authorityInformation) {
       toast.error('Missing Information', {
         description: 'Please fill out the required client details and authority information before generating the PDF.'
-      });
-      return;
-    }
-
-    if (!data.authorityInformation.responsibleAuthority) {
-      toast.error('Authority Required', {
-        description: 'Please select a responsible authority before generating the PDF.'
-      });
-      return;
-    }
-
-    if (!data.clientDetails.firstName && !data.clientDetails.lastName && !data.clientDetails.companyName) {
-      toast.error('Client Details Required', {
-        description: 'Please enter either client name (first/last) or company name before generating the PDF.'
       });
       return;
     }
@@ -413,26 +613,22 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   };
 
   const handlePreviewPDF = async (data: OfferData): Promise<void> => {
-    // PDF preview data validation
-    
-    // Validate required data before generating PDF
+    // Validate the entire form data using Zod schema
+    try {
+      await offerDataSchema.parseAsync(data);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+
+    // Additional basic checks for backwards compatibility  
     if (!data || !data.clientDetails || !data.authorityInformation) {
       toast.error('Missing Information', {
         description: 'Please fill out the required client details and authority information before generating the PDF.'
-      });
-      return;
-    }
-
-    if (!data.authorityInformation.responsibleAuthority) {
-      toast.error('Authority Required', {
-        description: 'Please select a responsible authority before generating the PDF.'
-      });
-      return;
-    }
-
-    if (!data.clientDetails.firstName && !data.clientDetails.lastName && !data.clientDetails.companyName) {
-      toast.error('Client Details Required', {
-        description: 'Please enter either client name (first/last) or company name before generating the PDF.'
       });
       return;
     }

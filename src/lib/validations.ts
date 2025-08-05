@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const clientDetailsSchema = z.object({
-  firstName: z.string().max(50, 'First name must be less than 50 characters').optional(),
-  lastName: z.string().max(50, 'Last name must be less than 50 characters').optional(),
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be less than 50 characters'),
   companyName: z.string().max(100, 'Company name must be less than 100 characters').optional(),
   addressToCompany: z.boolean().optional(),
   date: z.string().min(1, 'Date is required'),
@@ -17,7 +17,7 @@ export const authorityInformationSchema = z.object({
   areaInUAE: z.string().optional(),
   legalEntity: z.string().optional(),
   shareCapitalAED: z.number().min(1, 'Share capital is required'),
-  valuePerShareAED: z.number().min(10, 'Minimum value per share is AED 10'),
+  valuePerShareAED: z.number().min(1, 'Value per share is required').min(10, 'Minimum value per share is AED 10'),
   numberOfShares: z.number().min(1, 'Number of shares must be greater than 0'),
 });
 
@@ -335,28 +335,58 @@ export const offerDataSchema = z.object({
   // Conditional validation for activity codes
   const isIfzaSelected = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
   const isDetSelected = data.authorityInformation.responsibleAuthority === 'DET (Dubai Department of Economy and Tourism)';
-  const isTbcEnabled = (isIfzaSelected && data.ifzaLicense?.activitiesToBeConfirmed) || 
-                       (isDetSelected && data.detLicense?.activitiesToBeConfirmed);
   
-  // If TBC is enabled for either IFZA or DET, activity codes are completely optional
+  // Check TBC from the correct source
+  let isTbcEnabled = false;
+  if (isIfzaSelected) {
+    isTbcEnabled = data.ifzaLicense?.activitiesToBeConfirmed ?? true; // Default to true
+  } else if (isDetSelected) {
+    isTbcEnabled = data.detLicense?.activitiesToBeConfirmed ?? true; // Default to true
+  } else {
+    // For other authorities, use the general field, defaulting to true
+    isTbcEnabled = data.authorityInformation?.activitiesToBeConfirmed ?? true;
+  }
+  
+  // If TBC is enabled (which should be the default), activity codes are completely optional
   if (isTbcEnabled) {
     return true;
   }
   
-  // For authorities when TBC is not enabled, ensure at least one complete activity exists
+  // Only validate activity codes if TBC is explicitly disabled
   const hasValidActivities = data.activityCodes && data.activityCodes.length > 0 && 
     data.activityCodes.some(activity => 
       activity.code && activity.code.trim() !== '' && 
       activity.description && activity.description.trim() !== ''
     );
   
-  // For any authority when TBC is not enabled, at least one activity is required
   if (!hasValidActivities) {
     return false;
   }
   
   return true;
 }, {
-  message: "At least one complete activity code (both code and description) is required",
+  message: "At least one complete activity code (both code and description) is required when TBC is disabled",
   path: ["activityCodes"]
+}).refine((data) => {
+  // IFZA reduced visa validation
+  const isIfzaSelected = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
+  
+  if (isIfzaSelected && data.visaCosts?.reducedVisaCost && data.visaCosts.reducedVisaCost > 0) {
+    // Check if there's at least 1 visa quota in license fee section
+    const visaQuota = data.ifzaLicense?.visaQuota || 0;
+    
+    if (visaQuota < 1) {
+      return false;
+    }
+    
+    // Ensure reduced visa is maximum 1
+    if (data.visaCosts.reducedVisaCost > 1) {
+      return false;
+    }
+  }
+  
+  return true;
+}, {
+  message: "IFZA reduced visa requires at least 1 visa quota in license fee section and maximum 1 reduced visa allowed",
+  path: ["visaCosts", "reducedVisaCost"]
 }); 
