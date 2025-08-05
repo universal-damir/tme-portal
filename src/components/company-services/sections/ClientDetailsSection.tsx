@@ -377,20 +377,56 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             </div>
 
             {/* Exchange Rate Input - Much narrower and closer */}
-            <div className="w-28 ml-2">
+            <div className="ml-2">
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Rate *
               </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                type="number"
-                step="0.01"
-                {...register('exchangeRate', { valueAsNumber: true })}
-                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 text-center h-[42px]"
-                placeholder="4"
-                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              />
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => {
+                    const currentValue = data?.exchangeRate || 0;
+                    const newValue = Math.max(0.01, currentValue - 0.01);
+                    setValue('exchangeRate', parseFloat(newValue.toFixed(2)));
+                  }}
+                  className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                >
+                  -
+                </motion.button>
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  type="text"
+                  {...register('exchangeRate', { 
+                    valueAsNumber: true,
+                    setValueAs: (value) => parseFloat(value) || 0
+                  })}
+                  value={data?.exchangeRate || 0}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d.]/g, '');
+                    const parsed = parseFloat(value) || 0;
+                    setValue('exchangeRate', parsed);
+                  }}
+                  className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  placeholder="4"
+                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => {
+                    const currentValue = data?.exchangeRate || 0;
+                    const newValue = currentValue + 0.01;
+                    setValue('exchangeRate', parseFloat(newValue.toFixed(2)));
+                  }}
+                  className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                >
+                  +
+                </motion.button>
+              </div>
               <p className="text-xs text-gray-500 mt-1 whitespace-nowrap">
                 {data.exchangeRate || '4'} AED = 1 {data.secondaryCurrency || 'EUR'}
               </p>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface ChildrenCounterProps {
   /**
@@ -22,6 +23,11 @@ interface ChildrenCounterProps {
    * Maximum count (default: 10)
    */
   maxCount?: number;
+  
+  /**
+   * Label for the counter (default: "Children")
+   */
+  label?: string;
 }
 
 export const ChildrenCounter: React.FC<ChildrenCounterProps> = ({
@@ -29,6 +35,7 @@ export const ChildrenCounter: React.FC<ChildrenCounterProps> = ({
   onCountChange,
   minCount = 0,
   maxCount = 10,
+  label = "Children",
 }) => {
   const handleDecrement = () => {
     if (count > minCount) {
@@ -43,33 +50,48 @@ export const ChildrenCounter: React.FC<ChildrenCounterProps> = ({
   };
 
   return (
-    <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">
-        Children
+    <div style={{ fontFamily: 'Inter, sans-serif' }}>
+      <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+        {label}
       </label>
-      <div className="flex items-center">
-        <button
+      <div className="flex items-center gap-2">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           type="button"
           onClick={handleDecrement}
           disabled={count <= minCount}
-          className="w-10 h-12 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-l-xl hover:bg-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
+          className="w-7 h-7 rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ 
+            borderColor: count <= minCount ? '#d1d5db' : '#243F7B', 
+            color: count <= minCount ? '#9ca3af' : '#243F7B' 
+          }}
         >
           -
-        </button>
-        <input
+        </motion.button>
+        <motion.input
+          whileFocus={{ scale: 1.01 }}
           type="text"
           value={count}
           readOnly
-          className="w-20 px-4 py-3 border-t border-b border-gray-300 text-center focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+          className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center bg-gray-50"
+          onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
         />
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           type="button"
           onClick={handleIncrement}
           disabled={count >= maxCount}
-          className="w-10 h-12 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-r-xl hover:bg-gray-200 focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
+          className="w-7 h-7 rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ 
+            borderColor: count >= maxCount ? '#d1d5db' : '#243F7B', 
+            color: count >= maxCount ? '#9ca3af' : '#243F7B' 
+          }}
         >
           +
-        </button>
+        </motion.button>
       </div>
     </div>
   );

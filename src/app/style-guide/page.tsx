@@ -1570,6 +1570,256 @@ export default function StyleGuidePage() {
           </div>
         </motion.section>
 
+        {/* Increment Components */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+          className="mb-12"
+        >
+          <h2 className="text-2xl font-semibold mb-6" style={{ color: '#243F7B' }}>
+            Increment Components
+          </h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Basic Increment */}
+            <div>
+              <h3 className="text-lg font-medium mb-4" style={{ color: '#243F7B' }}>
+                Basic Increment
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                    Quantity
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-10 h-[42px] rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold"
+                      style={{ borderColor: '#243F7B', color: '#243F7B' }}
+                    >
+                      -
+                    </motion.button>
+                    <input
+                      type="number"
+                      value="1"
+                      readOnly
+                      className="w-20 h-[42px] px-3 py-2 rounded-lg border-2 border-gray-200 text-center focus:outline-none"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="w-10 h-[42px] rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold"
+                      style={{ borderColor: '#243F7B', color: '#243F7B' }}
+                    >
+                      +
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Styled Increment */}
+            <div>
+              <h3 className="text-lg font-medium mb-4" style={{ color: '#243F7B' }}>
+                Styled Increment
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                    Amount
+                  </label>
+                  <div className="flex items-center">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="h-[42px] px-4 rounded-l-lg font-semibold text-white transition-all duration-200"
+                      style={{ backgroundColor: '#243F7B' }}
+                    >
+                      -
+                    </motion.button>
+                    <input
+                      type="number"
+                      value="5"
+                      readOnly
+                      className="w-20 h-[42px] px-3 py-2 border-t-2 border-b-2 text-center focus:outline-none"
+                      style={{ borderColor: '#243F7B' }}
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="h-[42px] px-4 rounded-r-lg font-semibold text-white transition-all duration-200"
+                      style={{ backgroundColor: '#243F7B' }}
+                    >
+                      +
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Rounded Increment */}
+            <div>
+              <h3 className="text-lg font-medium mb-4" style={{ color: '#243F7B' }}>
+                Rounded Increment
+              </h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                    Items
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-10 h-10 rounded-full font-semibold text-white transition-all duration-200 flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: '#243F7B' }}
+                    >
+                      -
+                    </motion.button>
+                    <div className="w-16 text-center">
+                      <span className="text-2xl font-bold" style={{ color: '#243F7B' }}>3</span>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="w-10 h-10 rounded-full font-semibold text-white transition-all duration-200 flex items-center justify-center shadow-md"
+                      style={{ backgroundColor: '#243F7B' }}
+                    >
+                      +
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Advanced Increment Examples */}
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold mb-6" style={{ color: '#243F7B' }}>
+              Advanced Increment Components
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Large Increment with Label */}
+              <div className="bg-white p-6 rounded-lg border-2 border-gray-200">
+                <h4 className="text-lg font-medium mb-4" style={{ color: '#243F7B' }}>
+                  Investment Amount (AED)
+                </h4>
+                <div className="flex items-center justify-center gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-12 h-12 rounded-lg font-bold text-xl transition-all duration-200 flex items-center justify-center"
+                    style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                  >
+                    -
+                  </motion.button>
+                  <div className="flex flex-col items-center">
+                    <input
+                      type="text"
+                      value="100,000"
+                      readOnly
+                      className="w-32 h-12 px-4 text-center text-xl font-bold rounded-lg border-2 focus:outline-none"
+                      style={{ borderColor: '#243F7B', color: '#243F7B' }}
+                    />
+                    <span className="text-xs text-gray-500 mt-1">Minimum: 50,000</span>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-12 h-12 rounded-lg font-bold text-xl transition-all duration-200 flex items-center justify-center"
+                    style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                  >
+                    +
+                  </motion.button>
+                </div>
+                <div className="flex justify-center gap-2 mt-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-3 py-1 text-xs rounded-md transition-all duration-200"
+                    style={{ backgroundColor: '#f3f4f6', color: '#243F7B' }}
+                  >
+                    +10K
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-3 py-1 text-xs rounded-md transition-all duration-200"
+                    style={{ backgroundColor: '#f3f4f6', color: '#243F7B' }}
+                  >
+                    +50K
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-3 py-1 text-xs rounded-md transition-all duration-200"
+                    style={{ backgroundColor: '#f3f4f6', color: '#243F7B' }}
+                  >
+                    +100K
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Multi-Value Increment */}
+              <div className="bg-white p-6 rounded-lg border-2 border-gray-200">
+                <h4 className="text-lg font-medium mb-4" style={{ color: '#243F7B' }}>
+                  Family Members
+                </h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Adults</span>
+                    <div className="flex items-center gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-8 h-8 rounded-md font-medium transition-all duration-200 flex items-center justify-center"
+                        style={{ backgroundColor: '#f1f5f9', color: '#243F7B' }}
+                      >
+                        -
+                      </motion.button>
+                      <span className="w-8 text-center font-semibold" style={{ color: '#243F7B' }}>2</span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-8 h-8 rounded-md font-medium transition-all duration-200 flex items-center justify-center"
+                        style={{ backgroundColor: '#f1f5f9', color: '#243F7B' }}
+                      >
+                        +
+                      </motion.button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Children</span>
+                    <div className="flex items-center gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-8 h-8 rounded-md font-medium transition-all duration-200 flex items-center justify-center"
+                        style={{ backgroundColor: '#f1f5f9', color: '#243F7B' }}
+                      >
+                        -
+                      </motion.button>
+                      <span className="w-8 text-center font-semibold" style={{ color: '#243F7B' }}>1</span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-8 h-8 rounded-md font-medium transition-all duration-200 flex items-center justify-center"
+                        style={{ backgroundColor: '#f1f5f9', color: '#243F7B' }}
+                      >
+                        +
+                      </motion.button>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-gray-200">
+                    <span className="text-sm font-medium" style={{ color: '#243F7B' }}>Total Family Size: 3</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
         {/* Interactive Demo */}
         <motion.section 
           initial={{ opacity: 0, y: 20 }}

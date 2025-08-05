@@ -438,16 +438,52 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 Exchange Rate (AED to {clientDetails?.secondaryCurrency || 'Currency'}) *
               </label>
               <div className="flex items-center gap-3">
-                <motion.input
-                  whileFocus={{ scale: 1.01 }}
-                  type="number"
-                  step="0.01"
-                  {...register('clientDetails.exchangeRate', { valueAsNumber: true })}
-                  className="w-28 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                  placeholder="4.00"
-                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                />
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => {
+                      const currentValue = watchedData.clientDetails?.exchangeRate || 0;
+                      const newValue = Math.max(0.01, currentValue - 0.01);
+                      setValue('clientDetails.exchangeRate', parseFloat(newValue.toFixed(2)));
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                  >
+                    -
+                  </motion.button>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="text"
+                    {...register('clientDetails.exchangeRate', { 
+                      valueAsNumber: true,
+                      setValueAs: (value) => parseFloat(value) || 0
+                    })}
+                    value={watchedData.clientDetails?.exchangeRate || 0}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d.]/g, '');
+                      const parsed = parseFloat(value) || 0;
+                      setValue('clientDetails.exchangeRate', parsed);
+                    }}
+                    className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="4.00"
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => {
+                      const currentValue = watchedData.clientDetails?.exchangeRate || 0;
+                      const newValue = currentValue + 0.01;
+                      setValue('clientDetails.exchangeRate', parseFloat(newValue.toFixed(2)));
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                  >
+                    +
+                  </motion.button>
+                </div>
                 <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1 h-[42px] flex items-center">
                   <p className="text-xs text-gray-600 font-medium whitespace-nowrap">
                     {clientDetails?.exchangeRate || '4.00'} AED = 1 {clientDetails?.secondaryCurrency || 'Currency'}

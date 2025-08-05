@@ -151,16 +151,50 @@ export const ChildVisaSection: React.FC<ChildVisaSectionProps> = ({
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Number of Child Visas
               </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                type="number"
-                min="1"
-                {...register('visaCosts.numberOfChildVisas', { valueAsNumber: true })}
-                className="w-full max-w-xs px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                placeholder="1"
-              />
+              <div className="flex items-center gap-2 max-w-xs">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => {
+                    const currentValue = watchedData.visaCosts?.numberOfChildVisas || 0;
+                    const newValue = Math.max(1, currentValue - 1);
+                    setValue('visaCosts.numberOfChildVisas', newValue);
+                  }}
+                  className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                >
+                  -
+                </motion.button>
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
+                  type="text"
+                  {...register('visaCosts.numberOfChildVisas', { 
+                    valueAsNumber: true,
+                    setValueAs: (value) => Math.max(1, parseInt(value) || 1)
+                  })}
+                  value={watchedData.visaCosts?.numberOfChildVisas || 1}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    setValue('visaCosts.numberOfChildVisas', Math.max(1, parseInt(value) || 1));
+                  }}
+                  className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  placeholder="1"
+                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                />
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={() => {
+                    const currentValue = watchedData.visaCosts?.numberOfChildVisas || 0;
+                    setValue('visaCosts.numberOfChildVisas', currentValue + 1);
+                  }}
+                  className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                >
+                  +
+                </motion.button>
+              </div>
               {errors.visaCosts?.numberOfChildVisas && (
                 <p className="text-red-500 text-xs mt-1">{errors.visaCosts.numberOfChildVisas.message}</p>
               )}

@@ -172,18 +172,57 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Standard Number of Visas
                 </label>
-                <motion.input
-                  whileFocus={{ scale: 1.01 }}
-                  type="number"
-                  min="0"
-                  max={watchedData.ifzaLicense?.visaQuota || 0}
-                  disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
-                  {...register('visaCosts.numberOfVisas', { valueAsNumber: true })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  placeholder="0"
-                />
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
+                    onClick={() => {
+                      const currentValue = watchedData.visaCosts?.numberOfVisas || 0;
+                      const newValue = Math.max(0, currentValue - 1);
+                      setValue('visaCosts.numberOfVisas', newValue);
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    -
+                  </motion.button>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="text"
+                    disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
+                    {...register('visaCosts.numberOfVisas', { 
+                      valueAsNumber: true,
+                      setValueAs: (value) => parseInt(value) || 0
+                    })}
+                    value={watchedData.visaCosts?.numberOfVisas || 0}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      const parsed = parseInt(value) || 0;
+                      const maxValue = watchedData.ifzaLicense?.visaQuota || 0;
+                      setValue('visaCosts.numberOfVisas', Math.min(parsed, maxValue));
+                    }}
+                    className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
+                    onClick={() => {
+                      const currentValue = watchedData.visaCosts?.numberOfVisas || 0;
+                      const maxValue = watchedData.ifzaLicense?.visaQuota || 0;
+                      const newValue = Math.min(currentValue + 1, maxValue);
+                      setValue('visaCosts.numberOfVisas', newValue);
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    +
+                  </motion.button>
+                </div>
                 {(watchedData.ifzaLicense?.visaQuota || 0) < 1 ? (
                   <p className="text-xs text-gray-600 mt-2">
                     Set visa quota in License Fees section to enable visa fields
@@ -205,18 +244,55 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Reduced Number of Visas
                 </label>
-                <motion.input
-                  whileFocus={{ scale: 1.01 }}
-                  type="number"
-                  min="0"
-                  max={maxReducedVisas}
-                  disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
-                  {...register('visaCosts.reducedVisaCost', { valueAsNumber: true })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
-                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  placeholder="0"
-                />
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
+                    onClick={() => {
+                      const currentValue = watchedData.visaCosts?.reducedVisaCost || 0;
+                      const newValue = Math.max(0, currentValue - 1);
+                      setValue('visaCosts.reducedVisaCost', newValue);
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    -
+                  </motion.button>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="text"
+                    disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
+                    {...register('visaCosts.reducedVisaCost', { 
+                      valueAsNumber: true,
+                      setValueAs: (value) => parseInt(value) || 0
+                    })}
+                    value={watchedData.visaCosts?.reducedVisaCost || 0}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      const parsed = parseInt(value) || 0;
+                      setValue('visaCosts.reducedVisaCost', Math.min(parsed, maxReducedVisas));
+                    }}
+                    className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    disabled={(watchedData.ifzaLicense?.visaQuota || 0) < 1}
+                    onClick={() => {
+                      const currentValue = watchedData.visaCosts?.reducedVisaCost || 0;
+                      const newValue = Math.min(currentValue + 1, maxReducedVisas);
+                      setValue('visaCosts.reducedVisaCost', newValue);
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600 disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    +
+                  </motion.button>
+                </div>
                 <p className="text-xs text-gray-500 mt-2">
                   Only 1 visa can be reduced cost and free for life (AED {(visaCosts.standardVisaFee - visaCosts.reducedVisaFee).toLocaleString()} reduction)
                 </p>
@@ -233,16 +309,50 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Standard Number of Visas
                 </label>
-                <motion.input
-                  whileFocus={{ scale: 1.01 }}
-                  type="number"
-                  min="0"
-                  {...register('visaCosts.numberOfVisas', { valueAsNumber: true })}
-                  className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  placeholder="0"
-                />
+                <div className="flex items-center gap-2">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => {
+                      const currentValue = watchedData.visaCosts?.numberOfVisas || 0;
+                      const newValue = Math.max(0, currentValue - 1);
+                      setValue('visaCosts.numberOfVisas', newValue);
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                  >
+                    -
+                  </motion.button>
+                  <motion.input
+                    whileFocus={{ scale: 1.01 }}
+                    type="text"
+                    {...register('visaCosts.numberOfVisas', { 
+                      valueAsNumber: true,
+                      setValueAs: (value) => parseInt(value) || 0
+                    })}
+                    value={watchedData.visaCosts?.numberOfVisas || 0}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '');
+                      setValue('visaCosts.numberOfVisas', parseInt(value) || 0);
+                    }}
+                    className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    placeholder="0"
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    onClick={() => {
+                      const currentValue = watchedData.visaCosts?.numberOfVisas || 0;
+                      setValue('visaCosts.numberOfVisas', currentValue + 1);
+                    }}
+                    className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+                  >
+                    +
+                  </motion.button>
+                </div>
                 <p className="text-xs text-gray-500 mt-2">
                   Enter the number of visas required
                 </p>

@@ -253,31 +253,46 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <span className="ml-3 text-sm font-semibold text-gray-700">Include Children</span>
             </motion.label>
             
-            {/* Compact inline counter */}
+            {/* Compact inline counter with TME branding */}
             {(dependents.children?.count || 0) > 0 && (
-              <div className="flex items-center">
-                <button
+              <div className="flex items-center gap-2">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => handleChildrenCountChange(Math.max(1, (dependents.children?.count || 1) - 1))}
                   disabled={(dependents.children?.count || 0) <= 1}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-l-lg hover:bg-gray-200 focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
+                  className="w-7 h-7 rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    borderColor: (dependents.children?.count || 0) <= 1 ? '#d1d5db' : '#243F7B', 
+                    color: (dependents.children?.count || 0) <= 1 ? '#9ca3af' : '#243F7B' 
+                  }}
                 >
                   -
-                </button>
-                <input
+                </motion.button>
+                <motion.input
+                  whileFocus={{ scale: 1.01 }}
                   type="text"
                   value={dependents.children?.count || 0}
                   readOnly
-                  className="w-12 px-2 py-1 border-t border-b border-gray-300 text-center text-sm focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 bg-gray-50"
+                  className="w-16 px-2 py-1 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 text-center text-sm bg-gray-50"
+                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={() => handleChildrenCountChange(Math.min(10, (dependents.children?.count || 0) + 1))}
                   disabled={(dependents.children?.count || 0) >= 10}
-                  className="w-8 h-8 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-r-lg hover:bg-gray-200 focus:ring-2 focus:ring-slate-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-gray-100"
+                  className="w-7 h-7 rounded-lg border-2 transition-all duration-200 flex items-center justify-center font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    borderColor: (dependents.children?.count || 0) >= 10 ? '#d1d5db' : '#243F7B', 
+                    color: (dependents.children?.count || 0) >= 10 ? '#9ca3af' : '#243F7B' 
+                  }}
                 >
                   +
-                </button>
+                </motion.button>
               </div>
             )}
           </div>

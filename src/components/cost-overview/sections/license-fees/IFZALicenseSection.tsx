@@ -151,16 +151,50 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
           <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
             Visa Quota
           </label>
-          <motion.input
-            whileFocus={{ scale: 1.01 }}
-            type="number"
-            min="0"
-            {...register('ifzaLicense.visaQuota', { valueAsNumber: true })}
-            className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-            placeholder="0"
-            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-          />
+          <div className="flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={() => {
+                const currentValue = watchedData.ifzaLicense?.visaQuota || 0;
+                const newValue = Math.max(0, currentValue - 1);
+                setValue('ifzaLicense.visaQuota', newValue);
+              }}
+              className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+            >
+              -
+            </motion.button>
+            <motion.input
+              whileFocus={{ scale: 1.01 }}
+              type="text"
+              {...register('ifzaLicense.visaQuota', { 
+                valueAsNumber: true,
+                setValueAs: (value) => parseInt(value) || 0
+              })}
+              value={watchedData.ifzaLicense?.visaQuota || 0}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                setValue('ifzaLicense.visaQuota', parseInt(value) || 0);
+              }}
+              className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              placeholder="0"
+              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              type="button"
+              onClick={() => {
+                const currentValue = watchedData.ifzaLicense?.visaQuota || 0;
+                setValue('ifzaLicense.visaQuota', currentValue + 1);
+              }}
+              className="w-7 h-7 rounded-lg border-2 border-gray-200 transition-all duration-200 flex items-center justify-center font-semibold text-sm text-gray-600"
+            >
+              +
+            </motion.button>
+          </div>
           <p className="text-xs text-gray-600 mt-1">AED 12,900 + AED 2,000 per visa</p>
           {errors.ifzaLicense?.visaQuota && (
             <p className="text-red-500 text-xs mt-1">{errors.ifzaLicense.visaQuota.message}</p>
