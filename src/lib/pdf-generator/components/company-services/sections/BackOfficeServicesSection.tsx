@@ -60,24 +60,11 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
     // Build custom configuration from form data
     const customTiers: { staffRange: string; monthlyFee: number }[] = [];
     
-    console.log('PDF DEBUG - backOfficeServices data:', {
-      customTier1From: backOfficeServices.customTier1From,
-      customTier1To: backOfficeServices.customTier1To,
-      customTier1Fee: backOfficeServices.customTier1Fee,
-      customTier2From: backOfficeServices.customTier2From,
-      customTier2To: backOfficeServices.customTier2To,
-      customTier2Fee: backOfficeServices.customTier2Fee,
-      customTier3From: backOfficeServices.customTier3From,
-      customTier3To: backOfficeServices.customTier3To,
-      customTier3Fee: backOfficeServices.customTier3Fee
-    });
-    
     if (backOfficeServices.customTier1From && backOfficeServices.customTier1To && backOfficeServices.customTier1Fee) {
       customTiers.push({
         staffRange: `${backOfficeServices.customTier1From}–${backOfficeServices.customTier1To} staff`,
         monthlyFee: backOfficeServices.customTier1Fee
       });
-      console.log('PDF DEBUG - Added tier 1');
     }
     
     if (backOfficeServices.customTier2From && backOfficeServices.customTier2To && backOfficeServices.customTier2Fee) {
@@ -85,7 +72,6 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
         staffRange: `${backOfficeServices.customTier2From}–${backOfficeServices.customTier2To} staff`,
         monthlyFee: backOfficeServices.customTier2Fee
       });
-      console.log('PDF DEBUG - Added tier 2');
     }
     
     if (backOfficeServices.customTier3From && backOfficeServices.customTier3To && backOfficeServices.customTier3Fee) {
@@ -93,10 +79,7 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
         staffRange: `${backOfficeServices.customTier3From}–${backOfficeServices.customTier3To} staff`,
         monthlyFee: backOfficeServices.customTier3Fee
       });
-      console.log('PDF DEBUG - Added tier 3');
     }
-    
-    console.log('PDF DEBUG - Final customTiers:', customTiers);
     
     teamConfig = {
       label: 'Custom Team',
