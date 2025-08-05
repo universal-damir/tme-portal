@@ -252,7 +252,7 @@ export const CITShareholderDeclarationPage: React.FC<CITShareholderDeclarationPa
             </Text>
           </View>
           {getReliefTypePoints().map((point, index) => (
-            <View style={{ flexDirection: 'row', marginBottom: 4 }}>
+            <View key={`relief-point-${index}`} style={{ flexDirection: 'row', marginBottom: 4 }}>
               <Text style={[styles.introText, { width: 20, textAlign: 'right', marginRight: 5 }]}>{point.number}.</Text>
               <Text style={[styles.introText, { flex: 1, textAlign: 'justify', lineHeight: 1.2 }]}>
                 {point.text}

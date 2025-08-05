@@ -1,0 +1,24 @@
+TME Portal Backup Manifest
+==========================
+Backup Date: Tue Aug  5 09:41:58 UTC 2025
+Backup File: tme_portal_complete_20250805_094158.tar.gz
+PostgreSQL Version:  PostgreSQL 15.13 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+Database Size: 8853kB
+Tables Backed Up:
+  -  public.applications
+  -  public.audit_logs
+  -  public.notifications
+  -  public.permissions
+  -  public.security_alert_acknowledgments
+  -  public.sessions
+  -  public.system_config
+  -  public.user_permissions
+  -  public.users
+  - 
+
+Recent Activity:
+42totalusers
+2activesessions
+650auditlogentries
+
+Backup Status: SUCCESS

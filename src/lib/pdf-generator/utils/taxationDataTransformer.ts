@@ -63,4 +63,42 @@ export function transformTaxationData(
     // Add taxation data as a nested object for easy access in PDF components
     taxationData: taxationData,
   } as any;
+}
+
+/**
+ * Generate taxation PDF filename following TME naming conventions
+ * Format: {YYMMDD} {abbreviation} {shortname} CIT Disclaimer {tax end period dd.mm.yyyy}
+ */
+export function generateTaxationFilename(
+  taxationData: TaxationData,
+  clientInfo: SharedClientInfo
+): string {
+  // Format document date as YYMMDD  
+  const date = new Date(taxationData.date || clientInfo.date);
+  const yy = date.getFullYear().toString().slice(-2);
+  const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dd = date.getDate().toString().padStart(2, '0');
+  const formattedDate = `${yy}${mm}${dd}`;
+  
+  // Get company abbreviation from company type
+  const companyAbbreviation = taxationData.companyType === 'management-consultants' ? 'MGT' : 'FZCO';
+  
+  // Get company short name
+  const companyShortName = taxationData.shortCompanyName || clientInfo.shortCompanyName || 'Company';
+  
+  // Format tax end period as dd.mm.yyyy
+  const formatTaxEndPeriod = () => {
+    const toDate = taxationData.citDisclaimer?.taxPeriodRange?.toDate;
+    if (toDate) {
+      const endDate = new Date(toDate);
+      const day = endDate.getDate().toString().padStart(2, '0');
+      const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
+      const year = endDate.getFullYear();
+      return `${day}.${month}.${year}`;
+    }
+    return '31.12.2025'; // Default fallback
+  };
+  
+  // Build filename: {YYMMDD} {abbreviation} {shortname} CIT Disclaimer {tax end period}
+  return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}.pdf`;
 } 

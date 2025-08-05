@@ -33,6 +33,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isPreviewLoadingSecondary, setIsPreviewLoadingSecondary] = useState(false);
 
   // Don't render if feature is disabled
   if (!config.canShowReviewComponents || !config.allowReviewActions) {
@@ -45,6 +46,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     setSuccess(false);
     setIsSubmitting(false);
     setIsPreviewLoading(false);
+    setIsPreviewLoadingSecondary(false);
   };
 
   // Helper function to generate form title using PDF naming convention
@@ -126,6 +128,34 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         }
         
         return `${formattedDate} TME Services ${nameForTitle}`;
+      } else if (application.type === 'taxation') {
+        const formData = application.form_data as any; // TaxationData type
+        const date = new Date(formData.date || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        // Get company abbreviation from company type
+        const companyAbbreviation = formData.companyType === 'management-consultants' ? 'MGT' : 'FZCO';
+        
+        // Get company short name
+        const companyShortName = formData.shortCompanyName || 'Company';
+        
+        // Format tax end period as dd.mm.yyyy
+        const formatTaxEndPeriod = () => {
+          const toDate = formData.citDisclaimer?.taxPeriodRange?.toDate;
+          if (toDate) {
+            const endDate = new Date(toDate);
+            const day = endDate.getDate().toString().padStart(2, '0');
+            const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
+            const year = endDate.getFullYear();
+            return `${day}.${month}.${year}`;
+          }
+          return '31.12.2025'; // Default fallback
+        };
+        
+        return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
       }
       
       return application?.title || 'Application';
@@ -208,6 +238,30 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 1000);
+      } else if (application.type === 'taxation') {
+        // Generate Taxation PDF for review
+        const { generateTaxationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
+        const formData = application.form_data as any; // TaxationData type
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          shortCompanyName: formData.shortCompanyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateTaxationPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
       } else {
         setError('PDF preview not supported for this application type.');
         return;
@@ -223,6 +277,55 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       setError('Failed to generate PDF for review. Please try again.');
     } finally {
       setIsPreviewLoading(false);
+    }
+  };
+
+  const handlePreviewTaxationSecondaryPDF = async () => {
+    if (!application?.form_data || application.type !== 'taxation') return;
+    
+    try {
+      setIsPreviewLoadingSecondary(true);
+      setError(null);
+      
+      // Show toast notification about PDF generation
+      toast.info('Generating CIT Shareholder Declaration preview...', {
+        description: 'PDF will open in a new window when ready',
+        duration: 3000
+      });
+      
+      const { generateCITShareholderDeclarationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
+      const formData = application.form_data as any; // TaxationData type
+      
+      // Extract client info from form data
+      const clientInfo: SharedClientInfo = {
+        firstName: formData.firstName || '',
+        lastName: formData.lastName || '',
+        companyName: formData.companyName || '',
+        shortCompanyName: formData.shortCompanyName || '',
+        date: formData.date || new Date().toISOString().split('T')[0],
+      };
+      
+      const { blob } = await generateCITShareholderDeclarationPDFWithFilename(formData, clientInfo);
+      
+      // Open PDF in new tab for preview
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // Clean up the URL after a delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+      
+      // Show success toast when PDF is successfully generated and opened
+      toast.success('CIT Shareholder Declaration preview opened in new window', {
+        duration: 2000
+      });
+      
+    } catch (error) {
+      console.error('Error generating CIT Shareholder Declaration PDF for review:', error);
+      setError('Failed to generate CIT Shareholder Declaration PDF for review. Please try again.');
+    } finally {
+      setIsPreviewLoadingSecondary(false);
     }
   };
 
@@ -417,33 +520,90 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                       );
                     })()}
 
-                    {/* PDF Preview Button */}
-                    <div className="text-center">
-                      <motion.button
-                        whileHover={!isPreviewLoading ? { scale: 1.02 } : {}}
-                        whileTap={!isPreviewLoading ? { scale: 0.98 } : {}}
-                        type="button"
-                        onClick={handlePreviewPDF}
-                        disabled={isPreviewLoading}
-                        className="flex items-center justify-center space-x-2 w-1/2 mx-auto px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundColor: isPreviewLoading ? '#9CA3AF' : '#243F7B' }}
-                      >
-                        {isPreviewLoading ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            <span>Generating...</span>
-                          </>
-                        ) : (
-                          <>
-                            <FileText className="w-4 h-4" />
-                            <span>Preview PDF</span>
-                          </>
-                        )}
-                      </motion.button>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Opens in new tab for review
-                      </p>
-                    </div>
+                    {/* PDF Preview Button(s) - Special handling for taxation */}
+                    {application.type === 'taxation' ? (
+                      /* Taxation: Dual Preview Buttons */
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* CIT Disclaimer Preview */}
+                          <motion.button
+                            whileHover={!isPreviewLoading ? { scale: 1.02 } : {}}
+                            whileTap={!isPreviewLoading ? { scale: 0.98 } : {}}
+                            type="button"
+                            onClick={handlePreviewPDF}
+                            disabled={isPreviewLoading}
+                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: isPreviewLoading ? '#9CA3AF' : '#243F7B' }}
+                          >
+                            {isPreviewLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                <span>Generating...</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-4 h-4" />
+                                <span>Preview CIT Disclaimer</span>
+                              </>
+                            )}
+                          </motion.button>
+                          
+                          {/* CIT Shareholder Declaration Preview */}
+                          <motion.button
+                            whileHover={!isPreviewLoadingSecondary ? { scale: 1.02 } : {}}
+                            whileTap={!isPreviewLoadingSecondary ? { scale: 0.98 } : {}}
+                            type="button"
+                            onClick={handlePreviewTaxationSecondaryPDF}
+                            disabled={isPreviewLoadingSecondary}
+                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: isPreviewLoadingSecondary ? '#9CA3AF' : '#D2BC99', color: isPreviewLoadingSecondary ? 'white' : '#243F7B' }}
+                          >
+                            {isPreviewLoadingSecondary ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                                <span>Generating...</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-4 h-4" />
+                                <span>Preview Mgt Declaration</span>
+                              </>
+                            )}
+                          </motion.button>
+                        </div>
+                        <p className="text-xs text-gray-500 text-center">
+                          Both PDFs will open in new tabs for review
+                        </p>
+                      </div>
+                    ) : (
+                      /* Other Types: Single Preview Button */
+                      <div className="text-center">
+                        <motion.button
+                          whileHover={!isPreviewLoading ? { scale: 1.02 } : {}}
+                          whileTap={!isPreviewLoading ? { scale: 0.98 } : {}}
+                          type="button"
+                          onClick={handlePreviewPDF}
+                          disabled={isPreviewLoading}
+                          className="flex items-center justify-center space-x-2 w-1/2 mx-auto px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ backgroundColor: isPreviewLoading ? '#9CA3AF' : '#243F7B' }}
+                        >
+                          {isPreviewLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Generating...</span>
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="w-4 h-4" />
+                              <span>Preview PDF</span>
+                            </>
+                          )}
+                        </motion.button>
+                        <p className="text-xs text-gray-500 mt-2">
+                          Opens in new tab for review
+                        </p>
+                      </div>
+                    )}
 
                     {/* Comments */}
                     <div>

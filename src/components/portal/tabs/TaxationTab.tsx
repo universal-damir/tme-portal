@@ -4,12 +4,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Download, Eye, Send } from 'lucide-react';
+import { Eye, Send, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
+import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 import { TaxationData, TAXATION_DEFAULTS, CompanyType } from '@/types/taxation';
 import { taxationSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
+import { useTaxationApplication } from '@/hooks/useTaxationApplication';
 import {
   ClientDetailsSection,
   CITDisclaimerSection,
@@ -20,6 +22,7 @@ const TaxationTab: React.FC = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   // Form state management
   const {
@@ -48,6 +51,12 @@ const TaxationTab: React.FC = () => {
   });
 
   const watchedData = watch();
+
+  // Review system integration
+  const reviewApp = useTaxationApplication({
+    formData: watchedData,
+    clientName: watchedData.companyName || `${watchedData.firstName} ${watchedData.lastName}`.trim() || 'Client'
+  });
 
   // Always show CIT Shareholder Declaration when CIT Disclaimer is enabled
   const shouldShowCITShareholderDeclaration = () => {
@@ -396,12 +405,22 @@ const TaxationTab: React.FC = () => {
       });
     };
 
+    const handleSendApprovedApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Sending approved Taxation application:', applicationId);
+      
+      // Generate PDF and show email modal using the saved form data
+      handleDownloadAll(formData);
+    };
+
     window.addEventListener('edit-taxation-application', handleEditApplication);
+    window.addEventListener('send-approved-application', handleSendApprovedApplication);
 
     return () => {
       window.removeEventListener('edit-taxation-application', handleEditApplication);
+      window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, [setValue]);
+  }, [setValue, handleDownloadAll]);
 
   return (
     <div className="space-y-8">
@@ -442,15 +461,16 @@ const TaxationTab: React.FC = () => {
             disabled={isGenerating}
             whileHover={!isGenerating ? { scale: 1.02 } : {}}
             whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3 border-2"
             style={{ 
-              backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
-              color: '#243F7B' 
+              backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+              borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
+              color: isGenerating ? '#9CA3AF' : '#243F7B'
             }}
           >
             {isGenerating ? (
               <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
                 <span>Generating...</span>
               </>
             ) : (
@@ -469,15 +489,16 @@ const TaxationTab: React.FC = () => {
               disabled={isGenerating}
               whileHover={!isGenerating ? { scale: 1.02 } : {}}
               whileTap={!isGenerating ? { scale: 0.98 } : {}}
-              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3 border-2"
               style={{ 
-                backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
-                color: '#243F7B' 
+                backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+                borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
+                color: isGenerating ? '#9CA3AF' : '#243F7B'
               }}
             >
               {isGenerating ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
                   <span>Generating...</span>
                 </>
               ) : (
@@ -488,6 +509,32 @@ const TaxationTab: React.FC = () => {
               )}
             </motion.button>
           )}
+
+          {/* Submit for Review Button */}
+          <motion.button
+            type="button"
+            onClick={() => setIsReviewModalOpen(true)}
+            disabled={reviewApp.isLoading}
+            whileHover={!reviewApp.isLoading ? { scale: 1.02 } : {}}
+            whileTap={!reviewApp.isLoading ? { scale: 0.98 } : {}}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+            style={{ 
+              backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#D2BC99', 
+              color: '#243F7B' 
+            }}
+          >
+            {reviewApp.isLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <UserCheck className="h-5 w-5" />
+                <span>Submit for Review</span>
+              </>
+            )}
+          </motion.button>
           
           {/* Download All Button */}
           <motion.button
@@ -515,6 +562,63 @@ const TaxationTab: React.FC = () => {
           </motion.button>
         </div>
       </div>
+      
+      {/* Review Submission Modal */}
+      <ReviewSubmissionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        applicationId={reviewApp.application?.id?.toString() || 'new'}
+        applicationTitle={(() => {
+          // Use the same filename generation as PDF export for consistency
+          try {
+            const { generateTaxationFilename } = require('@/lib/pdf-generator/utils/taxationDataTransformer');
+            const filename = generateTaxationFilename(watchedData, clientInfo);
+            return filename.replace('.pdf', '');
+          } catch (error) {
+            // Fallback to basic format if generation fails
+            const date = new Date(watchedData.date || new Date());
+            const yy = date.getFullYear().toString().slice(-2);
+            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dd = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${yy}${mm}${dd}`;
+            
+            let nameForTitle = '';
+            if (watchedData.companyName) {
+              nameForTitle = watchedData.companyName;
+            } else if (watchedData.lastName && watchedData.firstName) {
+              nameForTitle = `${watchedData.lastName} ${watchedData.firstName}`;
+            } else if (watchedData.firstName) {
+              nameForTitle = watchedData.firstName;
+            } else if (watchedData.lastName) {
+              nameForTitle = watchedData.lastName;
+            } else {
+              nameForTitle = 'Client';
+            }
+            
+            // Get company abbreviation from company type
+            const companyAbbreviation = watchedData.companyType === 'management-consultants' ? 'MGT' : 'FZCO';
+            
+            // Get company short name
+            const companyShortName = watchedData.shortCompanyName || 'Company';
+            
+            // Format tax end period as dd.mm.yyyy
+            const formatTaxEndPeriod = () => {
+              const toDate = watchedData.citDisclaimer?.taxPeriodRange?.toDate;
+              if (toDate) {
+                const endDate = new Date(toDate);
+                const day = endDate.getDate().toString().padStart(2, '0');
+                const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
+                const year = endDate.getFullYear();
+                return `${day}.${month}.${year}`;
+              }
+              return '31.12.2025'; // Default fallback
+            };
+            
+            return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
+          }
+        })()}
+        onSubmit={reviewApp.submitForReview}
+      />
       
       {/* Email Draft Generator with Preview Modal */}
       {emailDraftProps && (

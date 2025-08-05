@@ -31,6 +31,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   // Removed viewMode state as we're removing the tabs
   const [error, setError] = useState<string | null>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [isPreviewLoadingSecondary, setIsPreviewLoadingSecondary] = useState(false);
   const [isSendLoading, setIsSendLoading] = useState(false);
 
   // Don't render if feature is disabled
@@ -117,6 +118,34 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         }
         
         return `${formattedDate} TME Services ${nameForTitle}`;
+      } else if (application.type === 'taxation') {
+        const formData = application.form_data as any; // TaxationData type
+        const date = new Date(formData.date || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        // Get company abbreviation from company type
+        const companyAbbreviation = formData.companyType === 'management-consultants' ? 'MGT' : 'FZCO';
+        
+        // Get company short name
+        const companyShortName = formData.shortCompanyName || 'Company';
+        
+        // Format tax end period as dd.mm.yyyy
+        const formatTaxEndPeriod = () => {
+          const toDate = formData.citDisclaimer?.taxPeriodRange?.toDate;
+          if (toDate) {
+            const endDate = new Date(toDate);
+            const day = endDate.getDate().toString().padStart(2, '0');
+            const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
+            const year = endDate.getFullYear();
+            return `${day}.${month}.${year}`;
+          }
+          return '31.12.2025'; // Default fallback
+        };
+        
+        return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
       }
       
       return application?.title || 'Application';
@@ -195,6 +224,28 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 1000);
+      } else if (application.type === 'taxation') {
+        const { generateTaxationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
+        const formData = application.form_data as any; // TaxationData type
+        
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          shortCompanyName: formData.shortCompanyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateTaxationPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
       } else {
         setError('PDF preview not supported for this application type.');
         return;
@@ -210,6 +261,54 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       setError('Failed to generate PDF preview. Please try again.');
     } finally {
       setIsPreviewLoading(false);
+    }
+  };
+
+  const handlePreviewTaxationSecondaryPDF = async () => {
+    if (!application?.form_data || application.type !== 'taxation') return;
+    
+    try {
+      setError(null);
+      setIsPreviewLoadingSecondary(true);
+      
+      // Show toast notification about PDF generation and new window
+      toast.info('Generating CIT Shareholder Declaration preview...', {
+        description: 'PDF will open in a new window when ready',
+        duration: 3000
+      });
+      
+      const { generateCITShareholderDeclarationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
+      const formData = application.form_data as any; // TaxationData type
+      
+      const clientInfo: SharedClientInfo = {
+        firstName: formData.firstName || '',
+        lastName: formData.lastName || '',
+        companyName: formData.companyName || '',
+        shortCompanyName: formData.shortCompanyName || '',
+        date: formData.date || new Date().toISOString().split('T')[0],
+      };
+      
+      const { blob } = await generateCITShareholderDeclarationPDFWithFilename(formData, clientInfo);
+      
+      // Open PDF in new tab for preview
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // Clean up the URL after a delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+      
+      // Show success toast when PDF is successfully generated and opened
+      toast.success('CIT Shareholder Declaration preview opened in new window', {
+        duration: 2000
+      });
+      
+    } catch (error) {
+      console.error('Error generating CIT Shareholder Declaration preview:', error);
+      setError('Failed to generate CIT Shareholder Declaration preview. Please try again.');
+    } finally {
+      setIsPreviewLoadingSecondary(false);
     }
   };
 
@@ -266,6 +365,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const resetState = () => {
     setError(null);
     setIsPreviewLoading(false);
+    setIsPreviewLoadingSecondary(false);
     setIsSendLoading(false);
   };
 
@@ -400,10 +500,36 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                       </motion.div>
                     )}
 
-                    {/* Action Buttons */}
-                    <div className={isApproved ? "flex justify-center" : "grid grid-cols-2 gap-3"}>
-                      {/* Go to Form Editor button - only show when not approved */}
-                      {!isApproved && (
+                    {/* Action Buttons - Special handling for taxation */}
+                    {isApproved ? (
+                      /* Approved: Single Send Button */
+                      <div className="flex justify-center">
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          type="button"
+                          onClick={handleSendPDF}
+                          disabled={isSendLoading}
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ backgroundColor: '#243F7B' }}
+                        >
+                          {isSendLoading ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              <span>Opening form...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              <span>Send</span>
+                            </>
+                          )}
+                        </motion.button>
+                      </div>
+                    ) : application.type === 'taxation' ? (
+                      /* Rejected Taxation: Go to Form Editor + Dual Preview Buttons */
+                      <div className="space-y-3">
+                        {/* Go to Form Editor button */}
                         <motion.button
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
@@ -418,31 +544,84 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                           <Edit3 className="w-4 h-4" />
                           <span>Go to Form Editor</span>
                         </motion.button>
-                      )}
-                      
-                      <motion.button
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
-                        type="button"
-                        onClick={isApproved ? handleSendPDF : handlePreviewPDF}
-                        disabled={isApproved ? isSendLoading : isPreviewLoading}
-                        className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ backgroundColor: isApproved ? '#243F7B' : '#D2BC99', color: isApproved ? 'white' : '#243F7B' }}
-                      >
-                        {isApproved ? (
-                          isSendLoading ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                              <span>Opening form...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send className="w-4 h-4" />
-                              <span>Send</span>
-                            </>
-                          )
-                        ) : (
-                          isPreviewLoading ? (
+                        
+                        {/* Dual Preview Buttons */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* CIT Disclaimer Preview */}
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            type="button"
+                            onClick={handlePreviewPDF}
+                            disabled={isPreviewLoading}
+                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                          >
+                            {isPreviewLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                                <span>Generating...</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-4 h-4" />
+                                <span>Preview CIT Disclaimer</span>
+                              </>
+                            )}
+                          </motion.button>
+                          
+                          {/* CIT Shareholder Declaration Preview */}
+                          <motion.button
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.99 }}
+                            type="button"
+                            onClick={handlePreviewTaxationSecondaryPDF}
+                            disabled={isPreviewLoadingSecondary}
+                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: '#F3F4F6', color: '#243F7B', border: '2px solid #243F7B' }}
+                          >
+                            {isPreviewLoadingSecondary ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                                <span>Generating...</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-4 h-4" />
+                                <span>Preview Mgt Declaration</span>
+                              </>
+                            )}
+                          </motion.button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Rejected Other Types: Go to Form Editor + Single Preview Button */
+                      <div className="grid grid-cols-2 gap-3">
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          type="button"
+                          onClick={handleEditForm}
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
+                          style={{ 
+                            backgroundColor: '#FEE2E2', 
+                            color: '#DC2626' 
+                          }}
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          <span>Go to Form Editor</span>
+                        </motion.button>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.01 }}
+                          whileTap={{ scale: 0.99 }}
+                          type="button"
+                          onClick={handlePreviewPDF}
+                          disabled={isPreviewLoading}
+                          className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                        >
+                          {isPreviewLoading ? (
                             <>
                               <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#243F7B' }}></div>
                               <span>Generating PDF...</span>
@@ -452,10 +631,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                               <FileText className="w-4 h-4" />
                               <span>Preview PDF</span>
                             </>
-                          )
-                        )}
-                      </motion.button>
-                    </div>
+                          )}
+                        </motion.button>
+                      </div>
+                    )}
                   </div>
                 }
               </div>

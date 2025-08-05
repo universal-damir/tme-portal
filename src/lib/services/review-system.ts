@@ -55,6 +55,11 @@ function generateApplicationTitle(applicationType: string, formData: any): strin
     const title = generateCompanyServicesTitle(formData);
     console.log('🔧 Generated Company Services title:', title);
     return title;
+  } else if (applicationType === 'taxation') {
+    console.log('🔧 Calling generateTaxationTitle...');
+    const title = generateTaxationTitle(formData);
+    console.log('🔧 Generated Taxation title:', title);
+    return title;
   }
   
   console.log('🔧 No matching type, using fallback. Type was:', applicationType);
@@ -164,6 +169,42 @@ function generateCompanyServicesTitle(formData: any): string {
       (firstName && lastName ? `${lastName} ${firstName}` : firstName || lastName || 'CLIENT');
     
     return `${formattedDate} TME Services ${nameForTitle}`;
+  }
+}
+
+function generateTaxationTitle(formData: any): string {
+  try {
+    const { generateTaxationFilename } = require('@/lib/pdf-generator/utils/taxationDataTransformer');
+    const filename = generateTaxationFilename(formData, {});
+    return filename.replace('.pdf', '');
+  } catch (error) {
+    // Fallback implementation matching PDF filename format
+    const date = new Date(formData.date || new Date());
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    // Get company abbreviation from company type
+    const companyAbbreviation = formData.companyType === 'management-consultants' ? 'MGT' : 'FZCO';
+    
+    // Get company short name
+    const companyShortName = formData.shortCompanyName || 'Company';
+    
+    // Format tax end period as dd.mm.yyyy
+    const formatTaxEndPeriod = () => {
+      const toDate = formData.citDisclaimer?.taxPeriodRange?.toDate;
+      if (toDate) {
+        const endDate = new Date(toDate);
+        const day = endDate.getDate().toString().padStart(2, '0');
+        const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
+        const year = endDate.getFullYear();
+        return `${day}.${month}.${year}`;
+      }
+      return '31.12.2025'; // Default fallback
+    };
+    
+    return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
   }
 }
 

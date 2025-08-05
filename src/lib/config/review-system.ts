@@ -26,6 +26,12 @@ export interface ReviewSystemConfig {
   showCostOverviewStatus: boolean;
   enableCostOverviewAutoSave: boolean;
   
+  // Phase 6 - Taxation integration feature flags
+  enableTaxationReview: boolean;
+  showTaxationSubmitButton: boolean;
+  showTaxationStatus: boolean;
+  enableTaxationAutoSave: boolean;
+  
   // Polling configuration
   notificationPollingInterval: number; // milliseconds
   maxNotificationsToFetch: number;
@@ -67,6 +73,12 @@ const DEFAULT_CONFIG: ReviewSystemConfig = {
   showCostOverviewSubmitButton: false,
   showCostOverviewStatus: false,
   enableCostOverviewAutoSave: false,
+  
+  // Phase 6 features - all disabled by default for ultra safety
+  enableTaxationReview: false,
+  showTaxationSubmitButton: false,
+  showTaxationStatus: false,
+  enableTaxationAutoSave: false,
   
   notificationPollingInterval: 30000, // 30 seconds - conservative
   maxNotificationsToFetch: 50,
@@ -129,6 +141,12 @@ export function getReviewSystemConfig(): ReviewSystemConfig {
     showCostOverviewStatus: true, // getEnvVar('SHOW_COST_OVERVIEW_STATUS') === 'true',
     enableCostOverviewAutoSave: true, // getEnvVar('ENABLE_COST_OVERVIEW_AUTO_SAVE') === 'true',
     
+    // Phase 6 - Taxation integration feature flags
+    enableTaxationReview: true, // getEnvVar('ENABLE_TAXATION_REVIEW') === 'true',
+    showTaxationSubmitButton: true, // getEnvVar('SHOW_TAXATION_SUBMIT_BUTTON') === 'true',
+    showTaxationStatus: true, // getEnvVar('SHOW_TAXATION_STATUS') === 'true',
+    enableTaxationAutoSave: true, // getEnvVar('ENABLE_TAXATION_AUTO_SAVE') === 'true',
+    
     // Polling configuration
     notificationPollingInterval: parseInt(
       getEnvVar('NOTIFICATION_POLLING_INTERVAL') || '60000'
@@ -173,6 +191,10 @@ export function useReviewSystemConfig(): ReviewSystemConfig & {
   canShowCostOverviewSubmit: boolean;
   canShowCostOverviewStatus: boolean;
   canAutoSaveCostOverview: boolean;
+  canUseTaxationReview: boolean;
+  canShowTaxationSubmit: boolean;
+  canShowTaxationStatus: boolean;
+  canAutoSaveTaxation: boolean;
 } {
   const config = getReviewSystemConfig();
   
@@ -193,7 +215,12 @@ export function useReviewSystemConfig(): ReviewSystemConfig & {
     canUseCostOverviewReview: config.enabled && config.enableCostOverviewReview,
     canShowCostOverviewSubmit: config.enabled && config.enableCostOverviewReview && config.showCostOverviewSubmitButton,
     canShowCostOverviewStatus: config.enabled && config.enableCostOverviewReview && config.showCostOverviewStatus,
-    canAutoSaveCostOverview: config.enabled && config.enableCostOverviewReview && config.enableCostOverviewAutoSave
+    canAutoSaveCostOverview: config.enabled && config.enableCostOverviewReview && config.enableCostOverviewAutoSave,
+    // Phase 6 - Taxation specific helpers
+    canUseTaxationReview: config.enabled && config.enableTaxationReview,
+    canShowTaxationSubmit: config.enabled && config.enableTaxationReview && config.showTaxationSubmitButton,
+    canShowTaxationStatus: config.enabled && config.enableTaxationReview && config.showTaxationStatus,
+    canAutoSaveTaxation: config.enabled && config.enableTaxationReview && config.enableTaxationAutoSave
   };
 }
 
