@@ -7,6 +7,37 @@ import { FormSection } from '../../cost-overview/ui/FormSection';
 import { CompanyServicesData } from '@/types/company-services';
 import { UseFormRegister, FieldErrors, UseFormSetValue } from 'react-hook-form';
 
+// Currency formatting utilities (same as used in useFormattedInputs)
+const formatNumberWithSeparators = (value: string): string => {
+  // Remove all non-digit characters except decimal point
+  const cleaned = value.replace(/[^\d.]/g, '');
+  // Split by decimal point
+  const parts = cleaned.split('.');
+  // Add thousand separators to the integer part
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  // Join back with decimal point if there was one
+  return parts.length > 1 ? parts.join('.') : parts[0];
+};
+
+const parseFormattedNumber = (value: string): number => {
+  if (!value || value.trim() === '') return 0;
+  const cleaned = value.replace(/,/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+// Add custom styles to hide number input spinners
+const hideSpinnersStyle = `
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
+`;
+
 interface BackOfficeServicesSectionProps {
   /**
    * Form registration function from react-hook-form
@@ -104,11 +135,13 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
   const secondaryCurrencyCode = watchedData.secondaryCurrency || 'USD';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <>
+      <style>{hideSpinnersStyle}</style>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
       <FormSection
         title="Back-Office (PRO) Services"
         description="Comprehensive administrative support for government-related processes"
@@ -167,7 +200,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
                 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Team Size Selection */}
-                  <div>
+                  <div className="flex flex-col">
                     <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
                       Select Team Size
                     </label>
@@ -189,6 +222,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
                                 if (teamSize === 'small') return '1-3 | 4-6 | 7-10 | Staff';
                                 if (teamSize === 'medium') return '1-4 | 5-6 | 7-8 | Staff';
                                 if (teamSize === 'large') return '1-5 | 6-10 | 11-15 | 16-20 | Staff';
+                                if (teamSize === 'custom') return 'Custom';
                                 return '';
                               })()
                             : 'Select team size...'}
@@ -220,12 +254,25 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
                                   setValue('backOfficeServices.teamSize', key as 'micro' | 'small' | 'medium' | 'large');
                                   setIsDropdownOpen(false);
                                 }}
-                                className="w-full px-3 py-2 text-left hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg transition-colors duration-150"
+                                className="w-full px-3 py-2 text-left hover:bg-gray-50 transition-colors duration-150"
                               >
                                 {displayText}
                               </motion.button>
                             );
                           })}
+                          
+                          {/* Custom Option */}
+                          <motion.button
+                            type="button"
+                            whileHover={{ backgroundColor: '#f3f4f6' }}
+                            onClick={() => {
+                              setValue('backOfficeServices.teamSize', 'custom');
+                              setIsDropdownOpen(false);
+                            }}
+                            className="w-full px-3 py-2 text-left hover:bg-gray-50 last:rounded-b-lg transition-colors duration-150"
+                          >
+                            Custom
+                          </motion.button>
                         </motion.div>
                       )}
                       
@@ -245,7 +292,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
 
                   {/* Pricing Display */}
                   {currentTeamConfig && (
-                    <div>
+                    <div className="flex flex-col">
                       <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
                         Monthly Pricing
                       </label>
@@ -274,12 +321,211 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
                       </div>
                     </div>
                   )}
+
+                  {/* Custom Pricing Configuration */}
+                  {watchedData.backOfficeServices?.teamSize === 'custom' && (
+                    <div className="flex flex-col">
+                      {/* Column Headers with Custom Pricing Tiers centered above Staff Range */}
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex-1 flex flex-col items-center">
+                          <label className="text-sm font-medium mb-1" style={{ color: '#243F7B' }}>Custom Pricing Tiers</label>
+                          <label className="text-xs text-gray-500 font-medium">Staff Range</label>
+                        </div>
+                        <div className="flex-1 flex justify-center">
+                          <label className="text-xs text-gray-500 font-medium">Monthly Fee</label>
+                        </div>
+                      </div>
+                      
+                      <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="space-y-2 max-h-48 overflow-y-auto"
+                      >
+                      
+                      {/* Custom Tier 1 */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 flex items-center justify-center gap-2">
+                          <input
+                            type="number"
+                            {...register('backOfficeServices.customTier1From', { valueAsNumber: true })}
+                            placeholder="20"
+                            min="1"
+                            className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center"
+                            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                            style={{ MozAppearance: 'textfield' }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                          />
+                          <span className="text-gray-500">–</span>
+                          <input
+                            type="number"
+                            {...register('backOfficeServices.customTier1To', { 
+                              valueAsNumber: true,
+                              onChange: (e) => {
+                                const value = parseInt(e.target.value);
+                                if (!isNaN(value)) {
+                                  setValue('backOfficeServices.customTier2From', value + 1);
+                                }
+                              }
+                            })}
+                            placeholder="25"
+                            min="1"
+                            className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center"
+                            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                            style={{ MozAppearance: 'textfield' }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">AED</span>
+                            <input
+                              type="text"
+                              placeholder="2,500"
+                              className="w-full pl-12 pr-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const formatted = formatNumberWithSeparators(value);
+                                e.target.value = formatted;
+                                const parsed = parseFormattedNumber(formatted);
+                                setValue('backOfficeServices.customTier1Fee', parsed);
+                              }}
+                            />
+                            <input
+                              type="hidden"
+                              {...register('backOfficeServices.customTier1Fee')}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Custom Tier 2 */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 flex items-center justify-center gap-2">
+                          <input
+                            type="number"
+                            {...register('backOfficeServices.customTier2From', { valueAsNumber: true })}
+                            placeholder="26"
+                            min="1"
+                            className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center bg-gray-50"
+                            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                            style={{ MozAppearance: 'textfield' }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                            readOnly
+                          />
+                          <span className="text-gray-500">–</span>
+                          <input
+                            type="number"
+                            {...register('backOfficeServices.customTier2To', { 
+                              valueAsNumber: true,
+                              onChange: (e) => {
+                                const value = parseInt(e.target.value);
+                                if (!isNaN(value)) {
+                                  setValue('backOfficeServices.customTier3From', value + 1);
+                                }
+                              }
+                            })}
+                            placeholder="30"
+                            min="1"
+                            className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center"
+                            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                            style={{ MozAppearance: 'textfield' }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">AED</span>
+                            <input
+                              type="text"
+                              placeholder="3,500"
+                              className="w-full pl-12 pr-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const formatted = formatNumberWithSeparators(value);
+                                e.target.value = formatted;
+                                const parsed = parseFormattedNumber(formatted);
+                                setValue('backOfficeServices.customTier2Fee', parsed);
+                              }}
+                            />
+                            <input
+                              type="hidden"
+                              {...register('backOfficeServices.customTier2Fee')}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Custom Tier 3 */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 flex items-center justify-center gap-2">
+                          <input
+                            type="number"
+                            {...register('backOfficeServices.customTier3From', { valueAsNumber: true })}
+                            placeholder="31"
+                            min="1"
+                            className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center bg-gray-50"
+                            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                            style={{ MozAppearance: 'textfield' }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                            readOnly
+                          />
+                          <span className="text-gray-500">–</span>
+                          <input
+                            type="number"
+                            {...register('backOfficeServices.customTier3To', { valueAsNumber: true })}
+                            placeholder="35"
+                            min="1"
+                            className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center"
+                            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                            style={{ MozAppearance: 'textfield' }}
+                            onWheel={(e) => e.currentTarget.blur()}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">AED</span>
+                            <input
+                              type="text"
+                              placeholder="5,000"
+                              className="w-full pl-12 pr-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const formatted = formatNumberWithSeparators(value);
+                                e.target.value = formatted;
+                                const parsed = parseFormattedNumber(formatted);
+                                setValue('backOfficeServices.customTier3Fee', parsed);
+                              }}
+                            />
+                            <input
+                              type="hidden"
+                              {...register('backOfficeServices.customTier3Fee')}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      </motion.div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
           )}
         </div>
       </FormSection>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }; 

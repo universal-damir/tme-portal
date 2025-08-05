@@ -116,15 +116,20 @@ export const DEPENDENT_FEE_FIELDS = [
  * Freezone options for NOC selection
  */
 export const FREEZONE_OPTIONS = [
-  { value: 'dmcc', label: 'DMCC (Dubai Multi Commodities Centre)' },
-  { value: 'adgm', label: 'ADGM (Abu Dhabi Global Market)' },
-  { value: 'difc', label: 'DIFC (Dubai International Financial Centre)' },
-  { value: 'ifza', label: 'IFZA (International Free Zone Authority)' },
-  { value: 'abu-dhabi', label: 'Abu Dhabi Free Zone' },
-  { value: 'dafza', label: 'DAFZA (Dubai Airport Free Zone)' },
-  { value: 'jafza', label: 'JAFZA (Jebel Ali Free Zone)' },
-  { value: 'dubai-internet-city', label: 'Dubai Internet City' },
-  { value: 'meydan', label: 'Meydan Freezone' },
+  { value: 'det', label: 'DXB DET', pdfLabel: 'DET', cost: 2000 },
+  { value: 'difc', label: 'DXB DIFC FZ', pdfLabel: 'DIFC', cost: 1000 },
+  { value: 'dmcc', label: 'DXB DMCC FZ', pdfLabel: 'DMCC', cost: 2020 },
+  { value: 'dso', label: 'DXB DSO FZ', pdfLabel: 'DSO', cost: 1020 },
+  { value: 'dwc', label: 'DXB DWC FZ', pdfLabel: 'DWC', cost: 1020 },
+  { value: 'dwtc', label: 'DXB DWTC FZ', pdfLabel: 'DWTC', cost: 1020 },
+  { value: 'ecda', label: 'DXB ECDA (Expo City Dubai Authority)', pdfLabel: 'ECDA', cost: 2020 },
+  { value: 'ifza', label: 'DXB IFZA FZ', pdfLabel: 'IFZA', cost: 1250 },
+  { value: 'jafza', label: 'DXB JAFZA FZ', pdfLabel: 'JAFZA', cost: 2000 },
+  { value: 'meydan', label: 'DXB Meydan FZ', pdfLabel: 'Meydan', cost: 270 },
+  { value: 'fujairah', label: 'FUJ Fujairah FZ', pdfLabel: 'Fujairah', cost: 15 },
+  { value: 'rakmc', label: 'RAK RAKMC FZ', pdfLabel: 'RAKMC', cost: 500 },
+  { value: 'hamriyah', label: 'SHJ Hamriyah FZ', pdfLabel: 'Hamriyah', cost: 2000 },
+  { value: 'uaq', label: 'UMM Umm Al Quwain FZ', pdfLabel: 'Umm Al Quwain', cost: 2025 },
 ] as const;
 
 /**
@@ -167,4 +172,28 @@ export const getAuthorityFeeFields = (visaType: GoldenVisaType) => {
  */
 export const getFieldPlaceholder = (fieldKey: keyof typeof AUTHORITY_FEE_PLACEHOLDERS) => {
   return AUTHORITY_FEE_PLACEHOLDERS[fieldKey];
+};
+
+/**
+ * Get freezone cost by value
+ */
+export const getFreezoneCost = (freezoneValue: string): number => {
+  const freezone = FREEZONE_OPTIONS.find(f => f.value === freezoneValue);
+  return freezone?.cost || 0;
+};
+
+/**
+ * Get freezone PDF label by value
+ */
+export const getFreezonePdfLabel = (freezoneValue: string): string => {
+  const freezone = FREEZONE_OPTIONS.find(f => f.value === freezoneValue);
+  return freezone?.pdfLabel || '';
+};
+
+/**
+ * Get freezone display label by value
+ */
+export const getFreezoneDisplayLabel = (freezoneValue: string): string => {
+  const freezone = FREEZONE_OPTIONS.find(f => f.value === freezoneValue);
+  return freezone?.label || '';
 }; 

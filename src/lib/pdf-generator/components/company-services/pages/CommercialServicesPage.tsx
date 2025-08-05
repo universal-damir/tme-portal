@@ -53,7 +53,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
             <Text style={styles.sectionTitle}>Commercial Services</Text>
             
             <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-              As an additional offering, we provide comprehensive handling of your company's financial tasks - such as reviewing and processing monthly payments for services like Etisalat, du, DEWA, and others, as well as managing salary disbursements via cheque or online banking. This service allows the company's management to focus on core operations and sales activities. It is already in place with many of our clients and is available at a flat monthly rate of AED {formatCurrency(accountingServices.commercialServicesFee!)} {formatSecondaryCurrency(accountingServices.commercialServicesFee!, exchangeRate, secondaryCurrency)}, or alternatively based on actual hours worked.
+              Additionally, we provide comprehensive handling of your company's financial tasks - such as reviewing and processing monthly payments for services like Etisalat, du, DEWA, and others, as well as managing salary disbursements via cheque or online banking. Designed to let management focus on key business areas, this service is already active across our client base and comes at a fixed monthly rate of AED {formatCurrency(accountingServices.commercialServicesFee!)} {formatSecondaryCurrency(accountingServices.commercialServicesFee!, exchangeRate, secondaryCurrency)}, or alternatively based on actual hours worked.
             </Text>
           </View>
         )}
@@ -105,7 +105,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
               {/* Digital Bank WIO Account */}
               {accountingServices.digitalBankWIO && accountingServices.digitalBankWIOFee && accountingServices.digitalBankWIOFee > 0 && (
                 <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 4 }]}>
-                  • Company account with the digital WIO bank - AED {formatCurrency(accountingServices.digitalBankWIOFee)} {formatSecondaryCurrency(accountingServices.digitalBankWIOFee, exchangeRate, secondaryCurrency)}
+                  • Company account with the UAE digital WIO bank or similar - AED {formatCurrency(accountingServices.digitalBankWIOFee)} {formatSecondaryCurrency(accountingServices.digitalBankWIOFee, exchangeRate, secondaryCurrency)}
                 </Text>
               )}
               

@@ -50,7 +50,7 @@ export const AnnualAccountingServicesSection: React.FC<PDFComponentProps> = ({ d
             Year-End Financial Statement:
           </Text>
           <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-            For the preparation of the annual financial statement (balance sheet and P/L (Profit/Loss)), our service fee is AED {formatCurrency(accountingServices.plStatementFee)} {formatSecondaryCurrency(accountingServices.plStatementFee, exchangeRate, secondaryCurrency)}.
+            For the preparation of the annual financial statement (balance sheet and P/L), our service fee is AED {formatCurrency(accountingServices.plStatementFee)} {formatSecondaryCurrency(accountingServices.plStatementFee, exchangeRate, secondaryCurrency)}.
           </Text>
         </>
       )}

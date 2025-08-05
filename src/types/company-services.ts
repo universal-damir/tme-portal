@@ -53,7 +53,17 @@ export interface AccountingServices {
 // Back-Office (PRO) Services Interface
 export interface BackOfficeServices {
   enabled?: boolean;
-  teamSize?: 'micro' | 'small' | 'medium' | 'large' | '';
+  teamSize?: 'micro' | 'small' | 'medium' | 'large' | 'custom' | '';
+  // Custom tier fields - for when teamSize is 'custom'
+  customTier1From?: number; // e.g., 20
+  customTier1To?: number;   // e.g., 25
+  customTier1Fee?: number;
+  customTier2From?: number; // e.g., 26
+  customTier2To?: number;   // e.g., 30
+  customTier2Fee?: number;
+  customTier3From?: number; // e.g., 31
+  customTier3To?: number;   // e.g., 50
+  customTier3Fee?: number;
 }
 
 // Compliance Services Interface

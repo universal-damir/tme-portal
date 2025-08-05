@@ -6,8 +6,8 @@ import { Shield, ChevronDown, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { FormSection } from '../../cost-overview/ui/FormSection';
-import { NumberInputField } from '../../portal/tabs/NumberInputField';
-import { FREEZONE_OPTIONS } from '../utils/goldenVisaConfig';
+import { NumberInputField } from '@/components/portal/tabs/NumberInputField';
+import { FREEZONE_OPTIONS, getFreezoneCost } from '../utils/goldenVisaConfig';
 
 interface NOCRequirementsSectionProps {
   data: GoldenVisaData;
@@ -25,8 +25,16 @@ export const NOCRequirementsSection: React.FC<NOCRequirementsSectionProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleFreezoneSelect = (freezoneValue: string) => {
-    setValue('selectedFreezone', freezoneValue);
-    setIsDropdownOpen(false);
+    try {
+      setValue('selectedFreezone', freezoneValue);
+      // Auto-populate the NOC fee based on the selected freezone
+      const cost = getFreezoneCost(freezoneValue);
+      setValue('freezoneNocFee', cost);
+      setIsDropdownOpen(false);
+    } catch (error) {
+      console.error('Error setting freezone value:', error);
+      setIsDropdownOpen(false);
+    }
   };
 
   const selectedFreezone = FREEZONE_OPTIONS.find(f => f.value === data.selectedFreezone);
@@ -141,7 +149,7 @@ export const NOCRequirementsSection: React.FC<NOCRequirementsSectionProps> = ({
               </div>
 
               {/* Dynamic Freezone NOC Fee Field */}
-              {data.selectedFreezone && (
+              {data.selectedFreezone && selectedFreezone && (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -149,10 +157,16 @@ export const NOCRequirementsSection: React.FC<NOCRequirementsSectionProps> = ({
                   className="max-w-md"
                 >
                   <NumberInputField
-                    label={`${selectedFreezone?.label || 'Freezone'} NOC (AED)`}
-                    value={data.freezoneNocFee}
-                    onChange={(value) => setValue('freezoneNocFee', value)}
-                    placeholder="2,020"
+                    label={`${selectedFreezone.pdfLabel} NOC (AED)`}
+                    value={data.freezoneNocFee || 0}
+                    onChange={(value) => {
+                      try {
+                        setValue('freezoneNocFee', value);
+                      } catch (error) {
+                        console.error('Error setting freezone NOC fee:', error);
+                      }
+                    }}
+                    placeholder={selectedFreezone.cost.toLocaleString()}
                     required
                     error={errors.freezoneNocFee?.message}
                   />

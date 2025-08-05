@@ -54,10 +54,95 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
     return null;
   }
 
-  // Get team configuration
-  const teamConfig = TEAM_CONFIGURATIONS[backOfficeServices.teamSize as keyof typeof TEAM_CONFIGURATIONS];
+  // Get team configuration - handle custom configuration
+  let teamConfig;
+  if (backOfficeServices.teamSize === 'custom') {
+    // Build custom configuration from form data
+    const customTiers: { staffRange: string; monthlyFee: number }[] = [];
+    
+    console.log('PDF DEBUG - backOfficeServices data:', {
+      customTier1From: backOfficeServices.customTier1From,
+      customTier1To: backOfficeServices.customTier1To,
+      customTier1Fee: backOfficeServices.customTier1Fee,
+      customTier2From: backOfficeServices.customTier2From,
+      customTier2To: backOfficeServices.customTier2To,
+      customTier2Fee: backOfficeServices.customTier2Fee,
+      customTier3From: backOfficeServices.customTier3From,
+      customTier3To: backOfficeServices.customTier3To,
+      customTier3Fee: backOfficeServices.customTier3Fee
+    });
+    
+    if (backOfficeServices.customTier1From && backOfficeServices.customTier1To && backOfficeServices.customTier1Fee) {
+      customTiers.push({
+        staffRange: `${backOfficeServices.customTier1From}–${backOfficeServices.customTier1To} staff`,
+        monthlyFee: backOfficeServices.customTier1Fee
+      });
+      console.log('PDF DEBUG - Added tier 1');
+    }
+    
+    if (backOfficeServices.customTier2From && backOfficeServices.customTier2To && backOfficeServices.customTier2Fee) {
+      customTiers.push({
+        staffRange: `${backOfficeServices.customTier2From}–${backOfficeServices.customTier2To} staff`,
+        monthlyFee: backOfficeServices.customTier2Fee
+      });
+      console.log('PDF DEBUG - Added tier 2');
+    }
+    
+    if (backOfficeServices.customTier3From && backOfficeServices.customTier3To && backOfficeServices.customTier3Fee) {
+      customTiers.push({
+        staffRange: `${backOfficeServices.customTier3From}–${backOfficeServices.customTier3To} staff`,
+        monthlyFee: backOfficeServices.customTier3Fee
+      });
+      console.log('PDF DEBUG - Added tier 3');
+    }
+    
+    console.log('PDF DEBUG - Final customTiers:', customTiers);
+    
+    teamConfig = {
+      label: 'Custom Team',
+      tiers: customTiers
+    };
+  } else {
+    teamConfig = TEAM_CONFIGURATIONS[backOfficeServices.teamSize as keyof typeof TEAM_CONFIGURATIONS];
+  }
   
+  // For custom configuration, show basic content even if no tiers are configured
   if (!teamConfig) {
+    return null;
+  }
+  
+  // If no tiers are configured for custom, show a placeholder message
+  if (teamConfig.tiers.length === 0 && backOfficeServices.teamSize === 'custom') {
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Back-Office (PRO) Services</Text>
+        
+        <Text style={[styles.introText, { marginTop: 12, fontStyle: 'italic' }]}>
+          Note: All pricing is based on monthly fees with a 12-month minimum commitment requirement.
+        </Text>
+        
+        <Text style={styles.introText}>
+          Managing government-related processes in the UAE can be time-consuming and complex. 
+          As an additional service, TME Services offers comprehensive Back-Office (PRO) support, 
+          handling all administrative tasks with {backOfficeServices.teamSize === 'custom' ? 'various government authorities' : 'Freezone Authority'}.
+        </Text>
+        
+        <Text style={styles.introText}>
+          These services cover activities like trade lease renewal, visa applications and renewals, 
+          labor contracts, and more. By outsourcing these tasks to us, the management team can stay 
+          focused on core business operations such as sales and growth.
+        </Text>
+        
+        <Text style={styles.introText}>
+          We offer scalable monthly plans based on your team size, allowing you to grow with us as your 
+          business expands. Custom pricing has been configured based on your specific requirements.
+        </Text>
+      </View>
+    );
+  }
+  
+  // For preset configurations, require at least one tier
+  if (teamConfig.tiers.length === 0) {
     return null;
   }
 
@@ -65,7 +150,7 @@ export const BackOfficeServicesSection: React.FC<PDFComponentProps> = ({ data })
   const getAuthorityDescription = () => {
     return companyServicesData?.companyType === 'tme-fzco' 
       ? 'Freezone Authority'
-      : 'General Directorate of Residency and Foreign Affairs (GDRFA), Ministry of Human Resources and Emiratization (MoHRE), and Department of Economy and Tourism (DET)';
+      : 'GDRFA (General Directorate of Residency and Foreign Affairs), MoHRE (Ministry of Human Resources and Emiratization), and DET (Dubai Department of Economy and Tourism)';
   };
 
   // Generate table data for pricing as CostItem[]

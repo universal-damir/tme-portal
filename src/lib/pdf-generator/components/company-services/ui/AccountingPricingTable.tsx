@@ -82,7 +82,7 @@ export const AccountingPricingTable: React.FC<{
         paymentFrequency: 'Quarterly (4 payments/year)',
         costPerPeriod: pricing.quarterly,
         annualTotal: pricing.quarterly * 4,
-        annualSavings: `AED ${formatCurrency(quarterlySavings)}`,
+        annualSavings: formatCurrency(quarterlySavings),
         annualSavingsAmount: quarterlySavings
       });
       
@@ -90,7 +90,7 @@ export const AccountingPricingTable: React.FC<{
         paymentFrequency: 'Yearly (1 payment/year)',
         costPerPeriod: pricing.yearly,
         annualTotal: pricing.yearly,
-        annualSavings: `AED ${formatCurrency(yearlySavings)}`,
+        annualSavings: formatCurrency(yearlySavings),
         annualSavingsAmount: yearlySavings
       });
     }
@@ -226,7 +226,7 @@ export const AccountingPricingTable: React.FC<{
                 paddingVertical: 4,
                 paddingRight: 6
               }}>
-                {row.annualSavings === '-' ? '-' : `${formatCurrency(row.annualSavingsAmount)} (${secondaryCurrency} ${Math.round(row.annualSavingsAmount / exchangeRate).toLocaleString()})`}
+                {row.annualSavings === '-' ? '-' : `AED ${formatCurrency(row.annualSavingsAmount)} (${secondaryCurrency} ${Math.round(row.annualSavingsAmount / exchangeRate).toLocaleString()})`}
               </Text>
             </View>
           ))}
