@@ -56,37 +56,8 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   const individualChildBreakdowns = hasChildren ? generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData) : [];
   const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
 
-  // Generate dynamic intro content with document requirements
-  const generateIntroContent = () => {
-    // Determine family member text
-    let familyMemberText = '';
-    if (hasSpouse && hasChildren) {
-      familyMemberText = 'family members';
-    } else if (hasSpouse) {
-      familyMemberText = 'spouse';
-    } else if (hasChildren) {
-      familyMemberText = numberOfChildren === 1 ? 'child' : 'children';
-    }
-
-    // Base intro text
-    let introText = `Below is a detailed breakdown of dependent visa costs for your ${familyMemberText}.`;
-
-    // Add document requirements based on selections
-    if (hasSpouse && hasChildren) {
-      // Both selected - combine in one sentence
-      const childText = numberOfChildren === 1 ? 'child birth certificate' : 'children birth certificates';
-      introText += ` Please note that both the marriage certificate and ${childText} must be attested and legalized by the UAE Embassy in the country of origin.`;
-    } else if (hasSpouse) {
-      // Spouse only
-      introText += ' Please note that the marriage certificate must be attested and legalized by the UAE Embassy in the country of origin.';
-    } else if (hasChildren) {
-      // Children only
-      const childText = numberOfChildren === 1 ? 'child birth certificate' : 'children birth certificates';
-      introText += ` Please note that the ${childText} must be attested and legalized by the UAE Embassy in the country of origin.`;
-    }
-
-    return introText;
-  };
+  // Fixed intro content
+  const introContent = `This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
 
   // Generate explanations from all services
   const generateExplanations = () => {
@@ -297,7 +268,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
               <View style={{ marginBottom: introSpacing }}>
                 <IntroSection
                   headline="Dependent Visa Cost Breakdown"
-                  content={generateIntroContent()}
+                  content={introContent}
                 />
               </View>
             )}

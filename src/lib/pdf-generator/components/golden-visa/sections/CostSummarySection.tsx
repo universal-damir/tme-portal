@@ -17,7 +17,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
   // Access golden visa data from transformed data
   const goldenVisaData = (data as any).goldenVisaData;
 
-  // Get visa type display name for dynamic title and descriptions
+  // Get visa type display name for dynamic title and descriptions (sentence case with exceptions)
   const getVisaTypeDisplay = () => {
     switch (goldenVisaData?.visaType) {
       case 'property-investment':
@@ -57,7 +57,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       
       // 1. Authority Costs line
       items.push({
-        description: `${itemNumber}. ${getVisaTypeDisplay()} Golden Visa Authority Costs`,
+        description: `${itemNumber}. Golden Visa authority costs`,
         amount: authorityTotal,
         secondaryAmount: authorityTotal / exchangeRate,
         isReduction: false
@@ -68,7 +68,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       if (goldenVisaData?.requiresNOC && goldenVisaData?.selectedFreezone && goldenVisaData?.freezoneNocFee) {
         const freezoneLabel = goldenVisaData.selectedFreezone.toUpperCase();
         items.push({
-          description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) Cost`,
+          description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) cost`,
           amount: goldenVisaData.freezoneNocFee,
           secondaryAmount: goldenVisaData.freezoneNocFee / exchangeRate,
           isReduction: false
@@ -84,7 +84,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       const spouseVisaTotal = spouseVisa.reduce((sum, service) => sum + service.amount, 0);
       
       items.push({
-        description: `${itemNumber}. Dependent (Spouse) Visa Authority Costs`,
+        description: `${itemNumber}. Dependent (spouse) visa authority costs`,
         amount: spouseVisaTotal,
         secondaryAmount: spouseVisaTotal / exchangeRate,
         isReduction: false
@@ -96,12 +96,12 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     const hasChildren = Boolean((goldenVisaData?.dependents?.children?.count || 0) > 0);
     if (hasChildren) {
       const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
-      const childText = numberOfChildren === 1 ? 'Child' : 'Children';
+      const childText = numberOfChildren === 1 ? 'child' : 'children';
       const childrenVisa = generateGoldenVisaChildrenVisaBreakdown(goldenVisaData);
       const childrenVisaTotal = childrenVisa.reduce((sum, service) => sum + service.amount, 0);
       
       items.push({
-        description: `${itemNumber}. Dependent (${childText}) Visa Authority Costs${numberOfChildren > 1 ? ` (${numberOfChildren} children)` : ''}`,
+        description: `${itemNumber}. Dependent (${childText}) visa authority costs${numberOfChildren > 1 ? ` (${numberOfChildren} children)` : ''}`,
         amount: childrenVisaTotal,
         secondaryAmount: childrenVisaTotal / exchangeRate,
         isReduction: false
@@ -126,7 +126,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     // Only add TME services if there are any services to include
     if (totalTmeServices > 0) {
       items.push({
-        description: `${itemNumber}. TME Services Professional Fee`,
+        description: `${itemNumber}. TME Services professional fee`,
         amount: totalTmeServices,
         secondaryAmount: totalTmeServices / exchangeRate,
         isReduction: false
@@ -142,16 +142,36 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
   // Dynamic title and description based on whether primary visa is required
   const getSummaryTitle = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      return 'Golden Visa Dependent Services Summary';
+      return 'Dependent Golden Visa Summary';
     }
+
+    // Check for dependents
+    const hasSpouse = Boolean(goldenVisaData?.dependents?.spouse?.required);
+    const hasChildren = Boolean((goldenVisaData?.dependents?.children?.count || 0) > 0);
+    
+    if (hasSpouse || hasChildren) {
+      // Generate dependent text
+      let dependentText = '';
+      if (hasSpouse && hasChildren) {
+        dependentText = 'Dependents';
+      } else if (hasSpouse) {
+        dependentText = 'Dependent';
+      } else if (hasChildren) {
+        const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
+        dependentText = numberOfChildren === 1 ? 'Dependent' : 'Dependents';
+      }
+      
+      return `${getVisaTypeDisplay()} Golden Visa Summary (Including ${dependentText})`;
+    }
+    
     return `${getVisaTypeDisplay()} Golden Visa Summary`;
   };
 
   const getSummaryDescription = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      return 'This represents the overall cost for your Golden Visa dependent services only. A detailed cost breakdown is provided on the following pages for full transparency. All government cost will always be charged on cost basis.';
+      return 'This represents the overall cost for your Golden Visa dependent services only. A detailed cost breakdown is provided on the following pages for full transparency.';
     }
-    return 'This represents the overall cost for your Golden Visa application. A detailed cost breakdown is provided on the following pages for full transparency. All government cost will always be charged on cost basis.';
+    return 'This represents the overall cost for your Golden Visa application. A detailed cost breakdown is provided on the following pages for full transparency.';
   };
 
   return (
@@ -164,7 +184,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       <View style={styles.costTable}>
         {/* Table Header */}
         <View style={styles.tableHeaderYellow}>
-          <Text style={styles.tableHeaderDescription}>DESCRIPTION</Text>
+          <Text style={styles.tableHeaderDescription}>Description</Text>
           <Text style={styles.tableHeaderCurrency}>AED</Text>
           <Text style={styles.tableHeaderCurrency}>{secondaryCurrency}</Text>
         </View>
