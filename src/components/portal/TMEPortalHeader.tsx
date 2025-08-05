@@ -109,14 +109,31 @@ export function TMEPortalHeader({
       return;
     }
 
-    // Navigate to the Golden Visa tab first
-    window.location.hash = '#golden-visa';
+    // Map application types to tab names and event names
+    const tabMapping: Record<string, string> = {
+      'golden-visa': 'golden-visa',
+      'cost-overview': 'cost-overview', 
+      'company-services': 'company-services',
+      'taxation': 'taxation',
+      'corporate-changes': 'corporate-changes'
+    };
+    
+    const targetTab = tabMapping[feedbackApplication.type];
+    
+    if (!targetTab) {
+      console.error('Unknown application type:', feedbackApplication.type);
+      return;
+    }
+
+    // Navigate to the correct tab first
+    window.location.hash = `#${targetTab}`;
     
     // Close the feedback modal
     setFeedbackModalOpen(false);
     
     // Dispatch the edit event with the application data
-    const editEvent = new CustomEvent('edit-golden-visa-application', {
+    const eventName = `edit-${feedbackApplication.type}-application`;
+    const editEvent = new CustomEvent(eventName, {
       detail: {
         applicationId: feedbackApplication.id,
         formData: feedbackApplication.form_data
@@ -126,7 +143,7 @@ export function TMEPortalHeader({
     // Small delay to ensure the tab has loaded before dispatching the event
     setTimeout(() => {
       window.dispatchEvent(editEvent);
-      console.log('🔧 Header: Dispatched edit event with form data:', feedbackApplication.form_data);
+      console.log(`🔧 Header: Dispatched ${eventName} event with form data:`, feedbackApplication.form_data);
     }, 100);
   };
 

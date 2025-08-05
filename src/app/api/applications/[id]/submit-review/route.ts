@@ -12,9 +12,14 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  console.log('🔧 API ROUTE: submit-review called for application ID:', id);
+  
   // Safety check: Feature flag
   const config = getReviewSystemConfig();
+  console.log('🔧 API ROUTE: Config check:', { enabled: config.enabled, reviewSubmissionEnabled: config.reviewSubmissionEnabled });
+  
   if (!config.enabled || !config.reviewSubmissionEnabled) {
+    console.log('🔧 API ROUTE: Review submission disabled');
     return NextResponse.json({ success: false, message: 'Review submission is currently disabled' }, { status: 200 });
   }
 
@@ -28,10 +33,13 @@ export async function POST(
     const userId = session.user.id;
 
     const body = await request.json();
+    console.log('🔧 API ROUTE: Request body:', body);
+    
     const { reviewer_id, urgency, comments } = body;
 
     // Validation
     if (!reviewer_id || !urgency) {
+      console.log('🔧 API ROUTE: Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields: reviewer_id and urgency' }, 
         { status: 400 }
@@ -39,12 +47,15 @@ export async function POST(
     }
 
     if (!['standard', 'urgent'].includes(urgency)) {
+      console.log('🔧 API ROUTE: Invalid urgency level:', urgency);
       return NextResponse.json(
         { error: 'Invalid urgency level. Must be: standard or urgent' }, 
         { status: 400 }
       );
     }
 
+    console.log('🔧 API ROUTE: Calling ApplicationsService.submitForReview');
+    
     // Submit for review
     const success = await ApplicationsService.submitForReview({
       application_id: id,
@@ -52,6 +63,8 @@ export async function POST(
       urgency,
       comments
     }, userId);
+    
+    console.log('🔧 API ROUTE: ApplicationsService result:', success);
 
     if (success) {
       return NextResponse.json({ 

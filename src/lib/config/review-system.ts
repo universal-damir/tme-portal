@@ -20,6 +20,12 @@ export interface ReviewSystemConfig {
   requireApprovalForDownload: boolean;
   enableGoldenVisaAutoSave: boolean;
   
+  // Phase 5 - Cost Overview integration feature flags
+  enableCostOverviewReview: boolean;
+  showCostOverviewSubmitButton: boolean;
+  showCostOverviewStatus: boolean;
+  enableCostOverviewAutoSave: boolean;
+  
   // Polling configuration
   notificationPollingInterval: number; // milliseconds
   maxNotificationsToFetch: number;
@@ -55,6 +61,12 @@ const DEFAULT_CONFIG: ReviewSystemConfig = {
   showGoldenVisaStatus: false,
   requireApprovalForDownload: false,
   enableGoldenVisaAutoSave: false,
+  
+  // Phase 5 features - all disabled by default for ultra safety
+  enableCostOverviewReview: false,
+  showCostOverviewSubmitButton: false,
+  showCostOverviewStatus: false,
+  enableCostOverviewAutoSave: false,
   
   notificationPollingInterval: 30000, // 30 seconds - conservative
   maxNotificationsToFetch: 50,
@@ -111,6 +123,12 @@ export function getReviewSystemConfig(): ReviewSystemConfig {
     requireApprovalForDownload: false, // getEnvVar('REQUIRE_APPROVAL_FOR_DOWNLOAD') === 'true',
     enableGoldenVisaAutoSave: true, // getEnvVar('ENABLE_GOLDEN_VISA_AUTO_SAVE') === 'true',
     
+    // Phase 5 - Cost Overview integration feature flags
+    enableCostOverviewReview: true, // getEnvVar('ENABLE_COST_OVERVIEW_REVIEW') === 'true',
+    showCostOverviewSubmitButton: true, // getEnvVar('SHOW_COST_OVERVIEW_SUBMIT_BUTTON') === 'true',
+    showCostOverviewStatus: true, // getEnvVar('SHOW_COST_OVERVIEW_STATUS') === 'true',
+    enableCostOverviewAutoSave: true, // getEnvVar('ENABLE_COST_OVERVIEW_AUTO_SAVE') === 'true',
+    
     // Polling configuration
     notificationPollingInterval: parseInt(
       getEnvVar('NOTIFICATION_POLLING_INTERVAL') || '60000'
@@ -151,6 +169,10 @@ export function useReviewSystemConfig(): ReviewSystemConfig & {
   canShowGoldenVisaStatus: boolean;
   shouldRequireApproval: boolean;
   canAutoSaveGoldenVisa: boolean;
+  canUseCostOverviewReview: boolean;
+  canShowCostOverviewSubmit: boolean;
+  canShowCostOverviewStatus: boolean;
+  canAutoSaveCostOverview: boolean;
 } {
   const config = getReviewSystemConfig();
   
@@ -166,7 +188,12 @@ export function useReviewSystemConfig(): ReviewSystemConfig & {
     canShowGoldenVisaSubmit: config.enabled && config.enableGoldenVisaReview && config.showGoldenVisaSubmitButton,
     canShowGoldenVisaStatus: config.enabled && config.enableGoldenVisaReview && config.showGoldenVisaStatus,
     shouldRequireApproval: config.enabled && config.enableGoldenVisaReview && config.requireApprovalForDownload,
-    canAutoSaveGoldenVisa: config.enabled && config.enableGoldenVisaReview && config.enableGoldenVisaAutoSave
+    canAutoSaveGoldenVisa: config.enabled && config.enableGoldenVisaReview && config.enableGoldenVisaAutoSave,
+    // Phase 5 - Cost Overview specific helpers
+    canUseCostOverviewReview: config.enabled && config.enableCostOverviewReview,
+    canShowCostOverviewSubmit: config.enabled && config.enableCostOverviewReview && config.showCostOverviewSubmitButton,
+    canShowCostOverviewStatus: config.enabled && config.enableCostOverviewReview && config.showCostOverviewStatus,
+    canAutoSaveCostOverview: config.enabled && config.enableCostOverviewReview && config.enableCostOverviewAutoSave
   };
 }
 

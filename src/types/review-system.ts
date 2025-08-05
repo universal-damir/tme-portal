@@ -115,6 +115,7 @@ export interface CreateApplicationRequest {
 }
 
 export interface UpdateApplicationRequest {
+  type?: ApplicationType; // Allow updating application type
   title?: string;
   form_data?: Record<string, any>;
 }

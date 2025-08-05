@@ -10,7 +10,8 @@ import {
   CreateApplicationRequest,
   UpdateApplicationRequest,
   ReviewSubmission,
-  ReviewAction
+  ReviewAction,
+  Reviewer
 } from '@/types/review-system';
 import { getReviewSystemConfig, withReviewSystemEnabled } from '@/lib/config/review-system';
 
@@ -27,6 +28,111 @@ function getPool(): Pool {
     });
   }
   return pool;
+}
+
+// Application title generation functions
+function generateApplicationTitle(applicationType: string, formData: any): string {
+  console.log('🔧 generateApplicationTitle called with:', { 
+    applicationType, 
+    typeOfType: typeof applicationType,
+    exactMatch: applicationType === 'golden-visa',
+    formDataKeys: formData ? Object.keys(formData) : null,
+    hasFormData: !!formData
+  });
+  
+  if (applicationType === 'golden-visa') {
+    console.log('🔧 Calling generateGoldenVisaTitle...');
+    const title = generateGoldenVisaTitle(formData);
+    console.log('🔧 Generated Golden Visa title:', title);
+    return title;
+  } else if (applicationType === 'cost-overview') {
+    console.log('🔧 Calling generateCostOverviewTitle...');
+    const title = generateCostOverviewTitle(formData);
+    console.log('🔧 Generated Cost Overview title:', title);
+    return title;
+  }
+  
+  console.log('🔧 No matching type, using fallback. Type was:', applicationType);
+  // Default fallback
+  return 'Application';
+}
+
+function generateGoldenVisaTitle(formData: any): string {
+  console.log('🔧 generateGoldenVisaTitle called with formData:', {
+    date: formData.date,
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    companyName: formData.companyName,
+    visaType: formData.visaType,
+    allKeys: Object.keys(formData || {})
+  });
+  
+  const date = new Date(formData.date || new Date());
+  const yy = date.getFullYear().toString().slice(-2);
+  const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dd = date.getDate().toString().padStart(2, '0');
+  const formattedDate = `${yy}${mm}${dd}`;
+  
+  let nameForTitle = '';
+  if (formData.companyName) {
+    nameForTitle = formData.companyName;
+  } else if (formData.lastName && formData.firstName) {
+    nameForTitle = `${formData.lastName} ${formData.firstName}`;
+  } else if (formData.firstName) {
+    nameForTitle = formData.firstName;
+  } else if (formData.lastName) {
+    nameForTitle = formData.lastName;
+  } else {
+    nameForTitle = 'Client';
+  }
+  
+  const visaTypeMap: { [key: string]: string } = {
+    'property-investment': 'property',
+    'time-deposit': 'deposit', 
+    'skilled-employee': 'skilled'
+  };
+  
+  const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType || 'unknown';
+  const result = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+  
+  console.log('🔧 Generated Golden Visa title result:', result);
+  return result;
+}
+
+function generateCostOverviewTitle(formData: any): string {
+  // Use the same detailed filename generation as the PDF export
+  try {
+    const { generateDynamicFilename } = require('@/lib/pdf-generator/utils/filename');
+    const filename = generateDynamicFilename(formData);
+    // Remove the .pdf extension for notification display
+    return filename.replace('.pdf', '');
+  } catch (error) {
+    console.warn('Failed to generate detailed title, using fallback:', error);
+    
+    // Fallback to basic format
+    const date = new Date(formData.clientDetails?.date || new Date());
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    // Use same naming logic as PDF generator - check addressToCompany first
+    const firstName = formData.clientDetails?.firstName || '';
+    const lastName = formData.clientDetails?.lastName || '';
+    const companyName = formData.clientDetails?.companyName || '';
+    const addressToCompany = formData.clientDetails?.addressToCompany || false;
+    
+    // Determine name for title based on addressToCompany checkbox (same as PDF generator)
+    const nameForTitle = addressToCompany && companyName ? 
+      companyName : 
+      (firstName ? 
+        (lastName ? `${lastName} ${firstName}` : firstName) : 
+        (companyName || 'CLIENT'));
+    
+    const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
+    
+    return `${formattedDate} ${nameForTitle} offer ${authority}`;
+  }
 }
 
 // Safe database operation wrapper
@@ -84,6 +190,13 @@ async function logError(operation: string, error: any): Promise<void> {
 export class ApplicationsService {
   
   static async create(data: CreateApplicationRequest, userId: number): Promise<Application | null> {
+    console.log('🔧 BACKEND: ApplicationsService.create called with:', { 
+      type: data.type, 
+      title: data.title, 
+      userId,
+      hasFormData: !!data.form_data 
+    });
+    
     return safeDbOperation(async () => {
       const config = getReviewSystemConfig();
       const pool = getPool();
@@ -99,24 +212,50 @@ export class ApplicationsService {
         throw new Error('Maximum applications limit reached');
       }
       
+      console.log('🔧 BACKEND: Inserting application with:', {
+        type: data.type,
+        title: data.title,
+        userId,
+        formDataKeys: data.form_data ? Object.keys(data.form_data) : []
+      });
+      
       const result = await pool.query(`
         INSERT INTO applications (type, title, form_data, submitted_by_id)
         VALUES ($1, $2, $3, $4)
         RETURNING *
       `, [data.type, data.title, data.form_data, userId]);
       
+      console.log('🔧 BACKEND: Application created:', {
+        id: result.rows[0]?.id,
+        type: result.rows[0]?.type,
+        title: result.rows[0]?.title
+      });
+      
       return result.rows[0] as Application;
     }, null, 'create_application');
   }
   
   static async update(id: string, data: UpdateApplicationRequest, userId: number): Promise<Application | null> {
+    console.log('🔧 BACKEND: ApplicationsService.update called with:', { 
+      id, 
+      hasTitle: !!data.title, 
+      hasFormData: !!data.form_data, 
+      userId 
+    });
+    
     return safeDbOperation(async () => {
       const pool = getPool();
       
       // Verify ownership
       const ownerCheck = await pool.query(`
-        SELECT submitted_by_id FROM applications WHERE id = $1
+        SELECT submitted_by_id, type FROM applications WHERE id = $1
       `, [id]);
+      
+      console.log('🔧 BACKEND: Existing application check:', {
+        found: ownerCheck.rows.length > 0,
+        existingType: ownerCheck.rows[0]?.type,
+        isOwner: ownerCheck.rows[0]?.submitted_by_id === userId
+      });
       
       if (ownerCheck.rows.length === 0 || ownerCheck.rows[0].submitted_by_id !== userId) {
         throw new Error('Application not found or access denied');
@@ -134,6 +273,19 @@ export class ApplicationsService {
       if (data.form_data) {
         updateFields.push(`form_data = $${paramCount++}`);
         values.push(data.form_data);
+      }
+      
+      // CRITICAL FIX: Allow updating application type
+      if (data.type) {
+        updateFields.push(`type = $${paramCount++}`);
+        values.push(data.type);
+        console.log('🔧 BACKEND: Updating application type to:', data.type);
+      }
+      
+      // Check if we have any fields to update
+      if (updateFields.length === 0) {
+        console.log('🔧 BACKEND: No fields to update, skipping SQL query');
+        return ownerCheck.rows[0] as Application;
       }
       
       values.push(id);
@@ -166,6 +318,25 @@ export class ApplicationsService {
       
       return result.rows as Application[];
     }, [], 'get_applications_by_user');
+  }
+  
+  static async getForReview(userId: number): Promise<Application[]> {
+    return safeDbOperation(async () => {
+      const pool = getPool();
+      
+      const result = await pool.query(`
+        SELECT a.*, 
+               sb.full_name as submitted_by_name,
+               r.full_name as reviewer_name
+        FROM applications a
+        LEFT JOIN users sb ON a.submitted_by_id = sb.id
+        LEFT JOIN users r ON a.reviewer_id = r.id
+        WHERE a.reviewer_id = $1 AND a.status IN ('pending_review', 'under_review')
+        ORDER BY a.created_at DESC
+      `, [userId]);
+      
+      return result.rows as Application[];
+    }, [], 'get_applications_for_review');
   }
   
   static async getById(applicationId: string, userId: number): Promise<Application | null> {
@@ -222,8 +393,11 @@ export class ApplicationsService {
   }
   
   static async submitForReview(submission: ReviewSubmission, userId: number): Promise<boolean> {
+    console.log('🔧 BACKEND: submitForReview called with:', { submission, userId });
     return safeDbOperation(async () => {
+      console.log('🔧 BACKEND: Inside safeDbOperation');
       const config = getReviewSystemConfig();
+      console.log('🔧 BACKEND: Config loaded:', { enabled: config.enabled, reviewSubmissionEnabled: config.reviewSubmissionEnabled });
       
       if (!config.reviewSubmissionEnabled) {
         throw new Error('Review submission is currently disabled');
@@ -258,44 +432,39 @@ export class ApplicationsService {
         }
         
         // Get application data for notification title generation
+        console.log('🔧 BACKEND: Getting application data for ID:', submission.application_id);
         const appResult = await pool.query(`
-          SELECT title, form_data FROM applications WHERE id = $1
+          SELECT type, title, form_data FROM applications WHERE id = $1
         `, [submission.application_id]);
+        console.log('🔧 BACKEND: Query result:', { 
+          rowCount: appResult.rows.length, 
+          firstRow: appResult.rows[0] ? { 
+            type: appResult.rows[0].type, 
+            title: appResult.rows[0].title,
+            hasFormData: !!appResult.rows[0].form_data 
+          } : null 
+        });
         
         let applicationTitle = 'Application';
         
         if (appResult.rows.length > 0) {
           try {
+            const applicationType = appResult.rows[0].type;
             const formData = appResult.rows[0].form_data;
             
-            // Generate title using same PDF naming convention as GoldenVisaTab
-            const date = new Date(formData.date || new Date());
-            const yy = date.getFullYear().toString().slice(-2);
-            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-            const dd = date.getDate().toString().padStart(2, '0');
-            const formattedDate = `${yy}${mm}${dd}`;
+            console.log('🔧 DEBUG submitForReview - Application Type Check:', {
+              rawType: applicationType,
+              typeIsString: typeof applicationType === 'string',
+              typeLength: applicationType ? applicationType.length : 0,
+              exactlyGoldenVisa: applicationType === 'golden-visa',
+              exactlyCostOverview: applicationType === 'cost-overview',
+              hasFormData: !!formData,
+              formDataKeys: formData ? Object.keys(formData) : []
+            });
             
-            let nameForTitle = '';
-            if (formData.companyName) {
-              nameForTitle = formData.companyName;
-            } else if (formData.lastName && formData.firstName) {
-              nameForTitle = `${formData.lastName} ${formData.firstName}`;
-            } else if (formData.firstName) {
-              nameForTitle = formData.firstName;
-            } else if (formData.lastName) {
-              nameForTitle = formData.lastName;
-            } else {
-              nameForTitle = 'Client';
-            }
+            applicationTitle = generateApplicationTitle(applicationType, formData);
             
-            const visaTypeMap: { [key: string]: string } = {
-              'property-investment': 'property',
-              'time-deposit': 'deposit', 
-              'skilled-employee': 'skilled'
-            };
-            
-            const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
-            applicationTitle = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+            console.log('🔧 DEBUG Generated title:', applicationTitle);
           } catch (error) {
             console.error('Error generating notification title:', error);
             applicationTitle = appResult.rows[0].title || 'Application';
@@ -310,6 +479,12 @@ export class ApplicationsService {
         const submitterInfo = submitterResult.rows[0];
         
         // Create notification for reviewer
+        console.log('🔧 Creating notification with:', {
+          title: applicationTitle,
+          type: 'review_requested',
+          application_id: submission.application_id
+        });
+        
         await NotificationsService.create({
           user_id: submission.reviewer_id,
           type: 'review_requested',
@@ -358,7 +533,7 @@ export class ApplicationsService {
         
         // Get application details and reviewer info for notification
         const appResult = await pool.query(`
-          SELECT a.submitted_by_id, a.title, a.form_data, u.full_name as reviewer_name, u.employee_code as reviewer_employee_code
+          SELECT a.submitted_by_id, a.type, a.title, a.form_data, u.full_name as reviewer_name, u.employee_code as reviewer_employee_code
           FROM applications a
           JOIN users u ON a.reviewer_id = u.id
           WHERE a.id = $1
@@ -371,36 +546,10 @@ export class ApplicationsService {
           let applicationTitle = 'Application';
           
           try {
+            const applicationType = app.type;
             const formData = app.form_data;
             
-            // Generate title using same PDF naming convention as GoldenVisaTab
-            const date = new Date(formData.date || new Date());
-            const yy = date.getFullYear().toString().slice(-2);
-            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-            const dd = date.getDate().toString().padStart(2, '0');
-            const formattedDate = `${yy}${mm}${dd}`;
-            
-            let nameForTitle = '';
-            if (formData.companyName) {
-              nameForTitle = formData.companyName;
-            } else if (formData.lastName && formData.firstName) {
-              nameForTitle = `${formData.lastName} ${formData.firstName}`;
-            } else if (formData.firstName) {
-              nameForTitle = formData.firstName;
-            } else if (formData.lastName) {
-              nameForTitle = formData.lastName;
-            } else {
-              nameForTitle = 'Client';
-            }
-            
-            const visaTypeMap: { [key: string]: string } = {
-              'property-investment': 'property',
-              'time-deposit': 'deposit', 
-              'skilled-employee': 'skilled'
-            };
-            
-            const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
-            applicationTitle = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+            applicationTitle = generateApplicationTitle(applicationType, formData);
           } catch (error) {
             console.error('Error generating notification title:', error);
             applicationTitle = app.title || 'Application';
@@ -462,6 +611,14 @@ export class NotificationsService {
         return null;
       }
       
+      console.log('🔧 NotificationsService.create called with:', {
+        user_id: data.user_id,
+        type: data.type,
+        title: data.title,
+        message: data.message,
+        application_id: data.application_id
+      });
+      
       // Try to insert with metadata column first (if migration has been run)
       let result;
       try {
@@ -470,6 +627,8 @@ export class NotificationsService {
           VALUES ($1, $2, $3, $4, $5, $6)
           RETURNING *
         `, [data.user_id, data.type, data.title, data.message, data.application_id, JSON.stringify(data.metadata || {})]);
+        
+        console.log('🔧 Notification created successfully:', result.rows[0]);
       } catch (error: any) {
         // If metadata column doesn't exist, fall back to old schema
         if (error.message && error.message.includes('metadata')) {
@@ -479,6 +638,8 @@ export class NotificationsService {
             VALUES ($1, $2, $3, $4, $5)
             RETURNING *
           `, [data.user_id, data.type, data.title, data.message, data.application_id]);
+          
+          console.log('🔧 Notification created (legacy):', result.rows[0]);
         } else {
           throw error;
         }

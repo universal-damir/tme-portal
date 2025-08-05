@@ -1,20 +1,20 @@
-// Golden Visa Application State Management Hook
-// Ultra-safe hook that handles application persistence and review system integration
+// Cost Overview Application State Management Hook
+// Based on Golden Visa pattern for consistent review system integration
 
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { toast } from 'sonner';
-import { GoldenVisaData } from '@/types/golden-visa';
+import { OfferData } from '@/types/offer';
 import { Application, ApplicationStatus, UrgencyLevel } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 
-interface UseGoldenVisaApplicationProps {
-  formData: GoldenVisaData;
+interface UseCostOverviewApplicationProps {
+  formData: OfferData;
   clientName: string;
 }
 
-interface UseGoldenVisaApplicationReturn {
+interface UseCostOverviewApplicationReturn {
   // Application state
   application: Application | null;
   applicationStatus: ApplicationStatus;
@@ -35,10 +35,10 @@ interface UseGoldenVisaApplicationReturn {
   statusMessage: string;
 }
 
-export const useGoldenVisaApplication = ({
+export const useCostOverviewApplication = ({
   formData,
   clientName
-}: UseGoldenVisaApplicationProps): UseGoldenVisaApplicationReturn => {
+}: UseCostOverviewApplicationProps): UseCostOverviewApplicationReturn => {
   const config = useReviewSystemConfig();
   
   // State management
@@ -51,37 +51,41 @@ export const useGoldenVisaApplication = ({
   const lastSavedDataRef = useRef<string>('');
   
   // Generate application title from form data
-  const generateApplicationTitle = useCallback((data: GoldenVisaData): string => {
-    const clientPart = clientName || `${data.firstName} ${data.lastName}`.trim() || 'Unnamed Client';
-    const visaType = data.visaType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-    return `${clientPart} - ${visaType} Golden Visa`;
+  const generateApplicationTitle = useCallback((data: OfferData): string => {
+    const clientPart = clientName || 
+      (data.clientDetails?.companyName) || 
+      `${data.clientDetails?.firstName || ''} ${data.clientDetails?.lastName || ''}`.trim() || 
+      'Unnamed Client';
+    
+    const authority = data.authorityInformation?.responsibleAuthority || 'Authority Setup';
+    return `${clientPart} - ${authority} Cost Overview`;
   }, [clientName]);
   
   // Load existing application on mount
   useEffect(() => {
-    console.log('🔧 useGoldenVisaApplication - Config Check:', {
-      canUseGoldenVisaReview: config.canUseGoldenVisaReview,
+    console.log('🔧 useCostOverviewApplication - Config Check:', {
+      canUseCostOverviewReview: config.canUseCostOverviewReview,
       enabled: config.enabled,
-      enableGoldenVisaReview: config.enableGoldenVisaReview
+      enableCostOverviewReview: config.enableCostOverviewReview
     });
     
-    if (!config.canUseGoldenVisaReview) {
-      console.log('🔧 Review system disabled for Golden Visa');
+    if (!config.canUseCostOverviewReview) {
+      console.log('🔧 Review system disabled for Cost Overview');
       return; // Don't load anything if review system is disabled
     }
     
-    console.log('🔧 Loading existing application...');
+    console.log('🔧 Loading existing Cost Overview application...');
     loadExistingApplication();
-  }, [config.canUseGoldenVisaReview]);
+  }, [config.canUseCostOverviewReview]);
   
   const loadExistingApplication = async () => {
-    if (!config.canUseGoldenVisaReview) return;
+    if (!config.canUseCostOverviewReview) return;
     
     setIsLoading(true);
     setError(null);
     
     try {
-      const response = await fetch('/api/applications?type=golden-visa&status=draft&limit=1');
+      const response = await fetch('/api/applications?type=cost-overview&status=draft&limit=1');
       if (!response.ok) {
         if (response.status === 404) {
           // No existing draft application found - this is fine
@@ -96,7 +100,7 @@ export const useGoldenVisaApplication = ({
         setApplication(app);
         
         if (config.debugMode) {
-          console.log('Loaded existing Golden Visa application:', app.id);
+          console.log('Loaded existing Cost Overview application:', app.id);
         }
       }
     } catch (err) {
@@ -120,7 +124,7 @@ export const useGoldenVisaApplication = ({
   
   // Save application to database
   const saveApplication = async (): Promise<boolean> => {
-    if (!config.canUseGoldenVisaReview) {
+    if (!config.canUseCostOverviewReview) {
       return true; // Return success if review system is disabled
     }
     
@@ -132,13 +136,20 @@ export const useGoldenVisaApplication = ({
       
       if (application) {
         // Update existing application
+        console.log('🔧 Updating existing Cost Overview application:', { 
+          id: application.id, 
+          title, 
+          formDataType: typeof formData,
+          formDataKeys: formData ? Object.keys(formData) : []
+        });
+        
         const response = await fetch(`/api/applications/${application.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            type: 'golden-visa', // CRITICAL: Always include type in updates
+            type: 'cost-overview', // CRITICAL FIX: Ensure type is correct
             title,
             form_data: formData,
           }),
@@ -152,17 +163,24 @@ export const useGoldenVisaApplication = ({
         setApplication(updatedApp);
         
         if (config.debugMode) {
-          console.log('Updated Golden Visa application:', updatedApp.id);
+          console.log('Updated Cost Overview application:', updatedApp.id);
         }
       } else {
         // Create new application
+        console.log('🔧 Creating new Cost Overview application:', { 
+          type: 'cost-overview',
+          title, 
+          formDataType: typeof formData,
+          formDataKeys: formData ? Object.keys(formData) : []
+        });
+        
         const response = await fetch('/api/applications', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            type: 'golden-visa',
+            type: 'cost-overview',
             title,
             form_data: formData,
           }),
@@ -176,7 +194,7 @@ export const useGoldenVisaApplication = ({
         setApplication(newApp);
         
         if (config.debugMode) {
-          console.log('Created new Golden Visa application:', newApp.id);
+          console.log('Created new Cost Overview application:', newApp.id);
         }
       }
       
@@ -201,7 +219,7 @@ export const useGoldenVisaApplication = ({
   
   // Auto-save functionality
   useEffect(() => {
-    if (!config.canAutoSaveGoldenVisa) {
+    if (!config.canAutoSaveCostOverview) {
       return; // Don't auto-save if disabled
     }
     
@@ -230,7 +248,7 @@ export const useGoldenVisaApplication = ({
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [formData, config.canAutoSaveGoldenVisa]);
+  }, [formData, config.canAutoSaveCostOverview]);
   
   // Submit application for review
   const submitForReview = async (submission: {
@@ -238,19 +256,25 @@ export const useGoldenVisaApplication = ({
     urgency: UrgencyLevel;
     comments?: string;
   }): Promise<boolean> => {
-    if (!config.canUseGoldenVisaReview || !application) {
+    if (!config.canUseCostOverviewReview || !application) {
+      console.log('🔧 submitForReview blocked:', { canUse: config.canUseCostOverviewReview, hasApplication: !!application });
       return false;
     }
+    
+    console.log('🔧 Cost Overview submitForReview starting:', { applicationId: application.id, submission });
     
     setIsLoading(true);
     setError(null);
     
     try {
       // First ensure application is saved with latest form data
+      console.log('🔧 Saving application before review submission...');
       const saveSuccess = await saveApplication();
       if (!saveSuccess) {
         throw new Error('Failed to save application before submission');
       }
+      
+      console.log('🔧 Making API call to submit for review:', `/api/applications/${application.id}/submit-review`);
       
       // Submit for review
       const response = await fetch(`/api/applications/${application.id}/submit-review`, {
@@ -261,11 +285,16 @@ export const useGoldenVisaApplication = ({
         body: JSON.stringify(submission),
       });
       
+      console.log('🔧 API response status:', response.status, response.statusText);
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('🔧 API error response:', errorText);
         throw new Error(`Failed to submit for review: ${response.statusText}`);
       }
       
       const result = await response.json();
+      console.log('🔧 API success response:', result);
       
       // Update application status locally since API doesn't return updated app
       if (application) {
@@ -277,7 +306,7 @@ export const useGoldenVisaApplication = ({
       }
       
       if (config.debugMode) {
-        console.log('Submitted Golden Visa application for review:', result);
+        console.log('Submitted Cost Overview application for review:', result);
       }
       
       return true;
@@ -303,7 +332,7 @@ export const useGoldenVisaApplication = ({
   const needsApproval = config.shouldRequireApproval && applicationStatus !== 'approved';
   
   const getStatusMessage = (): string => {
-    if (!config.canUseGoldenVisaReview) {
+    if (!config.canUseCostOverviewReview) {
       return '';
     }
     

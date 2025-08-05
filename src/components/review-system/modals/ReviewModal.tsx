@@ -9,6 +9,7 @@ import { X, CheckCircle, XCircle, FileText, Send, User, MessageSquare, Calendar,
 import { Application } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
+import { OfferData } from '@/types/offer';
 import { SharedClientInfo } from '@/types/portal';
 
 interface ReviewModalProps {
@@ -47,36 +48,63 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     if (!application?.form_data) return application?.title || 'Application';
     
     try {
-      const formData = application.form_data as GoldenVisaData;
-      const date = new Date(formData.date || new Date());
-      const yy = date.getFullYear().toString().slice(-2);
-      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-      const dd = date.getDate().toString().padStart(2, '0');
-      const formattedDate = `${yy}${mm}${dd}`;
-      
-      let nameForTitle = '';
-      if (formData.companyName) {
-        nameForTitle = formData.companyName;
-      } else if (formData.lastName && formData.firstName) {
-        nameForTitle = `${formData.lastName} ${formData.firstName}`;
-      } else if (formData.firstName) {
-        nameForTitle = formData.firstName;
-      } else if (formData.lastName) {
-        nameForTitle = formData.lastName;
-      } else {
-        nameForTitle = 'Client';
+      if (application.type === 'golden-visa') {
+        const formData = application.form_data as GoldenVisaData;
+        const date = new Date(formData.date || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        let nameForTitle = '';
+        if (formData.companyName) {
+          nameForTitle = formData.companyName;
+        } else if (formData.lastName && formData.firstName) {
+          nameForTitle = `${formData.lastName} ${formData.firstName}`;
+        } else if (formData.firstName) {
+          nameForTitle = formData.firstName;
+        } else if (formData.lastName) {
+          nameForTitle = formData.lastName;
+        } else {
+          nameForTitle = 'Client';
+        }
+        
+        const visaTypeMap: { [key: string]: string } = {
+          'property-investment': 'property',
+          'time-deposit': 'deposit',
+          'skilled-employee': 'skilled'
+        };
+        
+        const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+        return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+      } else if (application.type === 'cost-overview') {
+        const formData = application.form_data as OfferData;
+        const date = new Date(formData.clientDetails?.date || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        let nameForTitle = '';
+        if (formData.clientDetails?.companyName) {
+          nameForTitle = formData.clientDetails.companyName;
+        } else if (formData.clientDetails?.lastName && formData.clientDetails?.firstName) {
+          nameForTitle = `${formData.clientDetails.lastName} ${formData.clientDetails.firstName}`;
+        } else if (formData.clientDetails?.firstName) {
+          nameForTitle = formData.clientDetails.firstName;
+        } else if (formData.clientDetails?.lastName) {
+          nameForTitle = formData.clientDetails.lastName;
+        } else {
+          nameForTitle = 'Client';
+        }
+        
+        const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
+        return `${formattedDate} ${nameForTitle} offer ${authority}`;
       }
       
-      const visaTypeMap: { [key: string]: string } = {
-        'property-investment': 'property',
-        'time-deposit': 'deposit',
-        'skilled-employee': 'skilled'
-      };
-      
-      const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
-      return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+      return application?.title || 'Application';
     } catch (error) {
-      return application?.title || 'Golden Visa Application';
+      return application?.title || `${application.type.charAt(0).toUpperCase() + application.type.slice(1).replace('-', ' ')} Application`;
     }
   };
 
@@ -84,28 +112,47 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     if (!application?.form_data) return;
     
     try {
-      // Generate PDF for review using the same logic as Golden Visa tab preview
-      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
-      const formData = application.form_data as GoldenVisaData;
-      
-      // Extract client info from form data
-      const clientInfo: SharedClientInfo = {
-        firstName: formData.firstName || '',
-        lastName: formData.lastName || '',
-        companyName: formData.companyName || '',
-        date: formData.date || new Date().toISOString().split('T')[0],
-      };
-      
-      const { blob } = await generateGoldenVisaPDFWithFilename(formData, clientInfo);
-      
-      // Open PDF in new tab for preview
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      
-      // Clean up the URL after a delay
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-      }, 1000);
+      if (application.type === 'golden-visa') {
+        // Generate Golden Visa PDF for review
+        const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+        const formData = application.form_data as GoldenVisaData;
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateGoldenVisaPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      } else if (application.type === 'cost-overview') {
+        // Generate Cost Overview PDF for review
+        const { generatePDFWithFilename } = await import('@/lib/pdf-generator');
+        const formData = application.form_data as OfferData;
+        
+        const { blob } = await generatePDFWithFilename(formData);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      } else {
+        setError('PDF preview not supported for this application type.');
+      }
       
     } catch (error) {
       console.error('Error generating PDF for review:', error);
@@ -229,7 +276,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
-                      Review Application
+                      Review {application.type === 'golden-visa' ? 'Golden Visa' : application.type === 'cost-overview' ? 'Cost Overview' : 'Application'}
                     </h2>
                     <p className="text-sm font-medium text-gray-800 mt-1">
                       {getFormTitle()}

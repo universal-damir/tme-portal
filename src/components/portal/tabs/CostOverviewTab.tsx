@@ -12,7 +12,8 @@ import {
   generatePDFWithFilename, 
   generateFamilyVisaPDF,
   generateFamilyVisaPDFWithFilename,
-  hasFamilyVisas 
+  hasFamilyVisas,
+  generateDynamicFilename
 } from '@/lib/pdf-generator';
 import { Progress } from '@/components/ui/progress';
 
@@ -34,12 +35,16 @@ import { useCostCalculation } from '../../cost-overview/hooks/useCostCalculation
 import { useSharedClient } from '@/contexts/SharedClientContext';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useChatPanel } from '@/hooks/useChatPanel';
+import { useCostOverviewApplication } from '@/hooks/useCostOverviewApplication';
 
 // Import AI Assistant components
 import { ChatInterface } from '@/components/ai-assistant';
 
 // Import Email components
 import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
+
+// Import Review System components
+import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 
 // Progress tracking interface
 interface PDFGenerationProgress {
@@ -56,6 +61,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
   const chatPanel = useChatPanel();
   const [emailDraftProps, setEmailDraftProps] = React.useState<EmailDraftGeneratorProps | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = React.useState(false);
 
   // Form state management
   const {
@@ -180,6 +186,14 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     setValue
   );
   const { costs, hasCalculations } = useCostCalculation(authorityConfig, watchedData);
+  
+  // Review system integration
+  const reviewApp = useCostOverviewApplication({
+    formData: watchedData,
+    clientName: clientInfo.companyName || 
+      (watchedData.clientDetails?.companyName) || 
+      `${watchedData.clientDetails?.firstName || ''} ${watchedData.clientDetails?.lastName || ''}`.trim()
+  });
 
   // Track authority configuration changes
   React.useEffect(() => {
@@ -536,6 +550,14 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         }
       });
       
+      // Special handling for client emails to update the component's local state
+      if (formData.clientDetails?.clientEmails) {
+        const emailUpdateEvent = new CustomEvent('update-client-emails', {
+          detail: { emails: formData.clientDetails.clientEmails }
+        });
+        window.dispatchEvent(emailUpdateEvent);
+      }
+      
       // Show a toast notification to inform the user
       toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
         duration: 4000,
@@ -543,10 +565,20 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       });
     };
 
+    const handleSendApprovedApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🔧 Sending approved Cost Overview application:', applicationId);
+      
+      // Generate PDF and show email modal using the saved form data
+      handleGeneratePDF(formData);
+    };
+
     window.addEventListener('edit-cost-overview-application', handleEditApplication);
+    window.addEventListener('send-approved-application', handleSendApprovedApplication);
 
     return () => {
       window.removeEventListener('edit-cost-overview-application', handleEditApplication);
+      window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
   }, [setValue]);
 
@@ -842,6 +874,34 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               )}
             </button>
             
+            {/* Submit for Review Button */}
+            <button
+              type="button"
+              onClick={() => setIsReviewModalOpen(true)}
+              disabled={reviewApp.isLoading}
+              className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              style={{ 
+                backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#F59E0B',
+                fontFamily: 'Inter, sans-serif'
+              }}
+              onMouseEnter={(e) => !reviewApp.isLoading && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
+              onMouseLeave={(e) => !reviewApp.isLoading && ((e.target as HTMLElement).style.transform = 'scale(1)')}
+              onMouseDown={(e) => !reviewApp.isLoading && ((e.target as HTMLElement).style.transform = 'scale(0.98)')}
+              onMouseUp={(e) => !reviewApp.isLoading && ((e.target as HTMLElement).style.transform = 'scale(1.02)')}
+            >
+              {reviewApp.isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="h-5 w-5" />
+                  <span>Submit for Review</span>
+                </>
+              )}
+            </button>
+            
             <button
               type="button"
               onClick={() => handleGeneratePDF(watchedData)}
@@ -905,6 +965,45 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onClearHistory={aiAssistant.clearHistory}
         isLoading={aiAssistant.isLoading}
         error={aiAssistant.error}
+      />
+      
+      {/* Review Submission Modal */}
+      <ReviewSubmissionModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        applicationId={reviewApp.application?.id?.toString() || 'new'}
+        applicationTitle={(() => {
+          // Use the same filename generation as the actual PDF export
+          try {
+            const filename = generateDynamicFilename(watchedData);
+            // Remove the .pdf extension for display
+            return filename.replace('.pdf', '');
+          } catch (error) {
+            // Fallback to basic format if generation fails
+            const date = new Date(watchedData.clientDetails?.date || new Date());
+            const yy = date.getFullYear().toString().slice(-2);
+            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dd = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${yy}${mm}${dd}`;
+            
+            let nameForTitle = '';
+            if (watchedData.clientDetails?.companyName) {
+              nameForTitle = watchedData.clientDetails.companyName;
+            } else if (watchedData.clientDetails?.lastName && watchedData.clientDetails?.firstName) {
+              nameForTitle = `${watchedData.clientDetails.lastName} ${watchedData.clientDetails.firstName}`;
+            } else if (watchedData.clientDetails?.firstName) {
+              nameForTitle = watchedData.clientDetails.firstName;
+            } else if (watchedData.clientDetails?.lastName) {
+              nameForTitle = watchedData.clientDetails.lastName;
+            } else {
+              nameForTitle = 'Client';
+            }
+            
+            const authority = watchedData.authorityInformation?.responsibleAuthority || 'setup';
+            return `${formattedDate} ${nameForTitle} offer ${authority}`;
+          }
+        })()}
+        onSubmit={reviewApp.submitForReview}
       />
       
       {/* Email Draft Generator with Preview Modal */}

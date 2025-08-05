@@ -77,16 +77,19 @@ export async function PUT(
     const userId = session.user.id;
 
     const body = await request.json();
-    const { title, form_data } = body;
+    const { type, title, form_data } = body;
+    
+    console.log('🔧 API ROUTE: PUT /api/applications update with:', { id, type, title: !!title, form_data: !!form_data });
 
-    if (!title && !form_data) {
+    if (!title && !form_data && !type) {
       return NextResponse.json(
-        { error: 'At least one field (title or form_data) is required' }, 
+        { error: 'At least one field (type, title or form_data) is required' }, 
         { status: 400 }
       );
     }
 
     const application = await ApplicationsService.update(id, {
+      type,
       title,
       form_data
     }, userId);
@@ -101,13 +104,14 @@ export async function PUT(
     return NextResponse.json(application, { status: 200 });
 
   } catch (error) {
-    console.error('Update application error:', error);
+    console.error('🔧 API ROUTE: Update application error:', error);
+    console.error('🔧 API ROUTE: Error stack:', (error as Error).stack);
     return NextResponse.json(
       { 
         success: false,
         error: config.debugMode ? (error as Error).message : 'Failed to update application'
       }, 
-      { status: config.debugMode ? 500 : 200 }
+      { status: 500 } // Always return 500 for actual errors
     );
   }
 }
