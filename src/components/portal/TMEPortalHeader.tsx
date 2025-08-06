@@ -140,11 +140,60 @@ export function TMEPortalHeader({
       }
     });
     
-    // Small delay to ensure the tab has loaded before dispatching the event
-    setTimeout(() => {
-      window.dispatchEvent(editEvent);
-      console.log(`🔧 Header: Dispatched ${eventName} event with form data:`, feedbackApplication.form_data);
-    }, 100);
+    // Wait for the tab to be ready before dispatching the event (same as FeedbackModal)
+    const waitForTabAndDispatch = () => {
+      let attempts = 0;
+      const maxAttempts = 40; // Max 20 seconds (500ms * 40) to account for lazy loading
+      
+      const checkAndDispatch = () => {
+        attempts++;
+        console.log(`🔧 HEADER: Checking if tab is ready for edit event (attempt ${attempts}/${maxAttempts})`);
+        
+        // Test if we can dispatch and receive a response by sending a test event
+        const testEvent = new CustomEvent('tab-readiness-check', {
+          detail: { targetTab: feedbackApplication.type }
+        });
+        
+        let tabReady = false;
+        const testHandler = () => {
+          tabReady = true;
+          window.removeEventListener('tab-readiness-confirmed', testHandler);
+        };
+        
+        window.addEventListener('tab-readiness-confirmed', testHandler);
+        window.dispatchEvent(testEvent);
+        
+        // Give a small delay to see if tab responds
+        setTimeout(() => {
+          window.removeEventListener('tab-readiness-confirmed', testHandler);
+          
+          if (tabReady) {
+            console.log('🔧 HEADER: Tab is ready! Dispatching edit application event');
+            console.log('🔧 HEADER: Current window hash:', window.location.hash);
+            console.log('🔧 HEADER: Event detail:', editEvent.detail);
+            
+            // Dispatch the actual event
+            window.dispatchEvent(editEvent);
+            console.log(`🔧 Header: Dispatched ${eventName} event with form data successfully`);
+            
+          } else if (attempts < maxAttempts) {
+            console.log(`🔧 HEADER: Tab not ready yet, retrying in 300ms...`);
+            setTimeout(checkAndDispatch, 300);
+          } else {
+            console.error('🔧 HEADER: Tab failed to become ready after maximum attempts');
+            console.error('🔧 HEADER: This might be due to lazy loading delay or tab not mounting');
+            // Dispatch anyway as last resort
+            window.dispatchEvent(editEvent);
+            console.log(`🔧 Header: Dispatched ${eventName} event as last resort`);
+          }
+        }, 100);
+      };
+      
+      // Start checking after initial delay
+      setTimeout(checkAndDispatch, 500);
+    };
+    
+    waitForTabAndDispatch();
   };
 
   // Handle review actions (approve/reject)
