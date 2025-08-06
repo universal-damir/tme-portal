@@ -107,9 +107,9 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <label className="block text-sm font-medium">
+              <div className="flex flex-col h-full space-y-2 -mt-2">
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-semibold text-foreground">
                     Accounting
                   </label>
                   <div className="relative">
@@ -137,14 +137,13 @@ export const AdditionalServicesSection: React.FC<AdditionalServicesSectionProps>
                     onChange={handlers.handleAccountingFeeChange}
                     placeholder={localAccountingFrequency === 'quarterly' ? '2,098.00' : 
                                 localAccountingFrequency === 'yearly' ? '6,293.00' : '2,183.00'}
-                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                    style={{ fontFamily: 'Inter, sans-serif' }}
-                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                    className="pr-16 h-12 text-base focus-visible:ring-2 focus-visible:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none flex w-full rounded-md border border-input bg-transparent px-3 py-1 shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                   />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500 pointer-events-none">
-                    AED
-                  </span>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-sm font-medium text-muted-foreground">
+                      AED
+                    </span>
+                  </div>
                 </div>
               </div>
             </motion.div>
