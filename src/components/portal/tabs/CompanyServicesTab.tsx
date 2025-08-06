@@ -370,13 +370,15 @@ const CompanyServicesTab: React.FC = () => {
 
     const handleTabReadinessCheck = (event: any) => {
       const { targetTab } = event.detail;
-      console.log('🔧 COMPANY-SERVICES-TAB: Readiness check received for tab:', targetTab);
       
       // Only respond if this is our tab
       if (targetTab === 'company-services') {
-        console.log('🔧 COMPANY-SERVICES-TAB: Confirming tab readiness');
         const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
-          detail: { tab: 'company-services', ready: true }
+          detail: { 
+            tab: 'company-services', 
+            ready: true,
+            timestamp: Date.now()
+          }
         });
         window.dispatchEvent(readinessEvent);
       }
@@ -386,13 +388,10 @@ const CompanyServicesTab: React.FC = () => {
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
     window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
 
-    console.log('🔧 COMPANY-SERVICES-TAB: Event listeners registered');
-
     return () => {
       window.removeEventListener('edit-company-services-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
       window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
-      console.log('🔧 COMPANY-SERVICES-TAB: Event listeners removed');
     };
   }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 

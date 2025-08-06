@@ -60,8 +60,6 @@ interface CostOverviewTabProps {
 }
 
 const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
-  console.log('🔧 COST-OVERVIEW-TAB: Component mounting/rendering at', new Date().toISOString());
-  console.log('🔧 COST-OVERVIEW-TAB: Current window hash:', window.location.hash);
   
   const { clientInfo, updateClientInfo } = useSharedClient();
   const chatPanel = useChatPanel();
@@ -830,8 +828,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Listen for edit application events from review modal or notifications
   React.useEffect(() => {
-    console.log('🔧 COST-OVERVIEW-TAB: Setting up event listeners');
-    console.log('🔧 COST-OVERVIEW-TAB: Current component mounted and ready');
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 COST-OVERVIEW-TAB: Event received - edit application:', applicationId);
@@ -878,20 +874,23 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     const handleTabReadinessCheck = (event: any) => {
       const { targetTab } = event.detail;
-      console.log('🔧 COST-OVERVIEW-TAB: Readiness check received for tab:', targetTab);
-      console.log('🔧 COST-OVERVIEW-TAB: Current window hash:', window.location.hash);
-      console.log('🔧 COST-OVERVIEW-TAB: Tab component state - mounted and listeners active');
+      console.log(`🔧 COST-OVERVIEW-TAB: Received readiness check for: ${targetTab}`);
+      console.log('🔧 COST-OVERVIEW-TAB: Component is mounted, event listeners are active');
       
       // Only respond if this is our tab
       if (targetTab === 'cost-overview') {
-        console.log('🔧 COST-OVERVIEW-TAB: Confirming tab readiness');
+        console.log('🔧 COST-OVERVIEW-TAB: This is my tab - confirming readiness');
         const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
-          detail: { tab: 'cost-overview', ready: true }
+          detail: { 
+            tab: 'cost-overview', 
+            ready: true,
+            timestamp: Date.now()
+          }
         });
         window.dispatchEvent(readinessEvent);
-        console.log('🔧 COST-OVERVIEW-TAB: Dispatched tab-readiness-confirmed event');
+        console.log('🔧 COST-OVERVIEW-TAB: Readiness confirmation dispatched');
       } else {
-        console.log(`🔧 COST-OVERVIEW-TAB: Readiness check for different tab (${targetTab}), ignoring`);
+        console.log(`🔧 COST-OVERVIEW-TAB: Not my tab (${targetTab}), ignoring`);
       }
     };
 
@@ -899,13 +898,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
     window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
 
-    console.log('🔧 COST-OVERVIEW-TAB: Event listeners registered');
-
     return () => {
       window.removeEventListener('edit-cost-overview-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
       window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
-      console.log('🔧 COST-OVERVIEW-TAB: Event listeners removed');
     };
   }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 

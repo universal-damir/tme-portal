@@ -410,7 +410,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             
             // Set a timeout to stop loading if no confirmation is received
             setTimeout(() => {
-              console.warn('🔧 FEEDBACK-MODAL: No confirmation received after 5 seconds, stopping loading');
               setIsSendLoading(false);
               window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
             }, 5000);
@@ -431,7 +430,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
             
             setTimeout(() => {
-              console.warn('🔧 FEEDBACK-MODAL: No confirmation via fallback, stopping loading');
               setIsSendLoading(false);
               window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
             }, 5000);

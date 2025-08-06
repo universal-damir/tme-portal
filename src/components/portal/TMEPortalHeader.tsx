@@ -149,27 +149,33 @@ export function TMEPortalHeader({
         attempts++;
         console.log(`🔧 HEADER: Checking if tab is ready for edit event (attempt ${attempts}/${maxAttempts})`);
         
-        // Test if we can dispatch and receive a response by sending a test event
+        // Check if tab component is actually mounted by testing if it can receive events
+        let tabReady = false;
+        
+        // Create a unique test event that only a mounted tab would respond to
         const testEvent = new CustomEvent('tab-readiness-check', {
           detail: { targetTab: feedbackApplication.type }
         });
         
-        let tabReady = false;
         const testHandler = (event: any) => {
-          console.log('🔧 HEADER: Received tab readiness confirmation:', event.detail);
-          if (event.detail.tab === feedbackApplication.type) {
+          if (event.detail?.tab === feedbackApplication.type) {
+            console.log(`🔧 HEADER: Tab ${feedbackApplication.type} confirmed it's mounted and ready`);
             tabReady = true;
             window.removeEventListener('tab-readiness-confirmed', testHandler);
           }
         };
         
         window.addEventListener('tab-readiness-confirmed', testHandler);
-        console.log(`🔧 HEADER: Dispatching readiness check for ${feedbackApplication.type}`);
+        console.log(`🔧 HEADER: Testing if ${feedbackApplication.type} tab is mounted...`);
         window.dispatchEvent(testEvent);
         
         // Give a small delay to see if tab responds
         setTimeout(() => {
           window.removeEventListener('tab-readiness-confirmed', testHandler);
+          
+          // Additional check: if hash matches target and we've waited a while, try anyway
+          const hashMatches = window.location.hash === `#${feedbackApplication.type}`;
+          const hasWaitedLong = attempts > 10; // After 10 attempts (3+ seconds)
           
           if (tabReady) {
             console.log('🔧 HEADER: Tab is ready! Dispatching edit application event');
@@ -179,6 +185,13 @@ export function TMEPortalHeader({
             // Dispatch the actual event
             window.dispatchEvent(editEvent);
             console.log(`🔧 Header: Dispatched ${eventName} event with form data successfully`);
+            
+          } else if (hashMatches && hasWaitedLong && attempts < maxAttempts) {
+            console.log('🔧 HEADER: Tab seems ready based on hash, trying to dispatch anyway');
+            
+            // Try dispatching the event anyway since hash matches and we've waited
+            window.dispatchEvent(editEvent);
+            console.log(`🔧 Header: Dispatched ${eventName} event (fallback method)`);
             
           } else if (attempts < maxAttempts) {
             console.log(`🔧 HEADER: Tab not ready yet, retrying in 300ms...`);
@@ -190,11 +203,11 @@ export function TMEPortalHeader({
             window.dispatchEvent(editEvent);
             console.log(`🔧 Header: Dispatched ${eventName} event as last resort`);
           }
-        }, 100);
+        }, 50);
       };
       
       // Start checking after initial delay
-      setTimeout(checkAndDispatch, 500);
+      setTimeout(checkAndDispatch, 1000);
     };
     
     waitForTabAndDispatch();
