@@ -111,7 +111,7 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
     >
       <FormSection
         title="Authority Information"
-        description="Select the responsible UAE authority and provide company details"
+        description="Select the responsible UAE authority and provide business activity details"
         icon={Shield}
         iconColor="text-slate-600"
       >
@@ -213,88 +213,6 @@ export const AuthorityInfoSection: React.FC<AuthorityInfoSectionProps> = ({
             </div>
           </div>
 
-          {/* Share Capital, Value per Share, and Number of Shares */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                Share Capital (AED) *
-              </label>
-              <div className="relative">
-                <motion.input
-                  whileFocus={{ scale: 1.01 }}
-                  type="text"
-                  value={formattedInputs.shareCapitalFormatted}
-                  onChange={handlers.handleShareCapitalChange}
-                  placeholder="100,000"
-                  className={cn(
-                    "w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]",
-                    validationErrors.shareCapitalError ? 'border-red-300' : ''
-                  )}
-                  onFocus={(e) => e.target.style.borderColor = validationErrors.shareCapitalError ? '#ef4444' : '#243F7B'}
-                  onBlur={(e) => e.target.style.borderColor = validationErrors.shareCapitalError ? '#ef4444' : '#e5e7eb'}
-                />
-              </div>
-              {validationErrors.shareCapitalError && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.shareCapitalError}</p>
-              )}
-              {errors.authorityInformation?.shareCapitalAED && (
-                <p className="text-red-500 text-xs mt-1">{errors.authorityInformation.shareCapitalAED.message}</p>
-              )}
-              {shareCapitalAlert.shouldHighlight && shareCapitalAlert.message && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg"
-                >
-                  <p className="text-blue-700 text-sm font-medium">{shareCapitalAlert.message}</p>
-                </motion.div>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                Value per Share (AED) *
-              </label>
-              <motion.input
-                whileFocus={{ scale: 1.01 }}
-                type="text"
-                value={formattedInputs.valuePerShareFormatted}
-                onChange={handlers.handleValuePerShareChange}
-                placeholder="1"
-                className={cn(
-                  "w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]",
-                  validationErrors.valuePerShareError ? 'border-red-300' : ''
-                )}
-                onFocus={(e) => e.target.style.borderColor = validationErrors.valuePerShareError ? '#ef4444' : '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = validationErrors.valuePerShareError ? '#ef4444' : '#e5e7eb'}
-              />
-              {validationErrors.valuePerShareError && (
-                <p className="text-red-500 text-xs mt-1">{validationErrors.valuePerShareError}</p>
-              )}
-              {errors.authorityInformation?.valuePerShareAED && (
-                <p className="text-red-500 text-xs mt-1">{errors.authorityInformation.valuePerShareAED.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                Number of Shares
-              </label>
-              <input
-                type="text"
-                value={watchedData.authorityInformation?.numberOfShares ? watchedData.authorityInformation.numberOfShares.toLocaleString() : ''}
-                readOnly
-                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-gray-100 text-gray-600 cursor-not-allowed h-[42px]"
-                placeholder="Calculated automatically"
-              />
-              {/* Hidden input for form registration */}
-              <input
-                type="hidden"
-                {...register('authorityInformation.numberOfShares')}
-              />
-            </div>
-          </div>
 
           {/* Activity Codes - Show always, compact layout */}
           <div>
