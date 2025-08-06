@@ -596,7 +596,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         activityLogging: {
           resource: 'cost_overview',
           client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
-          document_type: 'Cost Overview'
+          document_type: 'Cost Overview',
+          filename: mainFilename
         }
       });
 
@@ -780,7 +781,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         activityLogging: {
           resource: 'cost_overview',
           client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
-          document_type: 'Cost Overview'
+          document_type: 'Cost Overview',
+          filename: mainFilename
         }
       });
 

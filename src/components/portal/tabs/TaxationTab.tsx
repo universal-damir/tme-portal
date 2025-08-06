@@ -159,7 +159,8 @@ const TaxationTab: React.FC = () => {
         activityLogging: {
           resource: 'taxation',
           client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
-          document_type: 'Taxation Services'
+          document_type: 'Taxation Services',
+          filename: filename
         }
       });
       
@@ -250,7 +251,8 @@ const TaxationTab: React.FC = () => {
         activityLogging: {
           resource: 'taxation',
           client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
-          document_type: 'Taxation Services'
+          document_type: 'Taxation Services',
+          filename: filename
         }
       });
       
@@ -381,7 +383,8 @@ const TaxationTab: React.FC = () => {
         activityLogging: {
           resource: 'taxation',
           client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
-          document_type: 'Taxation Services'
+          document_type: 'Taxation Services',
+          filename: disclaimerResult.filename
         }
       });
       

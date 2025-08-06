@@ -175,7 +175,8 @@ const CompanyServicesTab: React.FC = () => {
         activityLogging: {
           resource: 'company_services',
           client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
-          document_type: 'Company Services'
+          document_type: 'Company Services',
+          filename: filename
         }
       });
 

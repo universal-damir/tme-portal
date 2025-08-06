@@ -407,7 +407,8 @@ const GoldenVisaTab: React.FC = () => {
         activityLogging: {
           resource: 'golden_visa',
           client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
-          document_type: 'Golden Visa'
+          document_type: 'Golden Visa',
+          filename: filename
         }
       });
 
