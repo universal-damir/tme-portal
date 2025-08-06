@@ -212,9 +212,14 @@ const CompanyServicesTab: React.FC = () => {
 
   // Handle sending PDF to client (for approved applications)
   const handleSendPDF = async (data: CompanyServicesData): Promise<void> => {
+    console.log('🔧 Company Services handleSendPDF called with data:', data);
+    
     // Validate required data before sending PDF
     if (!data.firstName && !data.lastName && !data.companyName) {
-      alert('Please enter either client name (first/last) or company name before sending the PDF.');
+      console.error('🔧 Company Services missing client/company name:', data);
+      toast.error('Client Information Required', {
+        description: 'The saved application data is missing client or company name information.'
+      });
       return;
     }
 
@@ -350,6 +355,7 @@ const CompanyServicesTab: React.FC = () => {
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 Sending approved Company Services application:', applicationId);
+      console.log('🔧 Company Services form data received:', formData);
       
       // Send PDF to client using the saved form data
       handleSendPDF(formData);

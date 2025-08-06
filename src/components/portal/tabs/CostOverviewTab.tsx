@@ -704,15 +704,22 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Handle sending PDF to client (for approved applications)
   const handleSendPDF = async (data: OfferData): Promise<void> => {
+    console.log('🔧 handleSendPDF called with data:', data);
+    
     // Validate the entire form data using Zod schema
     try {
       await offerDataSchema.parseAsync(data);
     } catch (validationError: any) {
-      // Trigger form validation to show field-level errors
-      await trigger();
+      console.error('🔧 Zod validation failed:', validationError);
       
-      // Scroll to and highlight the first error field
-      scrollToFirstError(validationError);
+      // For approved applications, show a more helpful error message
+      toast.error('Data Validation Failed', {
+        description: 'The saved application data has validation issues. Please contact support.'
+      });
+      
+      // Don't trigger form validation for approved applications since user can't fix it
+      // await trigger();
+      // scrollToFirstError(validationError);
       return;
     }
 
@@ -849,6 +856,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 Sending approved Cost Overview application:', applicationId);
+      console.log('🔧 Form data received:', formData);
       
       // Send PDF to client using the saved form data
       handleSendPDF(formData);

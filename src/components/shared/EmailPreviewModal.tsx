@@ -35,6 +35,7 @@ export interface EmailPreviewModalProps {
     resource: string; // e.g., 'golden_visa', 'cost_overview'
     client_name: string; // e.g., 'Novalic Damir' or 'Company Name'
     document_type: string; // e.g., 'Golden Visa', 'Cost Overview'
+    filename?: string; // e.g., '250806 Novalic Damir IFZA 1 0 0 0 0 setup AED EUR.pdf'
   };
 }
 
@@ -166,7 +167,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
             action: 'pdf_downloaded',
             resource: activityLogging.resource,
             details: {
-              filename: filename,
+              filename: activityLogging.filename || filename,
               client_name: activityLogging.client_name,
               document_type: activityLogging.document_type
             }

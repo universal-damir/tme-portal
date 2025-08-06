@@ -339,10 +339,13 @@ const GoldenVisaTab: React.FC = () => {
 
   // Handle sending PDF to client (for approved applications)
   const handleSendPDF = async (data: GoldenVisaData) => {
+    console.log('🔧 Golden Visa handleSendPDF called with data:', data);
+    
     // Validate required client data
     if (!data.firstName && !data.lastName) {
+      console.error('🔧 Golden Visa missing client name:', data);
       toast.error('Client Name Required', {
-        description: 'Please enter client name (first and last name) before sending the PDF.'
+        description: 'The saved application data is missing client name information.'
       });
       return;
     }
@@ -470,7 +473,8 @@ const GoldenVisaTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Sending approved application:', applicationId);
+      console.log('🔧 Sending approved Golden Visa application:', applicationId);
+      console.log('🔧 Golden Visa form data received:', formData);
       
       // Send PDF to client using the saved form data
       handleSendPDF(formData);

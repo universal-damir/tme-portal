@@ -50,6 +50,7 @@ export interface EmailDraftGeneratorProps {
     resource: string; // e.g., 'golden_visa', 'cost_overview'
     client_name: string; // e.g., 'Novalic Damir' or 'Company Name'
     document_type: string; // e.g., 'Golden Visa', 'Cost Overview'
+    filename?: string; // e.g., '250806 Novalic Damir IFZA 1 0 0 0 0 setup AED EUR.pdf'
   };
 }
 
