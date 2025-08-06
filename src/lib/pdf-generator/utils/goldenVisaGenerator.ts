@@ -47,14 +47,24 @@ export const generateGoldenVisaPDFWithFilename = async (
     nameForFilename = 'Client';
   }
   
-  // Format visa type for filename (shortened versions)
-  const visaTypeMap: { [key: string]: string } = {
-    'property-investment': 'property',
-    'time-deposit': 'deposit',
-    'skilled-employee': 'skilled'
-  };
+  // Determine if this is a dependent-only visa (no primary holder)
+  const isDependentOnly = !goldenVisaData.primaryVisaRequired;
   
-  const visaTypeFormatted = visaTypeMap[goldenVisaData.visaType] || goldenVisaData.visaType;
+  let visaTypeFormatted: string;
+  
+  if (isDependentOnly) {
+    // If only dependents are getting visas, use "dependent" suffix
+    visaTypeFormatted = 'dependent';
+  } else {
+    // Format visa type for filename (shortened versions)
+    const visaTypeMap: { [key: string]: string } = {
+      'property-investment': 'property',
+      'time-deposit': 'deposit',
+      'skilled-employee': 'skilled'
+    };
+    
+    visaTypeFormatted = visaTypeMap[goldenVisaData.visaType] || goldenVisaData.visaType;
+  }
   
   // Build filename: yymmdd {name} offer golden visa {type}
   const filename = `${formattedDate} ${nameForFilename} offer golden visa ${visaTypeFormatted}.pdf`;

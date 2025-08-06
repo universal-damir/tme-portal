@@ -52,10 +52,48 @@ export const useGoldenVisaApplication = ({
   
   // Generate application title from form data
   const generateApplicationTitle = useCallback((data: GoldenVisaData): string => {
-    const clientPart = clientName || `${data.firstName} ${data.lastName}`.trim() || 'Unnamed Client';
-    const visaType = data.visaType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-    return `${clientPart} - ${visaType} Golden Visa`;
-  }, [clientName]);
+    // Format date as YYMMDD
+    const date = new Date(data.date || new Date());
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    // Get client names
+    let nameForTitle = '';
+    if (data.companyName) {
+      nameForTitle = data.companyName;
+    } else if (data.lastName && data.firstName) {
+      nameForTitle = `${data.lastName} ${data.firstName}`;
+    } else if (data.firstName) {
+      nameForTitle = data.firstName;
+    } else if (data.lastName) {
+      nameForTitle = data.lastName;
+    } else {
+      nameForTitle = 'Client';
+    }
+    
+    // Determine if this is a dependent-only visa (no primary holder)
+    const isDependentOnly = !data.primaryVisaRequired;
+    
+    let visaTypeFormatted: string;
+    
+    if (isDependentOnly) {
+      // If only dependents are getting visas, use "dependent" suffix
+      visaTypeFormatted = 'dependent';
+    } else {
+      // Format visa type for title (shortened versions)
+      const visaTypeMap: { [key: string]: string } = {
+        'property-investment': 'property',
+        'time-deposit': 'deposit',
+        'skilled-employee': 'skilled'
+      };
+      
+      visaTypeFormatted = visaTypeMap[data.visaType] || data.visaType;
+    }
+    
+    return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+  }, []);
   
   // Load existing application on mount
   useEffect(() => {

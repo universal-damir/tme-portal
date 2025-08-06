@@ -74,6 +74,7 @@ function generateGoldenVisaTitle(formData: any): string {
     lastName: formData.lastName,
     companyName: formData.companyName,
     visaType: formData.visaType,
+    primaryVisaRequired: formData.primaryVisaRequired,
     allKeys: Object.keys(formData || {})
   });
   
@@ -96,13 +97,33 @@ function generateGoldenVisaTitle(formData: any): string {
     nameForTitle = 'Client';
   }
   
-  const visaTypeMap: { [key: string]: string } = {
-    'property-investment': 'property',
-    'time-deposit': 'deposit', 
-    'skilled-employee': 'skilled'
-  };
+  // Determine if this is a dependent-only visa (no primary holder)
+  const isDependentOnly = !formData.primaryVisaRequired;
   
-  const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType || 'unknown';
+  console.log('🔧 Golden Visa Title Generation - Primary Visa Check:', {
+    primaryVisaRequired: formData.primaryVisaRequired,
+    isDependentOnly,
+    visaType: formData.visaType
+  });
+  
+  let visaTypeFormatted: string;
+  
+  if (isDependentOnly) {
+    // If only dependents are getting visas, use "dependent" suffix
+    visaTypeFormatted = 'dependent';
+    console.log('🔧 Using dependent suffix');
+  } else {
+    // Format visa type for filename (shortened versions)
+    const visaTypeMap: { [key: string]: string } = {
+      'property-investment': 'property',
+      'time-deposit': 'deposit', 
+      'skilled-employee': 'skilled'
+    };
+    
+    visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType || 'unknown';
+    console.log('🔧 Using visa type:', visaTypeFormatted);
+  }
+  
   const result = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
   
   console.log('🔧 Generated Golden Visa title result:', result);

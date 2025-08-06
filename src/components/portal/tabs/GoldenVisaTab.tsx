@@ -542,13 +542,25 @@ const GoldenVisaTab: React.FC = () => {
             nameForTitle = 'Client';
           }
           
-          const visaTypeMap: { [key: string]: string } = {
-            'property-investment': 'property',
-            'time-deposit': 'deposit',
-            'skilled-employee': 'skilled'
-          };
+          // Determine if this is a dependent-only visa (no primary holder)
+          const isDependentOnly = !watchedData.primaryVisaRequired;
           
-          const visaTypeFormatted = visaTypeMap[watchedData.visaType] || watchedData.visaType;
+          let visaTypeFormatted: string;
+          
+          if (isDependentOnly) {
+            // If only dependents are getting visas, use "dependent" suffix
+            visaTypeFormatted = 'dependent';
+          } else {
+            // Format visa type for title (shortened versions)
+            const visaTypeMap: { [key: string]: string } = {
+              'property-investment': 'property',
+              'time-deposit': 'deposit',
+              'skilled-employee': 'skilled'
+            };
+            
+            visaTypeFormatted = visaTypeMap[watchedData.visaType] || watchedData.visaType;
+          }
+          
           return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
         })()}
         onSubmit={reviewApp.submitForReview}

@@ -75,13 +75,25 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           nameForTitle = 'Client';
         }
         
-        const visaTypeMap: { [key: string]: string } = {
-          'property-investment': 'property',
-          'time-deposit': 'deposit',
-          'skilled-employee': 'skilled'
-        };
+        // Determine if this is a dependent-only visa (no primary holder)
+        const isDependentOnly = !formData.primaryVisaRequired;
         
-        const visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+        let visaTypeFormatted: string;
+        
+        if (isDependentOnly) {
+          // If only dependents are getting visas, use "dependent" suffix
+          visaTypeFormatted = 'dependent';
+        } else {
+          // Format visa type for title (shortened versions)
+          const visaTypeMap: { [key: string]: string } = {
+            'property-investment': 'property',
+            'time-deposit': 'deposit',
+            'skilled-employee': 'skilled'
+          };
+          
+          visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+        }
+        
         return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
       } else if (application.type === 'cost-overview') {
         const formData = application.form_data as OfferData;
@@ -398,10 +410,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       }
     });
     
-    // Delay the form data loading slightly to ensure tab navigation completes
+    // Delay the form data loading to ensure tab navigation completes and form is ready
     setTimeout(() => {
       window.dispatchEvent(editEvent);
-    }, 100);
+    }, 1000);
     
     // Close the review modal
     handleClose();
@@ -576,32 +588,58 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         </p>
                       </div>
                     ) : (
-                      /* Other Types: Single Preview Button */
-                      <div className="text-center">
-                        <motion.button
-                          whileHover={!isPreviewLoading ? { scale: 1.02 } : {}}
-                          whileTap={!isPreviewLoading ? { scale: 0.98 } : {}}
-                          type="button"
-                          onClick={handlePreviewPDF}
-                          disabled={isPreviewLoading}
-                          className="flex items-center justify-center space-x-2 w-1/2 mx-auto px-4 py-3 rounded-xl font-semibold text-white transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                          style={{ backgroundColor: isPreviewLoading ? '#9CA3AF' : '#243F7B' }}
-                        >
-                          {isPreviewLoading ? (
-                            <>
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                              <span>Generating...</span>
-                            </>
-                          ) : (
-                            <>
-                              <FileText className="w-4 h-4" />
-                              <span>Preview PDF</span>
-                            </>
-                          )}
-                        </motion.button>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Opens in new tab for review
-                        </p>
+                      /* Other Types: Preview PDF and Edit Button Side by Side */
+                      <div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {/* Preview PDF - Transparent with blue border */}
+                          <motion.button
+                            whileHover={!isPreviewLoading ? { scale: 1.02 } : {}}
+                            whileTap={!isPreviewLoading ? { scale: 0.98 } : {}}
+                            type="button"
+                            onClick={handlePreviewPDF}
+                            disabled={isPreviewLoading}
+                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl font-semibold transition-all duration-200 border-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ 
+                              backgroundColor: 'transparent',
+                              borderColor: isPreviewLoading ? '#9CA3AF' : '#243F7B',
+                              color: isPreviewLoading ? '#9CA3AF' : '#243F7B'
+                            }}
+                          >
+                            {isPreviewLoading ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                                <span>Generating...</span>
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="w-4 h-4" />
+                                <span>Preview PDF</span>
+                              </>
+                            )}
+                          </motion.button>
+                          
+                          {/* Edit Application */}
+                          <motion.button
+                            whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                            whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                            type="button"
+                            onClick={handleEditApplication}
+                            disabled={isSubmitting}
+                            className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50"
+                            style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                          >
+                            <Edit className="w-4 h-4" />
+                            <span>Edit</span>
+                          </motion.button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                          <p className="text-xs text-gray-500 text-center">
+                            Opens in new tab for review
+                          </p>
+                          <p className="text-xs text-gray-500 text-center">
+                            Continue editing the form
+                          </p>
+                        </div>
                       </div>
                     )}
 
@@ -639,7 +677,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                     )}
 
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 gap-3">
                       {/* Send Back for Revision */}
                       <motion.button
                         whileHover={!isSubmitting ? { scale: 1.01 } : {}}
@@ -653,20 +691,6 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         <Send className="w-4 h-4" />
                         <span className="hidden sm:inline">Send Back</span>
                         <span className="sm:hidden">Reject</span>
-                      </motion.button>
-
-                      {/* Edit Application */}
-                      <motion.button
-                        whileHover={!isSubmitting ? { scale: 1.01 } : {}}
-                        whileTap={!isSubmitting ? { scale: 0.99 } : {}}
-                        type="button"
-                        onClick={handleEditApplication}
-                        disabled={isSubmitting}
-                        className="flex items-center justify-center space-x-2 w-full px-3 py-3 rounded-lg font-semibold transition-all duration-200 disabled:opacity-50"
-                        style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
-                      >
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
                       </motion.button>
 
                       {/* Approve */}

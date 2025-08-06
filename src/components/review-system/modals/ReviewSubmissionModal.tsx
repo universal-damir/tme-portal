@@ -124,7 +124,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
-                    Submit for Review
+                    Submit to Checker
                   </h2>
                   <p className="text-sm text-gray-600 mt-1 truncate">
                     {applicationTitle}
