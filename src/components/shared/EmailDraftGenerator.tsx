@@ -45,6 +45,12 @@ export interface EmailDraftGeneratorProps {
   onError?: (error: string) => void;
   onClose?: () => void; // Add onClose callback
   fallbackToMailto?: boolean;
+  // Optional props for activity logging
+  activityLogging?: {
+    resource: string; // e.g., 'golden_visa', 'cost_overview'
+    client_name: string; // e.g., 'Novalic Damir' or 'Company Name'
+    document_type: string; // e.g., 'Golden Visa', 'Cost Overview'
+  };
 }
 
 // Default email templates for different tabs with Arial 10pt formatting
@@ -298,6 +304,7 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
           pdfBlob={pdfBlob || undefined}
           pdfFilename={pdfFilename || undefined}
           additionalPdfs={additionalPdfs}
+          activityLogging={props.activityLogging}
         />
       )}
     </>

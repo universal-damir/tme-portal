@@ -204,6 +204,70 @@ const CompanyServicesTab: React.FC = () => {
     }
   };
 
+  // Handle sending PDF to client (for approved applications)
+  const handleSendPDF = async (data: CompanyServicesData): Promise<void> => {
+    // Validate required data before sending PDF
+    if (!data.firstName && !data.lastName && !data.companyName) {
+      alert('Please enter either client name (first/last) or company name before sending the PDF.');
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      // Generate PDF for sending
+      const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator/utils/companyServicesGenerator');
+      
+      const clientInfo = {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        companyName: data.companyName || '',
+        shortCompanyName: data.shortCompanyName || '',
+        date: data.date,
+      };
+
+      const { blob, filename } = await generateCompanyServicesPDFWithFilename(data, clientInfo);
+
+      // Log PDF sent activity (different from generation)
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_sent',
+            resource: 'company_services',
+            details: {
+              filename: filename,
+              client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+              company_type: data.companyType,
+              document_type: 'Company Services'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF sent activity:', error);
+      }
+
+      // Create and trigger download
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error) {
+      console.error('Error sending PDF:', error);
+      alert(`Error sending PDF: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handlePreviewPDF = async (data: CompanyServicesData): Promise<void> => {
     // Validate required data before generating PDF
     if (!data.firstName && !data.lastName && !data.companyName) {
@@ -281,8 +345,8 @@ const CompanyServicesTab: React.FC = () => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 Sending approved Company Services application:', applicationId);
       
-      // Generate PDF and show email modal using the saved form data
-      handleGeneratePDF(formData);
+      // Send PDF to client using the saved form data
+      handleSendPDF(formData);
     };
 
     window.addEventListener('edit-company-services-application', handleEditApplication);
@@ -292,7 +356,7 @@ const CompanyServicesTab: React.FC = () => {
       window.removeEventListener('edit-company-services-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, []); // Remove dependencies to prevent listener re-registration
+  }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 
   return (
     <div className="space-y-8">

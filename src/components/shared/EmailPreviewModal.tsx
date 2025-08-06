@@ -30,6 +30,12 @@ export interface EmailPreviewModalProps {
     blob: Blob;
     filename: string;
   }>;
+  // Optional props for activity logging
+  activityLogging?: {
+    resource: string; // e.g., 'golden_visa', 'cost_overview'
+    client_name: string; // e.g., 'Novalic Damir' or 'Company Name'
+    document_type: string; // e.g., 'Golden Visa', 'Cost Overview'
+  };
 }
 
 export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
@@ -40,7 +46,8 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   loading = false,
   pdfBlob,
   pdfFilename,
-  additionalPdfs = []
+  additionalPdfs = [],
+  activityLogging
 }) => {
   const [editableSubject, setEditableSubject] = useState(emailData.subject);
   const [editableRecipients, setEditableRecipients] = useState(emailData.to.join(', '));
@@ -137,7 +144,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
     }
   };
 
-  const handleDownload = (blob: Blob, filename: string) => {
+  const handleDownload = async (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -146,20 +153,42 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+
+    // Log download activity if logging data is provided
+    if (activityLogging) {
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_downloaded',
+            resource: activityLogging.resource,
+            details: {
+              filename: filename,
+              client_name: activityLogging.client_name,
+              document_type: activityLogging.document_type
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF download activity:', error);
+      }
+    }
   };
 
-  const handleDownloadAll = () => {
+  const handleDownloadAll = async () => {
     // Download main PDF
     if (pdfBlob && pdfFilename) {
-      handleDownload(pdfBlob, pdfFilename);
+      await handleDownload(pdfBlob, pdfFilename);
     }
     
     // Download additional PDFs
-    additionalPdfs.forEach(pdf => {
-      setTimeout(() => {
-        handleDownload(pdf.blob, pdf.filename);
-      }, 100); // Small delay to prevent browser blocking multiple downloads
-    });
+    for (const pdf of additionalPdfs) {
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to prevent browser blocking
+      await handleDownload(pdf.blob, pdf.filename);
+    }
   };
 
   if (!isOpen) return null;

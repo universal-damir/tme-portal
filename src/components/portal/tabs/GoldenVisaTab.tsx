@@ -337,6 +337,94 @@ const GoldenVisaTab: React.FC = () => {
     }
   };
 
+  // Handle sending PDF to client (for approved applications)
+  const handleSendPDF = async (data: GoldenVisaData) => {
+    // Validate required client data
+    if (!data.firstName && !data.lastName) {
+      toast.error('Client Name Required', {
+        description: 'Please enter client name (first and last name) before sending the PDF.'
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      // Generate PDF document
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      // Convert form data to shared client format for PDF generation
+      const clientInfo = {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        companyName: data.companyName || '',
+        date: data.date,
+      };
+
+      const { blob, filename } = await generateGoldenVisaPDFWithFilename(data, clientInfo);
+
+      // Log PDF sent activity (different from generation)
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_sent',
+            resource: 'golden_visa',
+            details: {
+              filename: filename,
+              client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+              visa_type: data.visaType,
+              document_type: 'Golden Visa'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF sent activity:', error);
+      }
+
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'GOLDEN_VISA');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          toast.error('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'golden_visa',
+          client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+          document_type: 'Golden Visa'
+        }
+      });
+
+    } catch (error) {
+      console.error('Error sending PDF:', error);
+      toast.error('PDF Send Failed', {
+        description: `Error sending PDF: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+        action: {
+          label: 'Retry',
+          onClick: () => handleSendPDF(data)
+        }
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   // Listen for PDF generation events from header buttons
   React.useEffect(() => {
     const handleGeneratePDFEvent = () => handleGeneratePDF(watchedData);
@@ -383,8 +471,8 @@ const GoldenVisaTab: React.FC = () => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 Sending approved application:', applicationId);
       
-      // Generate PDF and show email modal using the saved form data
-      handleGeneratePDF(formData);
+      // Send PDF to client using the saved form data
+      handleSendPDF(formData);
     };
 
     window.addEventListener('edit-golden-visa-application', handleEditApplication);
@@ -394,7 +482,7 @@ const GoldenVisaTab: React.FC = () => {
       window.removeEventListener('edit-golden-visa-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, []); // Remove setValue dependency to prevent listener re-registration
+  }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 
   return (
     <div className="space-y-8" style={{ fontFamily: 'Inter, sans-serif' }}>

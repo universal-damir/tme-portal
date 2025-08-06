@@ -696,6 +696,102 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     }
   };
 
+  // Handle sending PDF to client (for approved applications)
+  const handleSendPDF = async (data: OfferData): Promise<void> => {
+    // Validate the entire form data using Zod schema
+    try {
+      await offerDataSchema.parseAsync(data);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+
+    // Additional basic checks for backwards compatibility
+    if (!data || !data.clientDetails || !data.authorityInformation) {
+      toast.error('Missing Information', {
+        description: 'Please fill out the required client details and authority information before sending the PDF.'
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    const hasFamilyVisaDoc = hasFamilyVisas(data);
+
+    const loadingToast = toast.loading('Preparing PDF for sending...', {
+      description: 'Please wait while we prepare your cost overview documents.'
+    });
+
+    try {
+      // Generate main document
+      const { blob: mainPdfBlob, filename: mainFilename } = await generatePDFWithFilename(data);
+
+      // Log PDF sent activity (different from generation)
+      try {
+        await fetch('/api/user/activities', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'pdf_sent',
+            resource: 'cost_overview',
+            details: {
+              filename: mainFilename,
+              client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
+              authority: data.authorityInformation?.responsibleAuthority || 'Not specified',
+              has_family_visa: hasFamilyVisaDoc,
+              document_type: 'Cost Overview'
+            }
+          })
+        });
+      } catch (error) {
+        console.error('Failed to log PDF sent activity:', error);
+      }
+
+      // Show email preview modal after successful PDF generation
+      const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
+      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW');
+      
+      // Set email props to trigger the EmailDraftGenerator component
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          // Clean up when email is sent successfully
+          setEmailDraftProps(null);
+        },
+        onError: (error: string) => {
+          console.error('Email sending failed:', error);
+          toast.error('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+        },
+        onClose: () => {
+          // Clean up when modal is closed/canceled
+          setEmailDraftProps(null);
+        }
+      });
+
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
+    } catch (error) {
+      console.error('Error sending PDF:', error);
+      toast.dismiss(loadingToast);
+      toast.error('PDF Send Failed', {
+        description: `Error sending PDF: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`,
+        action: {
+          label: 'Retry',
+          onClick: () => handleSendPDF(data)
+        }
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   // Listen for PDF generation events from header buttons
   React.useEffect(() => {
     const handleGeneratePDFEvent = () => handleGeneratePDF(watchedData);
@@ -742,8 +838,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 Sending approved Cost Overview application:', applicationId);
       
-      // Generate PDF and show email modal using the saved form data
-      handleGeneratePDF(formData);
+      // Send PDF to client using the saved form data
+      handleSendPDF(formData);
     };
 
     window.addEventListener('edit-cost-overview-application', handleEditApplication);
@@ -753,7 +849,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       window.removeEventListener('edit-cost-overview-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, []); // Remove setValue dependency to prevent listener re-registration
+  }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 
   return (
     <div className="space-y-8">

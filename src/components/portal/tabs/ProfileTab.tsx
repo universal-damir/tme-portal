@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle } from 'lucide-react'
+import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle, Download } from 'lucide-react'
 
 interface ActivityLog {
   id: number
@@ -179,6 +179,26 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         const clientName = details?.client_name ? ` for ${details.client_name}` : '';
                         return `Generated ${documentType}${clientName}`;
                       }
+                      if (action === 'pdf_sent') {
+                        const documentType = details?.document_type || 'Document';
+                        const clientName = details?.client_name;
+                        if (clientName) {
+                          return `Sent to ${clientName} ${documentType}`;
+                        }
+                        return `Sent ${documentType}`;
+                      }
+                      if (action === 'pdf_downloaded') {
+                        const filename = details?.filename;
+                        if (filename) {
+                          return `Downloaded ${filename}`;
+                        }
+                        const documentType = details?.document_type || 'Document';
+                        const clientName = details?.client_name;
+                        if (clientName) {
+                          return `Downloaded ${clientName} ${documentType}`;
+                        }
+                        return `Downloaded ${documentType}`;
+                      }
                       if (action === 'pdf_previewed') {
                         const filename = details?.filename;
                         if (filename) {
@@ -239,6 +259,24 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         if (resource === 'golden_visa') 
                           return { bg: 'bg-amber-100', icon: Crown, iconColor: 'text-amber-600', category: 'Golden Visa' };
                         return { bg: 'bg-purple-100', icon: FileText, iconColor: 'text-purple-600', category: 'Documents' };
+                      }
+                      if (action.includes('pdf_sent')) {
+                        if (resource === 'company_services') 
+                          return { bg: 'bg-blue-100', icon: Send, iconColor: 'text-blue-600', category: 'Sent to Client' };
+                        if (resource === 'golden_visa') 
+                          return { bg: 'bg-amber-100', icon: Send, iconColor: 'text-amber-600', category: 'Sent to Client' };
+                        if (resource === 'cost_overview') 
+                          return { bg: 'bg-green-100', icon: Send, iconColor: 'text-green-600', category: 'Sent to Client' };
+                        return { bg: 'bg-purple-100', icon: Send, iconColor: 'text-purple-600', category: 'Sent to Client' };
+                      }
+                      if (action.includes('pdf_downloaded')) {
+                        if (resource === 'company_services') 
+                          return { bg: 'bg-blue-50', icon: Download, iconColor: 'text-blue-500', category: 'Downloaded' };
+                        if (resource === 'golden_visa') 
+                          return { bg: 'bg-amber-50', icon: Download, iconColor: 'text-amber-500', category: 'Downloaded' };
+                        if (resource === 'cost_overview') 
+                          return { bg: 'bg-green-50', icon: Download, iconColor: 'text-green-500', category: 'Downloaded' };
+                        return { bg: 'bg-gray-100', icon: Download, iconColor: 'text-gray-600', category: 'Downloaded' };
                       }
                       if (action.includes('pdf_previewed')) {
                         if (resource === 'company_services') 
