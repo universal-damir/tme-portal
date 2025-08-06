@@ -180,6 +180,10 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         return `Generated ${documentType}${clientName}`;
                       }
                       if (action === 'pdf_sent') {
+                        const filename = details?.filename;
+                        if (filename) {
+                          return `Sent ${filename}`;
+                        }
                         const documentType = details?.document_type || 'Document';
                         const clientName = details?.client_name;
                         if (clientName) {
@@ -209,6 +213,12 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         return `Previewed ${documentType}${clientName}`;
                       }
                       if (action === 'form_submitted_for_review') {
+                        // Check if we have a PDF filename first (for consistency)
+                        const filename = details?.filename;
+                        if (filename) {
+                          return `Submitted ${filename} for review`;
+                        }
+                        
                         // Try to get form name from details, fallback to generic message
                         const formName = details?.form_name || details?.application_title || details?.title;
                         if (formName) {
@@ -217,6 +227,12 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         return `Submitted application for review`;
                       }
                       if (action === 'review_approved') {
+                        // Check if we have a PDF filename first (for consistency)
+                        const filename = details?.filename;
+                        if (filename) {
+                          return `Approved ${filename}`;
+                        }
+                        
                         // Try to get form name from details, fallback to generic message
                         const formName = details?.form_name || details?.application_title || details?.title;
                         if (formName) {
@@ -225,6 +241,12 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         return `Approved application review`;
                       }
                       if (action === 'review_rejected') {
+                        // Check if we have a PDF filename first (for consistency)
+                        const filename = details?.filename;
+                        if (filename) {
+                          return `Rejected ${filename}`;
+                        }
+                        
                         // Try to get form name from details, fallback to generic message
                         const formName = details?.form_name || details?.application_title || details?.title;
                         if (formName) {

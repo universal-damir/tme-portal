@@ -63,15 +63,67 @@ export async function POST(
     }, userId);
 
     if (success) {
-      // Get application title for the audit log
+      // Get application title and form data for the audit log
       let formName = null;
+      let filename = null;
       try {
-        const appResult = await query('SELECT title FROM applications WHERE id = $1', [id]);
+        const appResult = await query('SELECT title, type, data FROM applications WHERE id = $1', [id]);
         if (appResult.rows.length > 0) {
           formName = appResult.rows[0].title;
+          const applicationData = appResult.rows[0].data;
+          const applicationType = appResult.rows[0].type;
+          
+          // Generate PDF filename using the same logic as PDF generation
+          if (applicationData && applicationType) {
+            try {
+              switch (applicationType) {
+                case 'cost_overview': {
+                  const { generateDynamicFilename } = await import('@/lib/pdf-generator/utils/filename');
+                  filename = generateDynamicFilename(applicationData);
+                  break;
+                }
+                case 'golden_visa': {
+                  const { generateGoldenVisaFilename } = await import('@/lib/pdf-generator/utils/goldenVisaDataTransformer');
+                  const clientInfo = {
+                    firstName: applicationData.firstName || '',
+                    lastName: applicationData.lastName || '',
+                    companyName: applicationData.companyName || '',
+                    date: applicationData.date || new Date().toISOString().split('T')[0],
+                  };
+                  filename = generateGoldenVisaFilename(applicationData, clientInfo);
+                  break;
+                }
+                case 'company_services': {
+                  const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+                  const clientInfo = {
+                    firstName: applicationData.firstName || '',
+                    lastName: applicationData.lastName || '',
+                    companyName: applicationData.companyName || '',
+                    shortCompanyName: applicationData.shortCompanyName || '',
+                    date: applicationData.date || new Date().toISOString().split('T')[0],
+                  };
+                  filename = generateCompanyServicesFilename(applicationData, clientInfo);
+                  break;
+                }
+                case 'taxation': {
+                  const { generateTaxationFilename } = await import('@/lib/pdf-generator/utils/taxationDataTransformer');
+                  const clientInfo = {
+                    firstName: applicationData.firstName || '',
+                    lastName: applicationData.lastName || '',
+                    companyName: applicationData.companyName || '',
+                    date: applicationData.date || new Date().toISOString().split('T')[0],
+                  };
+                  filename = generateTaxationFilename(applicationData, clientInfo);
+                  break;
+                }
+              }
+            } catch (error) {
+              console.warn('Failed to generate filename for audit log:', error);
+            }
+          }
         }
       } catch (error) {
-        console.warn('Failed to get application title for audit log:', error);
+        console.warn('Failed to get application data for audit log:', error);
       }
 
       // Log audit event for review action
@@ -83,7 +135,8 @@ export async function POST(
           application_id: id,
           action,
           comments: comments || null,
-          form_name: formName
+          form_name: formName,
+          filename: filename
         },
         ip_address: getClientIP(request),
         user_agent: getUserAgent(request)
