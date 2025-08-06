@@ -705,7 +705,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Handle sending PDF to client (for approved applications)
   const handleSendPDF = async (data: OfferData): Promise<void> => {
-    console.log('🔧 handleSendPDF called with data:', data);
     
     // Validate the entire form data using Zod schema
     try {
@@ -830,9 +829,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 COST-OVERVIEW-TAB: Event received - edit application:', applicationId);
-      console.log('🔧 COST-OVERVIEW-TAB: Pre-filling form with application data:', formData);
-      console.log('🔧 COST-OVERVIEW-TAB: Current tab active?', window.location.hash === '#cost-overview');
       
       // Pre-fill the form with the application data
       Object.keys(formData).forEach((key) => {
@@ -858,9 +854,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 COST-OVERVIEW-TAB: Event received - send approved application:', applicationId);
-      console.log('🔧 COST-OVERVIEW-TAB: Form data received:', formData);
-      console.log('🔧 COST-OVERVIEW-TAB: Current tab active?', window.location.hash === '#cost-overview');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -874,12 +867,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     const handleTabReadinessCheck = (event: any) => {
       const { targetTab } = event.detail;
-      console.log(`🔧 COST-OVERVIEW-TAB: Received readiness check for: ${targetTab}`);
-      console.log('🔧 COST-OVERVIEW-TAB: Component is mounted, event listeners are active');
       
       // Only respond if this is our tab
       if (targetTab === 'cost-overview') {
-        console.log('🔧 COST-OVERVIEW-TAB: This is my tab - confirming readiness');
         const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
           detail: { 
             tab: 'cost-overview', 
@@ -888,9 +878,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
           }
         });
         window.dispatchEvent(readinessEvent);
-        console.log('🔧 COST-OVERVIEW-TAB: Readiness confirmation dispatched');
-      } else {
-        console.log(`🔧 COST-OVERVIEW-TAB: Not my tab (${targetTab}), ignoring`);
       }
     };
 

@@ -365,7 +365,6 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       
       const checkAndDispatch = () => {
         attempts++;
-        console.log(`🔧 FEEDBACK-MODAL: Checking if tab is ready (attempt ${attempts}/${maxAttempts})`);
         
         // Test if we can dispatch and receive a response by sending a test event
         const testEvent = new CustomEvent('tab-readiness-check', {
@@ -390,17 +389,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           const hasWaitedLong = attempts > 10; // After 10 attempts (3+ seconds)
           
           if (tabReady) {
-            console.log('🔧 FEEDBACK-MODAL: Tab is ready! Dispatching send approved application event');
-            console.log('🔧 FEEDBACK-MODAL: Current window hash:', window.location.hash);
-            console.log('🔧 FEEDBACK-MODAL: Event detail:', sendEvent.detail);
-            
             // Dispatch the actual event
             window.dispatchEvent(sendEvent);
-            console.log('🔧 FEEDBACK-MODAL: Event dispatched successfully');
             
             // Listen for confirmation that the event was received by the tab
             const handleEventConfirmation = () => {
-              console.log('🔧 FEEDBACK-MODAL: Send event confirmed - PDF generation started successfully');
               setIsSendLoading(false);
               window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
             };
@@ -415,15 +408,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             }, 5000);
             
           } else if (hashMatches && hasWaitedLong && attempts < maxAttempts) {
-            console.log('🔧 FEEDBACK-MODAL: Tab seems ready based on hash, trying to dispatch anyway');
-            
             // Try dispatching the event anyway since hash matches and we've waited
             window.dispatchEvent(sendEvent);
-            console.log('🔧 FEEDBACK-MODAL: Event dispatched (fallback method)');
             
             // Still listen for confirmation
             const handleEventConfirmation = () => {
-              console.log('🔧 FEEDBACK-MODAL: Send event confirmed via fallback method');
               setIsSendLoading(false);
               window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
             };
@@ -435,11 +424,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
             }, 5000);
             
           } else if (attempts < maxAttempts) {
-            console.log(`🔧 FEEDBACK-MODAL: Tab not ready yet, retrying in 300ms...`);
             setTimeout(checkAndDispatch, 300);
           } else {
-            console.error('🔧 FEEDBACK-MODAL: Tab failed to become ready after maximum attempts');
-            console.error('🔧 FEEDBACK-MODAL: This might be due to lazy loading delay or tab not mounting');
             setIsSendLoading(false);
             toast.error('Failed to connect to tab. Please try refreshing the page and try again.');
           }
