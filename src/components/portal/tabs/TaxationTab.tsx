@@ -155,6 +155,11 @@ const TaxationTab: React.FC = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'taxation',
+          client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+          document_type: 'Taxation Services'
         }
       });
       
@@ -241,6 +246,11 @@ const TaxationTab: React.FC = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'taxation',
+          client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+          document_type: 'Taxation Services'
         }
       });
       
@@ -367,6 +377,11 @@ const TaxationTab: React.FC = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'taxation',
+          client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+          document_type: 'Taxation Services'
         }
       });
       

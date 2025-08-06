@@ -171,6 +171,11 @@ const CompanyServicesTab: React.FC = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'company_services',
+          client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
+          document_type: 'Company Services'
         }
       });
 

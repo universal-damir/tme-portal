@@ -592,6 +592,11 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'cost_overview',
+          client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
+          document_type: 'Cost Overview'
         }
       });
 
@@ -771,6 +776,11 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
+        },
+        activityLogging: {
+          resource: 'cost_overview',
+          client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
+          document_type: 'Cost Overview'
         }
       });
 
