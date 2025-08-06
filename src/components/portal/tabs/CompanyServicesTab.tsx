@@ -357,6 +357,12 @@ const CompanyServicesTab: React.FC = () => {
       console.log('🔧 Sending approved Company Services application:', applicationId);
       console.log('🔧 Company Services form data received:', formData);
       
+      // Send confirmation that the event was received
+      const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
+        detail: { applicationId, formType: 'company-services' }
+      });
+      window.dispatchEvent(confirmationEvent);
+      
       // Send PDF to client using the saved form data
       handleSendPDF(formData);
     };

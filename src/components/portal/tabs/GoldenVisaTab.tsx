@@ -476,6 +476,12 @@ const GoldenVisaTab: React.FC = () => {
       console.log('🔧 Sending approved Golden Visa application:', applicationId);
       console.log('🔧 Golden Visa form data received:', formData);
       
+      // Send confirmation that the event was received
+      const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
+        detail: { applicationId, formType: 'golden-visa' }
+      });
+      window.dispatchEvent(confirmationEvent);
+      
       // Send PDF to client using the saved form data
       handleSendPDF(formData);
     };

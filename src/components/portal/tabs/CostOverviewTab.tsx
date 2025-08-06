@@ -858,6 +858,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       console.log('🔧 Sending approved Cost Overview application:', applicationId);
       console.log('🔧 Form data received:', formData);
       
+      // Send confirmation that the event was received
+      const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
+        detail: { applicationId, formType: 'cost-overview' }
+      });
+      window.dispatchEvent(confirmationEvent);
+      
       // Send PDF to client using the saved form data
       handleSendPDF(formData);
     };

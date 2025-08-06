@@ -427,6 +427,12 @@ const TaxationTab: React.FC = () => {
       const { applicationId, formData } = event.detail;
       console.log('🔧 Sending approved Taxation application:', applicationId);
       
+      // Send confirmation that the event was received
+      const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
+        detail: { applicationId, formType: 'taxation' }
+      });
+      window.dispatchEvent(confirmationEvent);
+      
       // Generate PDF and show email modal using the saved form data
       handleDownloadAll(formData);
     };

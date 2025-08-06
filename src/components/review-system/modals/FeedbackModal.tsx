@@ -345,14 +345,24 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       }
     });
     
-    // Small delay to ensure the tab has loaded before dispatching the event
+    // Longer delay to ensure the tab has fully loaded and event listeners are registered
     setTimeout(() => {
+      console.log('🔧 Dispatching send approved application event');
+      
+      // Dispatch the event
       window.dispatchEvent(sendEvent);
-      // Reset loading state after a reasonable delay
-      setTimeout(() => {
+      
+      // Listen for confirmation that the event was received by the tab
+      const handleEventConfirmation = () => {
+        console.log('🔧 Send event confirmed - PDF generation started successfully');
         setIsSendLoading(false);
-      }, 1500);
-    }, 100);
+        window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
+      };
+      
+      // Listen for confirmation - should happen immediately when tab receives event
+      window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
+      
+    }, 1000); // Keep the 1000ms initial delay
   };
 
   const handleEditForm = () => {
