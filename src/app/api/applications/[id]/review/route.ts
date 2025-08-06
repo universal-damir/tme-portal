@@ -67,10 +67,10 @@ export async function POST(
       let formName = null;
       let filename = null;
       try {
-        const appResult = await query('SELECT title, type, data FROM applications WHERE id = $1', [id]);
+        const appResult = await query('SELECT title, type, form_data FROM applications WHERE id = $1', [id]);
         if (appResult.rows.length > 0) {
           formName = appResult.rows[0].title;
-          const applicationData = appResult.rows[0].data;
+          const applicationData = appResult.rows[0].form_data;
           const applicationType = appResult.rows[0].type;
           
           // Generate PDF filename using the same logic as PDF generation

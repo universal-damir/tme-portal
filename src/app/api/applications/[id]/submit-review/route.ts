@@ -72,11 +72,12 @@ export async function POST(
       // Get application title and form data for the audit log
       let formName = null;
       let filename = null;
+      let reviewerName = null;
       try {
-        const appResult = await query('SELECT title, type, data FROM applications WHERE id = $1', [id]);
+        const appResult = await query('SELECT title, type, form_data FROM applications WHERE id = $1', [id]);
         if (appResult.rows.length > 0) {
           formName = appResult.rows[0].title;
-          const applicationData = appResult.rows[0].data;
+          const applicationData = appResult.rows[0].form_data;
           const applicationType = appResult.rows[0].type;
           
           // Generate PDF filename using the same logic as PDF generation
@@ -128,6 +129,16 @@ export async function POST(
             }
           }
         }
+        
+        // Get reviewer name
+        try {
+          const reviewerResult = await query('SELECT full_name FROM users WHERE id = $1', [parseInt(reviewer_id)]);
+          if (reviewerResult.rows.length > 0) {
+            reviewerName = reviewerResult.rows[0].full_name;
+          }
+        } catch (error) {
+          console.warn('Failed to get reviewer name for audit log:', error);
+        }
       } catch (error) {
         console.warn('Failed to get application data for audit log:', error);
       }
@@ -140,6 +151,7 @@ export async function POST(
         details: {
           application_id: id,
           reviewer_id: parseInt(reviewer_id),
+          reviewer_name: reviewerName,
           urgency,
           comments: comments || null,
           form_name: formName,

@@ -213,16 +213,31 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         return `Previewed ${documentType}${clientName}`;
                       }
                       if (action === 'form_submitted_for_review') {
+                        // Debug log to see what data we're working with
+                        console.log('🔧 DEBUG form_submitted_for_review details:', details);
+                        
                         // Check if we have a PDF filename first (for consistency)
                         const filename = details?.filename;
+                        const reviewerName = details?.reviewer_name;
+                        
                         if (filename) {
+                          if (reviewerName) {
+                            return `Submitted ${filename} for review to ${reviewerName}`;
+                          }
                           return `Submitted ${filename} for review`;
                         }
                         
                         // Try to get form name from details, fallback to generic message
                         const formName = details?.form_name || details?.application_title || details?.title;
                         if (formName) {
+                          if (reviewerName) {
+                            return `Submitted ${formName} for review to ${reviewerName}`;
+                          }
                           return `Submitted ${formName} for review`;
+                        }
+                        
+                        if (reviewerName) {
+                          return `Submitted application for review to ${reviewerName}`;
                         }
                         return `Submitted application for review`;
                       }
