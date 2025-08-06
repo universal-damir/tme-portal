@@ -1,5 +1,5 @@
 export interface ClientDetails {
-  firstName?: string;
+  firstName: string;
   lastName?: string;
   companyName?: string;
   addressToCompany?: boolean;
