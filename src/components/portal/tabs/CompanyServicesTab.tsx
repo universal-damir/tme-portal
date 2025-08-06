@@ -354,8 +354,9 @@ const CompanyServicesTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Sending approved Company Services application:', applicationId);
-      console.log('🔧 Company Services form data received:', formData);
+      console.log('🔧 COMPANY-SERVICES-TAB: Event received - send approved application:', applicationId);
+      console.log('🔧 COMPANY-SERVICES-TAB: Form data received:', formData);
+      console.log('🔧 COMPANY-SERVICES-TAB: Current tab active?', window.location.hash === '#company-services');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -367,12 +368,31 @@ const CompanyServicesTab: React.FC = () => {
       handleSendPDF(formData);
     };
 
+    const handleTabReadinessCheck = (event: any) => {
+      const { targetTab } = event.detail;
+      console.log('🔧 COMPANY-SERVICES-TAB: Readiness check received for tab:', targetTab);
+      
+      // Only respond if this is our tab
+      if (targetTab === 'company-services') {
+        console.log('🔧 COMPANY-SERVICES-TAB: Confirming tab readiness');
+        const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
+          detail: { tab: 'company-services', ready: true }
+        });
+        window.dispatchEvent(readinessEvent);
+      }
+    };
+
     window.addEventListener('edit-company-services-application', handleEditApplication);
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
+    window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
+
+    console.log('🔧 COMPANY-SERVICES-TAB: Event listeners registered');
 
     return () => {
       window.removeEventListener('edit-company-services-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
+      window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
+      console.log('🔧 COMPANY-SERVICES-TAB: Event listeners removed');
     };
   }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 

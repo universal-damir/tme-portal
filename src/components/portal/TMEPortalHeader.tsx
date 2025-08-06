@@ -155,12 +155,16 @@ export function TMEPortalHeader({
         });
         
         let tabReady = false;
-        const testHandler = () => {
-          tabReady = true;
-          window.removeEventListener('tab-readiness-confirmed', testHandler);
+        const testHandler = (event: any) => {
+          console.log('🔧 HEADER: Received tab readiness confirmation:', event.detail);
+          if (event.detail.tab === feedbackApplication.type) {
+            tabReady = true;
+            window.removeEventListener('tab-readiness-confirmed', testHandler);
+          }
         };
         
         window.addEventListener('tab-readiness-confirmed', testHandler);
+        console.log(`🔧 HEADER: Dispatching readiness check for ${feedbackApplication.type}`);
         window.dispatchEvent(testEvent);
         
         // Give a small delay to see if tab responds

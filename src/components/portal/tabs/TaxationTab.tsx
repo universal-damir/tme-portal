@@ -425,7 +425,9 @@ const TaxationTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Sending approved Taxation application:', applicationId);
+      console.log('🔧 TAXATION-TAB: Event received - send approved application:', applicationId);
+      console.log('🔧 TAXATION-TAB: Form data received:', formData);
+      console.log('🔧 TAXATION-TAB: Current tab active?', window.location.hash === '#taxation');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -437,12 +439,31 @@ const TaxationTab: React.FC = () => {
       handleDownloadAll(formData);
     };
 
+    const handleTabReadinessCheck = (event: any) => {
+      const { targetTab } = event.detail;
+      console.log('🔧 TAXATION-TAB: Readiness check received for tab:', targetTab);
+      
+      // Only respond if this is our tab
+      if (targetTab === 'taxation') {
+        console.log('🔧 TAXATION-TAB: Confirming tab readiness');
+        const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
+          detail: { tab: 'taxation', ready: true }
+        });
+        window.dispatchEvent(readinessEvent);
+      }
+    };
+
     window.addEventListener('edit-taxation-application', handleEditApplication);
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
+    window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
+
+    console.log('🔧 TAXATION-TAB: Event listeners registered');
 
     return () => {
       window.removeEventListener('edit-taxation-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
+      window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
+      console.log('🔧 TAXATION-TAB: Event listeners removed');
     };
   }, []); // Remove dependencies to prevent listener re-registration
 

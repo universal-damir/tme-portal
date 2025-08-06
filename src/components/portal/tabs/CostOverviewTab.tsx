@@ -60,6 +60,9 @@ interface CostOverviewTabProps {
 }
 
 const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
+  console.log('🔧 COST-OVERVIEW-TAB: Component mounting/rendering at', new Date().toISOString());
+  console.log('🔧 COST-OVERVIEW-TAB: Current window hash:', window.location.hash);
+  
   const { clientInfo, updateClientInfo } = useSharedClient();
   const chatPanel = useChatPanel();
   const [emailDraftProps, setEmailDraftProps] = React.useState<EmailDraftGeneratorProps | null>(null);
@@ -827,9 +830,13 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
   // Listen for edit application events from review modal or notifications
   React.useEffect(() => {
+    console.log('🔧 COST-OVERVIEW-TAB: Setting up event listeners');
+    console.log('🔧 COST-OVERVIEW-TAB: Current component mounted and ready');
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Pre-filling Cost Overview form with application data:', applicationId);
+      console.log('🔧 COST-OVERVIEW-TAB: Event received - edit application:', applicationId);
+      console.log('🔧 COST-OVERVIEW-TAB: Pre-filling form with application data:', formData);
+      console.log('🔧 COST-OVERVIEW-TAB: Current tab active?', window.location.hash === '#cost-overview');
       
       // Pre-fill the form with the application data
       Object.keys(formData).forEach((key) => {
@@ -855,8 +862,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Sending approved Cost Overview application:', applicationId);
-      console.log('🔧 Form data received:', formData);
+      console.log('🔧 COST-OVERVIEW-TAB: Event received - send approved application:', applicationId);
+      console.log('🔧 COST-OVERVIEW-TAB: Form data received:', formData);
+      console.log('🔧 COST-OVERVIEW-TAB: Current tab active?', window.location.hash === '#cost-overview');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -868,12 +876,36 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       handleSendPDF(formData);
     };
 
+    const handleTabReadinessCheck = (event: any) => {
+      const { targetTab } = event.detail;
+      console.log('🔧 COST-OVERVIEW-TAB: Readiness check received for tab:', targetTab);
+      console.log('🔧 COST-OVERVIEW-TAB: Current window hash:', window.location.hash);
+      console.log('🔧 COST-OVERVIEW-TAB: Tab component state - mounted and listeners active');
+      
+      // Only respond if this is our tab
+      if (targetTab === 'cost-overview') {
+        console.log('🔧 COST-OVERVIEW-TAB: Confirming tab readiness');
+        const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
+          detail: { tab: 'cost-overview', ready: true }
+        });
+        window.dispatchEvent(readinessEvent);
+        console.log('🔧 COST-OVERVIEW-TAB: Dispatched tab-readiness-confirmed event');
+      } else {
+        console.log(`🔧 COST-OVERVIEW-TAB: Readiness check for different tab (${targetTab}), ignoring`);
+      }
+    };
+
     window.addEventListener('edit-cost-overview-application', handleEditApplication);
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
+    window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
+
+    console.log('🔧 COST-OVERVIEW-TAB: Event listeners registered');
 
     return () => {
       window.removeEventListener('edit-cost-overview-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
+      window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
+      console.log('🔧 COST-OVERVIEW-TAB: Event listeners removed');
     };
   }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 
