@@ -50,11 +50,36 @@ export const useCompanyServicesApplication = ({
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
   
-  // Generate application title from form data
+  // Generate application title from form data using PDF filename standards
   const generateApplicationTitle = useCallback((data: CompanyServicesData): string => {
-    const clientPart = clientName || 
-      (data.companyName || `${data.firstName} ${data.lastName}`.trim() || 'Unnamed Client');
-    return `${clientPart} - Company Services`;
+    try {
+      // Use the same filename generation as PDF export for consistency
+      const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+      const clientInfo = {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        companyName: data.companyName || '',
+        shortCompanyName: data.shortCompanyName || '',
+        date: data.date || new Date().toISOString().split('T')[0],
+      };
+      const filename = generateCompanyServicesFilename(data, clientInfo);
+      // Remove the .pdf extension for database storage
+      return filename.replace('.pdf', '');
+    } catch (error) {
+      console.error('🔧 COMPANY-SERVICES-HOOK: Failed to generate filename, using fallback:', error);
+      
+      // Enhanced fallback that matches PDF format
+      const date = new Date(data.date || new Date());
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${yy}${mm}${dd}`;
+      
+      const nameForTitle = data.companyName || 
+        (data.firstName && data.lastName ? `${data.lastName} ${data.firstName}` : data.firstName || data.lastName || 'CLIENT');
+      
+      return `${formattedDate} TME Services ${nameForTitle}`;
+    }
   }, [clientName]);
   
   // Load existing application on mount

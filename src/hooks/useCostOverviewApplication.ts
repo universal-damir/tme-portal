@@ -50,15 +50,58 @@ export const useCostOverviewApplication = ({
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
   
-  // Generate application title from form data
+  // Generate application title from form data using PDF filename standards
   const generateApplicationTitle = useCallback((data: OfferData): string => {
-    const clientPart = clientName || 
-      (data.clientDetails?.companyName) || 
-      `${data.clientDetails?.firstName || ''} ${data.clientDetails?.lastName || ''}`.trim() || 
-      'Unnamed Client';
-    
-    const authority = data.authorityInformation?.responsibleAuthority || 'Authority Setup';
-    return `${clientPart} - ${authority} Cost Overview`;
+    try {
+      // Use the same filename generation as PDF export for consistency
+      const { generateDynamicFilename } = require('@/lib/pdf-generator/utils/filename');
+      const filename = generateDynamicFilename(data);
+      // Remove the .pdf extension for database storage
+      return filename.replace('.pdf', '');
+    } catch (error) {
+      console.error('🔧 COST-OVERVIEW-HOOK: Failed to generate filename, using fallback:', error);
+      
+      // Enhanced fallback that matches PDF format better than the old broken format
+      const date = new Date(data.clientDetails?.date || new Date());
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${yy}${mm}${dd}`;
+      
+      // Use same naming logic as PDF generator
+      const firstName = data.clientDetails?.firstName || '';
+      const lastName = data.clientDetails?.lastName || '';
+      const companyName = data.clientDetails?.companyName || '';
+      const addressToCompany = data.clientDetails?.addressToCompany || false;
+      
+      const nameForTitle = addressToCompany && companyName ? 
+        companyName : 
+        (firstName ? 
+          (lastName ? `${lastName} ${firstName}` : firstName) : 
+          (companyName || 'CLIENT'));
+      
+      const authority = data.authorityInformation?.responsibleAuthority || 'Unknown Authority';
+      const isDET = authority === 'DET (Dubai Department of Economy and Tourism)';
+      
+      if (isDET) {
+        const setupType = data.clientDetails?.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDIV';
+        const secondaryCurrency = data.clientDetails?.secondaryCurrency || 'USD';
+        return `${formattedDate} ${nameForTitle} DET ${setupType} setup AED ${secondaryCurrency}`;
+      } else {
+        const numberOfYears = data.ifzaLicense?.licenseYears || 1;
+        const visaQuota = data.ifzaLicense?.visaQuota || 0;
+        const visaUsed = data.visaCosts?.numberOfVisas || 0;
+        const spouseVisas = data.visaCosts?.spouseVisa ? 1 : 0;
+        const childrenVisas = data.visaCosts?.numberOfChildVisas || 0;
+        const secondaryCurrency = data.clientDetails?.secondaryCurrency || 'USD';
+        
+        const cleanedAuthority = authority.includes('IFZA') ? 'IFZA' : 
+                                authority.includes('DET') ? 'DET' : 
+                                authority.replace(/[()]/g, '').split(' ')[0];
+        
+        return `${formattedDate} ${nameForTitle} ${cleanedAuthority} ${numberOfYears} ${visaQuota} ${visaUsed} ${spouseVisas} ${childrenVisas} setup AED ${secondaryCurrency}`;
+      }
+    }
   }, [clientName]);
   
   // Load existing application on mount

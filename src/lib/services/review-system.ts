@@ -132,15 +132,32 @@ function generateGoldenVisaTitle(formData: any): string {
 
 function generateCostOverviewTitle(formData: any): string {
   // Use the same detailed filename generation as the PDF export
+  console.log('🔧 CRITICAL DEBUG: generateCostOverviewTitle called with:', {
+    keys: formData ? Object.keys(formData) : null,
+    hasClientDetails: !!formData?.clientDetails,
+    hasAuthorityInfo: !!formData?.authorityInformation,
+    clientDetailsKeys: formData?.clientDetails ? Object.keys(formData.clientDetails) : null,
+    authorityInfoKeys: formData?.authorityInformation ? Object.keys(formData.authorityInformation) : null
+  });
+  
   try {
     const { generateDynamicFilename } = require('@/lib/pdf-generator/utils/filename');
+    console.log('🔧 CRITICAL DEBUG: About to call generateDynamicFilename with data structure:', formData);
     const filename = generateDynamicFilename(formData);
+    console.log('🔧 CRITICAL DEBUG: generateDynamicFilename succeeded, filename:', filename);
     // Remove the .pdf extension for notification display
     return filename.replace('.pdf', '');
   } catch (error) {
-    console.warn('Failed to generate detailed title, using fallback:', error);
+    console.error('Failed to generate detailed title, error details:', error);
+    console.error('FormData structure:', {
+      hasClientDetails: !!formData.clientDetails,
+      hasAuthorityInfo: !!formData.authorityInformation,
+      clientDetailsKeys: formData.clientDetails ? Object.keys(formData.clientDetails) : null,
+      authorityInfoKeys: formData.authorityInformation ? Object.keys(formData.authorityInformation) : null,
+      fullFormDataKeys: formData ? Object.keys(formData) : null
+    });
     
-    // Fallback to basic format
+    // Enhanced fallback that better matches PDF filename format
     const date = new Date(formData.clientDetails?.date || new Date());
     const yy = date.getFullYear().toString().slice(-2);
     const mm = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -160,9 +177,32 @@ function generateCostOverviewTitle(formData: any): string {
         (lastName ? `${lastName} ${firstName}` : firstName) : 
         (companyName || 'CLIENT'));
     
-    const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
+    const authority = formData.authorityInformation?.responsibleAuthority || 'Unknown Authority';
     
-    return `${formattedDate} ${nameForTitle} offer ${authority}`;
+    // Check if this is DET authority for different format
+    const isDET = authority === 'DET (Dubai Department of Economy and Tourism)';
+    
+    if (isDET) {
+      // For DET: YYMMDD <NAME> DET CORP/INDIV AED <SECONDARY_CURRENCY>
+      const setupType = formData.clientDetails?.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDIV';
+      const secondaryCurrency = formData.clientDetails?.secondaryCurrency || 'USD';
+      return `${formattedDate} ${nameForTitle} DET ${setupType} setup AED ${secondaryCurrency}`;
+    } else {
+      // For IFZA and other authorities: Include basic visa info
+      const numberOfYears = formData.ifzaLicense?.licenseYears || 1;
+      const visaQuota = formData.ifzaLicense?.visaQuota || 0;
+      const visaUsed = formData.visaCosts?.numberOfVisas || 0;
+      const spouseVisas = formData.visaCosts?.spouseVisa ? 1 : 0;
+      const childrenVisas = formData.visaCosts?.numberOfChildVisas || 0;
+      const secondaryCurrency = formData.clientDetails?.secondaryCurrency || 'USD';
+      
+      // Get simplified authority name
+      const cleanedAuthority = authority.includes('IFZA') ? 'IFZA' : 
+                              authority.includes('DET') ? 'DET' : 
+                              authority.replace(/[()]/g, '').split(' ')[0];
+      
+      return `${formattedDate} ${nameForTitle} ${cleanedAuthority} ${numberOfYears} ${visaQuota} ${visaUsed} ${spouseVisas} ${childrenVisas} setup AED ${secondaryCurrency}`;
+    }
   }
 }
 

@@ -50,10 +50,52 @@ export const useTaxationApplication = ({
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
   
-  // Generate application title from form data
+  // Generate application title from form data using PDF filename standards
   const generateApplicationTitle = useCallback((data: TaxationFormData): string => {
-    const clientPart = clientName || `${data.firstName} ${data.lastName}`.trim() || 'Unnamed Client';
-    return `${clientPart} - Tax Consultation`;
+    try {
+      // Use the same filename generation as PDF export for consistency
+      const { generateTaxationFilename } = require('@/lib/pdf-generator/utils/taxationDataTransformer');
+      const clientInfo = {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        companyName: data.companyName || '',
+        shortCompanyName: data.shortCompanyName || '',
+        date: data.date || new Date().toISOString().split('T')[0],
+      };
+      const filename = generateTaxationFilename(data, clientInfo);
+      // Remove the .pdf extension for database storage
+      return filename.replace('.pdf', '');
+    } catch (error) {
+      console.error('🔧 TAXATION-HOOK: Failed to generate filename, using fallback:', error);
+      
+      // Enhanced fallback that matches PDF format
+      const date = new Date(data.date || new Date());
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${yy}${mm}${dd}`;
+      
+      // Get company abbreviation from company type
+      const companyAbbreviation = data.companyType === 'management-consultants' ? 'MGT' : 'FZCO';
+      
+      // Get company short name
+      const companyShortName = data.shortCompanyName || 'Company';
+      
+      // Format tax end period as dd.mm.yyyy
+      const formatTaxEndPeriod = () => {
+        const toDate = data.citDisclaimer?.taxPeriodRange?.toDate;
+        if (toDate) {
+          const endDate = new Date(toDate);
+          const day = endDate.getDate().toString().padStart(2, '0');
+          const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
+          const year = endDate.getFullYear();
+          return `${day}.${month}.${year}`;
+        }
+        return '31.12.2025'; // Default fallback
+      };
+      
+      return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
+    }
   }, [clientName]);
   
   // Load existing application on mount

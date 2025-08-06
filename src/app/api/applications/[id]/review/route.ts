@@ -76,10 +76,19 @@ export async function POST(
           // Generate PDF filename using the same logic as PDF generation
           if (applicationData && applicationType) {
             try {
+              console.log('🔧 REVIEW: Attempting filename generation for type:', applicationType);
+              console.log('🔧 REVIEW: Application data keys:', applicationData ? Object.keys(applicationData) : null);
+              
               switch (applicationType) {
                 case 'cost_overview': {
                   const { generateDynamicFilename } = await import('@/lib/pdf-generator/utils/filename');
+                  console.log('🔧 REVIEW: Calling generateDynamicFilename with data:', {
+                    hasClientDetails: !!applicationData.clientDetails,
+                    hasAuthorityInfo: !!applicationData.authorityInformation,
+                    dataStructure: applicationData ? Object.keys(applicationData) : null
+                  });
                   filename = generateDynamicFilename(applicationData);
+                  console.log('🔧 REVIEW: Generated filename:', filename);
                   break;
                 }
                 case 'golden_visa': {
@@ -118,7 +127,14 @@ export async function POST(
                 }
               }
             } catch (error) {
-              console.warn('Failed to generate filename for audit log:', error);
+              console.error('🔧 REVIEW: Failed to generate filename for audit log:', error);
+              console.error('🔧 REVIEW: Error details:', error.message || error);
+              console.error('🔧 REVIEW: Application data that failed:', {
+                type: applicationType,
+                dataKeys: applicationData ? Object.keys(applicationData) : null,
+                clientDetails: applicationData?.clientDetails ? Object.keys(applicationData.clientDetails) : null,
+                authorityInfo: applicationData?.authorityInformation ? Object.keys(applicationData.authorityInformation) : null
+              });
             }
           }
         }

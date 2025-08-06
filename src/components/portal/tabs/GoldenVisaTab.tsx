@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -25,6 +25,9 @@ import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewS
 
 
 const GoldenVisaTab: React.FC = () => {
+  console.log('🔧 GOLDEN-VISA-TAB: Component mounting/rendering at', new Date().toISOString());
+  console.log('🔧 GOLDEN-VISA-TAB: Current window hash:', window.location.hash);
+  
   const { clientInfo, updateClientInfo } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -338,7 +341,7 @@ const GoldenVisaTab: React.FC = () => {
   };
 
   // Handle sending PDF to client (for approved applications)
-  const handleSendPDF = async (data: GoldenVisaData) => {
+  const handleSendPDF = useCallback(async (data: GoldenVisaData) => {
     console.log('🔧 Golden Visa handleSendPDF called with data:', data);
     
     // Validate required client data
@@ -427,7 +430,7 @@ const GoldenVisaTab: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, []);
 
   // Listen for PDF generation events from header buttons
   React.useEffect(() => {
@@ -473,8 +476,9 @@ const GoldenVisaTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Sending approved Golden Visa application:', applicationId);
-      console.log('🔧 Golden Visa form data received:', formData);
+      console.log('🔧 GOLDEN-VISA-TAB: Event received - send approved application:', applicationId);
+      console.log('🔧 GOLDEN-VISA-TAB: Form data received:', formData);
+      console.log('🔧 GOLDEN-VISA-TAB: Current tab active?', window.location.hash === '#golden-visa');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -486,12 +490,31 @@ const GoldenVisaTab: React.FC = () => {
       handleSendPDF(formData);
     };
 
+    const handleTabReadinessCheck = (event: any) => {
+      const { targetTab } = event.detail;
+      console.log('🔧 GOLDEN-VISA-TAB: Readiness check received for tab:', targetTab);
+      
+      // Only respond if this is our tab
+      if (targetTab === 'golden-visa') {
+        console.log('🔧 GOLDEN-VISA-TAB: Confirming tab readiness');
+        const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
+          detail: { tab: 'golden-visa', ready: true }
+        });
+        window.dispatchEvent(readinessEvent);
+      }
+    };
+
     window.addEventListener('edit-golden-visa-application', handleEditApplication);
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
+    window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
+
+    console.log('🔧 GOLDEN-VISA-TAB: Event listeners registered');
 
     return () => {
       window.removeEventListener('edit-golden-visa-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
+      window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
+      console.log('🔧 GOLDEN-VISA-TAB: Event listeners removed');
     };
   }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 

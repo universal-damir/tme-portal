@@ -523,4 +523,53 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
   }
 
   return individualBreakdowns;
+}
+
+// Generate Golden Visa filename (matching the goldenVisaGenerator pattern)
+export function generateGoldenVisaFilename(
+  goldenVisaData: GoldenVisaData,
+  clientInfo: SharedClientInfo
+): string {
+  // Format date as YYMMDD
+  const date = new Date(goldenVisaData.date || clientInfo.date);
+  const yy = date.getFullYear().toString().slice(-2);
+  const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dd = date.getDate().toString().padStart(2, '0');
+  const formattedDate = `${yy}${mm}${dd}`;
+  
+  // Determine name for filename based on available data
+  let nameForFilename = '';
+  if (goldenVisaData.companyName) {
+    nameForFilename = goldenVisaData.companyName;
+  } else if (goldenVisaData.lastName && goldenVisaData.firstName) {
+    nameForFilename = `${goldenVisaData.lastName} ${goldenVisaData.firstName}`;
+  } else if (goldenVisaData.firstName) {
+    nameForFilename = goldenVisaData.firstName;
+  } else if (goldenVisaData.lastName) {
+    nameForFilename = goldenVisaData.lastName;
+  } else {
+    nameForFilename = 'Client';
+  }
+  
+  // Determine if this is a dependent-only visa (no primary holder)
+  const isDependentOnly = !goldenVisaData.primaryVisaRequired;
+  
+  let visaTypeFormatted: string;
+  
+  if (isDependentOnly) {
+    // If only dependents are getting visas, use "dependent" suffix
+    visaTypeFormatted = 'dependent';
+  } else {
+    // Format visa type for filename (shortened versions)
+    const visaTypeMap: { [key: string]: string } = {
+      'property-investment': 'property',
+      'time-deposit': 'deposit',
+      'skilled-employee': 'skilled'
+    };
+    
+    visaTypeFormatted = visaTypeMap[goldenVisaData.visaType] || goldenVisaData.visaType;
+  }
+  
+  // Build filename: yymmdd {name} offer golden visa {type}.pdf
+  return `${formattedDate} ${nameForFilename} offer golden visa ${visaTypeFormatted}.pdf`;
 } 

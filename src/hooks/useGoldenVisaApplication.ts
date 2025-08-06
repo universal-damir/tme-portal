@@ -50,49 +50,65 @@ export const useGoldenVisaApplication = ({
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedDataRef = useRef<string>('');
   
-  // Generate application title from form data
+  // Generate application title from form data using PDF filename standards
   const generateApplicationTitle = useCallback((data: GoldenVisaData): string => {
-    // Format date as YYMMDD
-    const date = new Date(data.date || new Date());
-    const yy = date.getFullYear().toString().slice(-2);
-    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-    const dd = date.getDate().toString().padStart(2, '0');
-    const formattedDate = `${yy}${mm}${dd}`;
-    
-    // Get client names
-    let nameForTitle = '';
-    if (data.companyName) {
-      nameForTitle = data.companyName;
-    } else if (data.lastName && data.firstName) {
-      nameForTitle = `${data.lastName} ${data.firstName}`;
-    } else if (data.firstName) {
-      nameForTitle = data.firstName;
-    } else if (data.lastName) {
-      nameForTitle = data.lastName;
-    } else {
-      nameForTitle = 'Client';
-    }
-    
-    // Determine if this is a dependent-only visa (no primary holder)
-    const isDependentOnly = !data.primaryVisaRequired;
-    
-    let visaTypeFormatted: string;
-    
-    if (isDependentOnly) {
-      // If only dependents are getting visas, use "dependent" suffix
-      visaTypeFormatted = 'dependent';
-    } else {
-      // Format visa type for title (shortened versions)
-      const visaTypeMap: { [key: string]: string } = {
-        'property-investment': 'property',
-        'time-deposit': 'deposit',
-        'skilled-employee': 'skilled'
+    try {
+      // Use the same filename generation as PDF export for consistency
+      const { generateGoldenVisaFilename } = require('@/lib/pdf-generator/utils/goldenVisaDataTransformer');
+      const clientInfo = {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        companyName: data.companyName || '',
+        date: data.date || new Date().toISOString().split('T')[0],
       };
+      const filename = generateGoldenVisaFilename(data, clientInfo);
+      // Remove the .pdf extension for database storage
+      return filename.replace('.pdf', '');
+    } catch (error) {
+      console.error('🔧 GOLDEN-VISA-HOOK: Failed to generate filename, using fallback:', error);
       
-      visaTypeFormatted = visaTypeMap[data.visaType] || data.visaType;
+      // Enhanced fallback that matches PDF format (keep current working logic)
+      const date = new Date(data.date || new Date());
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      const formattedDate = `${yy}${mm}${dd}`;
+      
+      // Get client names
+      let nameForTitle = '';
+      if (data.companyName) {
+        nameForTitle = data.companyName;
+      } else if (data.lastName && data.firstName) {
+        nameForTitle = `${data.lastName} ${data.firstName}`;
+      } else if (data.firstName) {
+        nameForTitle = data.firstName;
+      } else if (data.lastName) {
+        nameForTitle = data.lastName;
+      } else {
+        nameForTitle = 'Client';
+      }
+      
+      // Determine if this is a dependent-only visa (no primary holder)
+      const isDependentOnly = !data.primaryVisaRequired;
+      
+      let visaTypeFormatted: string;
+      
+      if (isDependentOnly) {
+        // If only dependents are getting visas, use "dependent" suffix
+        visaTypeFormatted = 'dependent';
+      } else {
+        // Format visa type for title (shortened versions)
+        const visaTypeMap: { [key: string]: string } = {
+          'property-investment': 'property',
+          'time-deposit': 'deposit',
+          'skilled-employee': 'skilled'
+        };
+        
+        visaTypeFormatted = visaTypeMap[data.visaType] || data.visaType;
+      }
+      
+      return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
     }
-    
-    return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
   }, []);
   
   // Load existing application on mount

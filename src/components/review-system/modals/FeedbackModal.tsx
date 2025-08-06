@@ -315,6 +315,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const handleSendPDF = () => {
     if (!application) return;
     
+    console.log('🔧 FEEDBACK-MODAL: Application data for send:', {
+      id: application.id,
+      type: application.type,
+      title: application.title,
+      status: application.status
+    });
+    
     setIsSendLoading(true);
     
     // Show toast notification about form opening
@@ -332,6 +339,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     };
     
     const targetHash = tabMapping[application.type] || '#cost-overview';
+    console.log('🔧 FEEDBACK-MODAL: Navigating to tab:', {
+      applicationType: application.type,
+      targetHash,
+      mappingUsed: tabMapping[application.type] ? 'found' : 'fallback'
+    });
+    
     window.location.hash = targetHash;
     
     // Close the feedback modal
@@ -345,24 +358,101 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       }
     });
     
-    // Longer delay to ensure the tab has fully loaded and event listeners are registered
-    setTimeout(() => {
-      console.log('🔧 Dispatching send approved application event');
+    // Wait for the tab to be ready before dispatching the event
+    const waitForTabAndDispatch = () => {
+      let attempts = 0;
+      const maxAttempts = 40; // Max 20 seconds (500ms * 40) to account for lazy loading
       
-      // Dispatch the event
-      window.dispatchEvent(sendEvent);
-      
-      // Listen for confirmation that the event was received by the tab
-      const handleEventConfirmation = () => {
-        console.log('🔧 Send event confirmed - PDF generation started successfully');
-        setIsSendLoading(false);
-        window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
+      const checkAndDispatch = () => {
+        attempts++;
+        console.log(`🔧 FEEDBACK-MODAL: Checking if tab is ready (attempt ${attempts}/${maxAttempts})`);
+        
+        // Test if we can dispatch and receive a response by sending a test event
+        const testEvent = new CustomEvent('tab-readiness-check', {
+          detail: { targetTab: application.type }
+        });
+        
+        let tabReady = false;
+        const testHandler = () => {
+          tabReady = true;
+          window.removeEventListener('tab-readiness-confirmed', testHandler);
+        };
+        
+        window.addEventListener('tab-readiness-confirmed', testHandler);
+        window.dispatchEvent(testEvent);
+        
+        // Give a small delay to see if tab responds
+        setTimeout(() => {
+          window.removeEventListener('tab-readiness-confirmed', testHandler);
+          
+          // Additional check: if hash matches target and we've waited a while, try anyway
+          const hashMatches = window.location.hash === `#${application.type}`;
+          const hasWaitedLong = attempts > 10; // After 10 attempts (3+ seconds)
+          
+          if (tabReady) {
+            console.log('🔧 FEEDBACK-MODAL: Tab is ready! Dispatching send approved application event');
+            console.log('🔧 FEEDBACK-MODAL: Current window hash:', window.location.hash);
+            console.log('🔧 FEEDBACK-MODAL: Event detail:', sendEvent.detail);
+            
+            // Dispatch the actual event
+            window.dispatchEvent(sendEvent);
+            console.log('🔧 FEEDBACK-MODAL: Event dispatched successfully');
+            
+            // Listen for confirmation that the event was received by the tab
+            const handleEventConfirmation = () => {
+              console.log('🔧 FEEDBACK-MODAL: Send event confirmed - PDF generation started successfully');
+              setIsSendLoading(false);
+              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
+            };
+            
+            // Listen for confirmation - should happen immediately when tab receives event
+            window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
+            
+            // Set a timeout to stop loading if no confirmation is received
+            setTimeout(() => {
+              console.warn('🔧 FEEDBACK-MODAL: No confirmation received after 5 seconds, stopping loading');
+              setIsSendLoading(false);
+              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
+            }, 5000);
+            
+          } else if (hashMatches && hasWaitedLong && attempts < maxAttempts) {
+            console.log('🔧 FEEDBACK-MODAL: Tab seems ready based on hash, trying to dispatch anyway');
+            
+            // Try dispatching the event anyway since hash matches and we've waited
+            window.dispatchEvent(sendEvent);
+            console.log('🔧 FEEDBACK-MODAL: Event dispatched (fallback method)');
+            
+            // Still listen for confirmation
+            const handleEventConfirmation = () => {
+              console.log('🔧 FEEDBACK-MODAL: Send event confirmed via fallback method');
+              setIsSendLoading(false);
+              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
+            };
+            window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
+            
+            setTimeout(() => {
+              console.warn('🔧 FEEDBACK-MODAL: No confirmation via fallback, stopping loading');
+              setIsSendLoading(false);
+              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
+            }, 5000);
+            
+          } else if (attempts < maxAttempts) {
+            console.log(`🔧 FEEDBACK-MODAL: Tab not ready yet, retrying in 300ms...`);
+            setTimeout(checkAndDispatch, 300);
+          } else {
+            console.error('🔧 FEEDBACK-MODAL: Tab failed to become ready after maximum attempts');
+            console.error('🔧 FEEDBACK-MODAL: This might be due to lazy loading delay or tab not mounting');
+            setIsSendLoading(false);
+            toast.error('Failed to connect to tab. Please try refreshing the page and try again.');
+          }
+        }, 50);
       };
       
-      // Listen for confirmation - should happen immediately when tab receives event
-      window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
-      
-    }, 1000); // Keep the 1000ms initial delay
+      // Start checking after initial delay
+      setTimeout(checkAndDispatch, 1000);
+    };
+    
+    waitForTabAndDispatch();
   };
 
   const handleEditForm = () => {
