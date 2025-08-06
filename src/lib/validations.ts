@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const clientDetailsSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
-  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be less than 50 characters'),
+  lastName: z.string().max(50, 'Last name must be less than 50 characters').optional(),
   companyName: z.string().max(100, 'Company name must be less than 100 characters').optional(),
   addressToCompany: z.boolean().optional(),
   date: z.string().min(1, 'Date is required'),

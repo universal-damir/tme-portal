@@ -608,7 +608,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       });
     } finally {
       setIsGenerating(false);
-      setPdfProgress({ step: '', progress: 0, isVisible: false });
     }
   };
 
@@ -635,20 +634,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     setIsGenerating(true);
     const hasFamilyVisaDoc = hasFamilyVisas(data);
-    const totalSteps = hasFamilyVisaDoc ? 3 : 2;
-    let currentStep = 0;
-
-    const loadingToast = toast.loading('Preparing preview...', {
-      description: 'Generating PDF preview for your review.'
-    });
 
     try {
-      // Step 1: Validate data
-      updateProgress('Preparing preview data...', (++currentStep / totalSteps) * 100);
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // Step 2: Generate main preview
-      updateProgress('Generating main document preview...', (++currentStep / totalSteps) * 100);
+      // Generate main preview
       const { blob: mainPdfBlob, filename: mainFilename } = await generatePDFWithFilename(data);
       const mainUrl = URL.createObjectURL(mainPdfBlob);
       
@@ -660,9 +648,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         URL.revokeObjectURL(mainUrl);
       }, 1000);
 
-      // Step 3: Generate family visa preview if needed
+      // Generate family visa preview if needed
       if (hasFamilyVisaDoc) {
-        updateProgress('Generating family visa preview...', (++currentStep / totalSteps) * 100);
         const familyPdfBlob = await generateFamilyVisaPDF(data);
         const familyUrl = URL.createObjectURL(familyPdfBlob);
         
@@ -700,22 +687,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         console.error('Failed to log PDF preview activity:', error);
       }
 
-      // Dismiss loading notification
-      toast.dismiss(loadingToast);
-
     } catch (error) {
       console.error('Error generating PDF preview:', error);
-      toast.dismiss(loadingToast);
-      toast.error('Preview Generation Failed', {
-        description: 'Error generating PDF preview. Please try again.',
-        action: {
-          label: 'Retry',
-          onClick: () => handlePreviewPDF(data)
-        }
-      });
     } finally {
       setIsGenerating(false);
-      setPdfProgress({ step: '', progress: 0, isVisible: false });
     }
   };
 
@@ -1127,26 +1102,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         </div>
       )}
 
-      {/* Help text when buttons are not visible */}
-      {!isAuthoritySelected && !aiAssistant.hasBeenUsed && (
-        <div className="text-center py-8">
-          <div className="max-w-md mx-auto">
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                Ready to Generate Your Quote?
-              </h3>
-              <p className="text-blue-700 text-sm">
-                Select an authority above or use the AI Assistant to get started. Once you provide the basic information, you'll see options to preview and download your PDF quote.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* AI Assistant Chat Interface - Modal Mode */}
       <ChatInterface

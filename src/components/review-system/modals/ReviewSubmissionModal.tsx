@@ -210,11 +210,9 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
                         />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center h-[42px]">
-                          <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
-                            Urgent
-                          </span>
-                        </div>
+                        <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                          Urgent
+                        </span>
                         <p className="text-xs text-gray-600 mt-1">
                           Mark as urgent for immediate attention. Default is standard priority.
                         </p>
