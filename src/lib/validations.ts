@@ -6,7 +6,10 @@ export const clientDetailsSchema = z.object({
   companyName: z.string().max(100, 'Company name must be less than 100 characters').optional(),
   addressToCompany: z.boolean().optional(),
   date: z.string().min(1, 'Date is required'),
-  companySetupType: z.string().min(1, 'Company setup type is required'),
+  companySetupType: z.string({
+    required_error: 'Please select either Individual or Corporate shareholder type',
+    invalid_type_error: 'Please select either Individual or Corporate shareholder type'
+  }).min(1, 'Please select either Individual or Corporate shareholder type'),
   secondaryCurrency: z.string().min(1, 'Secondary currency is required'),
   exchangeRate: z.number().min(0.01, 'Exchange rate must be greater than 0').max(1000, 'Exchange rate seems unrealistic'),
   clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
