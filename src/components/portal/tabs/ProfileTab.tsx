@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle, Download } from 'lucide-react'
+import { TodoListPanel } from '@/components/todos'
 
 interface ActivityLog {
   id: number
@@ -137,12 +138,15 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
 
           <Separator className="my-3" />
 
-          {/* TME Design System Activity Feed */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          {/* Split Layout: Recent Activities (50%) + Todo List (50%) */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Recent Activities Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="xl:max-h-[600px]"
+            >
             <h3 className="text-lg font-semibold mb-4" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
               Recent Activity
             </h3>
@@ -165,7 +169,7 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                 ))}
               </div>
             ) : activities.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-[480px] overflow-y-auto">
                 <div className="divide-y divide-gray-100">
                   {(showAllActivities ? activities : activities.slice(0, 5)).map((activity, index) => {
                     // Format activity type to be more readable
@@ -399,7 +403,23 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                 </p>
               </div>
             )}
-          </motion.div>
+            </motion.div>
+
+            {/* Todo List Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="xl:max-h-[600px]"
+            >
+              <TodoListPanel 
+                maxHeight="540px"
+                showFilters={true}
+                autoRefresh={true}
+                className="h-full"
+              />
+            </motion.div>
+          </div>
         </CardContent>
       </Card>
     </div>

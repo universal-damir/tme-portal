@@ -161,6 +161,39 @@ export async function POST(
         user_agent: getUserAgent(request)
       });
 
+      // Trigger todo generation for the reviewer
+      try {
+        const { NotificationTodoAutomation } = await import('@/lib/services/notification-todo-automation');
+        
+        // Create a mock notification for todo generation
+        const mockNotification = {
+          id: `review_${id}_${Date.now()}`,
+          type: 'review_requested', // Match the actual notification type
+          user_id: parseInt(reviewer_id), // Todo goes to the reviewer
+          data: {
+            application_id: id,
+            application_title: formName, // Rule expects this field
+            reviewer_id: parseInt(reviewer_id),
+            reviewer_name: reviewerName,
+            submitter_name: session.user.full_name, // Rule expects this field
+            urgency: urgency === 'urgent' ? 'high' : 'standard', // Map urgency values
+            comments: comments || null,
+            form_name: formName,
+            filename: filename,
+            client_name: formName, // Use form name as client identifier
+            document_type: 'Application Review',
+            submitter_id: userId
+          },
+          created_at: new Date().toISOString()
+        };
+
+        await NotificationTodoAutomation.processNotification(mockNotification);
+        console.log('✅ Todo generated for reviewer:', reviewerName);
+      } catch (error) {
+        console.error('❌ Failed to generate todo for reviewer:', error);
+        // Don't fail the main request if todo generation fails
+      }
+
       return NextResponse.json({ 
         success: true,
         message: 'Application submitted for review successfully'

@@ -142,6 +142,32 @@ export async function POST(
         user_agent: getUserAgent(request)
       });
 
+      // Trigger todo automation for review completion  
+      try {
+        const { NotificationTodoAutomation } = await import('@/lib/services/notification-todo-automation');
+        
+        // Create mock notification to trigger auto-completion
+        const mockNotification = {
+          id: `approval_${id}_${Date.now()}`,
+          type: 'application_approved',
+          user_id: userId, // Reviewer who performed the action
+          data: {
+            application_id: id,
+            action,
+            form_name: formName,
+            filename: filename,
+            application_title: formName
+          },
+          created_at: new Date().toISOString()
+        };
+
+        await NotificationTodoAutomation.processNotification(mockNotification);
+        console.log(`✅ Triggered todo auto-completion for application ${id}`);
+      } catch (error) {
+        console.error('❌ Failed to trigger todo auto-completion:', error);
+        // Don't fail the main request if todo automation fails
+      }
+
       return NextResponse.json({ 
         success: true,
         message: `Application ${action}ed successfully`
