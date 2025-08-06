@@ -394,7 +394,7 @@ const GoldenVisaTab: React.FC = () => {
       window.removeEventListener('edit-golden-visa-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, [setValue]);
+  }, []); // Remove setValue dependency to prevent listener re-registration
 
   return (
     <div className="space-y-8" style={{ fontFamily: 'Inter, sans-serif' }}>

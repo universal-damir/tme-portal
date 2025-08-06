@@ -292,7 +292,7 @@ const CompanyServicesTab: React.FC = () => {
       window.removeEventListener('edit-company-services-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, [setValue, handleGeneratePDF]);
+  }, []); // Remove dependencies to prevent listener re-registration
 
   return (
     <div className="space-y-8">

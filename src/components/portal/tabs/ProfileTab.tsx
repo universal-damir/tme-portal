@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye } from 'lucide-react'
+import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle } from 'lucide-react'
 
 interface ActivityLog {
   id: number
@@ -188,6 +188,30 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         const clientName = details?.client_name ? ` for ${details.client_name}` : '';
                         return `Previewed ${documentType}${clientName}`;
                       }
+                      if (action === 'form_submitted_for_review') {
+                        // Try to get form name from details, fallback to generic message
+                        const formName = details?.form_name || details?.application_title || details?.title;
+                        if (formName) {
+                          return `Submitted ${formName} for review`;
+                        }
+                        return `Submitted application for review`;
+                      }
+                      if (action === 'review_approved') {
+                        // Try to get form name from details, fallback to generic message
+                        const formName = details?.form_name || details?.application_title || details?.title;
+                        if (formName) {
+                          return `Approved ${formName}`;
+                        }
+                        return `Approved application review`;
+                      }
+                      if (action === 'review_rejected') {
+                        // Try to get form name from details, fallback to generic message
+                        const formName = details?.form_name || details?.application_title || details?.title;
+                        if (formName) {
+                          return `Rejected ${formName}`;
+                        }
+                        return `Rejected application review`;
+                      }
                       return action
                         .replace(/_/g, ' ')
                         .replace(/\b\w/g, l => l.toUpperCase())
@@ -223,6 +247,14 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                           return { bg: 'bg-amber-50', icon: Eye, iconColor: 'text-amber-500', category: 'Golden Visa' };
                         return { bg: 'bg-indigo-100', icon: Eye, iconColor: 'text-indigo-600', category: 'Documents' };
                       }
+                      
+                      // Review system activities
+                      if (action === 'form_submitted_for_review') 
+                        return { bg: 'bg-orange-100', icon: Send, iconColor: 'text-orange-600', category: 'Review Submission' };
+                      if (action === 'review_approved') 
+                        return { bg: 'bg-green-100', icon: CheckCircle, iconColor: 'text-green-600', category: 'Review Approved' };
+                      if (action === 'review_rejected') 
+                        return { bg: 'bg-red-100', icon: XCircle, iconColor: 'text-red-600', category: 'Review Rejected' };
                       
                       return { bg: 'bg-gray-100', icon: FileText, iconColor: 'text-gray-600', category: 'System' };
                     };

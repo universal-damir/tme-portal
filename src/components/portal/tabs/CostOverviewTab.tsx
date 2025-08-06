@@ -753,7 +753,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       window.removeEventListener('edit-cost-overview-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, [setValue]);
+  }, []); // Remove setValue dependency to prevent listener re-registration
 
   return (
     <div className="space-y-8">

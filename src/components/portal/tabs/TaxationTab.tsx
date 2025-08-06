@@ -420,7 +420,7 @@ const TaxationTab: React.FC = () => {
       window.removeEventListener('edit-taxation-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
     };
-  }, [setValue, handleDownloadAll]);
+  }, []); // Remove dependencies to prevent listener re-registration
 
   return (
     <div className="space-y-8">

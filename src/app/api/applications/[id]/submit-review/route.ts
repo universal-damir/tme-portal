@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ApplicationsService } from '@/lib/services/review-system';
 import { getReviewSystemConfig } from '@/lib/config/review-system';
 import { verifySession } from '@/lib/auth';
+import { logAuditEvent, getClientIP, getUserAgent } from '@/lib/audit';
+import { query } from '@/lib/database';
 
 // POST /api/applications/[id]/submit-review - Submit application for review
 export async function POST(
@@ -67,6 +69,33 @@ export async function POST(
     console.log('🔧 API ROUTE: ApplicationsService result:', success);
 
     if (success) {
+      // Get application title for the audit log
+      let formName = null;
+      try {
+        const appResult = await query('SELECT title FROM applications WHERE id = $1', [id]);
+        if (appResult.rows.length > 0) {
+          formName = appResult.rows[0].title;
+        }
+      } catch (error) {
+        console.warn('Failed to get application title for audit log:', error);
+      }
+
+      // Log audit event for form submission
+      await logAuditEvent({
+        user_id: userId,
+        action: 'form_submitted_for_review',
+        resource: 'review_system',
+        details: {
+          application_id: id,
+          reviewer_id: parseInt(reviewer_id),
+          urgency,
+          comments: comments || null,
+          form_name: formName
+        },
+        ip_address: getClientIP(request),
+        user_agent: getUserAgent(request)
+      });
+
       return NextResponse.json({ 
         success: true,
         message: 'Application submitted for review successfully'
