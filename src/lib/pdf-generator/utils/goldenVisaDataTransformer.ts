@@ -2,6 +2,7 @@ import { GoldenVisaData } from '@/types/golden-visa';
 import { SharedClientInfo } from '@/types/portal';
 import { OfferData } from '@/types/offer';
 import { getBrandingById } from '../branding';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../translations/golden-visa';
 
 // Golden Visa Service Item interface (similar to VisaServiceItem)
 export interface GoldenVisaServiceItem {
@@ -16,8 +17,9 @@ export interface GoldenVisaServiceItem {
 // This allows golden visa components to use the same shared components as cost overview
 export function transformGoldenVisaData(
   goldenVisaData: GoldenVisaData,
-  clientInfo: SharedClientInfo
-): OfferData & { goldenVisaData: GoldenVisaData } {
+  clientInfo: SharedClientInfo,
+  locale?: Locale
+): OfferData & { goldenVisaData: GoldenVisaData; locale?: Locale } {
   const branding = getBrandingById(goldenVisaData.companyType);
   
   return {
@@ -46,6 +48,8 @@ export function transformGoldenVisaData(
     additionalServices: undefined,
     // Add the original golden visa data for access by components
     goldenVisaData: goldenVisaData,
+    // Add locale for translation support
+    locale: locale,
   };
 }
 
@@ -100,8 +104,9 @@ export function hasDependentVisas(goldenVisaData: GoldenVisaData): boolean {
 }
 
 // Generate Authority Fees breakdown with detailed numbered items
-export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenVisaData): GoldenVisaServiceItem[] {
+export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[] {
   const services: GoldenVisaServiceItem[] = [];
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
   
   // Only generate authority fees if primary visa is required
   if (!goldenVisaData.primaryVisaRequired) {
@@ -117,35 +122,35 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'dld-approval',
       condition: true,
-      description: '1. DLD (Dubai Land Department) approval cost',
+      description: locale === 'de' ? '1. DLD Genehmigungs-/Bewertungsgebühr' : '1. DLD (Dubai Land Department) approval cost',
       amount: fees.dldApprovalFee,
-      explanation: 'Approval cost required for property investment Golden Visa applications.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.dldApprovalFee : 'Approval cost required for property investment Golden Visa applications.'
     });
 
     services.push({
       id: 'standard-authority-costs',
       condition: true,
-      description: '2. Standard authority costs',
+      description: locale === 'de' ? '2. Standard Behördenkosten' : '2. Standard authority costs',
       amount: fees.standardAuthorityCosts || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFee) || 5010,
-      explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
+      explanation: locale === 'de' ? `${t.costsBreakdown.explanations.mandatoryUaeMedicalTest} ${t.costsBreakdown.explanations.emiratesIdFee} ${t.costsBreakdown.explanations.immigrationResidencyFee}` : 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
     });
 
     if (fees.visaCancellation && fees.visaCancellationFee > 0) {
       services.push({
         id: 'visa-cancellation',
         condition: true,
-        description: '3. Visa cancellation cost',
+        description: locale === 'de' ? '3. Visa-Stornierungskosten' : '3. Visa cancellation cost',
         amount: fees.visaCancellationFee,
-        explanation: 'For canceling existing visa status before applying for Golden Visa.'
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For canceling existing visa status before applying for Golden Visa.'
       });
     }
 
     services.push({
       id: 'third-party-costs',
       condition: true,
-      description: fees.visaCancellation ? '4. Third party costs' : '3. Third party costs',
+      description: locale === 'de' ? (fees.visaCancellation ? '4. Drittanbieterkosten' : '3. Drittanbieterkosten') : (fees.visaCancellation ? '4. Third party costs' : '3. Third party costs'),
       amount: fees.thirdPartyCosts,
-      explanation: 'Administrative costs charged by various departments.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.thirdPartyCosts : 'Administrative costs charged by various departments.'
     });
 
     // Add TME Services Professional Fee as final point
@@ -153,9 +158,9 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'tme-professional-fee',
       condition: true,
-      description: fees.visaCancellation ? '5. TME Services professional fee' : '4. TME Services professional fee',
+      description: locale === 'de' ? (fees.visaCancellation ? '5. TME Services Beratungsgebühr' : '4. TME Services Beratungsgebühr') : (fees.visaCancellation ? '5. TME Services professional fee' : '4. TME Services professional fee'),
       amount: baseTmeServicesFee,
-      explanation: 'TME Services Professional Fee: Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'TME Services Professional Fee: Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
   } else if ((visaType === 'time-deposit' || visaType === 'skilled-employee') && goldenVisaData.skilledEmployeeAuthorityFees) {
     // Time Deposit and Skilled Employee (without NOC) - no DLD fee
@@ -164,27 +169,27 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'standard-authority-costs',
       condition: true,
-      description: '1. Standard authority costs',
+      description: locale === 'de' ? '1. Standard Behördenkosten' : '1. Standard authority costs',
       amount: fees.standardAuthorityCosts || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFee) || 5010,
-      explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
+      explanation: locale === 'de' ? `${t.costsBreakdown.explanations.mandatoryUaeMedicalTest} ${t.costsBreakdown.explanations.emiratesIdFee} ${t.costsBreakdown.explanations.immigrationResidencyFee}` : 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
     });
 
     if (fees.visaCancellation && fees.visaCancellationFee > 0) {
       services.push({
         id: 'visa-cancellation',
         condition: true,
-        description: '2. Visa cancellation cost',
+        description: locale === 'de' ? '2. Visa-Stornierungskosten' : '2. Visa cancellation cost',
         amount: fees.visaCancellationFee,
-        explanation: 'For canceling existing visa status before applying for Golden Visa.'
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For canceling existing visa status before applying for Golden Visa.'
       });
     }
 
     services.push({
       id: 'third-party-costs',
       condition: true,
-      description: fees.visaCancellation ? '3. Third party costs' : '2. Third party costs',
+      description: locale === 'de' ? (fees.visaCancellation ? '3. Drittanbieterkosten' : '2. Drittanbieterkosten') : (fees.visaCancellation ? '3. Third party costs' : '2. Third party costs'),
       amount: fees.thirdPartyCosts,
-      explanation: 'Administrative costs charged by various departments.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.thirdPartyCosts : 'Administrative costs charged by various departments.'
     });
 
     // Add TME Services Professional Fee as final point
@@ -192,18 +197,18 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     services.push({
       id: 'tme-professional-fee',
       condition: true,
-      description: fees.visaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee',
+      description: locale === 'de' ? (fees.visaCancellation ? '4. TME Services Beratungsgebühr' : '3. TME Services Beratungsgebühr') : (fees.visaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee'),
       amount: baseTmeServicesFee,
-      explanation: 'TME Services Professional Fee: Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'TME Services Professional Fee: Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
   } else {
     // Fallback to simple structure for backwards compatibility
     services.push({
       id: 'government-fees',
       condition: true,
-      description: '1. Government Costs (Medical Test + Emirates ID + Processing)',
+      description: locale === 'de' ? '1. Behördenkosten (Medizintest + Emirates ID + Bearbeitung)' : '1. Government Costs (Medical Test + Emirates ID + Processing)',
       amount: goldenVisaData.governmentFee || 0,
-      explanation: 'Government costs including medical examination, Emirates ID processing, and visa application charges.'
+      explanation: locale === 'de' ? 'Behördenkosten einschließlich medizinischer Untersuchung, Emirates ID Bearbeitung und Visa-Antragsgebühren.' : 'Government costs including medical examination, Emirates ID processing, and visa application charges.'
     });
   }
 
@@ -233,8 +238,8 @@ export function generateGoldenVisaTMEServicesBreakdown(goldenVisaData: GoldenVis
 }
 
 // Generate explanations for authority fees and TME services
-export function generateGoldenVisaExplanations(goldenVisaData: GoldenVisaData): Array<{ id: string; title: string; explanation: string }> {
-  const authorityServices = generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData);
+export function generateGoldenVisaExplanations(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): Array<{ id: string; title: string; explanation: string }> {
+  const authorityServices = generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData, locale);
   // TME Services is now included in authority breakdown, so no need to add separately
   
   return authorityServices
