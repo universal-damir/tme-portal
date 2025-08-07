@@ -3,22 +3,25 @@ import { pdf } from '@react-pdf/renderer';
 import { GoldenVisaDocument } from '../components/golden-visa/GoldenVisaDocument';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { SharedClientInfo } from '@/types/portal';
+import { Locale } from '../translations/golden-visa';
 
 export const generateGoldenVisaPDF = async (
   goldenVisaData: GoldenVisaData,
-  clientInfo: SharedClientInfo
+  clientInfo: SharedClientInfo,
+  locale: Locale = 'en'
 ): Promise<Blob> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const doc = React.createElement(GoldenVisaDocument, { goldenVisaData, clientInfo }) as any;
+  const doc = React.createElement(GoldenVisaDocument, { goldenVisaData, clientInfo, locale }) as any;
   const asPdf = pdf(doc);
   return await asPdf.toBlob();
 };
 
 export const generateGoldenVisaPDFWithFilename = async (
   goldenVisaData: GoldenVisaData,
-  clientInfo: SharedClientInfo
+  clientInfo: SharedClientInfo,
+  locale: Locale = 'en'
 ): Promise<{ blob: Blob; filename: string }> => {
-  const blob = await generateGoldenVisaPDF(goldenVisaData, clientInfo);
+  const blob = await generateGoldenVisaPDF(goldenVisaData, clientInfo, locale);
   
   // Generate filename: yymmdd Slast name first name offer visa 10y golden <type>
   

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Link } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
 import type { PDFComponentProps } from '../../../types';
 
 // VisaRequirementsSection - Visa-specific requirements and bullet points
@@ -8,6 +9,8 @@ import type { PDFComponentProps } from '../../../types';
 export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) => {
   // Access golden visa data from transformed data
   const goldenVisaData = (data as any).goldenVisaData;
+  const locale: Locale = (data as any).locale || 'en';
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
 
   // Get visa type from actual data
   const getVisaType = () => {
@@ -47,23 +50,23 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
         return (
           <>
             <Text style={styles.introText}>
-              1. <Text style={{ fontWeight: 'bold' }}>Minimum property value:</Text> AED 2,000,000 per person. Joint ownership is allowed.{"\n"}Off-plan properties require NOC (Non-Objection Certificate) and statement of payment status from the developer.
+              1. <Text style={{ fontWeight: 'bold' }}>{t.requirements.propertyInvestment.minProperty}:</Text> {t.requirements.propertyInvestment.minPropertyText}
             </Text>
       
             <Text style={styles.introText}>
-              2. <Text style={{ fontWeight: 'bold' }}>Eligible property types:</Text> Only villas and apartments qualify.
+              2. <Text style={{ fontWeight: 'bold' }}>{t.requirements.propertyInvestment.propertyTypes}:</Text> {t.requirements.propertyInvestment.propertyTypesText}
             </Text>
             
             <Text style={styles.introText}>
-              3. <Text style={{ fontWeight: 'bold' }}>Processing time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
+              3. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.processingTime}:</Text> {t.requirements.common.processingTimeText}
             </Text>
             
             <Text style={styles.introText}>
-              4. <Text style={{ fontWeight: 'bold' }}>Health insurance:</Text> Required. Must be either UAE-registered or international health insurance.
+              4. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.healthInsurance}:</Text> {t.requirements.common.healthInsuranceText}
             </Text>
             
             <Text style={styles.introText}>
-              5. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
+              5. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.medicalEmirates}:</Text> {t.requirements.common.medicalEmiratesText}
             </Text>
           </>
         );
@@ -72,25 +75,25 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
         return (
           <>
             <Text style={styles.introText}>
-              1. <Text style={{ fontWeight: 'bold' }}>Minimum deposit:</Text> A fixed deposit of AED 2,000,000 with a UAE-based bank is required, held for a minimum of 2 years.
+              1. <Text style={{ fontWeight: 'bold' }}>{t.requirements.timeDeposit.minDeposit}:</Text> {t.requirements.timeDeposit.minDepositText}
             </Text>
             
             <Text style={styles.introText}>
-              2. <Text style={{ fontWeight: 'bold' }}>Residency requirement:</Text> You must already hold a valid UAE residence visa and provide proof of Dubai residency.
+              2. <Text style={{ fontWeight: 'bold' }}>{t.requirements.timeDeposit.residencyReq}:</Text> {t.requirements.timeDeposit.residencyReqText}
             </Text>
-            <Text style={styles.introText}>   Acceptable documents include a valid Ejari or a title deed issued by the DLD (Dubai Land Department).
-            </Text>
-            
-            <Text style={styles.introText}>
-              3. <Text style={{ fontWeight: 'bold' }}>Processing time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
+            <Text style={styles.introText}>   {t.requirements.timeDeposit.acceptableDocs}
             </Text>
             
             <Text style={styles.introText}>
-              4. <Text style={{ fontWeight: 'bold' }}>Health insurance:</Text> Required. Must be either UAE-registered or international health insurance.
+              3. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.processingTime}:</Text> {t.requirements.common.processingTimeText}
             </Text>
             
             <Text style={styles.introText}>
-              5. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
+              4. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.healthInsurance}:</Text> {t.requirements.common.healthInsuranceText}
+            </Text>
+            
+            <Text style={styles.introText}>
+              5. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.medicalEmirates}:</Text> {t.requirements.common.medicalEmiratesText}
             </Text>
           </>
         );
@@ -107,63 +110,63 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
         return (
           <>
             <Text style={styles.introText}>
-              1. <Text style={{ fontWeight: 'bold' }}>Educational qualification:</Text> Bachelor's or Master's certificate with transcript. Requires a multi-stage attestation process, ending with authentication by the UAE Embassy in the country of origin.
+              1. <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.education}:</Text> {t.requirements.skilledEmployee.educationText}
             </Text>
 
             <Text style={styles.introText}>
-              2. <Text style={{ fontWeight: 'bold' }}>Equivalency certificate:</Text> This document must be obtained by the client from the Ministry of Education in Dubai.{"\n"} 
+              2. <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.equivalency}:</Text> {t.requirements.skilledEmployee.equivalencyText}{"\n"} 
               <Link 
               src="https://www.moe.gov.ae/En/EServices/ServiceCard/Pages/Pre-Assessment.aspx"
               style={[styles.introText, { color: '#2563eb', textDecoration: 'underline', marginLeft: 15, marginTop: 2 }]}
             >
-               Link to the Ministry of Education website.
+               {t.requirements.skilledEmployee.equivalencyLink}
             </Link></Text>
            
             
             <Text style={styles.introText}>
-              3. <Text style={{ fontWeight: 'bold' }}>Employment documents:</Text> Employment contract and salary certificate showing a minimum monthly salary of AED 30,000.
+              3. <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.employment}:</Text> {t.requirements.skilledEmployee.employmentText}
             </Text>
             
             {requiresNOC && selectedFreezone && (
               <Text style={styles.introText}>
-                4. <Text style={{ fontWeight: 'bold' }}>Freezone NOC:</Text> A Non-Objection Certificate from <Text>{getFreezoneDisplayName(selectedFreezone)}</Text>.
+                4. <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.freezoneNoc}:</Text> {t.requirements.skilledEmployee.freezoneNocText} <Text>{getFreezoneDisplayName(selectedFreezone)}</Text>.
               </Text>
             )}
             
             {requiresSalaryCertificate && selectedSalaryCertificateFreezone && (
               <Text style={styles.introText}>
-                {requiresNOC && selectedFreezone ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>Freezone Salary Certificate:</Text> A salary certificate from <Text>{getFreezoneDisplayName(selectedSalaryCertificateFreezone)}</Text>.
+                {requiresNOC && selectedFreezone ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.freezoneSalary}:</Text> {t.requirements.skilledEmployee.freezoneSalaryText} <Text>{getFreezoneDisplayName(selectedSalaryCertificateFreezone)}</Text>.
               </Text>
             )}
             
             <Text style={styles.introText}>
               {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '6.' : 
-               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>Company NOC:</Text> A Non-Objection Certificate from your current employer, in <Text>English and Arabic</Text>.
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '5.' : '4.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.companyNoc}:</Text> {t.requirements.skilledEmployee.companyNocText}
             </Text>
             
             <Text style={styles.introText}>
               {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '7.' : 
-               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '6.' : '5.'} <Text style={{ fontWeight: 'bold' }}>Bank statements:</Text> 6 months of personal bank statements reflecting a <Text>monthly salary of AED 30,000 or more</Text>.
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '6.' : '5.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.bankStatements}:</Text> {t.requirements.skilledEmployee.bankStatementsText}
             </Text>
             
             <Text style={styles.introText}>
               {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '8.' : 
-               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '7.' : '6.'} <Text style={{ fontWeight: 'bold' }}>Residence proof:</Text> Valid Ejari or title deed.
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '7.' : '6.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.skilledEmployee.residenceProof}:</Text> {t.requirements.skilledEmployee.residenceProofText}
             </Text>
             
             <Text style={styles.introText}>
               {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '9.' : 
-               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '8.' : '7.'} <Text style={{ fontWeight: 'bold' }}>Processing time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '8.' : '7.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.processingTime}:</Text> {t.requirements.common.processingTimeText}
             </Text>
             
             <Text style={styles.introText}>
               {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '10.' : 
-               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '9.' : '8.'} <Text style={{ fontWeight: 'bold' }}>Health insurance:</Text> Required. Must be either UAE-registered or international health insurance.
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '9.' : '8.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.healthInsurance}:</Text> {t.requirements.common.healthInsuranceText}
             </Text>
             
             <Text style={styles.introText}>
               {(requiresNOC && selectedFreezone && requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '11.' : 
-               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '10.' : '9.'} <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
+               (requiresNOC && selectedFreezone) || (requiresSalaryCertificate && selectedSalaryCertificateFreezone) ? '10.' : '9.'} <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.medicalEmirates}:</Text> {t.requirements.common.medicalEmiratesText}
             </Text>
           </>
         );
@@ -179,9 +182,9 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
   // Generate intro text based on visa type
   const getIntroText = () => {
     if (visaType === 'skilled-employee') {
-      return 'Please review the following requirements to determine eligibility:';
+      return t.requirements.introText.skilledEmployee;
     }
-    return 'Please review the following requirements that must be met to be eligible for this Golden Visa:';
+    return t.requirements.introText.standard;
   };
 
   // Generate dependent requirements when no primary visa is required
@@ -198,25 +201,24 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
       const childText = numberOfChildren === 1 ? 'child birth certificate' : 'children birth certificates';
       requirements.push(
         <Text key="marriage" style={styles.introText}>
-          1. <Text style={{ fontWeight: 'bold' }}>Marriage certificate:</Text> Requires a multi-stage attestation process, ending with authentication by the UAE Embassy in the country of origin.
+          1. <Text style={{ fontWeight: 'bold' }}>{t.requirements.dependent.marriageCert}:</Text> {t.requirements.dependent.marriageCertText}
         </Text>,
         <Text key="birth" style={styles.introText}>
-          2. <Text style={{ fontWeight: 'bold' }}>{numberOfChildren === 1 ? 'Child birth certificate' : 'Children birth certificates'}:</Text> Requires a multi-stage attestation process, ending with authentication by the UAE Embassy in the country of origin.
+          2. <Text style={{ fontWeight: 'bold' }}>{numberOfChildren === 1 ? t.requirements.dependent.birthCert : t.requirements.dependent.birthCertPlural}:</Text> {t.requirements.dependent.birthCertText}
         </Text>
       );
     } else if (hasSpouse) {
       // Spouse only
       requirements.push(
         <Text key="marriage" style={styles.introText}>
-          1. <Text style={{ fontWeight: 'bold' }}>Marriage certificate:</Text> Requires a multi-stage attestation process, ending with authentication by the UAE Embassy in the country of origin.
+          1. <Text style={{ fontWeight: 'bold' }}>{t.requirements.dependent.marriageCert}:</Text> {t.requirements.dependent.marriageCertText}
         </Text>
       );
     } else if (hasChildren) {
       // Children only
-      const childText = numberOfChildren === 1 ? 'Child birth certificate' : 'Children birth certificates';
       requirements.push(
         <Text key="birth" style={styles.introText}>
-          1. <Text style={{ fontWeight: 'bold' }}>{childText}:</Text> Requires a multi-stage attestation process, ending with authentication by the UAE Embassy in the country of origin.
+          1. <Text style={{ fontWeight: 'bold' }}>{numberOfChildren === 1 ? t.requirements.dependent.birthCert : t.requirements.dependent.birthCertPlural}:</Text> {t.requirements.dependent.birthCertText}
         </Text>
       );
     }
@@ -226,13 +228,13 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
     
     requirements.push(
       <Text key="processing" style={styles.introText}>
-        {nextPoint}. <Text style={{ fontWeight: 'bold' }}>Processing time:</Text> Approximately 10 - 15 working days. The applicant must be inside the UAE to start the visa process and must stay in the UAE for the entire duration of the process.
+        {nextPoint}. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.processingTime}:</Text> {t.requirements.common.processingTimeText}
       </Text>,
       <Text key="insurance" style={styles.introText}>
-        {nextPoint + 1}. <Text style={{ fontWeight: 'bold' }}>Health insurance:</Text> Required. Must be either UAE-registered or international health insurance.
+        {nextPoint + 1}. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.healthInsurance}:</Text> {t.requirements.common.healthInsuranceText}
       </Text>,
       <Text key="medical" style={styles.introText}>
-        {nextPoint + 2}. <Text style={{ fontWeight: 'bold' }}>Medical & Emirates ID:</Text> Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and one of our experienced team members will accompany you. Your original passport is required for both appointments.
+        {nextPoint + 2}. <Text style={{ fontWeight: 'bold' }}>{t.requirements.common.medicalEmirates}:</Text> {t.requirements.common.medicalEmiratesText}
       </Text>
     );
     
@@ -243,9 +245,9 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
   if (!goldenVisaData?.primaryVisaRequired) {
     return (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Visa Requirements & Eligibility Criteria</Text>
+        <Text style={styles.sectionTitle}>{t.requirements.sectionTitle}</Text>
         <Text style={styles.introText}>
-          Please review the following requirements for dependent visa applications:
+          {t.requirements.introText.dependent}
         </Text>
         
         <View style={{ marginTop: 8 }}>
@@ -257,7 +259,7 @@ export const VisaRequirementsSection: React.FC<PDFComponentProps> = ({ data }) =
 
   return (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Visa Requirements & Eligibility Criteria</Text>
+      <Text style={styles.sectionTitle}>{t.requirements.sectionTitle}</Text>
       <Text style={styles.introText}>
         {getIntroText()}
       </Text>

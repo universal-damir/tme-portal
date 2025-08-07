@@ -10,6 +10,7 @@ import {
   AuthorityFeesSection
 } from '@/lib/pdf-generator/components/golden-visa/sections';
 import { generateGoldenVisaExplanations } from '../../../utils/goldenVisaDataTransformer';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
 import type { PDFComponentProps } from '../../../types';
 import type { GoldenVisaData } from '@/types/golden-visa';
 
@@ -18,9 +19,11 @@ import type { GoldenVisaData } from '@/types/golden-visa';
 export const AuthorityCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
   // Access golden visa data from transformed data
   const goldenVisaData = (data as PDFComponentProps['data'] & { goldenVisaData: GoldenVisaData }).goldenVisaData;
+  const locale: Locale = (data as any).locale || 'en';
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
 
   // Generate explanations
-  const explanations = generateGoldenVisaExplanations(goldenVisaData);
+  const explanations = generateGoldenVisaExplanations(goldenVisaData, locale);
 
   // Render explanation elements with compact styling - handle the correct object structure
   const explanationElements = explanations.map((explanation, index) => (
@@ -30,14 +33,14 @@ export const AuthorityCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
     </Text>
   ));
 
-  const introContent = `This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
+  const introContent = locale === 'de' ? t.costsBreakdown.introText : `This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
 
   return (
     <Page size="A4" style={styles.page}>
       <HeaderComponent data={data} />
 
       <IntroSection
-        headline="Golden Visa Costs Breakdown"
+        headline={locale === 'de' ? t.costsBreakdown.pageTitle : "Golden Visa Costs Breakdown"}
         content={introContent}
       />
 
@@ -47,7 +50,7 @@ export const AuthorityCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
       {/* Explanations Section - Compact spacing like cost overview */}
       {explanationElements.length > 0 && (
         <View style={{ marginTop: 8, marginBottom: 16 }}>
-          <Text style={styles.introHeadline}>Service Explanations</Text>
+          <Text style={styles.introHeadline}>{locale === 'de' ? t.costsBreakdown.serviceExplanations : "Service Explanations"}</Text>
           <View style={{ marginTop: 6 }}>
             {explanationElements}
           </View>

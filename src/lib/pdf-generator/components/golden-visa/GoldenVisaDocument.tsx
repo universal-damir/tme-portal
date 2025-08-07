@@ -8,11 +8,13 @@ import {
 import { transformGoldenVisaData, hasDependentVisas } from '../../utils/goldenVisaDataTransformer';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { SharedClientInfo } from '@/types/portal';
+import { Locale } from '../../translations/golden-visa';
 
 // Props interface maintaining backward compatibility
 interface GoldenVisaDocumentProps {
   goldenVisaData: GoldenVisaData;
   clientInfo: SharedClientInfo;
+  locale?: Locale;
 }
 
 // GoldenVisaDocument - Main orchestrator component  
@@ -20,7 +22,8 @@ interface GoldenVisaDocumentProps {
 // Maintains backward compatibility while using new modular components internally
 export const GoldenVisaDocument: React.FC<GoldenVisaDocumentProps> = ({ 
   goldenVisaData, 
-  clientInfo 
+  clientInfo,
+  locale = 'en'
 }) => {
   // Defensive check to prevent crashes when data is malformed
   if (!goldenVisaData || !clientInfo) {
@@ -28,8 +31,8 @@ export const GoldenVisaDocument: React.FC<GoldenVisaDocumentProps> = ({
     throw new Error('Invalid data provided to Golden Visa PDF generator. Please ensure all required fields are filled.');
   }
 
-  // Transform golden visa data to standard PDF component format
-  const transformedData = transformGoldenVisaData(goldenVisaData, clientInfo);
+  // Transform golden visa data to standard PDF component format with locale
+  const transformedData = transformGoldenVisaData(goldenVisaData, clientInfo, locale);
 
   // Determine which pages should be shown based on actual data
   const showDependentVisas = hasDependentVisas(goldenVisaData);

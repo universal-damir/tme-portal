@@ -11,6 +11,7 @@ import {
   VisaRequirementsSection,
   CostSummarySection
 } from '@/lib/pdf-generator/components/golden-visa/sections';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
 import type { PDFComponentProps } from '../../../types';
 
 // GoldenVisaCoverPage - Cover page with client details and cost overview
@@ -18,47 +19,33 @@ import type { PDFComponentProps } from '../../../types';
 export const GoldenVisaCoverPage: React.FC<PDFComponentProps> = ({ data }) => {
   // Access golden visa data from transformed data
   const goldenVisaData = (data as any).goldenVisaData;
+  const locale: Locale = (data as any).locale || 'en';
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
 
   // Generate intro content based on visa type and requirements
   const getIntroContent = () => {
-    if (!goldenVisaData?.primaryVisaRequired) {
-      const content = `We are pleased to share a personalized proposal for your dependent Golden Visa application. This document provides a transparent breakdown of costs and fees for dependent visa applications only, based on your specific requirements.`;
-      
-      return data.clientDetails.addressToCompany ? 
-        content :
-        `Dear ${data.clientDetails.firstName},
+    const baseContent = goldenVisaData?.primaryVisaRequired 
+      ? t.intro.standard 
+      : t.intro.dependent;
 
-${content}`;
-    }
-
-    const visaTypeDisplay = goldenVisaData?.visaType === 'property-investment' 
-      ? 'Property Investment'
-      : goldenVisaData?.visaType === 'time-deposit'
-      ? 'Time Deposit'
-      : 'Skilled Employee';
-
-    const content = `We are pleased to share a personalized proposal for your Golden Visa application. This document provides a transparent breakdown of costs and fees based on the requirements.`;
-    
-    return data.clientDetails.addressToCompany ? 
-      content :
-      `Dear ${data.clientDetails.firstName},
-
-${content}`;
+    return data.clientDetails.addressToCompany 
+      ? baseContent 
+      : t.intro.withGreeting(data.clientDetails.firstName) + baseContent;
   };
 
   // Generate headline based on visa type and requirements
   const getHeadline = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      return 'Golden Visa (10 Years) Dependent';
+      return t.headlines.dependent;
     }
 
-    const visaTypeDisplay = goldenVisaData?.visaType === 'property-investment' 
-      ? 'Property Investment'
-      : goldenVisaData?.visaType === 'time-deposit'
-      ? 'Time Deposit'
-      : 'Skilled Employee';
-
-    return `Golden Visa (10 Years) ${visaTypeDisplay}`;
+    const visaType = goldenVisaData?.visaType;
+    switch(visaType) {
+      case 'property-investment': return t.headlines.propertyInvestment;
+      case 'time-deposit': return t.headlines.timeDeposit;
+      case 'skilled-employee': return t.headlines.skilledEmployee;
+      default: return t.headlines.propertyInvestment;
+    }
   };
 
   return (
