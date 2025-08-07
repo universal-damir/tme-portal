@@ -479,50 +479,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     }
   };
 
-  const handleEditForm = () => {
-    if (!application) return;
-    
-    console.log('📝 SIMPLE: Navigating to edit rejected application:', application.id);
-    
-    // Navigate to correct tab
-    const tabMapping: Record<string, string> = {
-      'cost_overview': '#cost-overview',
-      'golden_visa': '#golden-visa',
-      'company_services': '#company-services',
-      'company_incorporation': '#company-services',
-      'taxation': '#taxation'
-    };
-    
-    const frontendType = application.type === 'company_incorporation' ? 'company_services' : application.type;
-    const targetHash = tabMapping[frontendType] || '#cost-overview';
-    
-    // Navigate to tab
-    window.location.hash = targetHash;
-    
-    // Close modal first
-    onClose();
-    
-    // Dispatch event to load form data (same as approved applications)
-    const eventName = `edit-${frontendType}-application`;
-    const editEvent = new CustomEvent(eventName, {
-      detail: {
-        applicationId: application.id,
-        formData: application.form_data
-      }
-    });
-    
-    console.log(`📝 DISPATCHING EVENT: ${eventName} with data for application ${application.id}`);
-    
-    // Dispatch immediately after navigation
-    setTimeout(() => {
-      window.dispatchEvent(editEvent);
-    }, 100); // Small delay to ensure tab is ready
-    
-    toast.success('Form loaded with your previous data', {
-      description: 'You can now make changes and resubmit',
-      duration: 4000
-    });
-  };
+  // Note: handleEditForm removed - now using onEditForm prop from TMEPortalHeader
 
   const resetState = () => {
     setError(null);
@@ -691,7 +648,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
                           type="button"
-                          onClick={handleEditForm}
+                          onClick={onEditForm}
                           className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
                           style={{ 
                             backgroundColor: '#FEE2E2', 
@@ -758,7 +715,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                           whileHover={{ scale: 1.01 }}
                           whileTap={{ scale: 0.99 }}
                           type="button"
-                          onClick={handleEditForm}
+                          onClick={onEditForm}
                           className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg font-semibold transition-all duration-200"
                           style={{ 
                             backgroundColor: '#FEE2E2', 

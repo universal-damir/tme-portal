@@ -786,6 +786,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   // Listen for edit application events from review modal or notifications
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
+      console.log('🔧 COST-OVERVIEW-TAB: RECEIVED edit-cost-overview-application event!', event.detail);
       const { applicationId, formData } = event.detail;
       
       // Pre-fill the form with the application data

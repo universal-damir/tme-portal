@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
@@ -120,27 +121,19 @@ export function TMEPortalHeader({
     // Get the frontend type (handles both formats for compatibility)
     const frontendType = dbToFrontendTypeMapping[feedbackApplication.type] || feedbackApplication.type;
     
-    // Map application types to tab names and event names
-    const tabMapping: Record<string, string> = {
-      'golden-visa': 'golden-visa',
-      'cost-overview': 'cost-overview', 
-      'company-services': 'company-services',
-      'taxation': 'taxation',
-      'corporate-changes': 'corporate-changes'
-    };
-    
-    const targetTab = tabMapping[frontendType];
-    
-    if (!targetTab) {
-      console.error('Unknown application type:', feedbackApplication.type, '-> mapped to:', frontendType);
+    if (!frontendType) {
+      console.error('Unknown application type:', feedbackApplication.type);
       return;
     }
 
-    // Navigate to the correct tab first
-    window.location.hash = `#${targetTab}`;
-    
-    // Close the feedback modal
+    // Close the feedback modal first
     setFeedbackModalOpen(false);
+    
+    // Navigate using the portal's tab switching system
+    const switchTabEvent = new CustomEvent('switch-tab', {
+      detail: { tab: frontendType }
+    });
+    window.dispatchEvent(switchTabEvent);
     
     // Dispatch the edit event with the application data
     const eventName = `edit-${frontendType}-application`;
@@ -151,77 +144,15 @@ export function TMEPortalHeader({
       }
     });
     
-    // Wait for the tab to be ready before dispatching the event (same as FeedbackModal)
-    const waitForTabAndDispatch = () => {
-      let attempts = 0;
-      const maxAttempts = 40; // Max 20 seconds (500ms * 40) to account for lazy loading
-      
-      const checkAndDispatch = () => {
-        attempts++;
-        console.log(`🔧 HEADER: Checking if tab is ready for edit event (attempt ${attempts}/${maxAttempts})`);
-        
-        // Check if tab component is actually mounted by testing if it can receive events
-        let tabReady = false;
-        
-        // Create a unique test event that only a mounted tab would respond to
-        const testEvent = new CustomEvent('tab-readiness-check', {
-          detail: { targetTab: feedbackApplication.type }
-        });
-        
-        const testHandler = (event: any) => {
-          if (event.detail?.tab === feedbackApplication.type) {
-            console.log(`🔧 HEADER: Tab ${feedbackApplication.type} confirmed it's mounted and ready`);
-            tabReady = true;
-            window.removeEventListener('tab-readiness-confirmed', testHandler);
-          }
-        };
-        
-        window.addEventListener('tab-readiness-confirmed', testHandler);
-        console.log(`🔧 HEADER: Testing if ${feedbackApplication.type} tab is mounted...`);
-        window.dispatchEvent(testEvent);
-        
-        // Give a small delay to see if tab responds
-        setTimeout(() => {
-          window.removeEventListener('tab-readiness-confirmed', testHandler);
-          
-          // Additional check: if hash matches target and we've waited a while, try anyway
-          const hashMatches = window.location.hash === `#${feedbackApplication.type}`;
-          const hasWaitedLong = attempts > 10; // After 10 attempts (3+ seconds)
-          
-          if (tabReady) {
-            console.log('🔧 HEADER: Tab is ready! Dispatching edit application event');
-            console.log('🔧 HEADER: Current window hash:', window.location.hash);
-            console.log('🔧 HEADER: Event detail:', editEvent.detail);
-            
-            // Dispatch the actual event
-            window.dispatchEvent(editEvent);
-            console.log(`🔧 Header: Dispatched ${eventName} event with form data successfully`);
-            
-          } else if (hashMatches && hasWaitedLong && attempts < maxAttempts) {
-            console.log('🔧 HEADER: Tab seems ready based on hash, trying to dispatch anyway');
-            
-            // Try dispatching the event anyway since hash matches and we've waited
-            window.dispatchEvent(editEvent);
-            console.log(`🔧 Header: Dispatched ${eventName} event (fallback method)`);
-            
-          } else if (attempts < maxAttempts) {
-            console.log(`🔧 HEADER: Tab not ready yet, retrying in 300ms...`);
-            setTimeout(checkAndDispatch, 300);
-          } else {
-            console.error('🔧 HEADER: Tab failed to become ready after maximum attempts');
-            console.error('🔧 HEADER: This might be due to lazy loading delay or tab not mounting');
-            // Dispatch anyway as last resort
-            window.dispatchEvent(editEvent);
-            console.log(`🔧 Header: Dispatched ${eventName} event as last resort`);
-          }
-        }, 50);
-      };
-      
-      // Start checking after initial delay
-      setTimeout(checkAndDispatch, 1000);
-    };
+    console.log(`📝 DISPATCHING EVENT: ${eventName} with data for application ${feedbackApplication.id}`);
     
-    waitForTabAndDispatch();
+    // Wait for tab to render and mount, then dispatch edit event
+    setTimeout(() => {
+      window.dispatchEvent(editEvent);
+      console.log(`📝 Dispatched ${eventName} event successfully`);
+    }, 500); // Shorter delay since we're using direct tab switching
+    
+    // Toast notification is handled by the tab component
   };
 
   // Handle review actions (approve/reject)
