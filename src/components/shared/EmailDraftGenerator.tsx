@@ -57,6 +57,8 @@ export interface EmailDraftGeneratorProps {
   };
   // Props for language switching in modal
   templateType?: keyof typeof EMAIL_TEMPLATES;
+  // Function to regenerate PDF when language changes
+  onRegeneratePDF?: (language: 'en' | 'de') => Promise<{ blob: Blob; filename: string }> | null;
 }
 
 // Default email templates for different tabs with Arial 10pt formatting
@@ -294,7 +296,11 @@ export const useEmailDraftGenerator = () => {
     loading,
     pdfBlob,
     pdfFilename,
-    additionalPdfs
+    additionalPdfs,
+    // Setter functions for updating attachment state
+    setPdfBlob,
+    setPdfFilename,
+    setCurrentAttachments
   };
 };
 
@@ -368,7 +374,10 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
     loading,
     pdfBlob,
     pdfFilename,
-    additionalPdfs
+    additionalPdfs,
+    setPdfBlob,
+    setPdfFilename,
+    setCurrentAttachments
   } = useEmailDraftGenerator();
   
   // Generate email preview when component mounts
@@ -391,6 +400,17 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
           activityLogging={props.activityLogging}
           templateType={props.templateType}
           recipientData={props.recipients}
+          onRegeneratePDF={props.onRegeneratePDF}
+          onAttachmentUpdate={(blob, filename) => {
+            setPdfBlob(blob);
+            setPdfFilename(filename);
+            // Update currentAttachments to include the new PDF
+            setCurrentAttachments([{
+              blob,
+              filename,
+              contentType: 'application/pdf'
+            }, ...additionalPdfs]);
+          }}
         />
       )}
     </>

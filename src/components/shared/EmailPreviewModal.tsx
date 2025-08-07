@@ -41,6 +41,10 @@ export interface EmailPreviewModalProps {
   // Props for language switching
   templateType?: keyof typeof EMAIL_TEMPLATES; // e.g., 'COST_OVERVIEW', 'GOLDEN_VISA'
   recipientData?: EmailRecipientData;
+  // Function to regenerate PDF when language changes
+  onRegeneratePDF?: (language: 'en' | 'de') => Promise<{ blob: Blob; filename: string }> | null;
+  // Callback to update the attachment in parent component
+  onAttachmentUpdate?: (blob: Blob, filename: string) => void;
 }
 
 export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
@@ -54,7 +58,9 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   additionalPdfs = [],
   activityLogging,
   templateType,
-  recipientData
+  recipientData,
+  onRegeneratePDF,
+  onAttachmentUpdate
 }) => {
   const [editableSubject, setEditableSubject] = useState(emailData.subject);
   const [editableRecipients, setEditableRecipients] = useState(emailData.to.join(', '));
@@ -64,6 +70,9 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   const [isEditingRecipients, setIsEditingRecipients] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [language, setLanguage] = useState<'en' | 'de'>('en');
+  const [currentPdfBlob, setCurrentPdfBlob] = useState<Blob | undefined>(pdfBlob);
+  const [currentPdfFilename, setCurrentPdfFilename] = useState<string | undefined>(pdfFilename);
+  const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
 
   // Convert HTML to plain text for editing (preserve some formatting indicators)
   const htmlToPlainText = (html: string): string => {
@@ -187,9 +196,9 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   };
 
   const handleDownloadAll = async () => {
-    // Download main PDF
-    if (pdfBlob && pdfFilename) {
-      await handleDownload(pdfBlob, pdfFilename);
+    // Download main PDF (use current PDF if available, otherwise original)
+    if (currentPdfBlob && currentPdfFilename) {
+      await handleDownload(currentPdfBlob, currentPdfFilename);
     }
     
     // Download additional PDFs
@@ -342,9 +351,10 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium" style={{ color: '#243F7B' }}>EN</span>
                       <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
+                        whileHover={!isRegeneratingPdf ? { scale: 1.05 } : {}}
+                        whileTap={!isRegeneratingPdf ? { scale: 0.95 } : {}}
+                        disabled={isRegeneratingPdf}
+                        onClick={async () => {
                           const newLang = language === 'en' ? 'de' : 'en';
                           setLanguage(newLang);
                           
@@ -361,10 +371,28 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                           // Update content states
                           setEditableContent(newHtmlContent);
                           setPlainTextContent(htmlToPlainText(newHtmlContent));
+                          
+                          // Regenerate PDF if function is provided
+                          if (onRegeneratePDF) {
+                            setIsRegeneratingPdf(true);
+                            try {
+                              const result = await onRegeneratePDF(newLang);
+                              if (result) {
+                                setCurrentPdfBlob(result.blob);
+                                setCurrentPdfFilename(result.filename);
+                                // Update the attachment in parent component
+                                onAttachmentUpdate?.(result.blob, result.filename);
+                              }
+                            } catch (error) {
+                              console.error('Failed to regenerate PDF:', error);
+                            } finally {
+                              setIsRegeneratingPdf(false);
+                            }
+                          }
                         }}
                         className={`relative w-10 h-5 rounded-full transition-all duration-200 ${
                           language === 'de' ? 'shadow-sm' : ''
-                        }`}
+                        } ${isRegeneratingPdf ? 'opacity-50 cursor-not-allowed' : ''}`}
                         style={{ 
                           backgroundColor: language === 'de' ? '#243F7B' : '#e5e7eb' 
                         }}
@@ -446,7 +474,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
             >
               Cancel
             </motion.button>
-            {(pdfBlob && pdfFilename) && (
+            {(currentPdfBlob && currentPdfFilename) && (
               <>
                 {additionalPdfs.length > 0 ? (
                   // Multiple PDFs - show "Download All" button
@@ -454,7 +482,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleDownloadAll}
-                    disabled={loading}
+                    disabled={loading || isRegeneratingPdf}
                     className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
                     style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
                   >
@@ -466,8 +494,8 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => handleDownload(pdfBlob, pdfFilename)}
-                    disabled={loading}
+                    onClick={() => handleDownload(currentPdfBlob!, currentPdfFilename!)}
+                    disabled={loading || isRegeneratingPdf}
                     className="px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg flex items-center gap-2 disabled:opacity-50"
                     style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
                   >

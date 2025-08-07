@@ -323,6 +323,25 @@ const GoldenVisaTab: React.FC = () => {
 
 
 
+  // PDF regeneration function for language switching
+  const regeneratePDFForLanguage = async (language: 'en' | 'de') => {
+    try {
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const clientInfo = {
+        firstName: watchedData.firstName || '',
+        lastName: watchedData.lastName || '',
+        companyName: watchedData.companyName || '',
+        date: watchedData.date,
+      };
+      
+      const { blob, filename } = await generateGoldenVisaPDFWithFilename(watchedData, clientInfo, language);
+      return { blob, filename };
+    } catch (error) {
+      console.error('Error regenerating PDF:', error);
+      return null;
+    }
+  };
+
   // PDF generation using Golden Visa template
   const handleGeneratePDF = async (data: GoldenVisaData) => {
     // Validate the entire form data using Zod schema
@@ -401,7 +420,8 @@ const GoldenVisaTab: React.FC = () => {
         onClose: () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
-        }
+        },
+        onRegeneratePDF: regeneratePDFForLanguage
       });
 
     } catch (error) {
@@ -656,6 +676,7 @@ const GoldenVisaTab: React.FC = () => {
           // Clean up when modal is closed/canceled
           setEmailDraftProps(null);
         },
+        onRegeneratePDF: regeneratePDFForLanguage,
         activityLogging: {
           resource: 'golden_visa',
           client_name: data.companyName || `${data.firstName} ${data.lastName}`.trim(),
