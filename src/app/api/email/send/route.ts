@@ -91,6 +91,77 @@ export async function POST(request: NextRequest) {
       user_agent: getUserAgent(request)
     });
 
+    // Create follow-up todo directly after successful email send
+    if (primaryFilename && attachments && attachments.length > 0) {
+      try {
+        const recipientEmail = Array.isArray(to) ? to[0] : to;
+        
+        // Extract form data from the first attachment's metadata if available
+        // The attachments come from the FeedbackModal which has access to form data
+        let clientFirstName = '';
+        let clientLastName = '';
+        let formName = primaryFilename.replace('.pdf', '');
+        
+        // Try to parse additional form context from the PDF filename
+        // Format is typically: YYMMDD ClientName offer/service type
+        const filenameParts = primaryFilename.replace('.pdf', '').split(' ');
+        if (filenameParts.length >= 3) {
+          // Look for client name patterns in filename
+          const potentialName = filenameParts.slice(1, 3).join(' '); // Take parts after date
+          if (potentialName && potentialName !== 'offer' && potentialName !== 'TME') {
+            const nameParts = potentialName.split(' ');
+            clientFirstName = nameParts[1] || '';
+            clientLastName = nameParts[0] || '';
+          }
+        }
+        
+        // Fallback to email extraction if no name found in filename
+        if (!clientFirstName && !clientLastName) {
+          const emailName = recipientEmail.split('@')[0].replace(/[._]/g, ' ');
+          const emailNameParts = emailName.split(' ');
+          clientFirstName = emailNameParts[0] || '';
+          clientLastName = emailNameParts[1] || '';
+        }
+        
+        // Build contextual client name
+        const clientName = `${clientFirstName} ${clientLastName}`.trim() || 'client';
+        
+        // Format due date as dd.mm.yyyy
+        const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        const formattedDueDate = `${dueDate.getDate().toString().padStart(2, '0')}.${(dueDate.getMonth() + 1).toString().padStart(2, '0')}.${dueDate.getFullYear()}`;
+        
+        // Import TodoService and create contextual follow-up todo
+        const { TodoService } = await import('@/lib/services/todo-service');
+        
+        const followUpTodo = await TodoService.create({
+          user_id: session.user.id,
+          title: `Follow up with ${clientName} regarding ${formName}`,
+          description: `Document "${formName}" has been sent to ${clientName} (${recipientEmail}) on ${new Date().toLocaleDateString('en-GB')}. Follow up to ensure they received it and answer any questions. Due: ${formattedDueDate}`,
+          category: 'follow_up',
+          priority: 'medium',
+          due_date: dueDate,
+          client_name: clientName,
+          document_type: formName,
+          auto_generated: true,
+          action_type: 'contact_client',
+          action_data: {
+            client_first_name: clientFirstName,
+            client_last_name: clientLastName,
+            client_full_name: clientName,
+            document_type: formName,
+            filename: primaryFilename,
+            recipient_email: recipientEmail,
+            sent_date: new Date(),
+            due_date_formatted: formattedDueDate,
+            follow_up_reason: 'document_sent'
+          }
+        });
+      } catch (todoError) {
+        console.error('❌ Failed to create follow-up todo:', todoError);
+        // Don't fail the email send if todo creation fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       messageId: result.messageId,

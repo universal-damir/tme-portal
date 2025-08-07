@@ -86,8 +86,41 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
   },
 
   'application_approved': {
-    title: (data: NotificationData) => 
-      `Send ${data.application_title || data.filename || 'approved document'} to ${data.client_name || 'client'}`,
+    title: (data: NotificationData) => {
+      // Extract offer name from application title (remove PDF extension if present)
+      const offerName = data.application_title?.replace('.pdf', '') || data.filename?.replace('.pdf', '') || 'offer';
+      
+      // Extract client name from form data (firstName + lastName)
+      let clientName = 'client';
+      
+      if (data.form_data) {
+        const formData = data.form_data;
+        let firstName = '';
+        let lastName = '';
+        
+        // Check different form types for client name fields
+        if (formData.clientDetails) {
+          // Cost Overview format
+          firstName = formData.clientDetails.firstName || '';
+          lastName = formData.clientDetails.lastName || '';
+        } else if (formData.firstName || formData.lastName) {
+          // Golden Visa, Company Services, Taxation format
+          firstName = formData.firstName || '';
+          lastName = formData.lastName || '';
+        }
+        
+        // Build client name (firstName lastName)
+        if (firstName && lastName) {
+          clientName = `${firstName} ${lastName}`;
+        } else if (firstName) {
+          clientName = firstName;
+        } else if (lastName) {
+          clientName = lastName;
+        }
+      }
+      
+      return `Send ${offerName} to ${clientName}`;
+    },
     
     description: (data: NotificationData) => 
       `Your application has been approved by ${data.reviewer_name || 'reviewer'}. ` +
@@ -189,6 +222,9 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
   // ========================================
   // DOCUMENT LIFECYCLE TODOS
   // ========================================
+  
+  // NOTE: pdf_sent todos are now created directly in the email API
+  // for simpler, more reliable follow-up todo generation
 
   'pdf_sent_to_client': {
     title: (data: NotificationData) => 

@@ -781,30 +781,33 @@ export class NotificationsService {
       
       const notification = result.rows[0] as Notification;
       
-      // Trigger TODO automation for specific notification types
+      // Trigger TODO automation for specific notification types (review workflows only)
       if (['application_approved', 'application_rejected'].includes(data.type)) {
         try {
           const { NotificationTodoAutomation } = await import('./notification-todo-automation');
           
           // Get additional application data for TODO generation
-          const appResult = await pool.query(`
-            SELECT a.*, u.full_name as client_name, u.email as client_email
-            FROM applications a
-            LEFT JOIN users u ON a.submitted_by_id = u.id
-            WHERE a.id = $1
-          `, [data.application_id]);
-          
           let additionalData = {};
-          if (appResult.rows.length > 0) {
-            const app = appResult.rows[0];
-            additionalData = {
-              application_title: app.title,
-              client_name: app.client_name,
-              client_email: app.client_email,
-              document_type: app.type,
-              form_data: app.form_data,
-              reviewer_name: data.metadata?.reviewer_name
-            };
+          
+          if (data.application_id) {
+            const appResult = await pool.query(`
+              SELECT a.*, u.full_name as client_name, u.email as client_email
+              FROM applications a
+              LEFT JOIN users u ON a.submitted_by_id = u.id
+              WHERE a.id = $1
+            `, [data.application_id]);
+            
+            if (appResult.rows.length > 0) {
+              const app = appResult.rows[0];
+              additionalData = {
+                application_title: app.title,
+                client_name: app.client_name,
+                client_email: app.client_email,
+                document_type: app.type,
+                form_data: app.form_data,
+                reviewer_name: data.metadata?.reviewer_name
+              };
+            }
           }
           
           // Create notification data for TODO automation
@@ -816,7 +819,8 @@ export class NotificationsService {
             message: data.message,
             data: {
               application_id: data.application_id,
-              ...additionalData
+              ...additionalData,
+              metadata: data.metadata
             },
             created_at: new Date().toISOString()
           };

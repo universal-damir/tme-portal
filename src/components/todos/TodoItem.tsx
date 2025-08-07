@@ -98,11 +98,10 @@ const TodoItem: React.FC<TodoItemProps> = ({
     if (isToday) return 'Today';
     if (isTomorrow) return 'Tomorrow';
     
-    return dueDate.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: dueDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-    });
+    // Format as DD.MM
+    const day = dueDate.getDate().toString().padStart(2, '0');
+    const month = (dueDate.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}.${month}`;
   };
 
   // Status and priority styling
