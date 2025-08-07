@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, FileText, User, Calendar, AlertCircle, CheckCircle, Edit3, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { Application } from '@/types/review-system';
+import { EmailDraftGenerator, EmailDraftGeneratorProps, createEmailDataFromFormData } from '@/components/shared/EmailDraftGenerator';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { OfferData } from '@/types/offer';
@@ -33,6 +34,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [isPreviewLoadingSecondary, setIsPreviewLoadingSecondary] = useState(false);
   const [isSendLoading, setIsSendLoading] = useState(false);
+  const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
 
   // Don't render if feature is disabled
   if (!config.canShowReviewComponents) {
@@ -312,138 +314,198 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     }
   };
 
-  const handleSendPDF = () => {
+  const handleSendPDF = async () => {
     if (!application) return;
     
-    console.log('🔧 FEEDBACK-MODAL: Application data for send:', {
-      id: application.id,
-      type: application.type,
-      title: application.title,
-      status: application.status
-    });
+    console.log('📧 GENERATING ACTUAL PDF for application:', application.id);
+    console.log('🔧 FORM DATA:', application.form_data);
     
     setIsSendLoading(true);
     
-    // Show toast notification about form opening
-    toast.info('Opening form...', {
-      description: 'Navigating to form with your approved data',
-      duration: 2000
-    });
-    
-    // Navigate to appropriate tab based on application type
-    const tabMapping: Record<string, string> = {
-      'golden-visa': '#golden-visa',
-      'cost-overview': '#cost-overview',
-      'company-services': '#company-services',
-      'taxation': '#taxation'
-    };
-    
-    const targetHash = tabMapping[application.type] || '#cost-overview';
-    console.log('🔧 FEEDBACK-MODAL: Navigating to tab:', {
-      applicationType: application.type,
-      targetHash,
-      mappingUsed: tabMapping[application.type] ? 'found' : 'fallback'
-    });
-    
-    window.location.hash = targetHash;
-    
-    // Close the feedback modal
-    onClose();
-    
-    // Dispatch event to load form data and trigger PDF generation/email
-    const sendEvent = new CustomEvent('send-approved-application', {
-      detail: {
-        applicationId: application.id,
-        formData: application.form_data
-      }
-    });
-    
-    // Wait for the tab to be ready before dispatching the event
-    const waitForTabAndDispatch = () => {
-      let attempts = 0;
-      const maxAttempts = 40; // Max 20 seconds (500ms * 40) to account for lazy loading
+    try {
+      let pdfBlob: Blob;
+      let filename: string;
       
-      const checkAndDispatch = () => {
-        attempts++;
+      // Generate actual PDF based on application type (handle both underscore and hyphen formats)
+      const appType = application.type === 'golden_visa' ? 'golden-visa' : 
+                     application.type === 'cost_overview' ? 'cost-overview' :
+                     application.type === 'company_services' ? 'company-services' :
+                     application.type;
+      
+      if (appType === 'golden-visa' || application.type === 'golden_visa') {
+        const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+        const formData = application.form_data as GoldenVisaData;
         
-        // Test if we can dispatch and receive a response by sending a test event
-        const testEvent = new CustomEvent('tab-readiness-check', {
-          detail: { targetTab: application.type }
-        });
-        
-        let tabReady = false;
-        const testHandler = () => {
-          tabReady = true;
-          window.removeEventListener('tab-readiness-confirmed', testHandler);
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
         };
         
-        window.addEventListener('tab-readiness-confirmed', testHandler);
-        window.dispatchEvent(testEvent);
+        const result = await generateGoldenVisaPDFWithFilename(formData, clientInfo);
+        pdfBlob = result.blob;
+        filename = result.filename;
         
-        // Give a small delay to see if tab responds
-        setTimeout(() => {
-          window.removeEventListener('tab-readiness-confirmed', testHandler);
-          
-          // Additional check: if hash matches target and we've waited a while, try anyway
-          const hashMatches = window.location.hash === `#${application.type}`;
-          const hasWaitedLong = attempts > 10; // After 10 attempts (3+ seconds)
-          
-          if (tabReady) {
-            // Dispatch the actual event
-            window.dispatchEvent(sendEvent);
-            
-            // Listen for confirmation that the event was received by the tab
-            const handleEventConfirmation = () => {
-              setIsSendLoading(false);
-              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
-            };
-            
-            // Listen for confirmation - should happen immediately when tab receives event
-            window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
-            
-            // Set a timeout to stop loading if no confirmation is received
-            setTimeout(() => {
-              setIsSendLoading(false);
-              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
-            }, 5000);
-            
-          } else if (hashMatches && hasWaitedLong && attempts < maxAttempts) {
-            // Try dispatching the event anyway since hash matches and we've waited
-            window.dispatchEvent(sendEvent);
-            
-            // Still listen for confirmation
-            const handleEventConfirmation = () => {
-              setIsSendLoading(false);
-              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
-            };
-            window.addEventListener('send-approved-application-confirmed', handleEventConfirmation);
-            
-            setTimeout(() => {
-              setIsSendLoading(false);
-              window.removeEventListener('send-approved-application-confirmed', handleEventConfirmation);
-            }, 5000);
-            
-          } else if (attempts < maxAttempts) {
-            setTimeout(checkAndDispatch, 300);
-          } else {
-            setIsSendLoading(false);
-            toast.error('Failed to connect to tab. Please try refreshing the page and try again.');
-          }
-        }, 50);
-      };
+      } else if (appType === 'cost-overview' || application.type === 'cost_overview') {
+        const { generatePDFWithFilename } = await import('@/lib/pdf-generator');
+        const formData = application.form_data as OfferData;
+        
+        const result = await generatePDFWithFilename(formData);
+        pdfBlob = result.blob;
+        filename = result.filename;
+        
+      } else if (appType === 'company-services' || application.type === 'company_services') {
+        const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator/utils/companyServicesGenerator');
+        const formData = application.form_data as CompanyServicesData;
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          shortCompanyName: formData.shortCompanyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const result = await generateCompanyServicesPDFWithFilename(formData, clientInfo);
+        pdfBlob = result.blob;
+        filename = result.filename;
+        
+      } else if (appType === 'taxation' || application.type === 'taxation') {
+        const { generateTaxationPDFWithFilename } = await import('@/lib/pdf-generator/utils/taxationGenerator');
+        const formData = application.form_data as any; // TaxationData type
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.firstName || '',
+          lastName: formData.lastName || '',
+          companyName: formData.companyName || '',
+          shortCompanyName: formData.shortCompanyName || '',
+          date: formData.date || new Date().toISOString().split('T')[0],
+        };
+        
+        const result = await generateTaxationPDFWithFilename(formData, clientInfo);
+        pdfBlob = result.blob;
+        filename = result.filename;
+        
+      } else {
+        throw new Error(`PDF generation not supported for application type: ${application.type}`);
+      }
       
-      // Start checking after initial delay
-      setTimeout(checkAndDispatch, 1000);
-    };
-    
-    waitForTabAndDispatch();
+      console.log('📧 GENERATED PDF:', { filename, size: pdfBlob.size, type: pdfBlob.type });
+      
+      // Determine template type based on application type
+      const templateMapping = {
+        'cost_overview': 'COST_OVERVIEW',
+        'golden_visa': 'GOLDEN_VISA', 
+        'company_services': 'COMPANY_SERVICES',
+        'company_incorporation': 'COMPANY_SERVICES',
+        'taxation': 'TAXATION'
+      } as const;
+      
+      const templateType = templateMapping[application.type as keyof typeof templateMapping] || 'COST_OVERVIEW';
+      
+      // Use the EXISTING working function to create email props
+      const emailProps = createEmailDataFromFormData(
+        application.form_data,
+        pdfBlob,
+        filename,
+        templateType
+      );
+      
+      console.log('📧 CREATED EMAIL PROPS USING EXISTING SYSTEM:', emailProps);
+      
+      // Prepare activity logging data
+      const getClientName = (formData: any, appType: string): string => {
+        if (appType === 'cost_overview') {
+          const costData = formData as any;
+          return costData.clientDetails?.companyName || 
+                 `${costData.clientDetails?.firstName || ''} ${costData.clientDetails?.lastName || ''}`.trim();
+        } else if (appType === 'golden_visa') {
+          return formData.companyName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+        } else if (appType === 'company_services' || appType === 'taxation') {
+          return formData.companyName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+        }
+        return 'Unknown Client';
+      };
+
+      const getDocumentType = (appType: string): string => {
+        const typeMapping = {
+          'cost_overview': 'Cost Overview',
+          'golden_visa': 'Golden Visa',
+          'company_services': 'Company Services',
+          'taxation': 'Taxation'
+        } as const;
+        return typeMapping[appType as keyof typeof typeMapping] || 'Document';
+      };
+
+      // Set email props to trigger the EmailDraftGenerator component (EXISTING WORKING WAY)
+      setEmailDraftProps({
+        ...emailProps,
+        onSuccess: () => {
+          console.log('📧 EMAIL SENT SUCCESSFULLY!');
+          setEmailDraftProps(null);
+          setIsSendLoading(false);
+          onClose();
+        },
+        onError: (error) => {
+          console.error('📧 EMAIL SEND ERROR:', error);
+          toast.error('Failed to send email: ' + error);
+          setEmailDraftProps(null);
+          setIsSendLoading(false);
+        },
+        onClose: () => {
+          console.log('📧 EMAIL MODAL CLOSED');
+          setEmailDraftProps(null);
+          setIsSendLoading(false);
+          onClose(); // Also close the feedback modal
+        },
+        activityLogging: {
+          resource: application.type.replace('_', '_'), // Keep original format for resource
+          client_name: getClientName(application.form_data, application.type),
+          document_type: getDocumentType(application.type),
+          filename: filename
+        }
+      });
+      
+      // Don't close feedback modal immediately - let EmailDraftGenerator handle it
+      
+    } catch (error) {
+      console.error('📧 ERROR GENERATING PDF OR SETTING UP EMAIL:', error);
+      toast.error('Failed to generate PDF or prepare email: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      setIsSendLoading(false);
+    }
   };
 
   const handleEditForm = () => {
-    if (onEditForm) {
-      onEditForm();
-    }
+    if (!application) return;
+    
+    console.log('📝 SIMPLE: Navigating to edit rejected application:', application.id);
+    
+    // Navigate to correct tab - form will load with preserved state
+    const tabMapping: Record<string, string> = {
+      'cost_overview': '#cost-overview',
+      'golden_visa': '#golden-visa',
+      'company_services': '#company-services',
+      'company_incorporation': '#company-services',
+      'taxation': '#taxation'
+    };
+    
+    const frontendType = application.type === 'company_incorporation' ? 'company_services' : application.type;
+    const targetHash = tabMapping[frontendType] || '#cost-overview';
+    
+    // Navigate to tab
+    window.location.hash = targetHash;
+    
+    // Close modal
     onClose();
+    
+    toast.info('Navigate to form to make edits', {
+      description: 'Your previous data has been preserved',
+      duration: 3000
+    });
   };
 
   const resetState = () => {
@@ -465,30 +527,25 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const isRejected = application.status === 'rejected';
 
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={onClose}
-          />
-
+        <motion.div
+          key="feedback-modal"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={onClose}
+        >
           {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto max-h-[90vh] flex flex-col"
-              style={{ fontFamily: 'Inter, sans-serif' }}
-              onClick={(e) => e.stopPropagation()}
-            >
               {/* Header */}
               <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex-shrink-0">
                 <div className="flex items-center justify-between">
@@ -722,9 +779,13 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   </div>
                 }
               </div>
-            </div>
           </motion.div>
-        </>
+        </motion.div>
+      )}
+      
+      {/* Email Draft Generator - EXISTING WORKING SYSTEM */}
+      {emailDraftProps && (
+        <EmailDraftGenerator {...emailDraftProps} />
       )}
     </AnimatePresence>
   );

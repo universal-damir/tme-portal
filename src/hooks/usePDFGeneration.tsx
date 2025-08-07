@@ -15,6 +15,12 @@ export interface UsePDFGenerationProps<T> {
   generateFamilyPDF?: (data: T) => Promise<Blob>
   validateData: (data: T) => { isValid: boolean; errors: string[] }
   progressColor?: 'blue' | 'yellow' | 'green' | 'purple'
+  // Optional props for activity logging
+  activityLogging?: {
+    resource: string // e.g., 'golden_visa', 'cost_overview'
+    client_name: string // e.g., 'Novalic Damir' or 'Company Name'
+    document_type: string // e.g., 'Golden Visa', 'Cost Overview'
+  }
 }
 
 export interface UsePDFGenerationReturn {
@@ -32,7 +38,8 @@ export const usePDFGeneration = <T,>({
   generatePDFWithFilename,
   generateFamilyPDF,
   validateData,
-  progressColor = 'blue'
+  progressColor = 'blue',
+  activityLogging
 }: UsePDFGenerationProps<T>): UsePDFGenerationReturn => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [pdfProgress, setPdfProgress] = useState<PDFProgress>({
@@ -113,6 +120,29 @@ export const usePDFGeneration = <T,>({
         link.click()
         document.body.removeChild(link)
         URL.revokeObjectURL(url)
+
+        // Log PDF download activity if logging data is provided
+        if (activityLogging) {
+          try {
+            await fetch('/api/user/activities', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                action: 'pdf_downloaded',
+                resource: activityLogging.resource,
+                details: {
+                  filename: filename,
+                  client_name: activityLogging.client_name,
+                  document_type: activityLogging.document_type
+                }
+              })
+            });
+          } catch (error) {
+            console.error('Failed to log PDF download activity:', error);
+          }
+        }
       }
 
       updateProgress('Complete!', 100)

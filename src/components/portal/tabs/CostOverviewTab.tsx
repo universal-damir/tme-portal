@@ -551,28 +551,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       updateProgress('Finalizing documents...', (++currentStep / totalSteps) * 100);
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // Log PDF generation activity
-      try {
-        await fetch('/api/user/activities', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'pdf_generated',
-            resource: 'cost_overview',
-            details: {
-              filename: mainFilename,
-              client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
-              authority: data.authorityInformation?.responsibleAuthority || 'Not specified',
-              has_family_visa: hasFamilyVisaDoc,
-              document_type: 'Cost Overview'
-            }
-          })
-        });
-      } catch (error) {
-        console.error('Failed to log PDF generation activity:', error);
-      }
+      // PDF generation logging removed - only log user actions like send/download
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
@@ -742,28 +721,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       // Generate main document
       const { blob: mainPdfBlob, filename: mainFilename } = await generatePDFWithFilename(data);
 
-      // Log PDF sent activity (different from generation)
-      try {
-        await fetch('/api/user/activities', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'pdf_sent',
-            resource: 'cost_overview',
-            details: {
-              filename: mainFilename,
-              client_name: data.clientDetails.companyName || `${data.clientDetails.firstName} ${data.clientDetails.lastName}`.trim(),
-              authority: data.authorityInformation?.responsibleAuthority || 'Not specified',
-              has_family_visa: hasFamilyVisaDoc,
-              document_type: 'Cost Overview'
-            }
-          })
-        });
-      } catch (error) {
-        console.error('Failed to log PDF sent activity:', error);
-      }
+      // PDF sent logging is handled by email API route - no duplicate logging needed
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
@@ -854,22 +812,27 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
+      console.log(`🔧 COST-OVERVIEW-TAB: Received send-approved-application event`, { applicationId, hasFormData: !!formData });
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
         detail: { applicationId, formType: 'cost-overview' }
       });
       window.dispatchEvent(confirmationEvent);
+      console.log(`🔧 COST-OVERVIEW-TAB: Sent confirmation event`);
       
       // Send PDF to client using the saved form data
+      console.log(`🔧 COST-OVERVIEW-TAB: Calling handleSendPDF with formData`);
       handleSendPDF(formData);
     };
 
     const handleTabReadinessCheck = (event: any) => {
       const { targetTab } = event.detail;
+      console.log(`🔧 COST-OVERVIEW-TAB: Received tab-readiness-check for targetTab: ${targetTab}`);
       
       // Only respond if this is our tab
       if (targetTab === 'cost-overview') {
+        console.log(`🔧 COST-OVERVIEW-TAB: This is our tab, sending confirmation`);
         const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
           detail: { 
             tab: 'cost-overview', 
@@ -878,6 +841,8 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
           }
         });
         window.dispatchEvent(readinessEvent);
+      } else {
+        console.log(`🔧 COST-OVERVIEW-TAB: Not our tab (${targetTab} !== cost-overview)`);
       }
     };
 

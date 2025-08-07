@@ -171,7 +171,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
             ) : activities.length > 0 ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-[480px] overflow-y-auto">
                 <div className="divide-y divide-gray-100">
-                  {(showAllActivities ? activities : activities.slice(0, 5)).map((activity, index) => {
+                  {(showAllActivities ? activities : activities.slice(0, 5))
+                    .filter(activity => !activity.action.includes('todo_')) // Filter out todo-related activities
+                    .map((activity, index) => {
                     // Format activity type to be more readable
                     const formatActivityType = (action: string, details?: any) => {
                       if (action === 'pdf_generated') {

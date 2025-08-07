@@ -109,6 +109,17 @@ export function TMEPortalHeader({
       return;
     }
 
+    // Convert database underscore format to frontend hyphen format
+    const dbToFrontendTypeMapping: Record<string, string> = {
+      'cost_overview': 'cost-overview',
+      'golden_visa': 'golden-visa', 
+      'company_services': 'company-services',
+      'taxation': 'taxation'
+    };
+    
+    // Get the frontend type (handles both formats for compatibility)
+    const frontendType = dbToFrontendTypeMapping[feedbackApplication.type] || feedbackApplication.type;
+    
     // Map application types to tab names and event names
     const tabMapping: Record<string, string> = {
       'golden-visa': 'golden-visa',
@@ -118,10 +129,10 @@ export function TMEPortalHeader({
       'corporate-changes': 'corporate-changes'
     };
     
-    const targetTab = tabMapping[feedbackApplication.type];
+    const targetTab = tabMapping[frontendType];
     
     if (!targetTab) {
-      console.error('Unknown application type:', feedbackApplication.type);
+      console.error('Unknown application type:', feedbackApplication.type, '-> mapped to:', frontendType);
       return;
     }
 
@@ -132,7 +143,7 @@ export function TMEPortalHeader({
     setFeedbackModalOpen(false);
     
     // Dispatch the edit event with the application data
-    const eventName = `edit-${feedbackApplication.type}-application`;
+    const eventName = `edit-${frontendType}-application`;
     const editEvent = new CustomEvent(eventName, {
       detail: {
         applicationId: feedbackApplication.id,
