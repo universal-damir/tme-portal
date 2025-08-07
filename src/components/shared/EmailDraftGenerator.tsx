@@ -69,11 +69,11 @@ export const EMAIL_TEMPLATES = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #0066cc; font-weight: bold;">blue</span> indicate visa-related costs; each visa is valid for two years.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #DAA520; font-weight: bold;">yellow</span> reflect the annual license renewal fees, which apply from the second year onward.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #FF8C00; font-weight: bold;">orange</span> represent additional service offerings that are commonly required.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Kindly review the attached overview and return a signed copy for our records.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">If you have any questions or need clarification, please don\'t hesitate to reply to this email. A member of our team will get back to you promptly.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We look forward to hearing from you.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold;">{senderName}</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">{senderDesignation}</span>'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -81,20 +81,15 @@ export const EMAIL_TEMPLATES = {
   },
   GOLDEN_VISA: {
     subject: '', // Will be set from PDF filename
-    greeting: 'Dear {firstName},',
-    previewText: 'Your Golden Visa offer is ready for review - complete documentation and pricing included',
+    greeting: 'Hello {firstName},',
+    previewText: 'Your UAE Golden Visa offer is ready - personalized documentation and pricing included',
     bodyContent: [
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">I hope this email finds you well.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Following our discussion regarding your Golden Visa application, I am pleased to provide you with the comprehensive documentation and cost breakdown as requested.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc; font-weight: bold;">📋 What\'s Included:</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Complete Golden Visa application requirements and timeline</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Detailed cost breakdown including government fees and our service charges</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Step-by-step process explanation</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">• Required documentation checklist</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600; font-weight: bold;">✓ Next Steps:</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please review the attached proposal at your convenience. Should you have any questions or require clarification on any aspect, I would be happy to schedule a call to discuss further.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Thank you for considering TME Services for your Golden Visa application. We look forward to assisting you with this important milestone.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Best regards,<br>TME Services Team</span>'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We are happy to share a personalized offer for the UAE Golden Visa, tailored to your specific needs.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The document includes an overview of the visa requirements, a breakdown of the process, and our scope of services. Please review the offer and return a signed copy for our records.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Once we receive your confirmation, we will coordinate the next steps and provide guidance on the required documents and appointments.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">If you have any questions, feel free to reach out.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -102,12 +97,14 @@ export const EMAIL_TEMPLATES = {
   },
   COMPANY_SERVICES: {
     subject: '', // Will be set from PDF filename
-    greeting: 'Dear {firstName}, your company services proposal is ready.',
+    greeting: 'Dear {firstName},',
+    previewText: 'Your customized company services proposal is ready - tailored for your UAE business needs',
     bodyContent: [
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc; font-weight: bold;">📋 Company Services Proposal</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached the detailed proposal for your company services requirements.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600;">✓ Customized service packages included</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc; text-decoration: underline;">We look forward to discussing this further with you.</span>'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Attached is a customized overview of our services and pricing, tailored to support your business setup and compliance needs in the UAE.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The proposal outlines the areas where we can assist and gives you a clear picture of how we can add value to your operations.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please feel free to reach out if you have any questions or would like to proceed.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',

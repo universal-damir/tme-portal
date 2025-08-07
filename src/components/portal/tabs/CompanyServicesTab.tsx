@@ -11,6 +11,7 @@ import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewS
 import { CompanyServicesData, COMPANY_SERVICES_DEFAULTS } from '@/types/company-services';
 import { companyServicesSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useCompanyServicesApplication } from '@/hooks/useCompanyServicesApplication';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { 
@@ -24,6 +25,7 @@ import {
 
 const CompanyServicesTab: React.FC = () => {
   const { clientInfo, updateClientInfo } = useSharedClient();
+  const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -286,7 +288,7 @@ const CompanyServicesTab: React.FC = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, blob, filename, 'COMPANY_SERVICES');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'COMPANY_SERVICES', user || undefined);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({

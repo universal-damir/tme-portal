@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { GoldenVisaData, GOLDEN_VISA_DEFAULTS, GoldenVisaType } from '@/types/golden-visa';
 import { goldenVisaSchema } from '@/lib/validations';
 import { useSharedClient } from '@/contexts/SharedClientContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { NumberInputField } from './NumberInputField';
 import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shared/EmailDraftGenerator';
@@ -27,6 +28,7 @@ import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewS
 const GoldenVisaTab: React.FC = () => {
   
   const { clientInfo, updateClientInfo } = useSharedClient();
+  const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
@@ -366,7 +368,7 @@ const GoldenVisaTab: React.FC = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, blob, filename, 'GOLDEN_VISA');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'GOLDEN_VISA', user || undefined);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
@@ -560,7 +562,7 @@ const GoldenVisaTab: React.FC = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, blob, filename, 'GOLDEN_VISA');
+      const emailProps = createEmailDataFromFormData(data, blob, filename, 'GOLDEN_VISA', user || undefined);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
