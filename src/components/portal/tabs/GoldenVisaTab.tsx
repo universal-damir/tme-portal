@@ -319,10 +319,11 @@ const GoldenVisaTab: React.FC = () => {
       return;
     }
 
-    // Additional check for email from clientInfo
-    if (!clientInfo.email?.trim()) {
+    // Additional check for email from form data
+    const validEmails = data.clientEmails?.filter(email => email && email.trim() !== '') || [];
+    if (validEmails.length === 0) {
       toast.error('Missing Information', {
-        description: 'Email is required. Please fill it in the client information section.'
+        description: 'Email is required. Please provide at least one client email address.'
       });
       return;
     }
@@ -413,10 +414,11 @@ const GoldenVisaTab: React.FC = () => {
       return;
     }
 
-    // Additional check for email from clientInfo
-    if (!clientInfo.email?.trim()) {
+    // Additional check for email from form data
+    const validEmails = watchedData.clientEmails?.filter(email => email && email.trim() !== '') || [];
+    if (validEmails.length === 0) {
       toast.error('Missing Information', {
-        description: 'Email is required. Please fill it in the client information section.'
+        description: 'Email is required. Please provide at least one client email address.'
       });
       return;
     }
@@ -438,10 +440,11 @@ const GoldenVisaTab: React.FC = () => {
       return;
     }
 
-    // Additional check for email from clientInfo
-    if (!clientInfo.email?.trim()) {
+    // Additional check for email from form data
+    const validEmails = data.clientEmails?.filter(email => email && email.trim() !== '') || [];
+    if (validEmails.length === 0) {
       toast.error('Missing Information', {
-        description: 'Email is required. Please fill it in the client information section.'
+        description: 'Email is required. Please provide at least one client email address.'
       });
       return;
     }
