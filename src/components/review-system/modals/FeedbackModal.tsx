@@ -14,6 +14,7 @@ import { GoldenVisaData } from '@/types/golden-visa';
 import { OfferData } from '@/types/offer';
 import { CompanyServicesData } from '@/types/company-services';
 import { SharedClientInfo } from '@/types/portal';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FeedbackModalProps {
   isOpen: boolean;
@@ -29,6 +30,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   onEditForm
 }) => {
   const config = useReviewSystemConfig();
+  const { user } = useAuth();
   // Removed viewMode state as we're removing the tabs
   const [error, setError] = useState<string | null>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -396,23 +398,31 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       
       console.log('📧 GENERATED PDF:', { filename, size: pdfBlob.size, type: pdfBlob.type });
       
-      // Determine template type based on application type
-      const templateMapping = {
-        'cost_overview': 'COST_OVERVIEW',
-        'golden_visa': 'GOLDEN_VISA', 
-        'company_services': 'COMPANY_SERVICES',
-        'company_incorporation': 'COMPANY_SERVICES',
-        'taxation': 'TAXATION'
-      } as const;
+      // Determine template type based on application type (handle both formats)
+      const getTemplateType = (appType: string) => {
+        // Normalize the application type to handle both hyphen and underscore formats
+        const normalizedType = appType.replace('-', '_');
+        
+        const templateMapping = {
+          'cost_overview': 'COST_OVERVIEW',
+          'golden_visa': 'GOLDEN_VISA', 
+          'company_services': 'COMPANY_SERVICES',
+          'company_incorporation': 'COMPANY_SERVICES',
+          'taxation': 'TAXATION'
+        } as const;
+        
+        return templateMapping[normalizedType as keyof typeof templateMapping] || 'COST_OVERVIEW';
+      };
       
-      const templateType = templateMapping[application.type as keyof typeof templateMapping] || 'COST_OVERVIEW';
+      const templateType = getTemplateType(application.type);
       
-      // Use the EXISTING working function to create email props
+      // Use the EXISTING working function to create email props with user authentication
       const emailProps = createEmailDataFromFormData(
         application.form_data,
         pdfBlob,
         filename,
-        templateType
+        templateType,
+        user || undefined
       );
       
       console.log('📧 CREATED EMAIL PROPS USING EXISTING SYSTEM:', emailProps);
