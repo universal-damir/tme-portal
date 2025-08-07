@@ -29,6 +29,7 @@ export interface EmailRecipientData {
   companyName?: string;
   authorityName?: string;
   senderName?: string;
+  senderDesignation?: string;
 }
 
 // PDF attachment data interface
@@ -71,7 +72,8 @@ export const EMAIL_TEMPLATES = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">If you have any questions or need clarification, please don\'t hesitate to reply to this email. A member of our team will get back to you promptly.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We look forward to hearing from you.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">{senderName}</span>'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold;">{senderName}</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">{senderDesignation}</span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -234,6 +236,7 @@ const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipien
   const companyName = recipients.companyName || '';
   const authorityName = recipients.authorityName || 'Authority';
   const senderName = recipients.senderName || 'TME Services Team';
+  const senderDesignation = recipients.senderDesignation || '';
 
   // Replace template variables
   const processText = (text: string): string => {
@@ -242,7 +245,8 @@ const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipien
       .replace(/{lastName}/g, lastName)
       .replace(/{companyName}/g, companyName)
       .replace(/{authorityName}/g, authorityName)
-      .replace(/{senderName}/g, senderName);
+      .replace(/{senderName}/g, senderName)
+      .replace(/{senderDesignation}/g, senderDesignation);
   };
 
   return {
@@ -328,7 +332,7 @@ export const createEmailDataFromFormData = (
   pdfBlob: Blob,
   pdfFilename: string,
   templateType: keyof typeof EMAIL_TEMPLATES,
-  userInfo?: { full_name?: string } // Optional user info parameter
+  userInfo?: { full_name?: string; designation?: string } // Optional user info parameter
 ): EmailDraftGeneratorProps => {
   
   // Extract client details (handles different form structures)
@@ -341,7 +345,8 @@ export const createEmailDataFromFormData = (
     companyName: clientDetails.companyName,
     // Add additional data for template processing
     authorityName: formData.authorityInformation?.responsibleAuthority || 'Authority',
-    senderName: userInfo?.full_name || 'TME Services Team' // Use actual user name if available
+    senderName: userInfo?.full_name || 'TME Services Team', // Use actual user name if available
+    senderDesignation: userInfo?.designation || '' // Use actual user designation if available
   };
 
   const template: EmailTemplate = {
