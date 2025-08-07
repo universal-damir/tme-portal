@@ -7,6 +7,7 @@ import {
   generateGoldenVisaChildrenVisaBreakdown 
 } from '../../../utils/goldenVisaDataTransformer';
 import { getFreezonePdfLabel } from '@/components/golden-visa/utils/goldenVisaConfig';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
 import type { PDFComponentProps, CostItem } from '../../../types';
 
 // CostSummarySection - Overview table for cover page
@@ -17,16 +18,18 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
 
   // Access golden visa data from transformed data
   const goldenVisaData = (data as any).goldenVisaData;
+  const locale: Locale = (data as any).locale || 'en';
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
 
   // Get visa type display name for dynamic title and descriptions (sentence case with exceptions)
   const getVisaTypeDisplay = () => {
     switch (goldenVisaData?.visaType) {
       case 'property-investment':
-        return 'Property Investment';
+        return t.visaTypes['property-investment'];
       case 'time-deposit':
-        return 'Time Deposit';
+        return t.visaTypes['time-deposit'];
       case 'skilled-employee':
-        return 'Skilled Employee';
+        return t.visaTypes['skilled-employee'];
       default:
         return 'Golden Visa';
     }
@@ -58,7 +61,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       
       // 1. Authority Costs line
       items.push({
-        description: `${itemNumber}. Golden Visa authority costs`,
+        description: `${itemNumber}. ${t.costSummary.costItems.authorityCosts}`,
         amount: authorityTotal,
         secondaryAmount: authorityTotal / exchangeRate,
         isReduction: false
@@ -69,7 +72,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       if (goldenVisaData?.requiresNOC && goldenVisaData?.selectedFreezone && goldenVisaData?.freezoneNocFee) {
         const freezoneLabel = getFreezonePdfLabel(goldenVisaData.selectedFreezone);
         items.push({
-          description: `${itemNumber}. ${freezoneLabel} NOC (Non-Objection Certificate) cost`,
+          description: `${itemNumber}. ${freezoneLabel} ${t.costSummary.costItems.nocCost}`,
           amount: goldenVisaData.freezoneNocFee,
           secondaryAmount: goldenVisaData.freezoneNocFee / exchangeRate,
           isReduction: false
@@ -81,7 +84,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       if (goldenVisaData?.requiresSalaryCertificate && goldenVisaData?.selectedSalaryCertificateFreezone && goldenVisaData?.salaryCertificateFee) {
         const freezoneLabel = getFreezonePdfLabel(goldenVisaData.selectedSalaryCertificateFreezone);
         items.push({
-          description: `${itemNumber}. ${freezoneLabel} salary certificate cost`,
+          description: `${itemNumber}. ${freezoneLabel} ${t.costSummary.costItems.salaryCertificate}`,
           amount: goldenVisaData.salaryCertificateFee,
           secondaryAmount: goldenVisaData.salaryCertificateFee / exchangeRate,
           isReduction: false
@@ -93,11 +96,11 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     // 4. Spouse Visa (if selected)
     const hasSpouse = Boolean(goldenVisaData?.dependents?.spouse?.required);
     if (hasSpouse) {
-      const spouseVisa = generateGoldenVisaSpouseVisaBreakdown(goldenVisaData);
+      const spouseVisa = generateGoldenVisaSpouseVisaBreakdown(goldenVisaData, locale);
       const spouseVisaTotal = spouseVisa.reduce((sum, service) => sum + service.amount, 0);
       
       items.push({
-        description: `${itemNumber}. Dependent (spouse) visa authority costs`,
+        description: `${itemNumber}. ${t.costSummary.costItems.spouseVisa}`,
         amount: spouseVisaTotal,
         secondaryAmount: spouseVisaTotal / exchangeRate,
         isReduction: false
@@ -109,12 +112,16 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     const hasChildren = Boolean((goldenVisaData?.dependents?.children?.count || 0) > 0);
     if (hasChildren) {
       const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
-      const childText = numberOfChildren === 1 ? 'child' : 'children';
-      const childrenVisa = generateGoldenVisaChildrenVisaBreakdown(goldenVisaData);
+      const childText = numberOfChildren === 1 ? t.costSummary.costItems.childVisa : t.costSummary.costItems.childrenVisa;
+      const childrenVisa = generateGoldenVisaChildrenVisaBreakdown(goldenVisaData, locale);
       const childrenVisaTotal = childrenVisa.reduce((sum, service) => sum + service.amount, 0);
       
+      const description = numberOfChildren > 1 
+        ? `${itemNumber}. ${childText} ${t.costSummary.costItems.childrenCount(numberOfChildren)}`
+        : `${itemNumber}. ${childText}`;
+      
       items.push({
-        description: `${itemNumber}. Dependent (${childText}) visa authority costs${numberOfChildren > 1 ? ` (${numberOfChildren} children)` : ''}`,
+        description,
         amount: childrenVisaTotal,
         secondaryAmount: childrenVisaTotal / exchangeRate,
         isReduction: false
@@ -139,7 +146,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     // Only add TME services if there are any services to include
     if (totalTmeServices > 0) {
       items.push({
-        description: `${itemNumber}. TME Services professional fee`,
+        description: `${itemNumber}. ${t.costSummary.costItems.tmeServices}`,
         amount: totalTmeServices,
         secondaryAmount: totalTmeServices / exchangeRate,
         isReduction: false
@@ -155,7 +162,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
   // Dynamic title and description based on whether primary visa is required
   const getSummaryTitle = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      return 'Dependent Golden Visa Summary';
+      return t.costSummary.titles.dependent;
     }
 
     // Check for dependents
@@ -166,25 +173,35 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       // Generate dependent text
       let dependentText = '';
       if (hasSpouse && hasChildren) {
-        dependentText = 'Dependents';
+        dependentText = t.costSummary.titles.dependentPlural;
       } else if (hasSpouse) {
-        dependentText = 'Dependent';
+        dependentText = t.costSummary.titles.dependentSingle;
       } else if (hasChildren) {
         const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
-        dependentText = numberOfChildren === 1 ? 'Dependent' : 'Dependents';
+        dependentText = numberOfChildren === 1 ? t.costSummary.titles.dependentSingle : t.costSummary.titles.dependentPlural;
       }
       
-      return `${getVisaTypeDisplay()} Golden Visa Summary (Including ${dependentText})`;
+      return t.costSummary.titles.withDependents(getVisaTypeDisplay(), dependentText);
     }
     
-    return `${getVisaTypeDisplay()} Golden Visa Summary`;
+    // Return appropriate title based on visa type
+    switch (goldenVisaData?.visaType) {
+      case 'property-investment':
+        return t.costSummary.titles.propertyInvestment;
+      case 'time-deposit':
+        return t.costSummary.titles.timeDeposit;
+      case 'skilled-employee':
+        return t.costSummary.titles.skilledEmployee;
+      default:
+        return `${getVisaTypeDisplay()} Golden Visa Summary`;
+    }
   };
 
   const getSummaryDescription = () => {
     if (!goldenVisaData?.primaryVisaRequired) {
-      return 'This represents the overall cost for your Golden Visa dependent services only. A detailed cost breakdown is provided on the following pages for full transparency.';
+      return t.costSummary.descriptions.dependent;
     }
-    return 'This represents the overall cost for your Golden Visa application. A detailed cost breakdown is provided on the following pages for full transparency.';
+    return t.costSummary.descriptions.standard;
   };
 
   return (
@@ -197,8 +214,8 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       <View style={styles.costTable}>
         {/* Table Header */}
         <View style={styles.tableHeaderYellow}>
-          <Text style={styles.tableHeaderDescription}>Description</Text>
-          <Text style={styles.tableHeaderCurrency}>AED</Text>
+          <Text style={styles.tableHeaderDescription}>{t.costSummary.tableHeaders.description}</Text>
+          <Text style={styles.tableHeaderCurrency}>{t.costSummary.tableHeaders.aed}</Text>
           <Text style={styles.tableHeaderCurrency}>{secondaryCurrency}</Text>
         </View>
 
@@ -213,7 +230,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
 
         {/* Total Row */}
         <View style={styles.totalRowYellow}>
-          <Text style={[styles.totalLabel, { color: 'white', flex: 5, paddingLeft: 8 }]}>Total</Text>
+          <Text style={[styles.totalLabel, { color: 'white', flex: 5, paddingLeft: 8 }]}>{t.costSummary.tableHeaders.total}</Text>
           <Text style={[styles.totalAmount, { color: 'white' }]}>{formatNumber(totalAmount)}</Text>
           <Text style={[styles.totalAmount, { color: 'white' }]}>{formatNumber(totalAmount / exchangeRate)}</Text>
         </View>

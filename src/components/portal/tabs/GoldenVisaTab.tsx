@@ -80,6 +80,19 @@ const GoldenVisaTab: React.FC = () => {
           tmeServicesFee: GOLDEN_VISA_DEFAULTS.dependents.child.tmeServicesFee,
         },
       },
+      
+      // Initialize dependent authority fees with default values
+      dependentAuthorityFees: {
+        professionalPassportPicture: 0,
+        dependentFileOpening: 0,
+        mandatoryUaeMedicalTest: 0,
+        emiratesIdFee: 0,
+        immigrationResidencyFeeSpouse: 0,
+        immigrationResidencyFeeChild: 0,
+        visaCancelation: false,
+        visaCancelationFee: 0,
+        thirdPartyCosts: 0,
+      },
     },
   });
 
@@ -395,6 +408,66 @@ const GoldenVisaTab: React.FC = () => {
         action: {
           label: 'Retry',
           onClick: () => handleGeneratePDF(data)
+        }
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // German PDF preview handler
+  const handlePreviewGermanPDF = async (data: GoldenVisaData) => {
+    // Validate the entire form data using Zod schema
+    try {
+      await goldenVisaSchema.parseAsync(data);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+    // Additional check for email from form data
+    const validEmails = data.clientEmails?.filter(email => email && email.trim() !== '') || [];
+    if (validEmails.length === 0) {
+      toast.error('Missing Information', {
+        description: 'Email is required. Please provide at least one client email address.'
+      });
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      // Generate German preview document
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      // Convert form data to shared client format for PDF generation
+      const clientInfo = {
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+        companyName: data.companyName || '',
+        date: data.date,
+      };
+      const { blob, filename } = await generateGoldenVisaPDFWithFilename(data, clientInfo, 'de');
+      
+      // Open PDF in new tab for preview
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // Clean up the URL after a delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+
+      toast.success('German Preview Generated', {
+        description: 'German PDF preview opened in new tab 🇩🇪'
+      });
+    } catch (error) {
+      console.error('Error generating German PDF preview:', error);
+      toast.error('German Preview Failed', {
+        description: 'Error generating German PDF preview. Please try again.',
+        action: {
+          label: 'Retry',
+          onClick: () => handlePreviewGermanPDF(data)
         }
       });
     } finally {
@@ -754,6 +827,33 @@ const GoldenVisaTab: React.FC = () => {
               <>
                 <Eye className="h-5 w-5" />
                 <span>Preview PDF</span>
+              </>
+            )}
+          </motion.button>
+
+          {/* Preview German Button */}
+          <motion.button
+            whileHover={!isGenerating ? { scale: 1.02 } : {}}
+            whileTap={!isGenerating ? { scale: 0.98 } : {}}
+            type="button"
+            onClick={() => handlePreviewGermanPDF(watchedData)}
+            disabled={isGenerating}
+            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3 border-2"
+            style={{ 
+              backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+              borderColor: isGenerating ? '#9CA3AF' : '#D2BC99',
+              color: isGenerating ? '#9CA3AF' : '#D2BC99'
+            }}
+          >
+            {isGenerating ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
+                <span>Generating...</span>
+              </>
+            ) : (
+              <>
+                <Eye className="h-5 w-5" />
+                <span>Preview German 🇩🇪</span>
               </>
             )}
           </motion.button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
 import { formatNumber } from '../../utils';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../translations/golden-visa';
 import type { CostItem } from '../../types';
 
 // CompactCostTable - Shared component for visa breakdown tables
@@ -13,6 +14,10 @@ export const CompactCostTable: React.FC<{
   secondaryTotal: number;
 }> = ({ data, title, items, total, secondaryTotal }) => {
   const secondaryCurrency = data.clientDetails.secondaryCurrency;
+  
+  // Get language from data or default to English
+  const locale: Locale = ((data as any).locale as Locale) || 'en';
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
 
   return (
     <View style={{ marginBottom: 6 }}>
@@ -51,7 +56,7 @@ export const CompactCostTable: React.FC<{
             color: 'white',
             paddingLeft: 2
           }}>
-            Description
+{t.costSummary.tableHeaders.description}
           </Text>
           <Text style={{
             flex: 1,
@@ -137,7 +142,7 @@ export const CompactCostTable: React.FC<{
             color: 'white',
             paddingLeft: 2
           }}>
-            Total
+{t.costSummary.tableHeaders.total}
           </Text>
           <Text style={{
             flex: 1,

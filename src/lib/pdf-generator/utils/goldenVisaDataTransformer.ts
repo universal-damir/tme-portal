@@ -252,9 +252,10 @@ export function generateGoldenVisaExplanations(goldenVisaData: GoldenVisaData, l
 }
 
 // Generate Spouse Visa breakdown with detailed numbered items
-export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisaData): GoldenVisaServiceItem[] {
+export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[] {
   const services: GoldenVisaServiceItem[] = [];
   const spouse = goldenVisaData.dependents?.spouse;
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
   
   if (!spouse?.required) return services;
 
@@ -265,17 +266,17 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     services.push({
       id: 'spouse-file-opening',
       condition: true,
-      description: '1. Dependent file opening cost',
+      description: `1. ${t.dependentCosts.serviceDescriptions.dependentFileOpening}`,
       amount: fees.dependentFileOpening,
-      explanation: 'For opening dependent visa file (applies to first dependent only).'
+      explanation: t.dependentCosts.explanations.dependentFileOpening
     });
 
     services.push({
       id: 'spouse-standard-authority-costs',
       condition: true,
-      description: '2. Standard authority costs',
+      description: `2. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
       amount: fees.standardAuthorityCostsSpouse || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeSpouse) || 4710,
-      explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
+      explanation: t.dependentCosts.explanations.standardAuthorityCosts
     });
 
     // Check for visa cancellation - either from global setting or individual spouse setting
@@ -289,18 +290,18 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
       services.push({
         id: 'spouse-visa-cancellation',
         condition: true,
-        description: '3. Visa cancellation cost',
+        description: `3. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
         amount: cancellationFee,
-        explanation: 'For canceling existing visa status before applying for spouse dependent visa (if applicable).'
+        explanation: t.dependentCosts.explanations.visaCancellation
       });
     }
 
     services.push({
       id: 'spouse-third-party-costs',
       condition: true,
-      description: hasVisaCancellation ? '4. Third party costs' : '3. Third party costs',
+      description: `${hasVisaCancellation ? '4' : '3'}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
       amount: fees.thirdPartyCosts,
-      explanation: 'Administrative costs charged by various departments.'
+      explanation: t.dependentCosts.explanations.thirdPartyCosts
     });
   } else {
     // Fallback to legacy structure
@@ -334,24 +335,27 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     id: 'spouse-tme-services',
     condition: true,
     description: goldenVisaData.dependentAuthorityFees ? 
-      (spouseHasVisaCancellation ? '5. TME Services professional fee' : '4. TME Services professional fee') :
-      (spouseHasVisaCancellation ? '3. TME Services professional fee' : '2. TME Services professional fee'),
+      (spouseHasVisaCancellation ? `5. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}` : `4. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}`) :
+      (spouseHasVisaCancellation ? `3. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}` : `2. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}`),
     amount: spouse.tmeServicesFee || 2240,
-    explanation: 'TME Services Professional Fee: Covers the complete management of the spouse visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+    explanation: t.dependentCosts.explanations.tmeServicesProfessionalFee
   });
 
   return services.filter(service => service.condition);
 }
 
 // Generate Children Visa breakdown with detailed numbered items
-export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVisaData): GoldenVisaServiceItem[] {
+export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[] {
   const services: GoldenVisaServiceItem[] = [];
   const children = goldenVisaData.dependents?.children;
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
   
   if (!children?.count || children.count <= 0) return services;
 
   const numberOfChildren = children.count;
-  const childText = numberOfChildren === 1 ? 'child' : 'children';
+  const childText = numberOfChildren === 1 ? 
+    (locale === 'de' ? 'Kind' : 'child') : 
+    (locale === 'de' ? 'Kinder' : 'children');
 
   // Use detailed authority fees if available, otherwise fallback to legacy
   if (goldenVisaData.dependentAuthorityFees) {
@@ -363,9 +367,11 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       services.push({
         id: 'children-file-opening',
         condition: true,
-        description: '1. Dependent file opening cost',
+        description: `1. ${t.dependentCosts.serviceDescriptions.dependentFileOpening}`,
         amount: fees.dependentFileOpening,
-        explanation: 'One-time fee for opening dependent visa file (applies to first dependent only).'
+        explanation: locale === 'de' ? 
+          'Einmalgebühr für die Eröffnung der Angehörigen-Visa-Datei (gilt nur für den ersten Angehörigen).' : 
+          'One-time fee for opening dependent visa file (applies to first dependent only).'
       });
     }
 
@@ -373,9 +379,11 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     services.push({
       id: 'children-standard-authority-costs',
       condition: true,
-      description: `${standardCostsNumber}. Standard authority costs`,
+      description: `${standardCostsNumber}. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
       amount: (fees.standardAuthorityCostsChild || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeChild) || 4604) * numberOfChildren,
-      explanation: `For mandatory UAE medical test, Emirates ID, and immigration residency processing for ${childText}.`
+      explanation: locale === 'de' ? 
+        `Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung für ${childText}.` : 
+        `For mandatory UAE medical test, Emirates ID, and immigration residency processing for ${childText}.`
     });
 
     // Check for visa cancellation - either from global setting or individual children setting
@@ -390,9 +398,11 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       services.push({
         id: 'children-visa-cancellation',
         condition: true,
-        description: `${cancellationNumber}. Visa cancellation cost`,
+        description: `${cancellationNumber}. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
         amount: childrenCancellationFee * numberOfChildren,
-        explanation: `For canceling existing visa status before applying for ${childText} dependent visa.`
+        explanation: locale === 'de' ? 
+          `Für die Stornierung des bestehenden Visa-Status vor der Beantragung des ${childText}-Angehörigen-Visa.` : 
+          `For canceling existing visa status before applying for ${childText} dependent visa.`
       });
     }
 
@@ -402,9 +412,11 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     services.push({
       id: 'children-third-party-costs',
       condition: true,
-      description: `${thirdPartyNumber}. Third party costs`,
+      description: `${thirdPartyNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
       amount: fees.thirdPartyCosts * numberOfChildren,
-      explanation: `Administrative costs charged by various departments for ${childText}.`
+      explanation: locale === 'de' ? 
+        `Von verschiedenen Abteilungen erhobene Verwaltungskosten für ${childText}.` : 
+        `Administrative costs charged by various departments for ${childText}.`
     });
   } else {
     // Fallback to legacy structure
@@ -443,17 +455,20 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
   services.push({
     id: 'children-tme-services',
     condition: true,
-    description: `${tmeNumber}. TME Services professional fee`,
+    description: `${tmeNumber}. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}`,
     amount: (children.tmeServicesFee || 1690) * numberOfChildren,
-    explanation: `TME Services Professional Fee: Covers the complete management of the ${childText} visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.`
+    explanation: locale === 'de' ? 
+      `TME Services Beratungsgebühr: Umfasst die vollständige Verwaltung des ${childText}-Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.` : 
+      `TME Services Professional Fee: Covers the complete management of the ${childText} visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.`
   });
 
   return services.filter(service => service.condition);
 }
 
 // Generate individual child visa breakdowns for detailed view
-export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: GoldenVisaData): GoldenVisaServiceItem[][] {
+export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[][] {
   const children = goldenVisaData.dependents?.children;
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
   
   if (!children?.count || children.count <= 0) return [];
 

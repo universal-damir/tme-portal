@@ -223,7 +223,8 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
                   type="checkbox"
                   checked={(dependents.children?.count || 0) > 0}
                   onChange={(e) => {
-                    if (e.target.checked) {
+                    const checked = e.target.checked;
+                    if (checked) {
                       // When checking, set at least one child to show the options
                       handleChildrenCountChange(1);
                     } else {

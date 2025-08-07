@@ -12,6 +12,7 @@ import {
   generateGoldenVisaChildrenVisaBreakdown,
   generateGoldenVisaIndividualChildVisaBreakdowns
 } from '../../../utils/goldenVisaDataTransformer';
+import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
 import type { PDFComponentProps, CostItem } from '../../../types';
 import type { GoldenVisaData } from '@/types/golden-visa';
 
@@ -21,6 +22,10 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   // Access golden visa data from transformed data
   const goldenVisaData = (data as PDFComponentProps['data'] & { goldenVisaData: GoldenVisaData }).goldenVisaData;
   const exchangeRate = data.clientDetails.exchangeRate;
+  
+  // Get language from data or default to English
+  const locale: Locale = ((data as any).locale as Locale) || 'en';
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
 
   // Check if dependents are selected using actual data
   const hasSpouse = Boolean(goldenVisaData?.dependents?.spouse?.required);
@@ -33,7 +38,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   }
 
   // Generate spouse visa breakdown
-  const spouseVisa = hasSpouse ? generateGoldenVisaSpouseVisaBreakdown(goldenVisaData) : [];
+  const spouseVisa = hasSpouse ? generateGoldenVisaSpouseVisaBreakdown(goldenVisaData, locale) : [];
   const spouseVisaItems: CostItem[] = spouseVisa.map(service => ({
     description: service.description,
     amount: service.amount,
@@ -43,7 +48,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   const spouseVisaTotal = spouseVisaItems.reduce((sum, item) => sum + item.amount, 0);
 
   // Generate children visa breakdown
-  const childrenVisa = hasChildren ? generateGoldenVisaChildrenVisaBreakdown(goldenVisaData) : [];
+  const childrenVisa = hasChildren ? generateGoldenVisaChildrenVisaBreakdown(goldenVisaData, locale) : [];
   const childrenVisaItems: CostItem[] = childrenVisa.map(service => ({
     description: service.description,
     amount: service.amount,
@@ -53,11 +58,11 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   const childrenVisaTotal = childrenVisaItems.reduce((sum, item) => sum + item.amount, 0);
 
   // Generate individual child visa breakdowns for multiple children
-  const individualChildBreakdowns = hasChildren ? generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData) : [];
+  const individualChildBreakdowns = hasChildren ? generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData, locale) : [];
   const numberOfChildren = goldenVisaData?.dependents?.children?.count || 0;
 
-  // Fixed intro content
-  const introContent = `This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
+  // Get translated intro content
+  const introContent = t.dependentCosts.introText;
 
   // Generate explanations from all services
   const generateExplanations = () => {
@@ -140,7 +145,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   if (hasSpouse && spouseVisaItems.length > 0) {
     tables.push({
       key: 'spouse',
-      title: 'Spouse Visa Breakdown',
+      title: t.dependentCosts.spouseVisaBreakdown,
       items: spouseVisaItems,
       total: spouseVisaTotal,
       secondaryTotal: spouseVisaTotal / exchangeRate
@@ -151,7 +156,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   if (hasChildren && numberOfChildren === 1 && childrenVisaItems.length > 0) {
     tables.push({
       key: 'child-1',
-      title: 'Child Visa Breakdown',
+      title: t.dependentCosts.childVisaBreakdown,
       items: childrenVisaItems,
       total: childrenVisaTotal,
       secondaryTotal: childrenVisaTotal / exchangeRate
@@ -169,7 +174,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
 
       tables.push({
         key: `child-${childNumber}`,
-        title: `Child ${childNumber} Visa Breakdown`,
+        title: `${t.dependentCosts.childVisaBreakdown} ${childNumber}`,
         items: childItems,
         total: childTotal,
         secondaryTotal: childTotal / exchangeRate
@@ -267,7 +272,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
             {pageIndex === 0 && (
               <View style={{ marginBottom: introSpacing }}>
                 <IntroSection
-                  headline="Dependent Visa Cost Breakdown"
+                  headline={t.dependentCosts.pageTitle}
                   content={introContent}
                 />
               </View>
@@ -289,7 +294,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
             {/* Explanations Section - always on last page with tables */}
             {hasExplanationsOnThisPage && (
               <View style={{ marginTop: explanationMarginTop, marginBottom: explanationMarginBottom }}>
-                <Text style={styles.introHeadline}>Service Explanations</Text>
+                <Text style={styles.introHeadline}>{t.dependentCosts.serviceExplanations}</Text>
                 <View style={{ marginTop: explanationInnerMarginTop }}>
                   {explanations.map((explanation, index) => (
                     <Text key={`explanation-${explanation.id}-${index}`} style={[styles.introText, { marginBottom: explanationTextMarginBottom }]}>
