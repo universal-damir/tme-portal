@@ -27,6 +27,7 @@ export interface NotificationData {
   submitter_name?: string;
   reviewer_name?: string;
   client_name?: string;
+  client_email?: string;
   document_type?: string;
   filename?: string;
   urgency?: 'low' | 'medium' | 'high';
@@ -34,6 +35,7 @@ export interface NotificationData {
   sent_date?: Date;
   days_ago?: number;
   form_name?: string;
+  form_data?: any;
 }
 
 /**
@@ -84,19 +86,68 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
   },
 
   'application_approved': {
-    // Don't create new todos for approvals, just trigger auto-completion
-    title: () => '',
+    title: (data: NotificationData) => 
+      `Send ${data.application_title || data.filename || 'approved document'} to ${data.client_name || 'client'}`,
+    
+    description: (data: NotificationData) => 
+      `Your application has been approved by ${data.reviewer_name || 'reviewer'}. ` +
+      `Send the approved document to the client promptly.`,
+    
     category: 'action',
-    priority: () => 'low',
-    due_date: () => new Date(),
-    action_type: 'review_approved',
+    priority: () => 'high',
+    
+    due_date: () => new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours
+    
+    action_type: 'send_approved_document',
+    
     action_data: (data: NotificationData) => ({
       application_id: data.application_id,
-      auto_completion_trigger: true
+      application_title: data.application_title,
+      client_name: data.client_name,
+      reviewer_name: data.reviewer_name,
+      document_type: data.document_type,
+      filename: data.filename,
+      approval_date: new Date()
     }),
+
     auto_complete_criteria: (data: NotificationData) => ({
       application_id: data.application_id,
       category: ['review']
+    })
+  },
+
+  'application_rejected': {
+    title: (data: NotificationData) => 
+      `Edit and resubmit ${data.application_title || data.filename || 'rejected document'}`,
+    
+    description: (data: NotificationData) => {
+      const reviewerFeedback = data.message || 'No specific feedback provided';
+      return `Your application was rejected by ${data.reviewer_name || 'reviewer'}. ` +
+        `Reviewer feedback: "${reviewerFeedback}". Please address the issues and resubmit.`;
+    },
+    
+    category: 'action',
+    priority: () => 'high',
+    
+    due_date: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+    
+    action_type: 'edit_rejected_document',
+    
+    action_data: (data: NotificationData) => ({
+      application_id: data.application_id,
+      application_title: data.application_title,
+      client_name: data.client_name,
+      reviewer_name: data.reviewer_name,
+      rejection_reason: data.message,
+      document_type: data.document_type,
+      filename: data.filename,
+      rejection_date: new Date()
+    }),
+
+    auto_complete_criteria: (data: NotificationData) => ({
+      application_id: data.application_id,
+      category: ['review'],
+      status: 'resubmitted'
     })
   },
 

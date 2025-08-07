@@ -158,12 +158,8 @@ const TodoItem: React.FC<TodoItemProps> = ({
   if (variant === 'minimal') {
     return (
       <motion.div
-        className={`relative flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 hover:shadow-sm cursor-pointer ${
-          selected ? 'ring-2 ring-blue-500' : ''
-        } ${
-          overdue ? 'border-red-200' : 
-          dueSoon ? 'border-orange-200' :
-          'border-gray-200 hover:border-gray-300'
+        className={`relative flex items-center gap-3 p-3 transition-all duration-200 hover:bg-gray-50 cursor-pointer ${
+          selected ? 'bg-blue-50' : ''
         } ${className}`}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,17 +168,13 @@ const TodoItem: React.FC<TodoItemProps> = ({
         onClick={onSelect}
         layout
       >
-        {/* Priority dot */}
-        <div 
-          className="w-3 h-3 rounded-full flex-shrink-0"
-          style={{ backgroundColor: priorityConfig.color }}
-        />
+        {/* Priority dot removed */}
         
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-3">
             <h4 
-              className={`font-medium text-sm truncate ${
+              className={`font-normal text-sm truncate ${
                 todo.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'
               }`}
               style={{ fontFamily: 'Inter, sans-serif' }}
@@ -191,19 +183,21 @@ const TodoItem: React.FC<TodoItemProps> = ({
             </h4>
             
             {/* Context line */}
-            <div className="flex items-center gap-2 text-xs text-gray-500 flex-shrink-0">
-              <span className="uppercase font-medium" style={{ fontSize: '10px' }}>
-                {todo.category.replace('_', ' ')}
-              </span>
-              {todo.due_date && (
-                <>
-                  <span>•</span>
-                  <span className={overdue ? 'text-red-600 font-medium' : dueSoon ? 'text-orange-600' : ''}>
-                    {formatDueDate()}
-                  </span>
-                </>
-              )}
-            </div>
+            {todo.status !== 'completed' && todo.status !== 'dismissed' && (
+              <div className="flex items-center gap-2 text-xs text-gray-500 flex-shrink-0">
+                <span className="uppercase font-medium" style={{ fontSize: '10px' }}>
+                  {todo.category.replace('_', ' ')}
+                </span>
+                {todo.due_date && (
+                  <>
+                    <span>•</span>
+                    <span className={overdue ? 'text-red-600 font-medium' : dueSoon ? 'text-orange-600' : ''}>
+                      {formatDueDate()}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
         
@@ -227,23 +221,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
           </motion.button>
         )}
         
-        {/* Checked checkbox for completed tasks */}
-        {(todo.status === 'completed' || todo.status === 'dismissed') && (
-          <div 
-            className="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0"
-            style={{ 
-              borderColor: todo.status === 'completed' ? '#10b981' : '#6b7280',
-              backgroundColor: todo.status === 'completed' ? '#10b981' : '#6b7280'
-            }}
-          >
-            {todo.status === 'completed' && (
-              <Check className="w-3 h-3 text-white" />
-            )}
-            {todo.status === 'dismissed' && (
-              <X className="w-3 h-3 text-white" />
-            )}
-          </div>
-        )}
+        {/* No checkmark for completed tasks - removed */}
         
         {/* Loading overlay */}
         {isUpdating && (
@@ -262,12 +240,8 @@ const TodoItem: React.FC<TodoItemProps> = ({
   // Default variant (existing design)
   return (
     <motion.div
-      className={`relative p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md cursor-pointer ${
-        selected ? 'ring-2 ring-blue-500' : ''
-      } ${
-        overdue ? 'border-red-200' : 
-        dueSoon ? 'border-orange-200' :
-        'border-gray-200 hover:border-gray-300'
+      className={`relative p-4 border-b border-gray-200 transition-all duration-200 hover:bg-gray-50 cursor-pointer ${
+        selected ? 'bg-blue-50' : ''
       } ${className}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -301,7 +275,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
             {/* Title and priority */}
             <div className="flex items-start justify-between gap-2 mb-2">
               <h4 
-                className={`font-semibold text-sm leading-tight ${
+                className={`font-normal text-sm leading-tight ${
                   todo.status === 'completed' ? 'line-through text-gray-500' : ''
                 }`}
                 style={{ 

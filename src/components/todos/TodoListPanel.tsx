@@ -177,12 +177,11 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
       <div className="px-4 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Target className="w-5 h-5" style={{ color: '#243F7B' }} />
             <h3 
               className="text-lg font-semibold"
               style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
             >
-              My Tasks
+              Here is your TO DO list
             </h3>
           </div>
           
@@ -199,7 +198,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="mt-4 flex space-x-1 bg-gray-100 rounded-lg p-1">
+        <div className="mt-4 flex space-x-1 rounded-lg p-1">
           {[
             { key: 'all', label: 'All', count: tabGroups.all.length },
             { key: 'completed', label: 'Completed', count: tabGroups.completed.length }
@@ -212,10 +211,13 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
                 key={key}
                 className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
                   isActive 
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'text-white shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
-                style={{ fontFamily: 'Inter, sans-serif' }}
+                style={{ 
+                  fontFamily: 'Inter, sans-serif',
+                  backgroundColor: isActive ? '#243F7B' : 'transparent'
+                }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key as any)}
@@ -242,24 +244,32 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
                 {selectedTodos.size} task{selectedTodos.size !== 1 ? 's' : ''} selected
               </span>
               <div className="flex items-center gap-2">
-                <motion.button
-                  className="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleBulkComplete}
-                >
-                  <CheckSquare className="w-4 h-4 inline mr-1" />
-                  Complete
-                </motion.button>
-                <motion.button
-                  className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleBulkDismiss}
-                >
-                  <Trash2 className="w-4 h-4 inline mr-1" />
-                  Dismiss
-                </motion.button>
+                {/* Only show Complete/Dismiss buttons if there are non-completed tasks selected */}
+                {Array.from(selectedTodos).some(todoId => {
+                  const todo = filteredTodos.find(t => t.id === todoId);
+                  return todo && todo.status !== 'completed' && todo.status !== 'dismissed';
+                }) && (
+                  <>
+                    <motion.button
+                      className="px-3 py-1 text-sm font-medium text-green-700 bg-green-100 rounded-lg hover:bg-green-200 transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleBulkComplete}
+                    >
+                      <CheckSquare className="w-4 h-4 inline mr-1" />
+                      Complete
+                    </motion.button>
+                    <motion.button
+                      className="px-3 py-1 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleBulkDismiss}
+                    >
+                      <Trash2 className="w-4 h-4 inline mr-1" />
+                      Dismiss
+                    </motion.button>
+                  </>
+                )}
                 <button
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                   onClick={handleDeselectAll}
@@ -319,7 +329,6 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <Target className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h4 
               className="text-lg font-medium text-gray-900 mb-2"
               style={{ fontFamily: 'Inter, sans-serif' }}
@@ -337,18 +346,19 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
         )}
 
         {!loading && !error && tabGroups[activeTab].length > 0 && (
-          <div className="space-y-3">
+          <div>
             <AnimatePresence mode="wait">
-              {tabGroups[activeTab].map(todo => (
-                <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  onStatusUpdate={(status) => handleStatusUpdate(todo.id, status)}
-                  onSelect={() => handleTodoSelect(todo.id)}
-                  selected={selectedTodos.has(todo.id)}
-                  showActions={true}
-                  variant="minimal"
-                />
+              {tabGroups[activeTab].map((todo, index) => (
+                <div key={todo.id} className={index === tabGroups[activeTab].length - 1 ? '' : 'border-b border-gray-200'}>
+                  <TodoItem
+                    todo={todo}
+                    onStatusUpdate={(status) => handleStatusUpdate(todo.id, status)}
+                    onSelect={() => handleTodoSelect(todo.id)}
+                    selected={selectedTodos.has(todo.id)}
+                    showActions={true}
+                    variant="minimal"
+                  />
+                </div>
               ))}
             </AnimatePresence>
           </div>
@@ -375,7 +385,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
 
       {/* Selection helper */}
       {filteredTodos.filter(t => t.status !== 'completed' && t.status !== 'dismissed').length > 0 && (
-        <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
+        <div className="px-4 py-2 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <span 
               className="text-xs text-gray-500"
