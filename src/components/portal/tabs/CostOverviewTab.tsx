@@ -557,7 +557,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW', user);
+      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW', user || undefined);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
@@ -598,6 +598,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       });
     } finally {
       setIsGenerating(false);
+      setPdfProgress({ step: '', progress: 0, isVisible: false });
     }
   };
 
@@ -681,6 +682,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       console.error('Error generating PDF preview:', error);
     } finally {
       setIsGenerating(false);
+      setPdfProgress({ step: '', progress: 0, isVisible: false });
     }
   };
 
@@ -727,7 +729,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW', user);
+      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW', user || undefined);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
@@ -768,6 +770,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       });
     } finally {
       setIsGenerating(false);
+      setPdfProgress({ step: '', progress: 0, isVisible: false });
     }
   };
 
