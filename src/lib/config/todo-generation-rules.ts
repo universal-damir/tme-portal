@@ -117,8 +117,13 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
   },
 
   'application_rejected': {
-    title: (data: NotificationData) => 
-      `Edit and resubmit ${data.application_title || data.filename || 'rejected document'}`,
+    title: (data: NotificationData) => {
+      // Extract form name from application title (remove PDF extension if present)
+      const formName = data.application_title?.replace('.pdf', '') || data.filename?.replace('.pdf', '') || 'form';
+      const rejectionReason = data.message || 'No specific reason provided';
+      
+      return `Edit ${formName} - Reason: ${rejectionReason}`;
+    },
     
     description: (data: NotificationData) => {
       const reviewerFeedback = data.message || 'No specific feedback provided';

@@ -33,7 +33,12 @@ export class NotificationTodoAutomation {
       }
 
       // Parse notification data for rule processing
-      const notificationData = notification.data || {};
+      // Include the notification message and title in the data for the todo rule
+      const notificationData = {
+        ...(notification.data || {}),
+        message: notification.message,
+        title: notification.title
+      };
 
       // Check if this is an auto-completion-only rule (no todo creation)
       const todoTitle = rule.title(notificationData);
