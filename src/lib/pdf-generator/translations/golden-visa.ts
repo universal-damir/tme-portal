@@ -128,7 +128,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
     },
     dependentCosts: {
       pageTitle: 'Dependent Visa Cost Breakdown',
-      introText: 'This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.',
+      introText: 'This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your dependent Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.',
       spouseVisaBreakdown: 'Spouse Visa Breakdown',
       childVisaBreakdown: 'Child Visa Breakdown',
       serviceExplanations: 'Service Explanations',
@@ -277,7 +277,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
     },
     dependentCosts: {
       pageTitle: 'Angehörige Visa Kostenaufschlüsselung',
-      introText: 'Diese Seite bietet eine detaillierte Aufschlüsselung aller Behördenkosten, einschließlich der TME Services Beratungsgebühr, die für Ihren Golden Visa Antrag erforderlich sind. Jede Kostenkomponente ist für vollständige Transparenz im Antragsverfahren klar aufgelistet.',
+      introText: 'Diese Seite bietet eine detaillierte Aufschlüsselung aller Behördenkosten, einschließlich der TME Services Beratungsgebühr, die für Ihren Angehörigen Golden Visa Antrag erforderlich sind. Jede Kostenkomponente ist für vollständige Transparenz im Antragsverfahren klar aufgelistet.',
       spouseVisaBreakdown: 'Ehepartner Visa Aufschlüsselung',
       childVisaBreakdown: 'Kinder Visa Aufschlüsselung',
       serviceExplanations: 'Service-Erläuterungen',

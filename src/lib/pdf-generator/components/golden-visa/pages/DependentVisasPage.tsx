@@ -12,6 +12,7 @@ import {
   generateGoldenVisaChildrenVisaBreakdown,
   generateGoldenVisaIndividualChildVisaBreakdowns
 } from '../../../utils/goldenVisaDataTransformer';
+import { DependentRequirementsSection } from '../sections/DependentRequirementsSection';
 import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
 import type { PDFComponentProps, CostItem } from '../../../types';
 import type { GoldenVisaData } from '@/types/golden-visa';
@@ -191,16 +192,22 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
     goldenVisaData.dependents?.children?.visaCancelation
   );
 
+  // Check specifically for children visa cancellation
+  const hasChildrenVisaCancellation = Boolean(
+    goldenVisaData.dependentAuthorityFees?.visaCancelation ||
+    goldenVisaData.dependents?.children?.visaCancelation
+  );
+
   // Smart pagination based on content:
-  // - Spouse + 1 child: all on one page (unless visa cancellation with 2+ children)
-  // - Spouse + 2+ children with visa cancellation: spouse on page 1, children on separate pages (max 3 per page)
-  // - Spouse + 2+ children without visa cancellation: spouse + 2 children on page 1, rest on page 2
+  // - Spouse + children with children visa cancellation: spouse on page 1, children on separate pages (max 3 per page)
+  // - Spouse + 1-2 children without children visa cancellation: all on one page
+  // - Spouse + 3+ children without children visa cancellation: spouse + children split across pages
   // - Just children: 1-2 children on one page, 3+ children split (max 3 per page if visa cancellation)
   const pageGroups = [];
   
   if (hasSpouse && hasChildren) {
-    if (hasVisaCancellation && numberOfChildren >= 2) {
-      // Special case: visa cancellation with 2+ children - spouse on page 1, children on separate pages (max 3 per page)
+    if (hasChildrenVisaCancellation && numberOfChildren >= 1) {
+      // Special case: children have visa cancellation - always separate spouse and children
       const spouseTable = tables.find(t => t.key === 'spouse');
       const childrenTables = tables.filter(t => t.key !== 'spouse');
       
@@ -215,7 +222,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
         pageGroups.push(tables);
       }
     } else if (numberOfChildren <= 2) {
-      // Spouse + 1-2 children: all on one page (when no visa cancellation or only 1 child)
+      // Spouse + 1-2 children: all on one page (when no children visa cancellation)
       pageGroups.push(tables);
     } else {
       // Spouse + 3+ children without visa cancellation: spouse on first page, children on second page
@@ -259,10 +266,10 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
         // Use consistent spacing like main visa holder
         const introSpacing = 8;
         const tableSpacing = 12;
-        const explanationMarginTop = 8;
-        const explanationMarginBottom = 16;
-        const explanationInnerMarginTop = 6;
-        const explanationTextMarginBottom = 6;
+        const explanationMarginTop = 6;  // Reduced from 8 to bring closer to tables
+        const explanationMarginBottom = 12;  // Reduced from 16 for more compact layout
+        const explanationInnerMarginTop = 4;  // Reduced from 6
+        const explanationTextMarginBottom = 4; // Reduced from 6
         
         return (
           <Page key={`page-${pageIndex}`} size="A4" style={styles.page}>
@@ -270,10 +277,21 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
 
             {/* Intro Section - only on first page */}
             {pageIndex === 0 && (
-              <View style={{ marginBottom: introSpacing }}>
+              <View style={{ marginBottom: goldenVisaData?.primaryVisaRequired ? 6 : introSpacing }}>
                 <IntroSection
                   headline={t.dependentCosts.pageTitle}
                   content={introContent}
+                />
+              </View>
+            )}
+
+            {/* Dependent Requirements Section - only on first page when primary visa is selected */}
+            {pageIndex === 0 && goldenVisaData?.primaryVisaRequired && (
+              <View style={{ marginBottom: 10 }}>
+                <DependentRequirementsSection
+                  goldenVisaData={goldenVisaData}
+                  locale={locale}
+                  showTitle={false}
                 />
               </View>
             )}

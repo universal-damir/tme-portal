@@ -32,6 +32,9 @@ const GoldenVisaTab: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
+  const [showGermanButton, setShowGermanButton] = useState(false);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressRef = useRef(false);
 
 
   // Form state management
@@ -761,6 +764,32 @@ const GoldenVisaTab: React.FC = () => {
     };
   }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
 
+  // Long press handlers for German preview
+  const handleLongPressStart = () => {
+    isLongPressRef.current = false;
+    longPressTimerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      setShowGermanButton(true);
+    }, 800); // 0.8 second long press
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handlePreviewClick = () => {
+    // Small delay to check if this was a long press
+    setTimeout(() => {
+      if (!isLongPressRef.current) {
+        handlePreviewPDF(watchedData);
+      }
+      isLongPressRef.current = false;
+    }, 50);
+  };
+
   return (
     <div className="space-y-8" style={{ fontFamily: 'Inter, sans-serif' }}>
 
@@ -804,59 +833,96 @@ const GoldenVisaTab: React.FC = () => {
         transition={{ duration: 0.5, delay: 0.4 }}
         className="text-center"
       >
-        <div className="flex justify-center space-x-4">
-          <motion.button
-            whileHover={!isGenerating ? { scale: 1.02 } : {}}
-            whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            type="button"
-            onClick={() => handlePreviewPDF(watchedData)}
-            disabled={isGenerating}
-            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3 border-2"
-            style={{ 
-              backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
-              borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
-              color: isGenerating ? '#9CA3AF' : '#243F7B'
-            }}
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <Eye className="h-5 w-5" />
-                <span>Preview PDF</span>
-              </>
-            )}
-          </motion.button>
+        <div className="flex justify-center space-x-4 relative">
+          <div className="relative">
+            <motion.button
+              whileHover={!isGenerating ? { scale: 1.02 } : {}}
+              whileTap={!isGenerating ? { scale: 0.98 } : {}}
+              type="button"
+              onClick={handlePreviewClick}
+              onMouseDown={handleLongPressStart}
+              onMouseUp={handleLongPressEnd}
+              onMouseLeave={handleLongPressEnd}
+              onTouchStart={handleLongPressStart}
+              onTouchEnd={handleLongPressEnd}
+              disabled={isGenerating}
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3 border-2"
+              style={{ 
+                backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
+                borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
+                color: isGenerating ? '#9CA3AF' : '#243F7B'
+              }}
+            >
+              {isGenerating ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-5 w-5" />
+                  <span>Preview PDF</span>
+                </>
+              )}
+            </motion.button>
 
-          {/* Preview German Button */}
-          <motion.button
-            whileHover={!isGenerating ? { scale: 1.02 } : {}}
-            whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            type="button"
-            onClick={() => handlePreviewGermanPDF(watchedData)}
-            disabled={isGenerating}
-            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-3 border-2"
-            style={{ 
-              backgroundColor: isGenerating ? '#f3f4f6' : 'transparent',
-              borderColor: isGenerating ? '#9CA3AF' : '#D2BC99',
-              color: isGenerating ? '#9CA3AF' : '#D2BC99'
-            }}
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
-                <span>Generating...</span>
-              </>
-            ) : (
-              <>
-                <Eye className="h-5 w-5" />
-                <span>Preview German 🇩🇪</span>
-              </>
+            {/* Hidden German Preview Button - Shows on long press */}
+            {showGermanButton && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="absolute -top-16 left-1/2 transform -translate-x-1/2 z-20"
+                style={{ pointerEvents: 'auto' }}
+              >
+                {/* Background overlay to capture clicks outside */}
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setShowGermanButton(false)}
+                />
+                
+                <div className="relative z-20">
+                  {/* Small arrow pointing down */}
+                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+                    <div 
+                      className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent"
+                      style={{ borderTopColor: '#D2BC99' }}
+                    />
+                  </div>
+                  
+                  <motion.button
+                    whileHover={!isGenerating ? { scale: 1.05 } : {}}
+                    whileTap={!isGenerating ? { scale: 0.95 } : {}}
+                    type="button"
+                    onClick={() => {
+                      handlePreviewGermanPDF(watchedData);
+                      setShowGermanButton(false); // Hide after use
+                    }}
+                    disabled={isGenerating}
+                    className="px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center space-x-2 border-2 shadow-lg backdrop-blur-sm"
+                    style={{ 
+                      backgroundColor: isGenerating ? '#f3f4f6' : '#D2BC99',
+                      borderColor: isGenerating ? '#9CA3AF' : '#243F7B',
+                      color: isGenerating ? '#9CA3AF' : '#243F7B'
+                    }}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: '#9CA3AF' }}></div>
+                        <span className="text-sm">Generating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-5 w-5" />
+                        <span>German Preview 🇩🇪</span>
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </motion.div>
             )}
-          </motion.button>
+          </div>
           
           {/* Submit for Review Button */}
           <motion.button
