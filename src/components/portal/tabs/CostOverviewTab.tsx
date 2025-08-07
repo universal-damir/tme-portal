@@ -35,6 +35,7 @@ import { useFormattedInputs } from '../../cost-overview/hooks/useFormattedInputs
 import { useAuthorityConfig } from '../../cost-overview/hooks/useAuthorityConfig';
 import { useCostCalculation } from '../../cost-overview/hooks/useCostCalculation';
 import { useSharedClient } from '@/contexts/SharedClientContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useChatPanel } from '@/hooks/useChatPanel';
 import { useCostOverviewApplication } from '@/hooks/useCostOverviewApplication';
@@ -62,6 +63,7 @@ interface CostOverviewTabProps {
 const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   
   const { clientInfo, updateClientInfo } = useSharedClient();
+  const { user } = useAuth();
   const chatPanel = useChatPanel();
   const [emailDraftProps, setEmailDraftProps] = React.useState<EmailDraftGeneratorProps | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = React.useState(false);
@@ -555,7 +557,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW');
+      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW', user);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
@@ -725,7 +727,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW');
+      const emailProps = createEmailDataFromFormData(data, mainPdfBlob, mainFilename, 'COST_OVERVIEW', user);
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
