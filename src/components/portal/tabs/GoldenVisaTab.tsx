@@ -25,8 +25,6 @@ import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewS
 
 
 const GoldenVisaTab: React.FC = () => {
-  console.log('🔧 GOLDEN-VISA-TAB: Component mounting/rendering at', new Date().toISOString());
-  console.log('🔧 GOLDEN-VISA-TAB: Current window hash:', window.location.hash);
   
   const { clientInfo, updateClientInfo } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);

@@ -201,27 +201,38 @@ export function TMEPortalHeader({
               <>
                 <Separator orientation="vertical" className="mx-2 h-4" />
                 
-                {/* Notification Badge */}
-                <div className="relative">
-                  <NotificationBadge
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setIsNotificationPanelOpen(!isNotificationPanelOpen);
-                    }}
-                    size="sm"
-                  />
+                <div className="flex items-center gap-3">
+                  {/* Notification Badge */}
+                  <div className="relative">
+                    <NotificationBadge
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setIsNotificationPanelOpen(!isNotificationPanelOpen);
+                      }}
+                      size="xs"
+                    />
+                    
+                    {/* Notification Panel */}
+                    <NotificationPanel
+                      isOpen={isNotificationPanelOpen}
+                      onClose={() => setIsNotificationPanelOpen(false)}
+                      onNotificationClick={handleNotificationClick}
+                    />
+                  </div>
                   
-                  {/* Notification Panel */}
-                  <NotificationPanel
-                    isOpen={isNotificationPanelOpen}
-                    onClose={() => setIsNotificationPanelOpen(false)}
-                    onNotificationClick={handleNotificationClick}
-                  />
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  {/* Profile Photo - Clickable */}
+                  <Button 
+                    variant="ghost" 
+                    className="relative h-8 w-8 rounded-full"
+                    onClick={() => {
+                      const switchTabEvent = new CustomEvent('switch-tab', {
+                        detail: { tab: 'profile' }
+                      });
+                      window.dispatchEvent(switchTabEvent);
+                    }}
+                    title="Go to Profile"
+                  >
                     <UserAvatar user={user} size="sm" />
                   </Button>
                 </div>

@@ -168,7 +168,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
 
   return (
     <motion.div
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`}
+      className={`bg-white rounded-lg shadow-sm border border-gray-200 w-full max-w-full overflow-hidden ${className}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -285,7 +285,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
 
       {/* Todo list */}
       <div 
-        className="p-4 overflow-y-auto"
+        className="p-4 overflow-y-auto overflow-x-hidden"
         style={{ maxHeight }}
       >
         {loading && filteredTodos.length === 0 && (

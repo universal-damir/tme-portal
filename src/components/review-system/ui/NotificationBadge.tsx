@@ -13,7 +13,7 @@ interface NotificationBadgeProps {
   onClick?: () => void;
   className?: string;
   showCount?: boolean;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
 export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
@@ -31,12 +31,14 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   }
 
   const sizeClasses = {
+    xs: 'w-5 h-5',
     sm: 'w-6 h-6',
     md: 'w-8 h-8',
     lg: 'w-10 h-10'
   };
 
   const badgeClasses = {
+    xs: 'w-2.5 h-2.5 text-xs',
     sm: 'w-3 h-3 text-xs',
     md: 'w-4 h-4 text-xs',
     lg: 'w-5 h-5 text-sm'
@@ -86,7 +88,7 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
               min-w-max px-1
             `}
             style={{
-              fontSize: size === 'sm' ? '10px' : size === 'md' ? '11px' : '12px'
+              fontSize: size === 'xs' ? '8px' : size === 'sm' ? '10px' : size === 'md' ? '11px' : '12px'
             }}
           >
             {unreadCount > 99 ? '99+' : unreadCount}

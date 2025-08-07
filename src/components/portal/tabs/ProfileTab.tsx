@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle, Download } from 'lucide-react'
+import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle, Download, Upload } from 'lucide-react'
 import { TodoListPanel } from '@/components/todos'
 
 interface ActivityLog {
@@ -110,58 +110,36 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
       <Card>
         <CardContent className="p-4">
           {/* Welcome Message */}
-          <div className="mb-3">
+          <div className="mb-6">
             <h1 className="text-xl font-bold">
               Hey, {firstName}!
             </h1>
           </div>
 
-          {/* Profile Details */}
-          <div className="flex flex-wrap gap-x-8 gap-y-2 mb-4">
-            <div>
-              <p className="text-xs font-medium text-gray-500">Employee Code</p>
-              <p className="text-sm">{user.employee_code}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500">Email</p>
-              <p className="text-sm">{user.email}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500">Department</p>
-              <p className="text-sm">{user.department}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500">Designation</p>
-              <p className="text-sm">{user.designation}</p>
-            </div>
-          </div>
-
-          <Separator className="my-3" />
-
-          {/* Split Layout: Recent Activities (50%) + Todo List (50%) */}
+          {/* Main Content: Recent Activity + Todo List Side by Side */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* Recent Activities Panel */}
+            {/* Left Column: Recent Activity Panel */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="xl:max-h-[600px]"
+              className="xl:max-h-[400px]"
             >
-            <h3 className="text-lg font-semibold mb-4" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
               Recent Activity
             </h3>
-            <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            <p className="text-sm text-gray-600 mb-3" style={{ fontFamily: 'Inter, sans-serif' }}>
               Latest system activities and user actions
             </p>
             
             {loadingActivities ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse p-4 rounded-lg bg-gray-50">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-8 h-8 bg-gray-300 rounded-lg"></div>
+                  <div key={i} className="animate-pulse p-2 rounded-lg bg-gray-50">
+                    <div className="flex items-start space-x-2">
+                      <div className="w-6 h-6 bg-gray-300 rounded-lg"></div>
                       <div className="flex-1">
-                        <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-300 rounded w-3/4 mb-1"></div>
                         <div className="h-3 bg-gray-300 rounded w-1/2"></div>
                       </div>
                     </div>
@@ -169,9 +147,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                 ))}
               </div>
             ) : activities.length > 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-[480px] overflow-y-auto">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden max-h-[300px] overflow-y-auto">
                 <div className="divide-y divide-gray-100">
-                  {(showAllActivities ? activities : activities.slice(0, 5))
+                  {(showAllActivities ? activities : activities.slice(0, 4))
                     .filter(activity => !activity.action.includes('todo_')) // Filter out todo-related activities
                     .map((activity, index) => {
                     // Format activity type to be more readable
@@ -179,7 +157,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                       if (action === 'pdf_generated') {
                         const filename = details?.filename;
                         if (filename) {
-                          return `Generated ${filename}`;
+                          return (
+                            <>Generated <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span></>
+                          );
                         }
                         const documentType = details?.document_type || 'Document';
                         const clientName = details?.client_name ? ` for ${details.client_name}` : '';
@@ -188,7 +168,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                       if (action === 'pdf_sent') {
                         const filename = details?.filename;
                         if (filename) {
-                          return `Sent ${filename}`;
+                          return (
+                            <>Sent <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span></>
+                          );
                         }
                         const documentType = details?.document_type || 'Document';
                         const clientName = details?.client_name;
@@ -200,7 +182,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                       if (action === 'pdf_downloaded') {
                         const filename = details?.filename;
                         if (filename) {
-                          return `Downloaded ${filename}`;
+                          return (
+                            <>Downloaded <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span></>
+                          );
                         }
                         const documentType = details?.document_type || 'Document';
                         const clientName = details?.client_name;
@@ -212,7 +196,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                       if (action === 'pdf_previewed') {
                         const filename = details?.filename;
                         if (filename) {
-                          return `Previewed ${filename}`;
+                          return (
+                            <>Previewed <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span></>
+                          );
                         }
                         const documentType = details?.document_type || 'Document';
                         const clientName = details?.client_name ? ` for ${details.client_name}` : '';
@@ -228,18 +214,26 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         
                         if (filename) {
                           if (reviewerName) {
-                            return `Submitted ${filename} for review to ${reviewerName}`;
+                            return (
+                              <>Submitted <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span> for review to {reviewerName}</>
+                            );
                           }
-                          return `Submitted ${filename} for review`;
+                          return (
+                            <>Submitted <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span> for review</>
+                          );
                         }
                         
                         // Try to get form name from details, fallback to generic message
                         const formName = details?.form_name || details?.application_title || details?.title;
                         if (formName) {
                           if (reviewerName) {
-                            return `Submitted ${formName} for review to ${reviewerName}`;
+                            return (
+                              <>Submitted <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{formName}</span> for review to {reviewerName}</>
+                            );
                           }
-                          return `Submitted ${formName} for review`;
+                          return (
+                            <>Submitted <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{formName}</span> for review</>
+                          );
                         }
                         
                         if (reviewerName) {
@@ -251,7 +245,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         // Check if we have a PDF filename first (for consistency)
                         const filename = details?.filename;
                         if (filename) {
-                          return `Approved ${filename}`;
+                          return (
+                            <>Approved <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span></>
+                          );
                         }
                         
                         // Try to get form name from details, fallback to generic message
@@ -265,7 +261,9 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         // Check if we have a PDF filename first (for consistency)
                         const filename = details?.filename;
                         if (filename) {
-                          return `Rejected ${filename}`;
+                          return (
+                            <>Rejected <span style={{ fontWeight: 'normal', textDecoration: 'underline' }}>{filename}</span></>
+                          );
                         }
                         
                         // Try to get form name from details, fallback to generic message
@@ -331,7 +329,7 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                       
                       // Review system activities
                       if (action === 'form_submitted_for_review') 
-                        return { bg: 'bg-orange-100', icon: Send, iconColor: 'text-orange-600', category: 'Review Submission' };
+                        return { bg: 'bg-orange-100', icon: Upload, iconColor: 'text-orange-600', category: 'Review Submission' };
                       if (action === 'review_approved') 
                         return { bg: 'bg-green-100', icon: CheckCircle, iconColor: 'text-green-600', category: 'Review Approved' };
                       if (action === 'review_rejected') 
@@ -349,30 +347,18 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className="p-4 hover:bg-gray-50 transition-colors duration-150"
+                        className="p-2 hover:bg-gray-50 transition-colors duration-150"
                       >
-                        <div className="flex items-start space-x-3">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${config.bg}`}>
+                        <div className="flex items-start space-x-2">
+                          <div className="w-6 h-6 flex items-center justify-center">
                             <IconComponent className={`w-4 h-4 ${config.iconColor}`} />
                           </div>
                           
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
-                                {formatActivityType(activity.action, activity.details)}
-                              </p>
-                              <span 
-                                className="text-xs font-medium px-2 py-1 rounded-full" 
-                                style={{ 
-                                  backgroundColor: '#f3f4f6', 
-                                  color: '#243F7B',
-                                  fontFamily: 'Inter, sans-serif'
-                                }}
-                              >
-                                {config.category}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-500 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
+                            <p className="text-xs font-medium text-gray-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+                              {formatActivityType(activity.action, activity.details)}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5" style={{ fontFamily: 'Inter, sans-serif' }}>
                               {formatDate(activity.created_at)}
                             </p>
                           </div>
@@ -383,31 +369,31 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                 </div>
                 
                 {/* Activity Feed Footer */}
-                {activities.length > 5 && (
-                  <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+                {activities.length > 4 && (
+                  <div className="px-3 py-2 border-t border-gray-200 bg-gray-50">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setShowAllActivities(!showAllActivities)}
-                      className="w-full text-center text-sm font-medium py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100"
+                      className="w-full text-center text-xs font-medium py-1 rounded-lg transition-colors duration-150 hover:bg-gray-100"
                       style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
                     >
-                      {showAllActivities ? 'Show Less Activities' : `View All Activities (${activities.length})`}
+                      {showAllActivities ? 'Show Less' : `View All (${activities.length})`}
                     </motion.button>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center">
-                <FileText className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+                <FileText className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                <p className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>
                   No recent activity to display
                 </p>
               </div>
             )}
             </motion.div>
 
-            {/* Todo List Panel */}
+            {/* Right Column: Todo List Panel */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
