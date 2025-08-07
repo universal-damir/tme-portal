@@ -27,6 +27,8 @@ export interface EmailRecipientData {
   firstName?: string;
   lastName?: string;
   companyName?: string;
+  authorityName?: string;
+  senderName?: string;
 }
 
 // PDF attachment data interface
@@ -58,13 +60,18 @@ export interface EmailDraftGeneratorProps {
 export const EMAIL_TEMPLATES = {
   COST_OVERVIEW: {
     subject: '', // Will be set from PDF filename
-    greeting: 'Dear {firstName}, this is an offer as we discussed.',
+    greeting: 'Hello {firstName},',
     previewText: 'Your UAE business setup offer is ready - detailed pricing and services included',
     bodyContent: [
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600; font-weight: bold;">✓ Approved services and pricing</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #cc0000; text-decoration: underline;">⚠ Important terms and conditions</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #DAA520;">⏳ Pending documentation requirements</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc;">ℹ Additional information and next steps</span>'
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We are sharing with you our cost overview for setting up a company under the {authorityName} in Dubai.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #006600; font-weight: bold;">green</span> represent one-time costs related to the company formation.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #0066cc; font-weight: bold;">blue</span> indicate visa-related costs; each visa is valid for two years.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #DAA520; font-weight: bold;">yellow</span> reflect the annual license renewal fees, which apply from the second year onward.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #FF8C00; font-weight: bold;">orange</span> represent additional service offerings that are commonly required.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">If you have any questions or need clarification, please don\'t hesitate to reply to this email. A member of our team will get back to you promptly.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We look forward to hearing from you.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">{senderName}</span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -225,13 +232,17 @@ const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipien
   const firstName = recipients.firstName || 'Client';
   const lastName = recipients.lastName || '';
   const companyName = recipients.companyName || '';
+  const authorityName = recipients.authorityName || 'Authority';
+  const senderName = recipients.senderName || 'TME Services Team';
 
   // Replace template variables
   const processText = (text: string): string => {
     return text
       .replace(/{firstName}/g, firstName)
       .replace(/{lastName}/g, lastName)
-      .replace(/{companyName}/g, companyName);
+      .replace(/{companyName}/g, companyName)
+      .replace(/{authorityName}/g, authorityName)
+      .replace(/{senderName}/g, senderName);
   };
 
   return {
@@ -255,8 +266,7 @@ const createFormattedEmailHTML = (template: EmailTemplate): string => {
   
   htmlContent += `
     <div style="font-family: ${fontFamily}; font-size: ${fontSize}; line-height: 1.4; color: #333;">
-      <p style="margin-bottom: 16px;">${greeting}</p>
-      <br>
+      <p style="margin-bottom: 12px;">${greeting}</p>
   `;
   
   // Add body content with proper spacing
@@ -317,7 +327,8 @@ export const createEmailDataFromFormData = (
   formData: any,
   pdfBlob: Blob,
   pdfFilename: string,
-  templateType: keyof typeof EMAIL_TEMPLATES
+  templateType: keyof typeof EMAIL_TEMPLATES,
+  userInfo?: { full_name?: string } // Optional user info parameter
 ): EmailDraftGeneratorProps => {
   
   // Extract client details (handles different form structures)
@@ -327,7 +338,10 @@ export const createEmailDataFromFormData = (
     emails: clientDetails.clientEmails || [],
     firstName: clientDetails.firstName,
     lastName: clientDetails.lastName,
-    companyName: clientDetails.companyName
+    companyName: clientDetails.companyName,
+    // Add additional data for template processing
+    authorityName: formData.authorityInformation?.responsibleAuthority || 'Authority',
+    senderName: userInfo?.full_name || 'TME Services Team' // Use actual user name if available
   };
 
   const template: EmailTemplate = {
