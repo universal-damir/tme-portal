@@ -484,7 +484,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     
     console.log('📝 SIMPLE: Navigating to edit rejected application:', application.id);
     
-    // Navigate to correct tab - form will load with preserved state
+    // Navigate to correct tab
     const tabMapping: Record<string, string> = {
       'cost_overview': '#cost-overview',
       'golden_visa': '#golden-visa',
@@ -499,12 +499,28 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     // Navigate to tab
     window.location.hash = targetHash;
     
-    // Close modal
+    // Close modal first
     onClose();
     
-    toast.info('Navigate to form to make edits', {
-      description: 'Your previous data has been preserved',
-      duration: 3000
+    // Dispatch event to load form data (same as approved applications)
+    const eventName = `edit-${frontendType}-application`;
+    const editEvent = new CustomEvent(eventName, {
+      detail: {
+        applicationId: application.id,
+        formData: application.form_data
+      }
+    });
+    
+    console.log(`📝 DISPATCHING EVENT: ${eventName} with data for application ${application.id}`);
+    
+    // Dispatch immediately after navigation
+    setTimeout(() => {
+      window.dispatchEvent(editEvent);
+    }, 100); // Small delay to ensure tab is ready
+    
+    toast.success('Form loaded with your previous data', {
+      description: 'You can now make changes and resubmit',
+      duration: 4000
     });
   };
 
