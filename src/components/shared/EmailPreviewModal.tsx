@@ -5,7 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Edit2, Paperclip, Download } from 'lucide-react';
+import { X, Send, Edit2, Paperclip, Download, Languages } from 'lucide-react';
+import { EMAIL_TEMPLATES, EMAIL_TEMPLATES_DE, EmailTemplate, EmailRecipientData, processEmailTemplate, createFormattedEmailHTML } from './EmailDraftGenerator';
 
 export interface EmailPreviewData {
   to: string[];
@@ -37,6 +38,9 @@ export interface EmailPreviewModalProps {
     document_type: string; // e.g., 'Golden Visa', 'Cost Overview'
     filename?: string; // e.g., '250806 Novalic Damir IFZA 1 0 0 0 0 setup AED EUR.pdf'
   };
+  // Props for language switching
+  templateType?: keyof typeof EMAIL_TEMPLATES; // e.g., 'COST_OVERVIEW', 'GOLDEN_VISA'
+  recipientData?: EmailRecipientData;
 }
 
 export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
@@ -48,7 +52,9 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   pdfBlob,
   pdfFilename,
   additionalPdfs = [],
-  activityLogging
+  activityLogging,
+  templateType,
+  recipientData
 }) => {
   const [editableSubject, setEditableSubject] = useState(emailData.subject);
   const [editableRecipients, setEditableRecipients] = useState(emailData.to.join(', '));
@@ -57,6 +63,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   const [isEditingSubject, setIsEditingSubject] = useState(false);
   const [isEditingRecipients, setIsEditingRecipients] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'de'>('en');
 
   // Convert HTML to plain text for editing (preserve some formatting indicators)
   const htmlToPlainText = (html: string): string => {
@@ -329,13 +336,59 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                 <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
                   Email Content:
                 </label>
-                <button
-                  onClick={() => setIsEditingContent(!isEditingContent)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title={isEditingContent ? 'Preview Mode' : 'Edit Mode'}
-                >
-                  <Edit2 size={16} />
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Language Toggle Switch */}
+                  {templateType && recipientData && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium" style={{ color: '#243F7B' }}>EN</span>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => {
+                          const newLang = language === 'en' ? 'de' : 'en';
+                          setLanguage(newLang);
+                          
+                          // Get the appropriate template
+                          const templates = newLang === 'de' ? EMAIL_TEMPLATES_DE : EMAIL_TEMPLATES;
+                          const template = templates[templateType];
+                          
+                          // Process template with recipient data
+                          const processedTemplate = processEmailTemplate(template, recipientData);
+                          
+                          // Generate new HTML content
+                          const newHtmlContent = createFormattedEmailHTML(processedTemplate);
+                          
+                          // Update content states
+                          setEditableContent(newHtmlContent);
+                          setPlainTextContent(htmlToPlainText(newHtmlContent));
+                        }}
+                        className={`relative w-10 h-5 rounded-full transition-all duration-200 ${
+                          language === 'de' ? 'shadow-sm' : ''
+                        }`}
+                        style={{ 
+                          backgroundColor: language === 'de' ? '#243F7B' : '#e5e7eb' 
+                        }}
+                        title="Switch Language"
+                      >
+                        <motion.div
+                          animate={{ 
+                            x: language === 'de' ? 20 : 2,
+                          }}
+                          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                          className="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-sm"
+                        />
+                      </motion.button>
+                      <span className="text-xs font-medium" style={{ color: '#243F7B' }}>DE</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setIsEditingContent(!isEditingContent)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    title={isEditingContent ? 'Preview Mode' : 'Edit Mode'}
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                </div>
               </div>
               
               {isEditingContent ? (

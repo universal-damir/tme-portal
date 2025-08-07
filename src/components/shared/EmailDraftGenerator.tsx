@@ -55,6 +55,8 @@ export interface EmailDraftGeneratorProps {
     document_type: string; // e.g., 'Golden Visa', 'Cost Overview'
     filename?: string; // e.g., '250806 Novalic Damir IFZA 1 0 0 0 0 setup AED EUR.pdf'
   };
+  // Props for language switching in modal
+  templateType?: keyof typeof EMAIL_TEMPLATES;
 }
 
 // Default email templates for different tabs with Arial 10pt formatting
@@ -97,7 +99,7 @@ export const EMAIL_TEMPLATES = {
   },
   COMPANY_SERVICES: {
     subject: '', // Will be set from PDF filename
-    greeting: 'Dear {firstName},',
+    greeting: 'Hello {firstName},',
     previewText: 'Your customized company services proposal is ready - tailored for your UAE business needs',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Attached is a customized overview of our services and pricing, tailored to support your business setup and compliance needs in the UAE.</span>',
@@ -118,6 +120,76 @@ export const EMAIL_TEMPLATES = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please review the taxation services proposal attached to this email.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #006600;">✓ Compliance requirements covered</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc;">Our team is available to answer any questions you may have.</span>'
+    ],
+    includeColoredText: true,
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '10pt'
+  }
+} as const;
+
+// German email templates
+export const EMAIL_TEMPLATES_DE = {
+  COST_OVERVIEW: {
+    subject: '', // Will be set from PDF filename
+    greeting: 'Hallo {firstName},',
+    previewText: 'Ihre Kostenübersicht für die UAE Firmengründung ist bereit - detaillierte Preise und Services inklusive',
+    bodyContent: [
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei erhalten Sie unsere Kostenübersicht für die Gründung einer Gesellschaft unter der {authorityName} in Dubai.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Die <span style="color: #006600; font-weight: bold;">grün</span> markierten Positionen stellen einmalige Kosten im Zusammenhang mit der Firmengründung dar.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Die <span style="color: #0066cc; font-weight: bold;">blau</span> markierten Positionen beziehen sich auf Visakosten; jedes Visum ist zwei Jahre gültig.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Die <span style="color: #DAA520; font-weight: bold;">gelb</span> markierten Positionen zeigen die jährlichen Lizenzverlängerungsgebühren, die ab dem zweiten Jahr anfallen.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Die <span style="color: #FF8C00; font-weight: bold;">orange</span> markierten Positionen betreffen zusätzliche Serviceleistungen, die häufig benötigt werden.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte prüfen Sie die beigefügte Übersicht und senden Sie uns eine unterschriebene Kopie zur Ablage zurück.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Falls Sie Fragen haben oder weitere Informationen benötigen, antworten Sie gerne auf diese E-Mail. Ein Mitglied unseres Teams wird sich zeitnah bei Ihnen melden.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Wir freuen uns auf Ihre Rückmeldung.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
+    ],
+    includeColoredText: true,
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '10pt'
+  },
+  GOLDEN_VISA: {
+    subject: '', // Will be set from PDF filename
+    greeting: 'Hallo {firstName},',
+    previewText: 'Ihr UAE Golden Visa Angebot ist bereit - personalisierte Dokumentation und Preise inklusive',
+    bodyContent: [
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">wir freuen uns, Ihnen ein personalisiertes Angebot für das UAE Golden Visa zu unterbreiten, das auf Ihre spezifischen Bedürfnisse zugeschnitten ist.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Das Dokument enthält eine Übersicht über die Visa-Anforderungen, eine Aufschlüsselung des Prozesses und unseren Leistungsumfang. Bitte prüfen Sie das Angebot und senden Sie uns eine unterschriebene Kopie zur Ablage zurück.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Nach Erhalt Ihrer Bestätigung werden wir die nächsten Schritte koordinieren und Sie bei den erforderlichen Dokumenten und Terminen unterstützen.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bei Fragen stehen wir Ihnen gerne zur Verfügung.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
+    ],
+    includeColoredText: true,
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '10pt'
+  },
+  COMPANY_SERVICES: {
+    subject: '', // Will be set from PDF filename
+    greeting: 'Hallo {firstName},',
+    previewText: 'Ihr maßgeschneidertes Unternehmensservice-Angebot ist bereit - zugeschnitten auf Ihre UAE Geschäftsbedürfnisse',
+    bodyContent: [
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie eine maßgeschneiderte Übersicht unserer Services und Preise, die darauf ausgerichtet sind, Ihre Unternehmensgründung und Compliance-Anforderungen in den VAE zu unterstützen.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Das Angebot beschreibt die Bereiche, in denen wir Sie unterstützen können und gibt Ihnen einen klaren Überblick darüber, wie wir Mehrwert für Ihre Geschäftstätigkeit schaffen können.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte zögern Sie nicht, sich zu melden, falls Sie Fragen haben oder fortfahren möchten.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
+    ],
+    includeColoredText: true,
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '10pt'
+  },
+  TAXATION: {
+    subject: '', // Will be set from PDF filename
+    greeting: 'Liebe/r {firstName},',
+    previewText: 'Ihr Steuerberatungs-Angebot ist bereit',
+    bodyContent: [
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie unser Angebot für Steuerberatungsleistungen.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte prüfen Sie das beigefügte Angebot.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Unser Team steht Ihnen für Fragen gerne zur Verfügung.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; margin-bottom: 3px;">{senderName}<br><span style="font-weight: normal;">{senderDesignation}</span></span>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -227,7 +299,7 @@ export const useEmailDraftGenerator = () => {
 };
 
 // Process email template with dynamic variables
-const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipientData): EmailTemplate => {
+export const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipientData): EmailTemplate => {
   const firstName = recipients.firstName || 'Client';
   const lastName = recipients.lastName || '';
   const companyName = recipients.companyName || '';
@@ -255,7 +327,7 @@ const processEmailTemplate = (template: EmailTemplate, recipients: EmailRecipien
 };
 
 // Create formatted HTML email content
-const createFormattedEmailHTML = (template: EmailTemplate): string => {
+export const createFormattedEmailHTML = (template: EmailTemplate): string => {
   const { greeting, bodyContent, signature, previewText, fontFamily = 'Arial, sans-serif', fontSize = '10pt' } = template;
   
   let htmlContent = ``;
@@ -317,6 +389,8 @@ export const EmailDraftGenerator: React.FC<EmailDraftGeneratorProps> = (props) =
           pdfFilename={pdfFilename || undefined}
           additionalPdfs={additionalPdfs}
           activityLogging={props.activityLogging}
+          templateType={props.templateType}
+          recipientData={props.recipients}
         />
       )}
     </>
@@ -360,7 +434,8 @@ export const createEmailDataFromFormData = (
   return {
     recipients,
     template,
-    attachments
+    attachments,
+    templateType
   };
 };
 
