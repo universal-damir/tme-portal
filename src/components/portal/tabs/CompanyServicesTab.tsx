@@ -33,6 +33,7 @@ const CompanyServicesTab: React.FC = () => {
     register,
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<CompanyServicesData>({
     resolver: zodResolver(companyServicesSchema),
@@ -67,6 +68,122 @@ const CompanyServicesTab: React.FC = () => {
   });
 
   const watchedData = watch();
+
+  // Helper function to scroll to and highlight the first error field
+  const scrollToFirstError = (validationError: any) => {
+    const errors = validationError.errors || [];
+    if (errors.length === 0) return;
+    
+    // Prioritize errors - mandatory fields first, then others
+    const priorityOrder = [
+      'firstName',
+      'lastName',
+      'email', // This will come from clientInfo validation
+      'companyName',
+      'shortCompanyName',
+    ];
+    
+    // Sort errors by priority
+    const sortedErrors = [...errors].sort((a, b) => {
+      const aPath = a.path.join('.');
+      const bPath = b.path.join('.');
+      const aIndex = priorityOrder.findIndex(p => aPath.startsWith(p));
+      const bIndex = priorityOrder.findIndex(p => bPath.startsWith(p));
+      
+      // If both found in priority list, use that order
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      // If only one found, prioritize it
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      // If neither found, keep original order
+      return 0;
+    });
+    
+    const firstError = sortedErrors[0];
+    const fieldPath = firstError.path;
+    const pathStr = fieldPath.join('.');
+    
+    // Enhanced field mapping with multiple selector strategies
+    const getFieldElement = (path: string[]) => {
+      const pathStr = path.join('.');
+      
+      // Primary selectors - exact field targeting
+      const selectors = [
+        `input[name="${pathStr}"]`,
+        `select[name="${pathStr}"]`,
+        `textarea[name="${pathStr}"]`,
+        `[data-field="${pathStr}"]`,
+        // Radio button groups
+        `input[name="${pathStr}"][type="radio"]`,
+      ].filter(Boolean);
+      
+      // Try each selector until we find an element
+      for (const selector of selectors) {
+        const element = document.querySelector(selector as string);
+        if (element) {
+          return element;
+        }
+      }
+      
+      // Fallback: try to find by partial name match
+      const fallbackElement = document.querySelector(`[name*="${fieldPath[fieldPath.length - 1]}"]`);
+      if (fallbackElement) {
+        return fallbackElement;
+      }
+      
+      return null;
+    };
+    
+    let fieldElement = getFieldElement(fieldPath);
+    
+    if (fieldElement) {
+      // Scroll to the field with smooth animation
+      fieldElement.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center',
+        inline: 'nearest'
+      });
+      
+      // Add visual highlight effect with enhanced styling
+      const originalTransition = (fieldElement as HTMLElement).style.transition;
+      fieldElement.classList.add('ring-4', 'ring-red-400', 'ring-opacity-75');
+      (fieldElement as HTMLElement).style.transition = 'all 0.3s ease';
+      (fieldElement as HTMLElement).style.transform = 'scale(1.02)';
+      
+      // For custom dropdowns and radio groups, also highlight the container
+      const container = fieldElement.closest('.space-y-4, .grid, .flex');
+      if (container && container !== fieldElement) {
+        container.classList.add('bg-red-50', 'rounded-lg');
+      }
+      
+      // Focus the field if it's focusable
+      if (fieldElement instanceof HTMLInputElement || 
+          fieldElement instanceof HTMLSelectElement || 
+          fieldElement instanceof HTMLButtonElement ||
+          fieldElement instanceof HTMLTextAreaElement) {
+        setTimeout(() => {
+          fieldElement.focus();
+        }, 600);
+      }
+      
+      // Remove highlight after 4 seconds
+      setTimeout(() => {
+        fieldElement.classList.remove('ring-4', 'ring-red-400', 'ring-opacity-75');
+        (fieldElement as HTMLElement).style.transform = '';
+        (fieldElement as HTMLElement).style.transition = originalTransition;
+        
+        // Remove container highlight
+        if (container && container !== fieldElement) {
+          container.classList.remove('bg-red-50', 'rounded-lg');
+        }
+      }, 4000);
+    } else {
+      // Simple fallback - scroll to top of form
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // Review system integration
   const reviewApp = useCompanyServicesApplication({
@@ -139,9 +256,23 @@ const CompanyServicesTab: React.FC = () => {
 
   // PDF generation handlers
   const handleGeneratePDF = async (data: CompanyServicesData): Promise<void> => {
-    // Validate required data before generating PDF
-    if (!data.firstName && !data.lastName && !data.companyName) {
-      alert('Please enter either client name (first/last) or company name before generating the PDF.');
+    // Validate the entire form data using Zod schema
+    try {
+      await companyServicesSchema.parseAsync(data);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+
+    // Additional check for email from clientInfo
+    if (!clientInfo.email?.trim()) {
+      toast.error('Missing Information', {
+        description: 'Email is required. Please fill it in the client information section.'
+      });
       return;
     }
 
@@ -279,10 +410,50 @@ const CompanyServicesTab: React.FC = () => {
     }
   };
 
+  // Submit for review validation handler
+  const handleSubmitForReview = async () => {
+    // Validate the entire form data using Zod schema
+    try {
+      await companyServicesSchema.parseAsync(watchedData);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+
+    // Additional check for email from clientInfo
+    if (!clientInfo.email?.trim()) {
+      toast.error('Missing Information', {
+        description: 'Email is required. Please fill it in the client information section.'
+      });
+      return;
+    }
+
+    // If validation passes, open review modal
+    setIsReviewModalOpen(true);
+  };
+
   const handlePreviewPDF = async (data: CompanyServicesData): Promise<void> => {
-    // Validate required data before generating PDF
-    if (!data.firstName && !data.lastName && !data.companyName) {
-      alert('Please enter either client name (first/last) or company name before generating the PDF.');
+    // Validate the entire form data using Zod schema
+    try {
+      await companyServicesSchema.parseAsync(data);
+    } catch (validationError: any) {
+      // Trigger form validation to show field-level errors
+      await trigger();
+      
+      // Scroll to and highlight the first error field
+      scrollToFirstError(validationError);
+      return;
+    }
+
+    // Additional check for email from clientInfo
+    if (!clientInfo.email?.trim()) {
+      toast.error('Missing Information', {
+        description: 'Email is required. Please fill it in the client information section.'
+      });
       return;
     }
 
@@ -480,7 +651,7 @@ const CompanyServicesTab: React.FC = () => {
           {/* Submit for Review Button */}
           <motion.button
             type="button"
-            onClick={() => setIsReviewModalOpen(true)}
+            onClick={handleSubmitForReview}
             disabled={reviewApp.isLoading}
             whileHover={!reviewApp.isLoading ? { scale: 1.02 } : {}}
             whileTap={!reviewApp.isLoading ? { scale: 0.98 } : {}}

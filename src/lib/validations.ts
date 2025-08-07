@@ -134,8 +134,8 @@ export const additionalServicesSchema = z.object({
 // Golden Visa validation schema
 export const goldenVisaSchema = z.object({
   // Client Details
-  firstName: z.string().optional(),
-  lastName: z.string().optional(), 
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be less than 50 characters'), 
   companyName: z.string().optional(),
   date: z.string().min(1, 'Date is required'),
   clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
@@ -250,8 +250,8 @@ export const backOfficeServicesSchema = z.object({
 
 // Company Services validation schema
 export const companyServicesSchema = z.object({
-  firstName: z.string().max(50, 'First name must be less than 50 characters').optional(),
-  lastName: z.string().max(50, 'Last name must be less than 50 characters').optional(),
+  firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
+  lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be less than 50 characters'),
   companyName: z.string().max(100, 'Company name must be less than 100 characters').optional(),
   date: z.string().min(1, 'Date is required'),
   clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
