@@ -27,13 +27,13 @@ export const GOLDEN_VISA_TRANSLATIONS = {
         processingTime: 'Processing time',
         processingTimeText: 'Approximately 10 - 15 working days. The applicant must be in the UAE to start the visa process and must remain in the UAE throughout the entire processing period.',
         healthInsurance: 'Health insurance',
-        healthInsuranceText: 'Required. Must be either UAE registered or international health insurance.',
+        healthInsuranceText: 'Required. Must be either a UAE registered or an international health insurance.',
         medicalEmirates: 'Medical test & Emirates ID',
         medicalEmiratesText: 'Your physical presence is required for both the medical test and Emirates ID appointment. We will arrange the appointments for you, and an experienced member of our team will accompany you. Your original passport is required for both appointments.'
       },
       propertyInvestment: {
         minProperty: 'Minimum property value',
-        minPropertyText: 'AED 2,000,000 per person. Joint ownership is permitted.\nUnder-construction properties require NOC (No Objection Certificate) and payment proof from developer.',
+        minPropertyText: 'AED 2,000,000 per person. Joint ownership is permitted.\nUnder-construction properties require a NOC (No Objection Certificate) and payment plan from developer.',
         propertyTypes: 'Eligible property types',
         propertyTypesText: 'Only villas and apartments are eligible.'
       },
@@ -46,7 +46,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
       },
       skilledEmployee: {
         education: 'Educational qualification',
-        educationText: 'Bachelor or Master certificate with transcript. Requires a multi-step attestation process ending with authentication by the UAE Embassy in the country of origin.',
+        educationText: 'Bachelor or Master certificate with transcript. Requires a multi-step process ending with attestation by the UAE Embassy in the country of origin.',
         equivalency: 'Equivalency certificate',
         equivalencyText: 'This document must be obtained by the customer from the Ministry of Education in Dubai.',
         equivalencyLink: 'Link to Ministry of Education website.',
@@ -61,14 +61,14 @@ export const GOLDEN_VISA_TRANSLATIONS = {
         bankStatements: 'Bank statements',
         bankStatementsText: '6 months personal bank statements reflecting a monthly salary of AED 30,000 or more.',
         residenceProof: 'Proof of residence',
-        residenceProofText: 'Valid Ejari or title deed.'
+        residenceProofText: 'Valid Ejari or title deed issued by DLD (Dubai Land Department).'
       },
       dependent: {
         marriageCert: 'Marriage certificate',
-        marriageCertText: 'Requires a multi-step attestation process ending with authentication by the UAE Embassy in the country of origin.',
-        birthCert: 'Child birth certificate',
-        birthCertPlural: 'Children birth certificates',
-        birthCertText: 'Requires a multi-step attestation process ending with authentication by the UAE Embassy in the country of origin.'
+        marriageCertText: 'Requires a multi-step process ending with attestation by the UAE Embassy in the country of origin.',
+        birthCert: "Child's birth certificate",
+        birthCertPlural: "Children's birth certificates",
+        birthCertText: 'Requires a multi-step process ending with attestation by the UAE Embassy in the country of origin.'
       }
     },
     costSummary: {
@@ -93,7 +93,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
       costItems: {
         authorityCosts: 'Golden Visa authority costs',
         nocCost: 'NOC (No Objection Certificate) cost',
-        salaryCertificate: 'Salary certificate cost',
+        salaryCertificate: 'salary certificate cost',
         spouseVisa: 'Dependent (spouse) visa authority costs',
         childVisa: 'Dependent (child) visa authority costs',
         childrenVisa: 'Dependent (children) visa authority costs',
@@ -112,18 +112,18 @@ export const GOLDEN_VISA_TRANSLATIONS = {
       serviceExplanations: 'Service Explanations',
       explanations: {
         professionalPassportPicture: 'Professional Passport Pictures: Official biometric passport photos to UAE standards for all visa applications.',
-        dldApprovalFee: 'DLD Approval/Assessment Fee: For property assessment and approval by Dubai Land Department (property investment only).',
+        dldApprovalFee: 'DLD Approval/Assessment Fee: For property verification and approval by Dubai Land Department (property investment golden visa only).',
         mandatoryUaeMedicalTest: 'Mandatory UAE Medical Test: Required health examination for all visa applicants at approved clinics.',
         emiratesIdFee: 'Emirates ID Fee: For issuance of the mandatory Emirates ID card for all UAE residents.',
         immigrationResidencyFee: 'Immigration Residency Fee: Official government fee for residence visa processing.',
         visaCancellationFee: 'Visa Cancellation Costs: For cancelling existing visa status before applying for new Golden Visa (if applicable).',
         thirdPartyCosts: 'Third Party Costs: For additional third-party services and administrative costs.',
-        tmeServicesFee: 'TME Services Consultancy Fee: Includes complete management of the visa and Emirates ID application process, including document preparation, liaison with relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.',
+        tmeServicesFee: 'Includes complete management of the visa and Emirates ID application process, including document preparation, liaison with relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.',
         dependentFileOpening: 'Dependent File Opening Costs: For opening the dependent visa file (applies only to the first dependent).',
         dependentStandardCosts: 'Standard Authority Costs Dependent: For mandatory UAE medical test, Emirates ID and immigration residency processing for dependents.',
-        dependentTmeServices: 'TME Services Dependent: Consultancy fee for managing the dependent visa application process.',
+        dependentTmeServices: 'TME Services Dependent: Professional fee for managing the dependent visa application process.',
         freezoneNocFee: 'Freezone NOC Fee: No Objection Certificate from',
-        freezoneSalaryCertificate: 'Freezone Salary Certificate: Salary certificate from'
+        freezoneSalaryCertificate: 'Freezone salary Certificate: salary certificate from'
       }
     },
     dependentCosts: {
@@ -136,8 +136,8 @@ export const GOLDEN_VISA_TRANSLATIONS = {
         dependentFileOpening: 'For opening dependent visa file (applies to first dependent only).',
         standardAuthorityCosts: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.',
         thirdPartyCosts: 'Administrative costs charged by various departments.',
-        tmeServicesProfessionalFee: 'TME Services Professional Fee: Covers the complete management of the spouse visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.',
-        visaCancellation: 'For canceling existing visa status before applying for dependent visa (if applicable).'
+        tmeServicesProfessionalFee: 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.',
+        visaCancellation: 'For cancelling existing visa status before applying for dependent visa.'
       },
       serviceDescriptions: {
         dependentFileOpening: 'Dependent file opening cost',
@@ -176,13 +176,13 @@ export const GOLDEN_VISA_TRANSLATIONS = {
         processingTime: 'Bearbeitungszeit',
         processingTimeText: 'Etwa 10 - 15 Werktage. Der Antragsteller muss sich in den VAE befinden, um den Visa-Prozess zu beginnen und muss während der gesamten Bearbeitungsdauer in den VAE bleiben.',
         healthInsurance: 'Krankenversicherung',
-        healthInsuranceText: 'Erforderlich. Muss entweder eine in den VAE registrierte oder internationale Krankenversicherung sein.',
+        healthInsuranceText: 'Erforderlich. Muss entweder eine in den VAE registrierte oder eine internationale Krankenversicherung sein.',
         medicalEmirates: 'Medizinische Untersuchung & Emirates ID',
         medicalEmiratesText: 'Ihre physische Anwesenheit ist sowohl für die medizinische Untersuchung als auch für den Emirates ID-Termin erforderlich. Wir werden die Termine für Sie vereinbaren, und ein erfahrenes Mitglied unseres Teams wird Sie begleiten. Ihr Originalpass ist für beide Termine erforderlich.'
       },
       propertyInvestment: {
         minProperty: 'Mindestwert der Immobilie',
-        minPropertyText: 'AED 2.000.000 pro Person. Gemeinsames Eigentum ist erlaubt.\nImmobilien im Bau erfordern NOC (Unbedenklichkeitsbescheinigung) und Zahlungsnachweis vom Entwickler.',
+        minPropertyText: 'AED 2.000.000 pro Person. Gemeinsames Eigentum ist erlaubt.\nImmobilien im Bau erfordern eine NOC (Unbedenklichkeitsbescheinigung) und Zahlungsplan vom Entwickler.',
         propertyTypes: 'Berechtigte Immobilienarten',
         propertyTypesText: 'Nur Villen und Wohnungen sind berechtigt.'
       },
@@ -195,7 +195,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
       },
       skilledEmployee: {
         education: 'Bildungsqualifikation',
-        educationText: 'Bachelor- oder Master-Zertifikat mit Transcript. Erfordert einen mehrstufigen Beglaubigungsprozess, der mit der Authentifizierung durch die VAE-Botschaft im Herkunftsland endet.',
+        educationText: 'Bachelor- oder Master-Zertifikat mit Transcript. Erfordert einen mehrstufigen Prozess, der mit der Beglaubigung durch die VAE-Botschaft im Herkunftsland endet.',
         equivalency: 'Gleichwertigkeitszertifikat',
         equivalencyText: 'Dieses Dokument muss vom Kunden beim Bildungsministerium in Dubai eingeholt werden.',
         equivalencyLink: 'Link zur Website des Bildungsministeriums.',
@@ -214,10 +214,10 @@ export const GOLDEN_VISA_TRANSLATIONS = {
       },
       dependent: {
         marriageCert: 'Heiratsurkunde',
-        marriageCertText: 'Erfordert einen mehrstufigen Beglaubigungsprozess, der mit der Authentifizierung durch die VAE-Botschaft im Herkunftsland endet.',
+        marriageCertText: 'Erfordert einen mehrstufigen Prozess, der mit der Beglaubigung durch die VAE-Botschaft im Herkunftsland endet.',
         birthCert: 'Geburtsurkunde des Kindes',
         birthCertPlural: 'Geburtsurkunden der Kinder',
-        birthCertText: 'Erfordert einen mehrstufigen Beglaubigungsprozess, der mit der Authentifizierung durch die VAE-Botschaft im Herkunftsland endet.'
+        birthCertText: 'Erfordert einen mehrstufigen Prozess, der mit der Beglaubigung durch die VAE-Botschaft im Herkunftsland endet.'
       }
     },
     costSummary: {
@@ -261,16 +261,16 @@ export const GOLDEN_VISA_TRANSLATIONS = {
       serviceExplanations: 'Service-Erläuterungen',
       explanations: {
         professionalPassportPicture: 'Professionelle Passbilder: Offizielle biometrische Passfotos nach VAE-Standards für alle Visa-Anträge.',
-        dldApprovalFee: 'DLD Genehmigungs-/Bewertungsgebühr: Für die Immobilienbewertung und Genehmigung durch das Dubai Land Department (nur bei Immobilieninvestition).',
+        dldApprovalFee: 'DLD Genehmigungs-/Bewertungsgebühr: Für die Immobilienverifizierung und Genehmigung durch das Dubai Land Department (nur bei Immobilieninvestition Golden Visa).',
         mandatoryUaeMedicalTest: 'Pflicht-VAE-Medizintest: Erforderliche Gesundheitsuntersuchung für alle Visa-Antragsteller in zugelassenen Kliniken.',
         emiratesIdFee: 'Emirates ID Gebühr: Für die Ausstellung der obligatorischen Emirates ID-Karte für alle Einwohner der VAE.',
         immigrationResidencyFee: 'Einwanderungs-Aufenthaltsgebühr: Offizielle Regierungsgebühr für die Bearbeitung des Aufenthaltsvisa.',
         visaCancellationFee: 'Visa-Stornierungskosten: Für die Stornierung des bestehenden Visa-Status vor der Beantragung des neuen Golden Visa (falls zutreffend).',
         thirdPartyCosts: 'Drittanbieterkosten: Für zusätzliche Serviceleistungen Dritter und Verwaltungskosten.',
-        tmeServicesFee: 'TME Services Beratungsgebühr: Umfasst die vollständige Verwaltung des Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.',
+        tmeServicesFee: 'Umfasst die vollständige Verwaltung des Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.',
         dependentFileOpening: 'Angehörigen-Datei Eröffnungskosten: Für die Eröffnung der Angehörigen-Visa-Datei (gilt nur für den ersten Angehörigen).',
         dependentStandardCosts: 'Standard Behördenkosten Angehörige: Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung für Angehörige.',
-        dependentTmeServices: 'TME Services Angehörige: Beratungsgebühr für die Verwaltung des Angehörigen-Visa-Antragsverfahrens.',
+        dependentTmeServices: 'TME Services Angehörige: Beratungshonorar für die Verwaltung des Angehörigen-Visa-Antragsverfahrens.',
         freezoneNocFee: 'Freizone NOC Gebühr: Unbedenklichkeitsbescheinigung von',
         freezoneSalaryCertificate: 'Freizone Gehaltsbescheinigung: Gehaltsbescheinigung von'
       }
@@ -285,7 +285,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
         dependentFileOpening: 'Für die Eröffnung der Angehörigen-Visa-Datei (gilt nur für den ersten Angehörigen).',
         standardAuthorityCosts: 'Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung.',
         thirdPartyCosts: 'Von verschiedenen Abteilungen erhobene Verwaltungskosten.',
-        tmeServicesProfessionalFee: 'TME Services Beratungsgebühr: Umfasst die vollständige Verwaltung des Ehepartner-Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.',
+        tmeServicesProfessionalFee: 'Umfasst die vollständige Verwaltung des Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.',
         visaCancellation: 'Für die Stornierung des bestehenden Visa-Status vor der Beantragung des Angehörigen-Visa (falls zutreffend).'
       },
       serviceDescriptions: {

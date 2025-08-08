@@ -124,7 +124,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       condition: true,
       description: locale === 'de' ? '1. DLD Genehmigungs-/Bewertungsgebühr' : '1. DLD (Dubai Land Department) approval cost',
       amount: fees.dldApprovalFee,
-      explanation: locale === 'de' ? t.costsBreakdown.explanations.dldApprovalFee : 'Approval cost required for property investment Golden Visa applications.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.dldApprovalFee : 'Verification for property investment Golden Visa applications.'
     });
 
     services.push({
@@ -141,7 +141,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
         condition: true,
         description: locale === 'de' ? '3. Visa-Stornierungskosten' : '3. Visa cancellation cost',
         amount: fees.visaCancellationFee,
-        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For canceling existing visa status before applying for Golden Visa.'
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For cancelling existing visa status before applying for Golden Visa.'
       });
     }
 
@@ -160,7 +160,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       condition: true,
       description: locale === 'de' ? (fees.visaCancellation ? '5. TME Services Beratungsgebühr' : '4. TME Services Beratungsgebühr') : (fees.visaCancellation ? '5. TME Services professional fee' : '4. TME Services professional fee'),
       amount: baseTmeServicesFee,
-      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'TME Services Professional Fee: Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
   } else if ((visaType === 'time-deposit' || visaType === 'skilled-employee') && goldenVisaData.skilledEmployeeAuthorityFees) {
     // Time Deposit and Skilled Employee (without NOC) - no DLD fee
@@ -180,7 +180,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
         condition: true,
         description: locale === 'de' ? '2. Visa-Stornierungskosten' : '2. Visa cancellation cost',
         amount: fees.visaCancellationFee,
-        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For canceling existing visa status before applying for Golden Visa.'
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For cancelling existing visa status before applying for Golden Visa.'
       });
     }
 
@@ -199,7 +199,7 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       condition: true,
       description: locale === 'de' ? (fees.visaCancellation ? '4. TME Services Beratungsgebühr' : '3. TME Services Beratungsgebühr') : (fees.visaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee'),
       amount: baseTmeServicesFee,
-      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'TME Services Professional Fee: Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
   } else {
     // Fallback to simple structure for backwards compatibility
@@ -459,7 +459,7 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     amount: (children.tmeServicesFee || 1690) * numberOfChildren,
     explanation: locale === 'de' ? 
       `TME Services Beratungsgebühr: Umfasst die vollständige Verwaltung des ${childText}-Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.` : 
-      `TME Services Professional Fee: Covers the complete management of the ${childText} visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.`
+      `Covers the complete management of the ${childText} visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.`
   });
 
   return services.filter(service => service.condition);
@@ -536,7 +536,7 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
         (hasVisaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee') :
         '2. TME Services professional fee',
       amount: children.tmeServicesFee || 1690,
-      explanation: 'TME Services Professional Fee: Covers the complete management of the child visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: 'Covers the complete management of the child visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
 
     individualBreakdowns.push(services);
