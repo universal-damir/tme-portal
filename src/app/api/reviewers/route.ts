@@ -29,8 +29,12 @@ export async function GET(request: NextRequest) {
     
     const userId = session.user.id;
 
-    // Fetch available reviewers (department colleagues + UH user Uwe)
-    const reviewers = await ReviewersService.getAvailableReviewers(userId);
+    // Get document type from query params
+    const { searchParams } = new URL(request.url);
+    const documentType = searchParams.get('documentType');
+
+    // Fetch available reviewers (department colleagues + UH user Uwe, or Company Setup for specific docs)
+    const reviewers = await ReviewersService.getAvailableReviewers(userId, documentType || undefined);
 
     return NextResponse.json({ reviewers }, { status: 200 });
 

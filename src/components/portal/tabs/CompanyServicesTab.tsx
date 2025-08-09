@@ -710,6 +710,7 @@ const CompanyServicesTab: React.FC = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         applicationId={reviewApp.application?.id?.toString() || 'new'}
+        documentType="company-services"
         applicationTitle={(() => {
           // Use the same filename generation as PDF export for consistency
           try {

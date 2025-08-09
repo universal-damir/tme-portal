@@ -17,6 +17,7 @@ interface ReviewerDropdownProps {
   disabled?: boolean;
   error?: string;
   className?: string;
+  documentType?: string;
 }
 
 export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
@@ -25,7 +26,8 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
   placeholder = 'Select a checker...',
   disabled = false,
   error,
-  className = ''
+  className = '',
+  documentType
 }) => {
   const config = useReviewSystemConfig();
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +47,8 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
       setFetchError(null);
       
       try {
-        const response = await fetch('/api/reviewers');
+        const url = documentType ? `/api/reviewers?documentType=${encodeURIComponent(documentType)}` : '/api/reviewers';
+        const response = await fetch(url);
         const data = await response.json();
         
         if (response.ok) {
@@ -62,7 +65,7 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
     };
 
     fetchReviewers();
-  }, []);
+  }, [documentType]);
 
   const selectedReviewer = reviewers.find(r => r.id === value);
 

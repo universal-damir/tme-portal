@@ -874,7 +874,7 @@ export class NotificationsService {
 // Reviewers service
 export class ReviewersService {
   
-  static async getAvailableReviewers(currentUserId: number): Promise<Reviewer[]> {
+  static async getAvailableReviewers(currentUserId: number, documentType?: string): Promise<Reviewer[]> {
     return safeDbOperation(async () => {
       const config = getReviewSystemConfig();
       
@@ -885,35 +885,71 @@ export class ReviewersService {
       const pool = getPool();
       
       try {
-        console.log(`🔧 ReviewersService: Getting reviewers for userId: ${currentUserId}`);
+        console.log(`🔧 ReviewersService: Getting reviewers for userId: ${currentUserId}, documentType: ${documentType}`);
         
-        // Get current user's department
-        const userResult = await pool.query(`
-          SELECT department FROM users WHERE id = $1
-        `, [currentUserId]);
+        // Check if this is a document type that should use specific reviewers
+        const specificReviewerDocTypes = ['cost-overview', 'golden-visa', 'company-services'];
+        const taxationDocType = ['taxation'];
+        const useSpecificReviewers = documentType && specificReviewerDocTypes.includes(documentType);
+        const useTaxationReviewers = documentType && taxationDocType.includes(documentType);
         
-        if (userResult.rows.length === 0) {
-          console.log('🔧 ReviewersService: Current user not found, using default department');
+        let reviewersResult;
+        
+        if (useSpecificReviewers) {
+          // For specific document types: only show Uwe, Tina, and Onur
+          console.log(`🔧 ReviewersService: Using specific reviewers (Uwe, Tina, Onur) for ${documentType}`);
+          reviewersResult = await pool.query(`
+            SELECT id, full_name, email, department, role, employee_code
+            FROM users 
+            WHERE id != $1 
+            AND email IN ('uwe@TME-Services.com', 'tina@TME-Services.com', 'onur@TME-Services.com')
+            ORDER BY 
+              CASE WHEN email = 'uwe@TME-Services.com' THEN 0 ELSE 1 END,
+              full_name ASC
+            LIMIT $2
+          `, [currentUserId, config.maxReviewersToFetch]);
+        } else if (useTaxationReviewers) {
+          // For taxation documents: show Tax and Compliance department + Uwe
+          console.log(`🔧 ReviewersService: Using Tax and Compliance department + Uwe for ${documentType}`);
+          reviewersResult = await pool.query(`
+            SELECT id, full_name, email, department, role, employee_code
+            FROM users 
+            WHERE id != $1 
+            AND (department = 'Tax and Compliance' OR email = 'uwe@TME-Services.com')
+            ORDER BY 
+              CASE WHEN email = 'uwe@TME-Services.com' THEN 0 ELSE 1 END,
+              full_name ASC
+            LIMIT $2
+          `, [currentUserId, config.maxReviewersToFetch]);
+        } else {
+          // For other document types: use department-based approach
+          // Get current user's department
+          const userResult = await pool.query(`
+            SELECT department FROM users WHERE id = $1
+          `, [currentUserId]);
+          
+          if (userResult.rows.length === 0) {
+            console.log('🔧 ReviewersService: Current user not found, using default department');
+          }
+          
+          const userDepartment = userResult.rows.length > 0 ? userResult.rows[0].department : 'General';
+          console.log(`🔧 ReviewersService: Using department-based reviewers for user department: ${userDepartment}`);
+          
+          // Get department colleagues + UH user Uwe Hohmann
+          reviewersResult = await pool.query(`
+            SELECT id, full_name, email, department, role, employee_code
+            FROM users 
+            WHERE id != $1 
+            AND (department = $2 OR email = 'uwe@TME-Services.com')
+            ORDER BY 
+              CASE WHEN email = 'uwe@TME-Services.com' THEN 0 ELSE 1 END,
+              full_name ASC
+            LIMIT $3
+          `, [currentUserId, userDepartment, config.maxReviewersToFetch]);
         }
         
-        const userDepartment = userResult.rows.length > 0 ? userResult.rows[0].department : 'General';
-        console.log(`🔧 ReviewersService: User department: ${userDepartment}`);
-        
-        // Get department colleagues + UH user Uwe Hohmann
-        // Query gets: 1) Same department colleagues (excluding self) 2) UH user Uwe Hohmann
-        const reviewersResult = await pool.query(`
-          SELECT id, full_name, email, department, role, employee_code
-          FROM users 
-          WHERE id != $1 
-          AND (department = $2 OR email = 'uwe@TME-Services.com')
-          ORDER BY 
-            CASE WHEN email = 'uwe@TME-Services.com' THEN 0 ELSE 1 END,
-            full_name ASC
-          LIMIT $3
-        `, [currentUserId, userDepartment, config.maxReviewersToFetch]);
-        
         console.log(`🔧 ReviewersService: Raw query result:`, reviewersResult.rows);
-        console.log(`🔧 ReviewersService: Found ${reviewersResult.rows.length} reviewers for department: ${userDepartment}`);
+        console.log(`🔧 ReviewersService: Found ${reviewersResult.rows.length} reviewers for ${useSpecificReviewers ? 'specific document type' : useTaxationReviewers ? 'taxation department' : 'department-based selection'}`);
         
         const reviewers = reviewersResult.rows.map(row => ({
           id: row.id,
@@ -927,24 +963,76 @@ export class ReviewersService {
         // If no reviewers found, add fallback reviewers
         if (reviewers.length === 0) {
           console.log('🔧 ReviewersService: No reviewers found in database, using fallback');
-          return [
-            {
-              id: 999,
-              full_name: 'UH - Uwe Hohmann',
-              email: 'uwe@TME-Services.com',
-              department: 'Management',
-              employee_code: '09 UH',
-              is_universal: true
-            },
-            {
-              id: 998,
-              full_name: 'Test Reviewer',
-              email: 'test@TME-Services.com',
-              department: userDepartment,
-              employee_code: 'TR',
-              is_universal: false
-            }
-          ];
+          
+          if (useSpecificReviewers) {
+            // For specific document types, return the 3 specific fallback users
+            return [
+              {
+                id: 999,
+                full_name: 'UH - Uwe Hohmann',
+                email: 'uwe@TME-Services.com',
+                department: 'Company Setup',
+                employee_code: '09 UH',
+                is_universal: true
+              },
+              {
+                id: 998,
+                full_name: 'Tina Reimann',
+                email: 'tina@TME-Services.com',
+                department: 'Company Setup',
+                employee_code: '96 TR',
+                is_universal: false
+              },
+              {
+                id: 997,
+                full_name: 'Onur Ozturk',
+                email: 'onur@TME-Services.com',
+                department: 'Company Setup',
+                employee_code: '102 OO',
+                is_universal: false
+              }
+            ];
+          } else if (useTaxationReviewers) {
+            // For taxation documents, return Tax and Compliance + Uwe fallback
+            return [
+              {
+                id: 999,
+                full_name: 'UH - Uwe Hohmann',
+                email: 'uwe@TME-Services.com',
+                department: 'Tax and Compliance',
+                employee_code: '09 UH',
+                is_universal: true
+              },
+              {
+                id: 996,
+                full_name: 'Tax Reviewer',
+                email: 'tax@TME-Services.com',
+                department: 'Tax and Compliance',
+                employee_code: 'TAX',
+                is_universal: false
+              }
+            ];
+          } else {
+            // For department-based, return general fallback
+            return [
+              {
+                id: 999,
+                full_name: 'UH - Uwe Hohmann',
+                email: 'uwe@TME-Services.com',
+                department: 'Management',
+                employee_code: '09 UH',
+                is_universal: true
+              },
+              {
+                id: 998,
+                full_name: 'Test Reviewer',
+                email: 'test@TME-Services.com',
+                department: 'General',
+                employee_code: 'TR',
+                is_universal: false
+              }
+            ];
+          }
         }
         
         return reviewers;

@@ -11,7 +11,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  const tabs = [
+  
+  const allTabs = [
     {
       id: 'cost-overview' as TabId,
       label: 'Cost Overview',
@@ -38,6 +39,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       description: 'Tax planning and compliance contracts',
     },
   ];
+
+  const tabs = allTabs;
 
   return (
     <div className="border-b border-gray-200 bg-white rounded-t-lg shadow-sm">

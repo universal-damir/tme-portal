@@ -15,6 +15,7 @@ interface ReviewSubmissionModalProps {
   onClose: () => void;
   applicationId: string;
   applicationTitle: string;
+  documentType?: string;
   onSubmit: (submission: {
     reviewer_id: number;
     urgency: UrgencyLevel;
@@ -27,6 +28,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
   onClose,
   applicationId,
   applicationTitle,
+  documentType,
   onSubmit
 }) => {
   const config = useReviewSystemConfig();
@@ -180,6 +182,7 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
                       setError(null);
                     }}
                     error={error && !selectedReviewer ? 'Please select a reviewer' : undefined}
+                    documentType={documentType}
                   />
 
                   {/* Urgent Checkbox */}

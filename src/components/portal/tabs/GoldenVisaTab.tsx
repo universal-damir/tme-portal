@@ -1000,6 +1000,7 @@ const GoldenVisaTab: React.FC = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         applicationId={reviewApp.application?.id?.toString() || 'new'}
+        documentType="golden-visa"
         applicationTitle={(() => {
           // Simple fallback format for modal title
           const date = new Date(watchedData.date || new Date());

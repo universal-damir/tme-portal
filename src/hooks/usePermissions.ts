@@ -64,7 +64,7 @@ export function usePermissions() {
       'golden_visa': ['IT', 'Management', 'Legal', 'Business Development', 'Finance', 'Company Setup'],
       'company_services': ['IT', 'Management', 'Finance', 'Legal', 'Administration', 'HR', 'Company Setup'],
       'corporate_changes': ['IT', 'Management', 'Legal', 'Administration'],
-      'taxation': ['IT', 'Management', 'Finance'],
+      'taxation': ['IT', 'Management', 'Finance', 'Tax and Compliance'],
       'user_management': ['IT', 'HR'],
       'system_admin': ['IT'],
       'audit_logs': ['IT', 'Management'],

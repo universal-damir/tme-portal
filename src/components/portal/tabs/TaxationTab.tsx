@@ -613,6 +613,7 @@ const TaxationTab: React.FC = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         applicationId={reviewApp.application?.id?.toString() || 'new'}
+        documentType="taxation"
         applicationTitle={(() => {
           // Use the same filename generation as PDF export for consistency
           try {

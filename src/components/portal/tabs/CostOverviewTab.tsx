@@ -1243,6 +1243,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         isOpen={isReviewModalOpen}
         onClose={() => setIsReviewModalOpen(false)}
         applicationId={reviewApp.application?.id?.toString() || 'new'}
+        documentType="cost-overview"
         applicationTitle={(() => {
           // Use the same filename generation as the actual PDF export
           try {
