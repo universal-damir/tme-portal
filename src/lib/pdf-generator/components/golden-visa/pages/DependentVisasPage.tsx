@@ -153,7 +153,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
     });
   }
 
-  // Add individual child tables
+  // Add individual child tables - one table per child
   if (hasChildren && numberOfChildren === 1 && childrenVisaItems.length > 0) {
     tables.push({
       key: 'child-1',
@@ -162,7 +162,7 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
       total: childrenVisaTotal,
       secondaryTotal: childrenVisaTotal / exchangeRate
     });
-  } else if (hasChildren && individualChildBreakdowns.length > 1) {
+  } else if (hasChildren && numberOfChildren > 1 && individualChildBreakdowns.length > 0) {
     individualChildBreakdowns.forEach((childBreakdown, index) => {
       const childNumber = index + 1;
       const childItems: CostItem[] = childBreakdown.map(service => ({
@@ -261,7 +261,9 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
       {pageGroups.map((pageTable, pageIndex) => {
         // Calculate spacing based on content of this specific page
         const tablesOnThisPage = pageTable.length;
-        const hasExplanationsOnThisPage = pageIndex === pageGroups.length - 1 && explanations.length > 0;
+        // Show explanations on separate page if more than 2 children, otherwise on last page with tables
+        const shouldShowExplanationsOnSeparatePage = numberOfChildren > 2 && explanations.length > 0;
+        const hasExplanationsOnThisPage = !shouldShowExplanationsOnSeparatePage && pageIndex === pageGroups.length - 1 && explanations.length > 0;
         
         // Use consistent spacing like main visa holder
         const introSpacing = 8;
@@ -332,6 +334,29 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
         );
       })}
 
+      {/* Separate explanations page for more than 2 children */}
+      {numberOfChildren > 2 && explanations.length > 0 && (
+        <Page size="A4" style={styles.page}>
+          <HeaderComponent data={data} />
+          
+          <View style={{ marginTop: 8, marginBottom: 12 }}>
+            <Text style={styles.introHeadline}>{t.dependentCosts.serviceExplanations}</Text>
+            <View style={{ marginTop: 4 }}>
+              {explanations.map((explanation, index) => (
+                <Text key={`explanation-${explanation.id}-${index}`} style={[styles.introText, { marginBottom: 4 }]}>
+                  <Text style={{ fontWeight: 'bold' }}>{explanation.title}:</Text>{' '}
+                  {explanation.explanation}
+                </Text>
+              ))}
+            </View>
+          </View>
+
+          {/* Spacer to push footer to bottom */}
+          <View style={{ flex: 1 }} />
+
+          <FooterComponent />
+        </Page>
+      )}
 
     </>
   );

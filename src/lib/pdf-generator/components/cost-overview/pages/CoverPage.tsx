@@ -29,10 +29,10 @@ export const CoverPage: React.FC<PDFComponentProps> = ({ data }) => {
   };
 
   const introContent = data.clientDetails.addressToCompany ? 
-    `We are pleased to share a personalized cost overview for your company setup in ${getAuthorityDisplayName()}. This document provides a transparent breakdown of fees and services. It is designed to give you clear insight into each cost element.` :
+    `We are pleased to share a personalized cost overview for your company setup in ${getAuthorityDisplayName()}. This document provides a transparent breakdown of costs and fees based on the requirements. It is designed to give you clear insight into each cost element.` :
     `Dear ${data.clientDetails.firstName},
 
-We are pleased to share a personalized cost overview for your company setup in ${getAuthorityDisplayName()}. This document provides a transparent breakdown of fees and services. It is designed to give you clear insight into each cost element.`;
+We are pleased to share a personalized cost overview for your company setup in ${getAuthorityDisplayName()}. This document provides a transparent breakdown of costs and fees based on the requirements. It is designed to give you clear insight into each cost element.`;
 
   // Generate the filename to display on the cover page
   const filename = generateDynamicFilename(data);

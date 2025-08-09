@@ -491,9 +491,9 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
       services.push({
         id: `child-${childNumber}-standard-authority-costs`,
         condition: true,
-        description: '1. Standard authority costs',
+        description: locale === 'de' ? '1. Standard Behördenkosten' : '1. Standard authority costs',
         amount: fees.standardAuthorityCostsChild || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeChild) || 4604,
-        explanation: 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
+        explanation: locale === 'de' ? 'Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung.' : 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
       });
 
       const cancellationFee = children.visaCancelation && children.visaCancelationFee 
@@ -504,27 +504,29 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
         services.push({
           id: `child-${childNumber}-visa-cancellation`,
           condition: true,
-          description: '2. Visa cancellation cost',
+          description: locale === 'de' ? '2. Visa-Stornierungskosten' : '2. Visa cancellation cost',
           amount: cancellationFee,
-          explanation: 'For canceling existing visa status before applying for child dependent visa.'
+          explanation: locale === 'de' ? 'Für die Stornierung des bestehenden Visa-Status vor der Beantragung des Angehörigen-Visa.' : 'For cancelling existing visa status before applying for child dependent visa.'
         });
       }
 
       services.push({
         id: `child-${childNumber}-third-party-costs`,
         condition: true,
-        description: hasVisaCancellation ? '3. Third party costs' : '2. Third party costs',
+        description: locale === 'de' ? 
+          (hasVisaCancellation ? '3. Drittanbieterkosten' : '2. Drittanbieterkosten') :
+          (hasVisaCancellation ? '3. Third party costs' : '2. Third party costs'),
         amount: fees.thirdPartyCosts,
-        explanation: 'Administrative costs charged by various departments.'
+        explanation: locale === 'de' ? 'Von verschiedenen Abteilungen erhobene Verwaltungskosten.' : 'Administrative costs charged by various departments.'
       });
     } else {
       // Fallback to legacy structure
       services.push({
         id: `child-${childNumber}-government-fees`,
         condition: true,
-        description: '1. Government Costs (Medical + Emirates ID + Processing)',
+        description: locale === 'de' ? '1. Behördenkosten (Medizintest + Emirates ID + Bearbeitung)' : '1. Government Costs (Medical + Emirates ID + Processing)',
         amount: children.governmentFee || 0,
-        explanation: 'For child visa including medical examination, Emirates ID processing, and visa application charges.'
+        explanation: locale === 'de' ? 'Für Kinder-Visa einschließlich medizinischer Untersuchung, Emirates ID-Bearbeitung und Visa-Antragsgebühren.' : 'For child visa including medical examination, Emirates ID processing, and visa application charges.'
       });
     }
 
@@ -532,11 +534,17 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
     services.push({
       id: `child-${childNumber}-tme-services`,
       condition: true,
-      description: goldenVisaData.dependentAuthorityFees ? 
-        (hasVisaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee') :
-        '2. TME Services professional fee',
+      description: locale === 'de' ? 
+        (goldenVisaData.dependentAuthorityFees ? 
+          (hasVisaCancellation ? '4. TME Services Beratungshonorar' : '3. TME Services Beratungshonorar') :
+          '2. TME Services Beratungshonorar') :
+        (goldenVisaData.dependentAuthorityFees ? 
+          (hasVisaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee') :
+          '2. TME Services professional fee'),
       amount: children.tmeServicesFee || 1690,
-      explanation: 'Covers the complete management of the child visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
+      explanation: locale === 'de' ? 
+        'Umfasst die vollständige Verwaltung des Kinder-Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.' :
+        'Covers the complete management of the child visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
 
     individualBreakdowns.push(services);

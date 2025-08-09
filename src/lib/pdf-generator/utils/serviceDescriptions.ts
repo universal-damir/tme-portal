@@ -35,7 +35,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       condition: true,
       description: 'DET registration cost',
       amount: 2000,
-      explanation: 'Cost for obtaining the business license issued by DET (Department of Economy and Tourism).'
+      explanation: 'For registering the business with the DET (Department of Economy and Tourism).'
     });
 
     // 2. GDRFA Cost (Immigration Establishment Card)
@@ -53,7 +53,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       condition: true,
       description: 'MoHRE registration cost (Labour card)',
       amount: 1000,
-      explanation: 'Mandatory registration fee with the MoHRE (Ministry of Human Resources and Emiratisation).'
+      explanation: 'Mandatory registration cost with the MoHRE (Ministry of Human Resources and Emiratisation).'
     });
 
     // 4. DET License Cost - Commercial (or other type)
@@ -84,7 +84,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         condition: true,
         description: `DET license cost - ${licenseTypeName.toLowerCase()}`,
         amount: licenseCost,
-        explanation: `${licenseTypeName} license with the DET (Dubai Department of Economy and Tourism).`
+        explanation: `For obtaining a license issued by the DET (Dubai Department of Economy and Tourism).`
       });
     }
 
@@ -99,7 +99,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
         : 'Warehouse rent (differs on location & availability)';
         
       const officeRentExplanation = data.detLicense.rentType === 'business-center' 
-        ? 'For your business center arrangement. (Ejari)'
+        ? 'For your business center arrangement (Ejari).'
         : `Annual rental cost for your ${data.detLicense.rentType}.`;
       
       services.push({
@@ -132,7 +132,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
 
     if (mofaTotal > 0) {
       let description = 'PoA (Power of Attorney) cost';
-      let explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
+      let explanation = 'Includes obtaining an official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       
       if (setupType === 'Corporate Setup') {
         description = 'Document translation cost';
@@ -318,7 +318,7 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       
       if (setupType === 'Individual Setup') {
         description = 'PoA (Power of Attorney) cost';
-        explanation = 'Includes obtaining official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
+        explanation = 'Includes obtaining an official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       } else if (setupType === 'Corporate Setup') {
         description = 'Document translation cost';
         explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';

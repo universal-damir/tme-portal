@@ -48,12 +48,22 @@ export async function POST(request: NextRequest) {
     const transporter = createBrevoTransporter();
 
     // Process attachments to proper nodemailer format
-    const processedAttachments = (attachments || []).map((attachment: any) => ({
-      filename: attachment.filename,
-      contentType: attachment.contentType,
-      content: Buffer.from(attachment.content, 'base64'), // Convert back from base64
-      encoding: 'binary' // Use binary encoding for the buffer
-    }));
+    const processedAttachments = (attachments || []).map((attachment: any) => {
+      const attachmentObj: any = {
+        filename: attachment.filename,
+        contentType: attachment.contentType,
+        content: Buffer.from(attachment.content, 'base64'), // Convert back from base64
+        encoding: 'binary' // Use binary encoding for the buffer
+      };
+      
+      // Add CID if present (for inline images)
+      if (attachment.cid) {
+        attachmentObj.cid = attachment.cid;
+        console.log('📎 Processing CID attachment:', attachment.cid, 'filename:', attachment.filename);
+      }
+      
+      return attachmentObj;
+    });
 
     // Prepare email options with contact@tme-services.com FROM and user REPLY-TO
     const mailOptions = {

@@ -104,11 +104,11 @@ export const AdditionalServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           </Text>
           
           <Text style={[styles.introText, { marginBottom: 5 }]}>
-            We appreciate the opportunity to support your business setup and ongoing operations.
+            We appreciate the opportunity to support your business setup.
           </Text>
           
           <Text style={[styles.introText, { marginBottom: 5 }]}>
-            Should you have any questions or need further clarification on any of the listed items, please don't hesitate to reach out.
+            Should you have any questions or need further clarification, please don't hesitate to reach out.
           </Text>
           
           <Text style={[styles.introText, { marginBottom: 5 }]}>

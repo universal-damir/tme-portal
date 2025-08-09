@@ -105,7 +105,7 @@ export const generateAdditionalServiceDescriptions = (
     services.push({
       id: 'accounting-fee',
       condition: true,
-      description: `${frequencyLabels[frequency]} accounting fee`,
+      description: `${frequencyLabels[frequency]} fee for accounting`,
       amount: data.additionalServices.accountingFee,
       explanation: `${frequencyLabels[frequency]} accounting and bookkeeping services based on 360 transactions per year, including financial record maintenance and basic reporting.`
     });

@@ -178,7 +178,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
         healthInsurance: 'Krankenversicherung',
         healthInsuranceText: 'Erforderlich. Muss entweder eine in den VAE registrierte oder eine internationale Krankenversicherung sein.',
         medicalEmirates: 'Medizinische Untersuchung & Emirates ID',
-        medicalEmiratesText: 'Ihre physische Anwesenheit ist sowohl für die medizinische Untersuchung als auch für den Emirates ID-Termin erforderlich. Wir werden die Termine für Sie vereinbaren, und ein erfahrenes Mitglied unseres Teams wird Sie begleiten. Ihr Originalpass ist für beide Termine erforderlich.'
+        medicalEmiratesText: 'Ihre physische Anwesenheit ist für beide Termine erforderlich. Wir vereinbaren die Termine und ein erfahrenes Teammitglied begleitet Sie. Ihr Originalpass ist für beide Termine erforderlich.'
       },
       propertyInvestment: {
         minProperty: 'Mindestwert der Immobilie',

@@ -6,7 +6,7 @@ export { formatCurrency, formatDate, formatDateDDMMYYYY };
 
 // formatNumber function extracted from the original OfferDocument component (line 484-486)
 export const formatNumber = (num: number): string => {
-  return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
 
 // Helper function for visa text pluralization

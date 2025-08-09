@@ -78,34 +78,9 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
                 return displayTiers.map(tier => {
                   const price = MONTHLY_PRICING[tier as keyof typeof MONTHLY_PRICING];
                   return (
-                    <View key={tier} style={{ 
-                      flexDirection: 'row', 
-                      alignItems: 'center', 
-                      marginBottom: 6,
-                      paddingHorizontal: 8
-                    }}>
-                      <Text style={[styles.introText, { 
-                        width: 200, 
-                        textAlign: 'left'
-                      }]}>
-                        Up to {tier} transactions / month
-                      </Text>
-                      <Text style={[styles.introText, { 
-                        width: 100, 
-                        textAlign: 'right',
-                        fontWeight: 'bold'
-                      }]}>
-                        AED {formatCurrency(price)}
-                      </Text>
-                      <Text style={[styles.introText, { 
-                        width: 100, 
-                        textAlign: 'right',
-                        color: '#666666',
-                        marginLeft: 8
-                      }]}>
-                        {formatSecondaryCurrency(price, exchangeRate, secondaryCurrency)}
-                      </Text>
-                    </View>
+                    <Text key={tier} style={[styles.introText, { marginBottom: 6 }]}>
+                      Up to {tier} transactions / month - <Text style={{ fontWeight: 'bold' }}>AED {formatCurrency(price)}</Text> <Text style={{ color: '#666666' }}>{formatSecondaryCurrency(price, exchangeRate, secondaryCurrency)}</Text>
+                    </Text>
                   );
                 });
               })()}

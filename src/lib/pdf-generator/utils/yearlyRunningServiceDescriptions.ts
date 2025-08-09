@@ -28,7 +28,7 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: 'IFZA license renewal cost',
         amount: yearlyRunningData.baseLicenseRenewal + yearlyRunningData.visaQuotaRenewal,
-        explanation: `Annual renewal cost for your business license issued by ${data.authorityInformation.responsibleAuthority}.`
+        explanation: `Annual renewal cost with IFZA (International Free Zone Authority).`
       });
     }
 
@@ -39,7 +39,7 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: 'GDRFA (Immigration establishment card) renewal cost',
         amount: yearlyRunningData.immigrationRenewal,
-        explanation: 'Mandatory renewal cost.'
+        explanation: 'Mandatory annual renewal cost.'
       });
     }
 
@@ -83,7 +83,7 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: 'TME Services professional fee',
         amount: yearlyRunningData.tmeYearlyFee,
-        explanation: 'Our professional service fee for managing annual license renewals, government liaison, and ongoing compliance support.'
+        explanation: 'For managing annual license renewals, government liaison, and ongoing compliance support.'
       });
     }
   }
@@ -105,7 +105,7 @@ export const generateYearlyRunningServiceDescriptions = (
       condition: true,
       description: 'GDRFA (Immigration establishment card) renewal cost',
       amount: 2000,
-      explanation: 'Mandatory renewal cost.'
+      explanation: 'Mandatory annual renewal cost.'
     });
 
     // 3. DET Office Rent
@@ -126,7 +126,7 @@ export const generateYearlyRunningServiceDescriptions = (
         description: rentDescription,
         amount: data.detLicense.officeRentAmount,
         explanation: data.detLicense.rentType === 'business-center' 
-          ? 'For your business center arrangement. (Ejari)'
+          ? 'For your business center arrangement (Ejari).'
           : `Annual rental cost for your ${data.detLicense.rentType}.`
       });
     }
@@ -138,7 +138,7 @@ export const generateYearlyRunningServiceDescriptions = (
         condition: true,
         description: 'Third-party approval (NOC) renewal cost',
         amount: data.detLicense.thirdPartyApprovalAmount,
-        explanation: 'Annual renewal cost for third-party approvals required for specific business activities under DET jurisdiction.'
+        explanation: 'Annual renewal cost for third-party approvals or NOC (No Objection Certificate) required for specific business activities.'
       });
     }
 
@@ -148,7 +148,7 @@ export const generateYearlyRunningServiceDescriptions = (
       condition: true,
       description: 'TME Services professional fee',
       amount: authorityConfig?.yearlyRunning?.tmeYearlyFee || 3000,
-      explanation: 'Our professional service fee for managing annual license renewals, government liaison, and ongoing compliance support with DET.'
+      explanation: 'For managing annual license renewals, government liaison, and ongoing compliance support with DET.'
     });
   }
 

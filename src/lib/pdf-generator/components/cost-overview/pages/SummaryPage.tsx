@@ -18,11 +18,11 @@ export const SummaryPage: React.FC<PDFComponentProps> = ({ data }) => {
         </Text>
         
         <Text style={[styles.introText, { marginBottom: 8 }]}>
-          We appreciate the opportunity to support your business setup and ongoing operations.
+          We appreciate the opportunity to support your business setup.
         </Text>
         
         <Text style={[styles.introText, { marginBottom: 8 }]}>
-          Should you have any questions or need further clarification, please don't hesitate to reach out or contact us.
+          Should you have any questions or need further clarification, please don't hesitate to reach out.
         </Text>
         
         <Text style={styles.introText}>

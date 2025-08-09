@@ -138,7 +138,7 @@ const TaxationTab: React.FC = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, blob, filename, 'TAXATION');
+      const emailProps = await createEmailDataFromFormData(data, blob, filename, 'TAXATION');
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({
@@ -230,7 +230,7 @@ const TaxationTab: React.FC = () => {
 
       // Show email preview modal after successful PDF generation
       const { createEmailDataFromFormData } = await import('@/components/shared/EmailDraftGenerator');
-      const emailProps = createEmailDataFromFormData(data, blob, filename, 'TAXATION');
+      const emailProps = await createEmailDataFromFormData(data, blob, filename, 'TAXATION');
       
       // Set email props to trigger the EmailDraftGenerator component
       setEmailDraftProps({

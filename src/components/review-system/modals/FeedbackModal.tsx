@@ -417,7 +417,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       const templateType = getTemplateType(application.type);
       
       // Use the EXISTING working function to create email props with user authentication
-      const emailProps = createEmailDataFromFormData(
+      const emailProps = await createEmailDataFromFormData(
         application.form_data,
         pdfBlob,
         filename,

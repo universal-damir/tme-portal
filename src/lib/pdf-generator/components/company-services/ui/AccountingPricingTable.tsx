@@ -97,7 +97,7 @@ export const AccountingPricingTable: React.FC<{
     
     return {
       tier,
-      transactionVolume: `Up to ${tier} Transactions per Month (${tier * 12} per year)`,
+      transactionVolume: `Up to ${tier} Transactions per Month (${tier * 12} per Year)`,
       rows: tierRows
     };
   });
@@ -204,7 +204,7 @@ export const AccountingPricingTable: React.FC<{
                 paddingVertical: 4,
                 paddingRight: 6
               }}>
-                AED {formatCurrency(row.costPerPeriod)} <Text style={{ color: '#9ca3af' }}>({secondaryCurrency} {Math.round(row.costPerPeriod / exchangeRate).toLocaleString()})</Text>
+                AED {formatCurrency(row.costPerPeriod)}<Text style={{ color: '#9ca3af', fontSize: 7 }}> ({secondaryCurrency} {Math.round(row.costPerPeriod / exchangeRate).toLocaleString()})</Text>
               </Text>
               <Text style={{
                 flex: 2,
@@ -215,7 +215,7 @@ export const AccountingPricingTable: React.FC<{
                 paddingVertical: 4,
                 paddingRight: 6
               }}>
-                AED {formatCurrency(row.annualTotal)} <Text style={{ color: '#9ca3af' }}>({secondaryCurrency} {Math.round(row.annualTotal / exchangeRate).toLocaleString()})</Text>
+                AED {formatCurrency(row.annualTotal)}<Text style={{ color: '#9ca3af', fontSize: 7 }}> ({secondaryCurrency} {Math.round(row.annualTotal / exchangeRate).toLocaleString()})</Text>
               </Text>
               <Text style={{
                 flex: 1.5,
@@ -226,7 +226,7 @@ export const AccountingPricingTable: React.FC<{
                 paddingVertical: 4,
                 paddingRight: 6
               }}>
-                {row.annualSavings === '-' ? '-' : `AED ${formatCurrency(row.annualSavingsAmount)} (${secondaryCurrency} ${Math.round(row.annualSavingsAmount / exchangeRate).toLocaleString()})`}
+                {row.annualSavings === '-' ? '-' : <>AED {formatCurrency(row.annualSavingsAmount)}<Text style={{ color: '#9ca3af', fontSize: 7 }}> ({secondaryCurrency} {Math.round(row.annualSavingsAmount / exchangeRate).toLocaleString()})</Text></>}
               </Text>
             </View>
           ))}
