@@ -107,8 +107,6 @@ INSERT INTO permissions (name, description, resource, action) VALUES
 INSERT INTO system_config (key, value, description) VALUES
 ('password_policy', '{"min_length": 8, "require_uppercase": true, "require_lowercase": true, "require_numbers": true, "require_symbols": true}', 'Password complexity requirements'),
 ('session_timeout', '28800', 'Session timeout in seconds (8 hours)'),
-('max_login_attempts', '5', 'Maximum failed login attempts before account lockout'),
-('lockout_duration', '1800', 'Account lockout duration in seconds (30 minutes)'),
 ('company_name', '"TME Services"', 'Company name for branding'),
 ('admin_email', '"uwe@TME-Services.com"', 'System administrator email');
 

@@ -26,11 +26,9 @@ interface User {
   department: string;
   designation: string;
   role: 'admin' | 'manager' | 'employee' | 'staff';
-  status: 'active' | 'inactive' | 'locked';
+  status: 'active' | 'inactive' | 'suspended' | 'pending';
   last_login: string | null;
   created_at: string;
-  failed_login_attempts: number;
-  locked_until: string | null;
 }
 
 interface UserManagementPanelProps {

@@ -56,8 +56,9 @@ export async function verifyToken(token: string): Promise<any> {
 // User authentication
 export async function authenticateUser(email: string, password: string): Promise<User | null> {
   try {
+    // Use case-insensitive email lookup
     const result = await query(
-      'SELECT * FROM users WHERE email = $1 AND status = $2',
+      'SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND status = $2',
       [email, 'active']
     );
 
@@ -67,39 +68,17 @@ export async function authenticateUser(email: string, password: string): Promise
 
     const user = result.rows[0];
 
-    // Check if account is locked
-    if (user.locked_until && new Date(user.locked_until) > new Date()) {
-      throw new Error('Account is locked due to too many failed login attempts');
-    }
-
     // Verify password
     const isValid = await verifyPassword(password, user.hashed_password);
 
     if (!isValid) {
-      // Increment failed login attempts
-      await query(
-        'UPDATE users SET failed_login_attempts = failed_login_attempts + 1 WHERE id = $1',
-        [user.id]
-      );
-
-      // Lock account after 5 failed attempts
-      if (user.failed_login_attempts + 1 >= 5) {
-        const lockUntil = new Date();
-        lockUntil.setMinutes(lockUntil.getMinutes() + 30); // Lock for 30 minutes
-        
-        await query(
-          'UPDATE users SET locked_until = $1 WHERE id = $2',
-          [lockUntil, user.id]
-        );
-        throw new Error('Account locked due to too many failed login attempts');
-      }
-
+      // Simply return null for invalid password - no locking or attempt tracking
       return null;
     }
 
-    // Reset failed attempts and update last login
+    // Update last login on successful authentication
     await query(
-      'UPDATE users SET failed_login_attempts = 0, locked_until = NULL, last_login = CURRENT_TIMESTAMP WHERE id = $1',
+      'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
       [user.id]
     );
 
