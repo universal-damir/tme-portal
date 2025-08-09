@@ -56,90 +56,136 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
     try {
       if (application.type === 'golden-visa') {
         const formData = application.form_data as GoldenVisaData;
-        const date = new Date(formData.date || new Date());
-        const yy = date.getFullYear().toString().slice(-2);
-        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-        const dd = date.getDate().toString().padStart(2, '0');
-        const formattedDate = `${yy}${mm}${dd}`;
         
-        let nameForTitle = '';
-        if (formData.companyName) {
-          nameForTitle = formData.companyName;
-        } else if (formData.lastName && formData.firstName) {
-          nameForTitle = `${formData.lastName} ${formData.firstName}`;
-        } else if (formData.firstName) {
-          nameForTitle = formData.firstName;
-        } else if (formData.lastName) {
-          nameForTitle = formData.lastName;
-        } else {
-          nameForTitle = 'Client';
-        }
-        
-        // Determine if this is a dependent-only visa (no primary holder)
-        const isDependentOnly = !formData.primaryVisaRequired;
-        
-        let visaTypeFormatted: string;
-        
-        if (isDependentOnly) {
-          // If only dependents are getting visas, use "dependent" suffix
-          visaTypeFormatted = 'dependent';
-        } else {
-          // Format visa type for title (shortened versions)
-          const visaTypeMap: { [key: string]: string } = {
-            'property-investment': 'property',
-            'time-deposit': 'deposit',
-            'skilled-employee': 'skilled'
+        try {
+          // Use the actual filename generator for consistency with PDF generation
+          const { generateGoldenVisaFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
+          const clientInfo = {
+            firstName: formData.firstName || '',
+            lastName: formData.lastName || '',
+            companyName: formData.companyName || '',
+            date: formData.date || new Date().toISOString().split('T')[0],
           };
+          const filename = generateGoldenVisaFilename(formData, clientInfo);
+          // Remove the .pdf extension for display
+          return filename.replace('.pdf', '');
+        } catch (error) {
+          console.error('🔧 REVIEW-MODAL: Failed to generate Golden Visa filename, using fallback:', error);
           
-          visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType;
+          // Enhanced fallback that matches new format
+          const date = new Date(formData.date || new Date());
+          const yy = date.getFullYear().toString().slice(-2);
+          const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+          const dd = date.getDate().toString().padStart(2, '0');
+          const formattedDate = `${yy}${mm}${dd}`;
+          
+          const nameForTitle = formData.lastName && formData.firstName 
+            ? `${formData.lastName} ${formData.firstName}`
+            : formData.firstName || formData.lastName || 'Client';
+          
+          // Handle dependent-only case
+          const isDependentOnly = !formData.primaryVisaRequired;
+          let visaType: string;
+          
+          if (isDependentOnly) {
+            visaType = 'Dependent';
+          } else {
+            // Simplified visa type mapping
+            const visaTypeMap: { [key: string]: string } = {
+              'property-investment': 'Property',
+              'time-deposit': 'Deposit',
+              'skilled-employee': 'Skilled'
+            };
+            visaType = visaTypeMap[formData.visaType] || 'Property';
+          }
+          
+          // Match new filename format: YYMMDD MGT LastName FirstName Golden {Property/Deposit/Skilled/Dependent}
+          return `${formattedDate} MGT ${nameForTitle} Golden ${visaType}`;
         }
-        
-        return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
       } else if (application.type === 'cost-overview') {
         const formData = application.form_data as OfferData;
-        const date = new Date(formData.clientDetails?.date || new Date());
-        const yy = date.getFullYear().toString().slice(-2);
-        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-        const dd = date.getDate().toString().padStart(2, '0');
-        const formattedDate = `${yy}${mm}${dd}`;
         
-        let nameForTitle = '';
-        if (formData.clientDetails?.companyName) {
-          nameForTitle = formData.clientDetails.companyName;
-        } else if (formData.clientDetails?.lastName && formData.clientDetails?.firstName) {
-          nameForTitle = `${formData.clientDetails.lastName} ${formData.clientDetails.firstName}`;
-        } else if (formData.clientDetails?.firstName) {
-          nameForTitle = formData.clientDetails.firstName;
-        } else if (formData.clientDetails?.lastName) {
-          nameForTitle = formData.clientDetails.lastName;
-        } else {
-          nameForTitle = 'Client';
+        try {
+          // Use the actual filename generator for consistency with PDF generation
+          const { generateDynamicFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
+          const filename = generateDynamicFilename(formData);
+          // Remove the .pdf extension for display
+          return filename.replace('.pdf', '');
+        } catch (error) {
+          console.error('🔧 REVIEW-MODAL: Failed to generate Cost Overview filename, using fallback:', error);
+          
+          // Enhanced fallback that matches new format
+          const date = new Date(formData.clientDetails?.date || new Date());
+          const yy = date.getFullYear().toString().slice(-2);
+          const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+          const dd = date.getDate().toString().padStart(2, '0');
+          const formattedDate = `${yy}${mm}${dd}`;
+          
+          const authority = formData.authorityInformation?.responsibleAuthority || 'Unknown Authority';
+          const isDET = authority === 'DET (Dubai Department of Economy and Tourism)';
+          
+          let nameForTitle = '';
+          if (formData.clientDetails?.addressToCompany && formData.clientDetails?.companyName) {
+            nameForTitle = formData.clientDetails.companyName;
+          } else if (formData.clientDetails?.lastName && formData.clientDetails?.firstName) {
+            nameForTitle = `${formData.clientDetails.lastName} ${formData.clientDetails.firstName}`;
+          } else if (formData.clientDetails?.firstName) {
+            nameForTitle = formData.clientDetails.firstName;
+          } else {
+            nameForTitle = 'CLIENT';
+          }
+          
+          // Add company short name if available and not using address to company
+          const shortName = formData.clientDetails?.companyName && !formData.clientDetails?.addressToCompany 
+            ? formData.clientDetails.companyName : '';
+          
+          if (isDET) {
+            const setupType = formData.clientDetails?.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDIV';
+            const currency = formData.clientDetails?.secondaryCurrency || 'USD';
+            return `${formattedDate} MGT ${nameForTitle} ${shortName ? shortName + ' ' : ''}Setup DET ${setupType} AED ${currency}`;
+          } else {
+            const years = formData.ifzaLicense?.licenseYears || 1;
+            const visaQuota = formData.ifzaLicense?.visaQuota || 0;
+            const visaUsed = formData.visaCosts?.numberOfVisas || 0;
+            const spouseVisas = formData.visaCosts?.spouseVisa ? 1 : 0;
+            const childrenVisas = formData.visaCosts?.numberOfChildVisas || 0;
+            const currency = formData.clientDetails?.secondaryCurrency || 'USD';
+            
+            return `${formattedDate} FZCO ${nameForTitle} ${shortName ? shortName + ' ' : ''}Setup IFZA ${years} ${visaQuota} ${visaUsed} ${spouseVisas} ${childrenVisas} AED ${currency}`;
+          }
         }
-        
-        const authority = formData.authorityInformation?.responsibleAuthority || 'setup';
-        return `${formattedDate} ${nameForTitle} offer ${authority}`;
       } else if (application.type === 'company-services') {
         const formData = application.form_data as CompanyServicesData;
-        const date = new Date(formData.date || new Date());
-        const yy = date.getFullYear().toString().slice(-2);
-        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-        const dd = date.getDate().toString().padStart(2, '0');
-        const formattedDate = `${yy}${mm}${dd}`;
         
-        let nameForTitle = '';
-        if (formData.companyName) {
-          nameForTitle = formData.companyName;
-        } else if (formData.lastName && formData.firstName) {
-          nameForTitle = `${formData.lastName} ${formData.firstName}`;
-        } else if (formData.firstName) {
-          nameForTitle = formData.firstName;
-        } else if (formData.lastName) {
-          nameForTitle = formData.lastName;
-        } else {
-          nameForTitle = 'Client';
+        try {
+          // Use the actual filename generator for consistency with PDF generation
+          const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
+          const clientInfo = {
+            firstName: formData.firstName || '',
+            lastName: formData.lastName || '',
+            companyName: formData.companyName || '',
+            shortCompanyName: formData.shortCompanyName || '',
+            date: formData.date || new Date().toISOString().split('T')[0],
+          };
+          const filename = generateCompanyServicesFilename(formData, clientInfo);
+          // Remove the .pdf extension for display
+          return filename.replace('.pdf', '');
+        } catch (error) {
+          console.error('🔧 REVIEW-MODAL: Failed to generate filename, using fallback:', error);
+          
+          // Enhanced fallback that matches new format
+          const date = new Date(formData.date || new Date());
+          const yy = date.getFullYear().toString().slice(-2);
+          const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+          const dd = date.getDate().toString().padStart(2, '0');
+          const formattedDate = `${yy}${mm}${dd}`;
+          
+          const nameForTitle = formData.companyName || 
+            (formData.firstName && formData.lastName ? `${formData.lastName} ${formData.firstName}` : formData.firstName || formData.lastName || 'Client');
+          
+          // Match new filename format - no hyphen separators, use spaces
+          return `${formattedDate} ${nameForTitle} FZCO CIT VAT ACC PRO COMPL`;
         }
-        
-        return `${formattedDate} TME Services ${nameForTitle}`;
       } else if (application.type === 'taxation') {
         const formData = application.form_data as any; // TaxationData type
         const date = new Date(formData.date || new Date());
@@ -190,7 +236,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       });
       if (application.type === 'golden-visa') {
         // Generate Golden Visa PDF for review
-        const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+        const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
         const formData = application.form_data as GoldenVisaData;
         
         // Extract client info from form data
@@ -228,7 +274,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         }, 1000);
       } else if (application.type === 'company-services') {
         // Generate Company Services PDF for review
-        const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator/utils/companyServicesGenerator');
+        const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator');
         const formData = application.form_data as CompanyServicesData;
         
         // Extract client info from form data

@@ -54,7 +54,7 @@ export const useGoldenVisaApplication = ({
   const generateApplicationTitle = useCallback((data: GoldenVisaData): string => {
     try {
       // Use the same filename generation as PDF export for consistency
-      const { generateGoldenVisaFilename } = require('@/lib/pdf-generator/utils/goldenVisaDataTransformer');
+      const { generateGoldenVisaFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
       const clientInfo = {
         firstName: data.firstName || '',
         lastName: data.lastName || '',

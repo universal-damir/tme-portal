@@ -361,7 +361,7 @@ const CompanyServicesTab: React.FC = () => {
 
     try {
       // Generate PDF for sending
-      const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator/utils/companyServicesGenerator');
+      const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator');
       
       const clientInfo = {
         firstName: data.firstName || '',
@@ -713,7 +713,7 @@ const CompanyServicesTab: React.FC = () => {
         applicationTitle={(() => {
           // Use the same filename generation as PDF export for consistency
           try {
-            const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+            const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
             const filename = generateCompanyServicesFilename(watchedData, clientInfo);
             return filename.replace('.pdf', '');
           } catch (error) {

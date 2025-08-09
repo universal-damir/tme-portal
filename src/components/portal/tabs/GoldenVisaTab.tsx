@@ -326,7 +326,7 @@ const GoldenVisaTab: React.FC = () => {
   // PDF regeneration function for language switching
   const regeneratePDFForLanguage = async (language: 'en' | 'de') => {
     try {
-      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
       const clientInfo = {
         firstName: watchedData.firstName || '',
         lastName: watchedData.lastName || '',
@@ -369,7 +369,7 @@ const GoldenVisaTab: React.FC = () => {
 
     try {
       // Generate PDF document
-      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
       // Convert form data to shared client format for PDF generation
       const clientInfo = {
         firstName: data.firstName || '',
@@ -462,7 +462,7 @@ const GoldenVisaTab: React.FC = () => {
     setIsGenerating(true);
     try {
       // Generate German preview document
-      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
       // Convert form data to shared client format for PDF generation
       const clientInfo = {
         firstName: data.firstName || '',
@@ -551,7 +551,7 @@ const GoldenVisaTab: React.FC = () => {
 
     try {
       // Generate preview document
-      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
       // Convert form data to shared client format for PDF generation
       const clientInfo = {
         firstName: data.firstName || '',
@@ -623,7 +623,7 @@ const GoldenVisaTab: React.FC = () => {
 
     try {
       // Generate PDF document
-      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator/utils/goldenVisaGenerator');
+      const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
       // Convert form data to shared client format for PDF generation
       const clientInfo = {
         firstName: data.firstName || '',
@@ -1001,46 +1001,35 @@ const GoldenVisaTab: React.FC = () => {
         onClose={() => setIsReviewModalOpen(false)}
         applicationId={reviewApp.application?.id?.toString() || 'new'}
         applicationTitle={(() => {
-          // Generate title using PDF naming convention
+          // Simple fallback format for modal title
           const date = new Date(watchedData.date || new Date());
           const yy = date.getFullYear().toString().slice(-2);
           const mm = (date.getMonth() + 1).toString().padStart(2, '0');
           const dd = date.getDate().toString().padStart(2, '0');
           const formattedDate = `${yy}${mm}${dd}`;
           
-          let nameForTitle = '';
-          if (clientInfo.companyName) {
-            nameForTitle = clientInfo.companyName;
-          } else if (watchedData.lastName && watchedData.firstName) {
-            nameForTitle = `${watchedData.lastName} ${watchedData.firstName}`;
-          } else if (watchedData.firstName) {
-            nameForTitle = watchedData.firstName;
-          } else if (watchedData.lastName) {
-            nameForTitle = watchedData.lastName;
-          } else {
-            nameForTitle = 'Client';
-          }
+          const nameForTitle = watchedData.lastName && watchedData.firstName 
+            ? `${watchedData.lastName} ${watchedData.firstName}`
+            : watchedData.firstName || watchedData.lastName || 'Client';
           
-          // Determine if this is a dependent-only visa (no primary holder)
+          // Handle dependent-only case
           const isDependentOnly = !watchedData.primaryVisaRequired;
-          
-          let visaTypeFormatted: string;
+          let visaType: string;
           
           if (isDependentOnly) {
-            // If only dependents are getting visas, use "dependent" suffix
-            visaTypeFormatted = 'dependent';
+            visaType = 'Dependent';
           } else {
-            // Format visa type for title (shortened versions)
+            // Simplified visa type mapping
             const visaTypeMap: { [key: string]: string } = {
-              'property-investment': 'property',
-              'time-deposit': 'deposit',
-              'skilled-employee': 'skilled'
+              'property-investment': 'Property',
+              'time-deposit': 'Deposit',
+              'skilled-employee': 'Skilled'
             };
-            
-            visaTypeFormatted = visaTypeMap[watchedData.visaType] || watchedData.visaType;
+            visaType = visaTypeMap[watchedData.visaType] || 'Property';
           }
           
-          return `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
+          // Match new filename format: YYMMDD MGT {LastName} {FirstName} Golden {Property/Deposit/Skilled/Dependent}
+          return `${formattedDate} MGT ${nameForTitle} Golden ${visaType}`;
         })()}
         onSubmit={reviewApp.submitForReview}
       />

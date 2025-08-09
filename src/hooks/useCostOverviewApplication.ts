@@ -208,6 +208,8 @@ export const useCostOverviewApplication = ({
         if (config.debugMode) {
           console.log('Updated Cost Overview application:', updatedApp.id);
         }
+        
+        return true;
       } else {
         // Create new application
         console.log('🔧 Creating new Cost Overview application:', { 
@@ -239,9 +241,9 @@ export const useCostOverviewApplication = ({
         if (config.debugMode) {
           console.log('Created new Cost Overview application:', newApp.id);
         }
+        
+        return true;
       }
-      
-      return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to save application';
       setError(errorMessage);
@@ -299,41 +301,66 @@ export const useCostOverviewApplication = ({
     urgency: UrgencyLevel;
     comments?: string;
   }): Promise<boolean> => {
-    if (!config.canUseCostOverviewReview || !application) {
-      console.log('🔧 submitForReview blocked:', { canUse: config.canUseCostOverviewReview, hasApplication: !!application });
+    if (!config.canUseCostOverviewReview) {
+      console.log('🔧 submitForReview blocked: review system disabled');
       return false;
     }
     
-    console.log('🔧 Cost Overview submitForReview starting:', { applicationId: application.id, submission });
+    if (!application) {
+      console.log('🔧 submitForReview blocked: no application found, trying to create one first...');
+      const saveSuccess = await saveApplication();
+      if (!saveSuccess) {
+        console.log('🔧 submitForReview: failed to create application');
+        return false;
+      }
+      
+      // Check if application was created
+      if (!application) {
+        console.log('🔧 submitForReview: still no application after save attempt');
+        return false;
+      }
+    }
+    
+    console.log('🔧 submitForReview: proceeding with application:', { 
+      id: application.id, 
+      title: application.title 
+    });
     
     setIsLoading(true);
     setError(null);
     
     try {
       // First ensure application is saved with latest form data
-      console.log('🔧 Saving application before review submission...');
+      console.log('🔧 submitForReview: saving application before submission...');
       const saveSuccess = await saveApplication();
       if (!saveSuccess) {
         throw new Error('Failed to save application before submission');
       }
       
-      console.log('🔧 Making API call to submit for review:', `/api/applications/${application.id}/submit-review`);
+      console.log('🔧 submitForReview: making API call to:', `/api/applications/${application.id}/submit-review`);
+      console.log('🔧 submitForReview: request body:', submission);
       
-      // Submit for review
+      // Submit for review with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch(`/api/applications/${application.id}/submit-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(submission),
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       
       console.log('🔧 API response status:', response.status, response.statusText);
       
       if (!response.ok) {
         const errorText = await response.text();
         console.error('🔧 API error response:', errorText);
-        throw new Error(`Failed to submit for review: ${response.statusText}`);
+        throw new Error(`Failed to submit for review: ${response.statusText} - ${errorText}`);
       }
       
       const result = await response.json();
@@ -354,11 +381,28 @@ export const useCostOverviewApplication = ({
       
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to submit for review';
-      setError(errorMessage);
+      let errorMessage = 'Failed to submit for review';
       
-      if (config.debugMode) {
-        console.error('Error submitting for review:', err);
+      if (err instanceof Error) {
+        if (err.name === 'AbortError') {
+          errorMessage = 'Request timed out. Please try again.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      setError(errorMessage);
+      console.error('🔧 submitForReview error:', err);
+      
+      // Show user-friendly error toast
+      if (errorMessage.includes('timed out')) {
+        toast.error('Request Timeout', {
+          description: 'The submission is taking too long. Please try again.'
+        });
+      } else {
+        toast.error('Submission Error', {
+          description: errorMessage
+        });
       }
       
       return false;

@@ -87,8 +87,8 @@ export async function POST(
               console.log('🔧 SUBMIT-REVIEW: Application data keys:', applicationData ? Object.keys(applicationData) : null);
               
               switch (applicationType) {
-                case 'cost_overview': {
-                  const { generateDynamicFilename } = await import('@/lib/pdf-generator/utils/filename');
+                case 'cost-overview': {
+                  const { generateDynamicFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
                   console.log('🔧 SUBMIT-REVIEW: Calling generateDynamicFilename with data:', {
                     hasClientDetails: !!applicationData.clientDetails,
                     hasAuthorityInfo: !!applicationData.authorityInformation,
@@ -98,8 +98,8 @@ export async function POST(
                   console.log('🔧 SUBMIT-REVIEW: Generated filename:', filename);
                   break;
                 }
-                case 'golden_visa': {
-                  const { generateGoldenVisaFilename } = await import('@/lib/pdf-generator/utils/goldenVisaDataTransformer');
+                case 'golden-visa': {
+                  const { generateGoldenVisaFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
                   const clientInfo = {
                     firstName: applicationData.firstName || '',
                     lastName: applicationData.lastName || '',
@@ -109,8 +109,8 @@ export async function POST(
                   filename = generateGoldenVisaFilename(applicationData, clientInfo);
                   break;
                 }
-                case 'company_services': {
-                  const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+                case 'company-services': {
+                  const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
                   const clientInfo = {
                     firstName: applicationData.firstName || '',
                     lastName: applicationData.lastName || '',
@@ -188,15 +188,15 @@ export async function POST(
           user_id: parseInt(reviewer_id), // Todo goes to the reviewer
           data: {
             application_id: id,
-            application_title: formName, // Rule expects this field
+            application_title: filename ? filename.replace('.pdf', '') : formName, // Prefer fresh filename over potentially stale DB title
             reviewer_id: parseInt(reviewer_id),
             reviewer_name: reviewerName,
             submitter_name: session.user.full_name, // Rule expects this field
             urgency: urgency === 'urgent' ? 'high' : 'standard', // Map urgency values
             comments: comments || null,
-            form_name: formName,
+            form_name: filename ? filename.replace('.pdf', '') : formName, // Use fresh filename
             filename: filename,
-            client_name: formName, // Use form name as client identifier
+            client_name: filename ? filename.replace('.pdf', '') : formName, // Use fresh filename as client identifier
             document_type: 'Application Review',
             submitter_id: userId
           },

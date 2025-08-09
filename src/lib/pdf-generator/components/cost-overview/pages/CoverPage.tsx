@@ -13,7 +13,7 @@ import {
   ActivityCodesSection,
   InitialCostSummarySection
 } from '../sections';
-import { generateDynamicFilename } from '../../../utils/filename';
+import { generateDynamicFilename } from '../../../integrations/FilenameIntegrations';
 import type { PDFComponentProps } from '../../../types';
 
 // CoverPage - First page of the PDF document

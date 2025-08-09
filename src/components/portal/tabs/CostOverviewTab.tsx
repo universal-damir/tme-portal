@@ -12,8 +12,7 @@ import {
   generatePDFWithFilename, 
   generateFamilyVisaPDF,
   generateFamilyVisaPDFWithFilename,
-  hasFamilyVisas,
-  generateDynamicFilename
+  hasFamilyVisas
 } from '@/lib/pdf-generator';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -48,6 +47,7 @@ import { EmailDraftGenerator, EmailDraftGeneratorProps } from '@/components/shar
 
 // Import Review System components
 import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
+
 
 // Progress tracking interface
 interface PDFGenerationProgress {
@@ -1246,6 +1246,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         applicationTitle={(() => {
           // Use the same filename generation as the actual PDF export
           try {
+            const { generateDynamicFilename } = require('@/lib/pdf-generator/utils/filename');
             const filename = generateDynamicFilename(watchedData);
             // Remove the .pdf extension for display
             return filename.replace('.pdf', '');

@@ -80,8 +80,8 @@ export async function POST(
               console.log('🔧 REVIEW: Application data keys:', applicationData ? Object.keys(applicationData) : null);
               
               switch (applicationType) {
-                case 'cost_overview': {
-                  const { generateDynamicFilename } = await import('@/lib/pdf-generator/utils/filename');
+                case 'cost-overview': {
+                  const { generateDynamicFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
                   console.log('🔧 REVIEW: Calling generateDynamicFilename with data:', {
                     hasClientDetails: !!applicationData.clientDetails,
                     hasAuthorityInfo: !!applicationData.authorityInformation,
@@ -91,8 +91,8 @@ export async function POST(
                   console.log('🔧 REVIEW: Generated filename:', filename);
                   break;
                 }
-                case 'golden_visa': {
-                  const { generateGoldenVisaFilename } = await import('@/lib/pdf-generator/utils/goldenVisaDataTransformer');
+                case 'golden-visa': {
+                  const { generateGoldenVisaFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
                   const clientInfo = {
                     firstName: applicationData.firstName || '',
                     lastName: applicationData.lastName || '',
@@ -102,8 +102,8 @@ export async function POST(
                   filename = generateGoldenVisaFilename(applicationData, clientInfo);
                   break;
                 }
-                case 'company_services': {
-                  const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+                case 'company-services': {
+                  const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
                   const clientInfo = {
                     firstName: applicationData.firstName || '',
                     lastName: applicationData.lastName || '',
@@ -170,9 +170,9 @@ export async function POST(
           data: {
             application_id: id,
             action,
-            form_name: formName,
+            form_name: filename ? filename.replace('.pdf', '') : formName, // Use fresh filename
             filename: filename,
-            application_title: formName
+            application_title: filename ? filename.replace('.pdf', '') : formName // Prefer fresh filename over potentially stale DB title
           },
           created_at: new Date().toISOString()
         };

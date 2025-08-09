@@ -51,10 +51,10 @@ export const useCompanyServicesApplication = ({
   const lastSavedDataRef = useRef<string>('');
   
   // Generate application title from form data using PDF filename standards
-  const generateApplicationTitle = useCallback((data: CompanyServicesData): string => {
+  const generateApplicationTitle = useCallback(async (data: CompanyServicesData): Promise<string> => {
     try {
-      // Use the same filename generation as PDF export for consistency
-      const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+      // Use dynamic import for client-side compatibility
+      const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
       const clientInfo = {
         firstName: data.firstName || '',
         lastName: data.lastName || '',
@@ -78,7 +78,8 @@ export const useCompanyServicesApplication = ({
       const nameForTitle = data.companyName || 
         (data.firstName && data.lastName ? `${data.lastName} ${data.firstName}` : data.firstName || data.lastName || 'CLIENT');
       
-      return `${formattedDate} TME Services ${nameForTitle}`;
+      // Match new filename format - no hyphen separators, use spaces
+      return `${formattedDate} ${nameForTitle} FZCO CIT VAT ACC PRO COMPL`;
     }
   }, [clientName]);
   
@@ -152,7 +153,7 @@ export const useCompanyServicesApplication = ({
     setError(null);
     
     try {
-      const title = generateApplicationTitle(formData);
+      const title = await generateApplicationTitle(formData);
       
       if (application) {
         // Update existing application

@@ -141,7 +141,7 @@ function generateCostOverviewTitle(formData: any): string {
   });
   
   try {
-    const { generateDynamicFilename } = require('@/lib/pdf-generator/utils/filename');
+    const { generateDynamicFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
     console.log('🔧 CRITICAL DEBUG: About to call generateDynamicFilename with data structure:', formData);
     const filename = generateDynamicFilename(formData);
     console.log('🔧 CRITICAL DEBUG: generateDynamicFilename succeeded, filename:', filename);
@@ -209,7 +209,7 @@ function generateCostOverviewTitle(formData: any): string {
 function generateCompanyServicesTitle(formData: any): string {
   // Use the same detailed filename generation as PDF export for consistency
   try {
-    const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/utils/companyServicesDataTransformer');
+    const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
     const filename = generateCompanyServicesFilename(formData, {});
     return filename.replace('.pdf', '');
   } catch (error) {

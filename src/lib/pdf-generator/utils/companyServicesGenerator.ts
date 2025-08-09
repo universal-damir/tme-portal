@@ -3,7 +3,7 @@ import { pdf } from '@react-pdf/renderer';
 import { CompanyServicesDocument } from '../components/company-services/CompanyServicesDocument';
 import { CompanyServicesData } from '@/types/company-services';
 import { SharedClientInfo } from '@/types/portal';
-import { generateCompanyServicesFilename } from './companyServicesDataTransformer';
+import { generateCompanyServicesFilename } from '../integrations/FilenameIntegrations';
 
 export const generateCompanyServicesPDF = async (
   companyServicesData: CompanyServicesData,

@@ -4,92 +4,66 @@ import { createCostCalculator } from '@/lib/business';
 import { getAuthorityConfigByName } from '@/lib/authorities/registry';
 import { formatDateForFilename, cleanAuthorityName } from './formatting';
 
-// generateDynamicFilename function extracted from lines 2760-2828
+// generateDynamicFilename function - updated with new IFZA/DET format
 export const generateDynamicFilename = (data: OfferData): string => {
   // Format date as YYMMDD
   const date = new Date(data.clientDetails.date);
   const formattedDate = formatDateForFilename(date);
 
-  // Get basic info
+  // Authority-specific format determines company type prefix
+  const authority = data.authorityInformation.responsibleAuthority;
+  const isDET = authority === 'DET (Dubai Department of Economy and Tourism)';
+  
+  // Company type: MGT for DET, FZCO for IFZA
+  const companyPrefix = isDET ? 'MGT' : 'FZCO';
+  
+  // Name components based on addressToCompany setting and requirements
   const firstName = data.clientDetails.firstName || '';
   const lastName = data.clientDetails.lastName || '';
   const companyName = data.clientDetails.companyName || '';
   const addressToCompany = data.clientDetails.addressToCompany || false;
-  const authority = data.authorityInformation.responsibleAuthority;
   
-  // Determine name for filename based on addressToCompany checkbox
-  const nameForFilename = addressToCompany && companyName ? 
-    companyName : 
-    (firstName ? 
-      (lastName ? `${lastName} ${firstName}` : firstName) : 
-      (companyName || 'CLIENT'));
+  let nameComponents = [];
   
-  // Check if this is DET authority
-  const isDET = authority === 'DET (Dubai Department of Economy and Tourism)';
+  if (addressToCompany && companyName) {
+    // Use only CompanyShortName when "Address to company" is selected
+    nameComponents.push(companyName);
+  } else {
+    // Use name logic: LastName FirstName as default, or only FirstName if no LastName
+    if (lastName && firstName) {
+      nameComponents.push(lastName, firstName);
+    } else if (firstName) {
+      nameComponents.push(firstName);
+    } else {
+      nameComponents.push('Client');
+    }
+    
+    // Add CompanyShortName after the name (if available and not using "Address to company")
+    if (companyName) {
+      nameComponents.push(companyName);
+    }
+  }
   
   if (isDET) {
-    // For DET: YYMMDD <NAME> DET CORP/INDIV AED <SECONDARY_CURRENCY>
+    // DET format: YYMMDD MGT {LastName} {FirstName} {CompanyShortName} Setup DET {INDIV/CORP} AED {CURRENCY}
     const setupType = data.clientDetails.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDIV';
-    const secondaryCurrency = data.clientDetails.secondaryCurrency;
+    const secondaryCurrency = data.clientDetails.secondaryCurrency || 'EUR';
     
-    return `${formattedDate} ${nameForFilename} DET ${setupType} setup AED ${secondaryCurrency}.pdf`;
+    const components = [formattedDate, companyPrefix, ...nameComponents, 'Setup', 'DET', setupType, 'AED', secondaryCurrency];
+    return components.join(' ') + '.pdf';
   } else {
-    // For IFZA: Keep existing format
-    // Get authority display name
-    const authorityConfig = getAuthorityConfigByName(authority);
-    const authorityDisplayName = authorityConfig?.displayName || authority;
-    
-    // Get actual license years selected
-    const numberOfYears = authority === 'IFZA (International Free Zone Authority)' 
-      ? (data.ifzaLicense?.licenseYears || 1).toString()
-      : '1'; // Default to 1 year for other authorities
-    
-    // Get visa quota
-    const visaQuota = authority === 'IFZA (International Free Zone Authority)' 
-      ? (data.ifzaLicense?.visaQuota || 0)
-      : 0; // DET doesn't have visa quota concept
-    
-    // Get visa used out of quota
-    const visaUsed = data.visaCosts?.numberOfVisas || 0;
-    
-    // Get number of spouse visas (0 if not selected/checked)
+    // IFZA format: YYMMDD FZCO {LastName} {FirstName} {CompanyShortName} Setup IFZA {years} {visaQuota} {companyVisas} {spouseVisas} {childrenVisas} AED {currency}
+    const years = data.ifzaLicense?.licenseYears || 1;
+    const visaQuota = data.ifzaLicense?.visaQuota || 0;
+    const companyVisas = data.visaCosts?.numberOfVisas || 0;
     const spouseVisas = data.visaCosts?.spouseVisa ? 1 : 0;
-    
-    // Get number of children visas (0 if not selected)
     const childrenVisas = data.visaCosts?.numberOfChildVisas || 0;
+    const secondaryCurrency = data.clientDetails.secondaryCurrency || 'EUR';
     
-    // Calculate costs using the same logic as the UI
-    const calculator = createCostCalculator(authorityConfig || null);
-    const costs = calculator ? {
-      initialSetup: calculator.calculateInitialSetupCosts(data),
-      yearlyRunning: calculator.calculateYearlyRunningCosts(data)
-    } : null;
-    
-    const setupTotal = costs?.initialSetup.total || 0;
-    const yearlyTotal = costs?.yearlyRunning.total || 0;
-    
-    // Add deposits to setup total if applicable
-    let totalSetupCost = setupTotal;
-    if (data.ifzaLicense?.depositWithLandlord && data.ifzaLicense.depositAmount) {
-      totalSetupCost += data.ifzaLicense.depositAmount;
-    }
-    if (authority === 'DET (Dubai Department of Economy and Tourism)' && 
-        data.detLicense?.rentType && data.detLicense.rentType !== 'business-center') {
-      const detRentAmount = data.detLicense.officeRentAmount || 0;
-      const detLandlordDeposit = detRentAmount * 0.05;
-      const detDewaDeposit = data.detLicense.rentType === 'office' ? 2000 : (data.detLicense.rentType === 'warehouse' ? 4000 : 0);
-      totalSetupCost += detLandlordDeposit + detDewaDeposit;
-    }
-    
-    const secondaryCurrency = data.clientDetails.secondaryCurrency;
-    
-    // Clean authority name for filename (remove special characters)
-    const cleanedAuthorityName = cleanAuthorityName(authorityDisplayName);
-    
-    // Build filename
-    const filename = `${formattedDate} ${nameForFilename} ${cleanedAuthorityName} ${numberOfYears} ${visaQuota} ${visaUsed} ${spouseVisas} ${childrenVisas} setup AED ${secondaryCurrency}.pdf`;
-    
-    return filename;
+    const components = [formattedDate, companyPrefix, ...nameComponents, 'Setup', 'IFZA', 
+                       years.toString(), visaQuota.toString(), companyVisas.toString(), 
+                       spouseVisas.toString(), childrenVisas.toString(), 'AED', secondaryCurrency];
+    return components.join(' ') + '.pdf';
   }
 };
 
