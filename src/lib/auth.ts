@@ -8,10 +8,13 @@ export interface User {
   id: number;
   employee_code: string;
   email: string;
+  first_name: string;
+  last_name: string;
   full_name: string;
+  phone?: string;
   department: string;
   designation: string;
-  role: 'admin' | 'manager' | 'employee';
+  role: 'admin' | 'manager' | 'employee' | 'staff';
   status: 'active' | 'inactive' | 'suspended' | 'pending';
   must_change_password: boolean;
   last_login?: Date;
@@ -104,7 +107,10 @@ export async function authenticateUser(email: string, password: string): Promise
       id: user.id,
       employee_code: user.employee_code,
       email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
       full_name: user.full_name,
+      phone: user.phone,
       department: user.department,
       designation: user.designation,
       role: user.role,
@@ -174,7 +180,10 @@ export async function getSession(sessionId: string): Promise<SessionData | null>
         id: row.user_id,
         employee_code: row.employee_code,
         email: row.email,
+        first_name: row.first_name,
+        last_name: row.last_name,
         full_name: row.full_name,
+        phone: row.phone,
         department: row.department,
         designation: row.designation,
         role: row.role,

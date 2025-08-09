@@ -31,7 +31,7 @@ function getPool(): Pool {
 }
 
 // Application title generation functions
-function generateApplicationTitle(applicationType: string, formData: any): string {
+async function generateApplicationTitle(applicationType: string, formData: any): Promise<string> {
   console.log('🔧 generateApplicationTitle called with:', { 
     applicationType, 
     typeOfType: typeof applicationType,
@@ -42,7 +42,7 @@ function generateApplicationTitle(applicationType: string, formData: any): strin
   
   if (applicationType === 'golden-visa') {
     console.log('🔧 Calling generateGoldenVisaTitle...');
-    const title = generateGoldenVisaTitle(formData);
+    const title = await generateGoldenVisaTitle(formData);
     console.log('🔧 Generated Golden Visa title:', title);
     return title;
   } else if (applicationType === 'cost-overview') {
@@ -67,67 +67,41 @@ function generateApplicationTitle(applicationType: string, formData: any): strin
   return 'Application';
 }
 
-function generateGoldenVisaTitle(formData: any): string {
-  console.log('🔧 generateGoldenVisaTitle called with formData:', {
-    date: formData.date,
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    companyName: formData.companyName,
-    visaType: formData.visaType,
-    primaryVisaRequired: formData.primaryVisaRequired,
-    allKeys: Object.keys(formData || {})
-  });
+async function generateGoldenVisaTitle(formData: any): Promise<string> {
+  console.log('🔧 generateGoldenVisaTitle called - using modern filename generation');
   
-  const date = new Date(formData.date || new Date());
-  const yy = date.getFullYear().toString().slice(-2);
-  const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-  const dd = date.getDate().toString().padStart(2, '0');
-  const formattedDate = `${yy}${mm}${dd}`;
-  
-  let nameForTitle = '';
-  if (formData.companyName) {
-    nameForTitle = formData.companyName;
-  } else if (formData.lastName && formData.firstName) {
-    nameForTitle = `${formData.lastName} ${formData.firstName}`;
-  } else if (formData.firstName) {
-    nameForTitle = formData.firstName;
-  } else if (formData.lastName) {
-    nameForTitle = formData.lastName;
-  } else {
-    nameForTitle = 'Client';
-  }
-  
-  // Determine if this is a dependent-only visa (no primary holder)
-  const isDependentOnly = !formData.primaryVisaRequired;
-  
-  console.log('🔧 Golden Visa Title Generation - Primary Visa Check:', {
-    primaryVisaRequired: formData.primaryVisaRequired,
-    isDependentOnly,
-    visaType: formData.visaType
-  });
-  
-  let visaTypeFormatted: string;
-  
-  if (isDependentOnly) {
-    // If only dependents are getting visas, use "dependent" suffix
-    visaTypeFormatted = 'dependent';
-    console.log('🔧 Using dependent suffix');
-  } else {
-    // Format visa type for filename (shortened versions)
-    const visaTypeMap: { [key: string]: string } = {
-      'property-investment': 'property',
-      'time-deposit': 'deposit', 
-      'skilled-employee': 'skilled'
+  try {
+    // Use the same filename generation logic as PDF/preview
+    const { generateGoldenVisaFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
+    
+    const clientInfo = {
+      firstName: formData.firstName || '',
+      lastName: formData.lastName || '',
+      companyName: formData.companyName || '',
+      date: formData.date || new Date().toISOString().split('T')[0],
     };
     
-    visaTypeFormatted = visaTypeMap[formData.visaType] || formData.visaType || 'unknown';
-    console.log('🔧 Using visa type:', visaTypeFormatted);
+    const filename = generateGoldenVisaFilename(formData, clientInfo);
+    console.log('🔧 Generated Golden Visa filename:', filename);
+    
+    // Remove .pdf extension for notification title
+    return filename.replace('.pdf', '');
+  } catch (error) {
+    console.error('🔧 Error generating Golden Visa filename, using fallback:', error);
+    
+    // Fallback to simple format if filename generation fails
+    const date = new Date(formData.date || new Date());
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    const name = formData.companyName || 
+                 (formData.firstName && formData.lastName ? `${formData.lastName} ${formData.firstName}` : '') ||
+                 formData.firstName || formData.lastName || 'Client';
+    
+    return `${formattedDate} ${name} Golden Visa`;
   }
-  
-  const result = `${formattedDate} ${nameForTitle} offer golden visa ${visaTypeFormatted}`;
-  
-  console.log('🔧 Generated Golden Visa title result:', result);
-  return result;
 }
 
 function generateCostOverviewTitle(formData: any): string {
@@ -596,7 +570,7 @@ export class ApplicationsService {
               formDataKeys: formData ? Object.keys(formData) : []
             });
             
-            applicationTitle = generateApplicationTitle(applicationType, formData);
+            applicationTitle = await generateApplicationTitle(applicationType, formData);
             
             console.log('🔧 DEBUG Generated title:', applicationTitle);
           } catch (error) {
@@ -683,7 +657,7 @@ export class ApplicationsService {
             const applicationType = app.type;
             const formData = app.form_data;
             
-            applicationTitle = generateApplicationTitle(applicationType, formData);
+            applicationTitle = await generateApplicationTitle(applicationType, formData);
           } catch (error) {
             console.error('Error generating notification title:', error);
             applicationTitle = app.title || 'Application';

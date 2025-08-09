@@ -19,10 +19,13 @@ interface User {
   id: number;
   employee_code: string;
   email: string;
+  first_name: string;
+  last_name: string;
   full_name: string;
+  phone?: string;
   department: string;
   designation: string;
-  role: 'admin' | 'manager' | 'employee';
+  role: 'admin' | 'manager' | 'employee' | 'staff';
   status: 'active' | 'inactive' | 'locked';
   last_login: string | null;
   created_at: string;

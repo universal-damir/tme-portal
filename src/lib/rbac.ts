@@ -9,7 +9,7 @@ export type Permission = {
   action: string;
 };
 
-export type UserRole = 'admin' | 'manager' | 'employee';
+export type UserRole = 'admin' | 'manager' | 'employee' | 'staff';
 export type ResourceType = 'cost_overview' | 'company_services' | 'golden_visa' | 'taxation' | 'users' | 'system' | 'audit';
 export type ActionType = 'read' | 'write' | 'export' | 'admin' | 'delete';
 
@@ -29,6 +29,12 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, string[]> = {
     'taxation_read', 'taxation_write', 'taxation_export'
   ],
   employee: [
+    'cost_overview_read', 'cost_overview_write', 'cost_overview_export',
+    'company_services_read', 'company_services_write', 'company_services_export',
+    'golden_visa_read', 'golden_visa_write', 'golden_visa_export',
+    'taxation_read', 'taxation_write', 'taxation_export'
+  ],
+  staff: [
     'cost_overview_read', 'cost_overview_write', 'cost_overview_export',
     'company_services_read', 'company_services_write', 'company_services_export',
     'golden_visa_read', 'golden_visa_write', 'golden_visa_export',
