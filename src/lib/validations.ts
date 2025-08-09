@@ -218,14 +218,26 @@ export const goldenVisaSchema = z.object({
 
 // Tax Consulting Services validation schema
 export const taxConsultingServicesSchema = z.object({
-  enabled: z.boolean().optional(),
+  enabled: z.boolean().optional(), // Keep for backward compatibility with PDF rendering
+  // Separate CIT and VAT service flags
+  citEnabled: z.boolean().optional(),
+  vatEnabled: z.boolean().optional(),
+  // CIT-related fields
   citRegistration: z.number().min(0, 'CIT registration fee must be 0 or greater').optional(),
   citReturnFiling: z.number().min(0, 'CIT return filing fee must be 0 or greater').optional(),
+  citType: z.enum(['sbr-regular', 'qfzp', ''], {
+    required_error: 'Please select a CIT return filing type',
+  }).optional(),
+  // VAT-related fields
   vatType: z.enum(['registration', 'exception', 'de-registration', ''], {
     required_error: 'Please select a VAT service type',
   }).optional(),
   vatRegistration: z.number().min(0, 'VAT registration fee must be 0 or greater').optional(),
   vatReturnFiling: z.number().min(0, 'VAT return filing fee must be 0 or greater').optional(),
+  vatReturnFilingType: z.enum(['mini', 'basic', 'complex', ''], {
+    required_error: 'Please select a VAT return filing type',
+  }).optional(),
+  clientManagedAccounting: z.boolean().optional(),
 }).optional();
 
 // Accounting Services validation schema

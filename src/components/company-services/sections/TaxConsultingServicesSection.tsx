@@ -43,47 +43,53 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
   setValue,
   watchedData,
 }) => {
-  // Reset tax consulting fields when the main checkbox is unchecked
+  // Reset CIT fields when CIT checkbox is unchecked
   useEffect(() => {
-    if (!watchedData.taxConsultingServices?.enabled) {
+    if (!watchedData.taxConsultingServices?.citEnabled) {
       setValue('taxConsultingServices.citRegistration', 0);
       setValue('taxConsultingServices.citType', '');
+    }
+  }, [watchedData.taxConsultingServices?.citEnabled, setValue]);
+
+  // Reset VAT fields when VAT checkbox is unchecked
+  useEffect(() => {
+    if (!watchedData.taxConsultingServices?.vatEnabled) {
       setValue('taxConsultingServices.vatType', '');
       setValue('taxConsultingServices.vatRegistration', 0);
       setValue('taxConsultingServices.vatReturnFiling', 0);
       setValue('taxConsultingServices.vatReturnFilingType', '');
       setValue('taxConsultingServices.clientManagedAccounting', false);
     }
-  }, [watchedData.taxConsultingServices?.enabled, setValue]);
+  }, [watchedData.taxConsultingServices?.vatEnabled, setValue]);
 
-  // Auto-populate default values when sections are enabled
+  // Auto-populate default values when CIT is enabled
   useEffect(() => {
-    if (watchedData.taxConsultingServices?.enabled) {
+    if (watchedData.taxConsultingServices?.citEnabled) {
       // Auto-populate CIT Registration if not already set
       if (!watchedData.taxConsultingServices?.citRegistration || watchedData.taxConsultingServices?.citRegistration === 0) {
         setValue('taxConsultingServices.citRegistration', DEFAULT_FEES.citRegistration);
       }
     }
-  }, [watchedData.taxConsultingServices?.enabled, setValue]);
+  }, [watchedData.taxConsultingServices?.citEnabled, setValue]);
 
   // Auto-populate VAT registration fee when VAT type is selected
   useEffect(() => {
     const vatType = watchedData.taxConsultingServices?.vatType;
-    if (vatType && ['registration', 'exception', 'de-registration'].includes(vatType)) {
+    if (watchedData.taxConsultingServices?.vatEnabled && vatType && ['registration', 'exception', 'de-registration'].includes(vatType)) {
       if (!watchedData.taxConsultingServices?.vatRegistration || watchedData.taxConsultingServices?.vatRegistration === 0) {
         setValue('taxConsultingServices.vatRegistration', DEFAULT_FEES.vatRegistration);
       }
-    } else {
+    } else if (!watchedData.taxConsultingServices?.vatEnabled) {
       setValue('taxConsultingServices.vatRegistration', 0);
       setValue('taxConsultingServices.vatReturnFiling', 0);
       setValue('taxConsultingServices.vatReturnFilingType', '');
     }
-  }, [watchedData.taxConsultingServices?.vatType, setValue]);
+  }, [watchedData.taxConsultingServices?.vatType, watchedData.taxConsultingServices?.vatEnabled, setValue]);
 
   // Auto-populate VAT return filing fee when VAT return filing type is selected
   useEffect(() => {
     const vatReturnFilingType = watchedData.taxConsultingServices?.vatReturnFilingType;
-    if (vatReturnFilingType && ['mini', 'basic', 'complex'].includes(vatReturnFilingType)) {
+    if (watchedData.taxConsultingServices?.vatEnabled && vatReturnFilingType && ['mini', 'basic', 'complex'].includes(vatReturnFilingType)) {
       let defaultValue = 664; // mini
       if (vatReturnFilingType === 'basic') {
         defaultValue = 2361;
@@ -93,68 +99,79 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
       
       // Always update the value when the type changes
       setValue('taxConsultingServices.vatReturnFiling', defaultValue);
-    } else {
+    } else if (!watchedData.taxConsultingServices?.vatEnabled) {
       setValue('taxConsultingServices.vatReturnFiling', 0);
     }
-  }, [watchedData.taxConsultingServices?.vatReturnFilingType, setValue]);
+  }, [watchedData.taxConsultingServices?.vatReturnFilingType, watchedData.taxConsultingServices?.vatEnabled, setValue]);
+
+  // Update the main enabled flag for backward compatibility with PDF rendering
+  useEffect(() => {
+    const citEnabled = watchedData.taxConsultingServices?.citEnabled;
+    const vatEnabled = watchedData.taxConsultingServices?.vatEnabled;
+    const overallEnabled = citEnabled || vatEnabled;
+    
+    if (watchedData.taxConsultingServices?.enabled !== overallEnabled) {
+      setValue('taxConsultingServices.enabled', overallEnabled);
+    }
+  }, [watchedData.taxConsultingServices?.citEnabled, watchedData.taxConsultingServices?.vatEnabled, setValue]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <FormSection
-        title="Tax Consulting Services"
-        description="CIT (Corporate Income Tax) and VAT (Value Added Tax) consulting services"
-        icon={Calculator}
-        iconColor="text-blue-600"
+    <>
+      {/* CIT Consulting Service Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        <div className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-          {/* Main Tax Consulting Services Checkbox */}
-          <motion.label
-            whileHover={{ scale: 1.01 }}
-            className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
-          >
-            <div className="relative">
-              <input
-                type="checkbox"
-                {...register('taxConsultingServices.enabled')}
-                checked={watchedData.taxConsultingServices?.enabled || false}
-                className="sr-only"
-              />
-              <div 
-                className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                style={{ 
-                  borderColor: watchedData.taxConsultingServices?.enabled ? '#243F7B' : '#d1d5db',
-                  backgroundColor: watchedData.taxConsultingServices?.enabled ? '#243F7B' : 'white'
-                }}
-              >
-                {watchedData.taxConsultingServices?.enabled && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-3 h-3 text-white flex items-center justify-center"
-                  >
-                    ✓
-                  </motion.div>
-                )}
+        <FormSection
+          title="CIT Consulting Service"
+          description="Corporate Income Tax (CIT) consulting services"
+          icon={Calculator}
+          iconColor="text-blue-600"
+        >
+          <div className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {/* CIT Services Checkbox */}
+            <motion.label
+              whileHover={{ scale: 1.01 }}
+              className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+            >
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  {...register('taxConsultingServices.citEnabled')}
+                  checked={watchedData.taxConsultingServices?.citEnabled || false}
+                  className="sr-only"
+                />
+                <div 
+                  className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                  style={{ 
+                    borderColor: watchedData.taxConsultingServices?.citEnabled ? '#243F7B' : '#d1d5db',
+                    backgroundColor: watchedData.taxConsultingServices?.citEnabled ? '#243F7B' : 'white'
+                  }}
+                >
+                  {watchedData.taxConsultingServices?.citEnabled && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-3 h-3 text-white flex items-center justify-center"
+                    >
+                      ✓
+                    </motion.div>
+                  )}
+                </div>
               </div>
-            </div>
-            <div>
-              <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
-                Include Tax Consulting Services
-              </span>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Select to include Corporate Income Tax (CIT) and Value Added Tax (VAT) services
-              </p>
-            </div>
-          </motion.label>
+              <div>
+                <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                  Include CIT Consulting Services
+                </span>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Select to include Corporate Income Tax (CIT) services
+                </p>
+              </div>
+            </motion.label>
 
-          {/* Tax Consulting Options - Show only if enabled */}
-          {watchedData.taxConsultingServices?.enabled && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-              {/* CIT Section */}
+            {/* CIT Options - Show only if enabled */}
+            {watchedData.taxConsultingServices?.citEnabled && (
               <div className="bg-white rounded-lg p-4 border border-gray-200">
                 <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
                   Corporate Income Tax (CIT)
@@ -223,9 +240,68 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
                   </div>
                 </div>
               </div>
+            )}
+          </div>
+        </FormSection>
+      </motion.div>
 
-              {/* VAT Section */}
+      {/* VAT Consulting Services Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <FormSection
+          title="VAT Consulting Services"
+          description="Value Added Tax (VAT) consulting services"
+          icon={Calculator}
+          iconColor="text-blue-600"
+        >
+          <div className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+            {/* VAT Services Checkbox */}
+            <motion.label
+              whileHover={{ scale: 1.01 }}
+              className="flex items-center space-x-3 cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+            >
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  {...register('taxConsultingServices.vatEnabled')}
+                  checked={watchedData.taxConsultingServices?.vatEnabled || false}
+                  className="sr-only"
+                />
+                <div 
+                  className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                  style={{ 
+                    borderColor: watchedData.taxConsultingServices?.vatEnabled ? '#243F7B' : '#d1d5db',
+                    backgroundColor: watchedData.taxConsultingServices?.vatEnabled ? '#243F7B' : 'white'
+                  }}
+                >
+                  {watchedData.taxConsultingServices?.vatEnabled && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-3 h-3 text-white flex items-center justify-center"
+                    >
+                      ✓
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                  Include VAT Consulting Services
+                </span>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Select to include Value Added Tax (VAT) services
+                </p>
+              </div>
+            </motion.label>
+
+            {/* VAT Options - Show only if enabled */}
+            {watchedData.taxConsultingServices?.vatEnabled && (
               <div className="bg-white rounded-lg p-4 border border-gray-200">
+
                 <h3 className="text-base font-semibold mb-3" style={{ color: '#243F7B' }}>
                   Value Added Tax (VAT)
                 </h3>
@@ -410,10 +486,10 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
                   </motion.label>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
-      </FormSection>
-    </motion.div>
+            )}
+          </div>
+        </FormSection>
+      </motion.div>
+    </>
   );
 }; 

@@ -5,10 +5,15 @@ export type CompanyType = 'tme-fzco' | 'management-consultants';
 
 // Tax Consulting Services Interface
 export interface TaxConsultingServices {
-  enabled?: boolean;
+  enabled?: boolean; // Keep for backward compatibility with PDF rendering
+  // Separate CIT and VAT service flags
+  citEnabled?: boolean;
+  vatEnabled?: boolean;
+  // CIT-related fields
   citRegistration?: number;
   citReturnFiling?: number;
   citType?: 'sbr-regular' | 'qfzp' | '' | undefined;
+  // VAT-related fields
   vatType?: 'registration' | 'exception' | 'de-registration' | '' | undefined;
   vatRegistration?: number;
   vatReturnFiling?: number;
@@ -119,7 +124,9 @@ export const COMPANY_SERVICES_DEFAULTS = {
   form: {
     companyType: 'tme-fzco' as const,
     taxConsultingServices: {
-      enabled: false,
+      enabled: false, // Keep for backward compatibility
+      citEnabled: false,
+      vatEnabled: false,
       citRegistration: 0,
       citReturnFiling: 0,
       citType: '' as const,
