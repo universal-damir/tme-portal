@@ -5,12 +5,12 @@ import type { PDFComponentProps } from '../../../types';
 
 // ActivityCodesSection - Full width section for business activity codes
 export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
-  // Check if TBC is enabled - can be stored in different locations depending on form state
+  // Check if TBC is enabled - only check authorityInformation (the main source)
   const isIfzaSelected = data.authorityInformation.responsibleAuthority === 'IFZA (International Free Zone Authority)';
   const isDetSelected = data.authorityInformation.responsibleAuthority === 'DET (Dubai Department of Economy and Tourism)';
-  const isTbcEnabled = data.authorityInformation?.activitiesToBeConfirmed || 
-                       (isIfzaSelected && data.ifzaLicense?.activitiesToBeConfirmed) || 
-                       (isDetSelected && data.detLicense?.activitiesToBeConfirmed);
+  
+  // Simplified check - only use the authorityInformation field which is the source of truth
+  const isTbcEnabled = data.authorityInformation?.activitiesToBeConfirmed === true;
 
   // Compact styles - reduced padding for smaller table height
   const compactStyles = {
@@ -51,9 +51,9 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
           </View>
           
           {(data.activityCodes || [])
-            .filter(activity => activity.code && activity.description) // Only show complete activities
+            .filter(activity => activity.code && activity.code.trim() !== '' && activity.description && activity.description.trim() !== '') // Only show complete activities with non-empty values
             .map((activity, index) => {
-              const filteredActivities = (data.activityCodes || []).filter(a => a.code && a.description);
+              const filteredActivities = (data.activityCodes || []).filter(a => a.code && a.code.trim() !== '' && a.description && a.description.trim() !== '');
               const isLast = index === filteredActivities.length - 1;
               
               return (
@@ -66,6 +66,15 @@ export const ActivityCodesSection: React.FC<PDFComponentProps> = ({ data }) => {
                 </View>
               );
             })}
+          
+          {/* If no activities after filtering, show a message */}
+          {(!data.activityCodes || data.activityCodes.filter(a => a.code && a.code.trim() !== '' && a.description && a.description.trim() !== '').length === 0) && (
+            <View style={compactStyles.activityRow}>
+              <Text style={[styles.introText, { textAlign: 'center', fontStyle: 'italic', color: '#6b7280' }]}>
+                No business activities have been specified.
+              </Text>
+            </View>
+          )}
         </View>
       )}
     </View>

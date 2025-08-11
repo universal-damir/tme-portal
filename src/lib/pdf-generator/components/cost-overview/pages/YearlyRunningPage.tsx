@@ -72,8 +72,8 @@ export const YearlyRunningPage: React.FC<PDFComponentProps> = ({ data }) => {
   };
 
   const introContent = isIFZAMultiYear 
-    ? `This overview outlines the expected recurring costs for maintaining your company licence with ${getAuthorityDisplayName()}. These costs will be applied each year after initial ${licenseYears} years. It includes license renewals, mandatory government fees, office expenses, and professional service charges. The total cost may vary slightly year to year based on regulatory updates or optional services. Of course, you can also opt for multiple year renewal`
-    : `This overview outlines the expected recurring costs for maintaining your company licence with ${getAuthorityDisplayName()}. It includes license renewals, mandatory government fees, office expenses, and professional service charges. The total cost may vary slightly year to year based on regulatory updates or optional services.`;
+    ? `This overview outlines the expected recurring costs for maintaining your company licence with ${getAuthorityDisplayName()}. These costs will be applied each year after initial ${licenseYears} years. The total cost may vary slightly year to year based on regulatory updates or optional services. Of course, you can also opt for multiple year renewal.`
+    : `This overview outlines the expected recurring costs for maintaining your company licence with ${getAuthorityDisplayName()}. The total cost may vary slightly year to year based on regulatory updates or optional services.`;
   
   const pageTitle = isIFZAMultiYear 
     ? `Yearly Running Costs (After ${licenseYears} Years)`
