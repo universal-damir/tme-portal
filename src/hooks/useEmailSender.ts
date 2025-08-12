@@ -47,6 +47,7 @@ export const useEmailSender = (): UseEmailSenderReturn => {
 
       const requestBody = {
         to: emailData.to,
+        cc: emailData.cc,
         subject: emailData.subject,
         htmlContent: emailData.htmlContent,
         attachments: processedAttachments

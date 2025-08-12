@@ -10,6 +10,7 @@ import { EMAIL_TEMPLATES, EMAIL_TEMPLATES_DE, EmailTemplate, EmailRecipientData,
 
 export interface EmailPreviewData {
   to: string[];
+  cc?: string[];
   subject: string;
   htmlContent: string;
   attachments?: {
@@ -64,10 +65,12 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
 }) => {
   const [editableSubject, setEditableSubject] = useState(emailData.subject);
   const [editableRecipients, setEditableRecipients] = useState(emailData.to.join(', '));
+  const [editableCc, setEditableCc] = useState(emailData.cc?.join(', ') || '');
   const [editableContent, setEditableContent] = useState(emailData.htmlContent);
   const [plainTextContent, setPlainTextContent] = useState('');
   const [isEditingSubject, setIsEditingSubject] = useState(false);
   const [isEditingRecipients, setIsEditingRecipients] = useState(false);
+  const [isEditingCc, setIsEditingCc] = useState(false);
   const [isEditingContent, setIsEditingContent] = useState(false);
   const [language, setLanguage] = useState<'en' | 'de'>('en');
   const [currentPdfBlob, setCurrentPdfBlob] = useState<Blob | undefined>(pdfBlob);
@@ -149,6 +152,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
     const updatedEmailData: EmailPreviewData = {
       ...emailData,
       to: editableRecipients.split(',').map(email => email.trim()),
+      cc: editableCc ? editableCc.split(',').map(email => email.trim()) : undefined,
       subject: editableSubject,
       htmlContent: editableContent
     };
@@ -279,6 +283,42 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* CC Field */}
+            {emailData.cc && emailData.cc.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                  CC:
+                </label>
+                <div className="flex items-center gap-2">
+                  {isEditingCc ? (
+                    <input
+                      type="text"
+                      value={editableCc}
+                      onChange={(e) => setEditableCc(e.target.value)}
+                      onBlur={() => setIsEditingCc(false)}
+                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingCc(false)}
+                      className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                      onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                      autoFocus
+                    />
+                  ) : (
+                    <div
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 h-[42px] flex items-center cursor-pointer hover:bg-gray-50"
+                      onClick={() => setIsEditingCc(true)}
+                    >
+                      <span className="text-gray-700">{editableCc}</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setIsEditingCc(!isEditingCc)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <Edit2 size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Subject Field */}
             <div>

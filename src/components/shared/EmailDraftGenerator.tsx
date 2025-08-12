@@ -24,12 +24,14 @@ export interface EmailTemplate {
 // Email recipient data interface
 export interface EmailRecipientData {
   emails: string[];
+  ccEmails?: string[];
   firstName?: string;
   lastName?: string;
   companyName?: string;
   authorityName?: string;
   senderName?: string;
   senderDesignation?: string;
+  senderPhone?: string;
 }
 
 // PDF attachment data interface
@@ -77,7 +79,7 @@ export const EMAIL_TEMPLATES = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">If you have any questions or need clarification, please don\'t hesitate to reply to this email. A member of our team will get back to you promptly.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We look forward to hearing from you.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -93,7 +95,7 @@ export const EMAIL_TEMPLATES = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Once we receive your confirmation, we will coordinate the next steps and provide guidance on the required documents and appointments.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">If you have any questions, feel free to reach out.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -108,7 +110,7 @@ export const EMAIL_TEMPLATES = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The proposal outlines the areas where we can assist and gives you a clear picture of how we can add value to your operations.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please feel free to reach out if you have any questions or would like to proceed.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -145,7 +147,7 @@ export const EMAIL_TEMPLATES_DE = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Falls Sie Fragen haben oder weitere Informationen benötigen, antworten Sie gerne auf diese E-Mail. Ein Mitglied unseres Teams wird sich zeitnah bei Ihnen melden.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Wir freuen uns auf Ihre Rückmeldung.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -161,7 +163,7 @@ export const EMAIL_TEMPLATES_DE = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Nach Erhalt Ihrer Bestätigung werden wir die nächsten Schritte koordinieren und Sie bei den erforderlichen Dokumenten und Terminen unterstützen.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bei Fragen stehen wir Ihnen gerne zur Verfügung.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -176,7 +178,7 @@ export const EMAIL_TEMPLATES_DE = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Das Angebot beschreibt die Bereiche, in denen wir Sie unterstützen können und gibt Ihnen einen klaren Überblick darüber, wie wir Mehrwert für Ihre Geschäftstätigkeit schaffen können.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte zögern Sie nicht, sich zu melden, falls Sie Fragen haben oder fortfahren möchten.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -191,7 +193,7 @@ export const EMAIL_TEMPLATES_DE = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte prüfen Sie das beigefügte Angebot.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Unser Team steht Ihnen für Fragen gerne zur Verfügung.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
-      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span></div>'
+      '<div style="margin-top: 8px;"><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: bold; display: block;">{senderName}</span><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">{senderDesignation}</span>{senderPhone}</div>'
     ],
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
@@ -228,6 +230,7 @@ export const useEmailDraftGenerator = () => {
       // Prepare email preview data
       const previewData: EmailPreviewData = {
         to: recipients.emails,
+        cc: recipients.ccEmails,
         subject: processedTemplate.subject,
         htmlContent,
         attachments: attachments.map(att => ({
@@ -312,6 +315,7 @@ export const processEmailTemplate = (template: EmailTemplate, recipients: EmailR
   const authorityName = recipients.authorityName || 'Authority';
   const senderName = recipients.senderName || 'TME Services Team';
   const senderDesignation = recipients.senderDesignation || '';
+  const senderPhone = recipients.senderPhone ? `<br><span style="font-family: Arial, sans-serif; font-size: 10pt; font-weight: normal; color: #666;">${recipients.senderPhone}</span>` : '';
 
   // Replace template variables
   const processText = (text: string): string => {
@@ -321,7 +325,8 @@ export const processEmailTemplate = (template: EmailTemplate, recipients: EmailR
       .replace(/{companyName}/g, companyName)
       .replace(/{authorityName}/g, authorityName)
       .replace(/{senderName}/g, senderName)
-      .replace(/{senderDesignation}/g, senderDesignation);
+      .replace(/{senderDesignation}/g, senderDesignation)
+      .replace(/{senderPhone}/g, senderPhone);
   };
 
   return {
@@ -425,7 +430,7 @@ export const createEmailDataFromFormData = async (
   pdfBlob: Blob,
   pdfFilename: string,
   templateType: keyof typeof EMAIL_TEMPLATES,
-  userInfo?: { full_name?: string; designation?: string; employee_code?: string } // Optional user info parameter
+  userInfo?: { full_name?: string; designation?: string; employee_code?: string; phone?: string } // Optional user info parameter
 ): Promise<EmailDraftGeneratorProps> => {
   
   // Extract client details (handles different form structures)
@@ -433,15 +438,22 @@ export const createEmailDataFromFormData = async (
   
   // No photo needed anymore - removed for simplicity and CSP compliance
 
+  // Add CC email for specific templates
+  const ccEmailsForTemplate = ['COST_OVERVIEW', 'GOLDEN_VISA', 'COMPANY_SERVICES'].includes(templateType) 
+    ? ['newsletter@news.TME-Services.com'] 
+    : undefined;
+
   const recipients: EmailRecipientData = {
     emails: clientDetails.clientEmails || [],
+    ccEmails: ccEmailsForTemplate,
     firstName: clientDetails.firstName || 'Client',
     lastName: clientDetails.lastName || '',
     companyName: clientDetails.companyName || '',
     // Add additional data for template processing
     authorityName: formData.authorityInformation?.responsibleAuthority || 'Authority',
     senderName: userInfo?.full_name || 'TME Services Team', // Use actual user name if available
-    senderDesignation: userInfo?.designation || '' // Use actual user designation if available
+    senderDesignation: userInfo?.designation || '', // Use actual user designation if available
+    senderPhone: userInfo?.phone || '' // Use actual user phone if available
   };
 
   const template: EmailTemplate = {

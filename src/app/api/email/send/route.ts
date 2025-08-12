@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { to, subject, htmlContent, attachments } = await request.json();
+    const { to, cc, subject, htmlContent, attachments } = await request.json();
 
     // Validate required fields
     if (!to || !subject || !htmlContent) {
@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       from: 'TME Services Portal <contact@tme-services.com>', // Professional company email with display name
       replyTo: session.user.email, // User's email for replies
       to: Array.isArray(to) ? to.join(', ') : to,
+      cc: cc ? (Array.isArray(cc) ? cc.join(', ') : cc) : undefined,
       subject,
       html: htmlContent,
       attachments: processedAttachments
