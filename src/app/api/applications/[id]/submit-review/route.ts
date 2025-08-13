@@ -58,14 +58,39 @@ export async function POST(
 
     console.log('🔧 API ROUTE: Calling ApplicationsService.submitForReview');
     
-    // Submit for review
-    const success = await ApplicationsService.submitForReview({
-      application_id: id,
-      reviewer_id: parseInt(reviewer_id),
-      urgency,
-      comments
-    }, userId);
+    // Add timeout and retry logic
+    const submitWithRetry = async (retries = 3): Promise<boolean> => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          // Create a timeout promise
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout after 10 seconds')), 10000);
+          });
+          
+          // Submit for review with timeout
+          const submitPromise = ApplicationsService.submitForReview({
+            application_id: id,
+            reviewer_id: parseInt(reviewer_id),
+            urgency,
+            comments
+          }, userId);
+          
+          const result = await Promise.race([submitPromise, timeoutPromise]);
+          console.log(`🔧 API ROUTE: Submit attempt ${attempt} succeeded`);
+          return result;
+        } catch (error) {
+          console.error(`🔧 API ROUTE: Submit attempt ${attempt} failed:`, error);
+          if (attempt === retries) {
+            throw error;
+          }
+          // Wait before retry (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+      return false;
+    };
     
+    const success = await submitWithRetry();
     console.log('🔧 API ROUTE: ApplicationsService result:', success);
 
     if (success) {

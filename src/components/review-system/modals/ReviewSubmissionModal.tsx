@@ -73,12 +73,23 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
     setIsSubmitting(true);
     setError(null);
 
+    // Add timeout safety to prevent stuck state
+    const resetTimeout = setTimeout(() => {
+      if (isSubmitting) {
+        console.error('🔧 ReviewSubmissionModal: Submission timeout, resetting state');
+        setIsSubmitting(false);
+        setError('Request timed out. Please try again.');
+      }
+    }, 15000); // 15 second safety timeout
+
     try {
       const success = await onSubmit({
         reviewer_id: selectedReviewer.id,
         urgency,
         comments: comments.trim() || undefined
       });
+
+      clearTimeout(resetTimeout);
 
       if (success) {
         setSuccess(true);
@@ -87,11 +98,18 @@ export const ReviewSubmissionModal: React.FC<ReviewSubmissionModalProps> = ({
         }, 2000);
       } else {
         setError('Failed to submit for review. Please try again.');
+        setIsSubmitting(false); // Ensure state is reset on failure
       }
     } catch (error) {
+      clearTimeout(resetTimeout);
+      console.error('🔧 ReviewSubmissionModal: Submit error:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setIsSubmitting(false); // Ensure state is reset on error
     } finally {
-      setIsSubmitting(false);
+      // Double-check state reset after a delay
+      setTimeout(() => {
+        setIsSubmitting(false);
+      }, 500);
     }
   };
 

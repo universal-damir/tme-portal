@@ -22,9 +22,15 @@ function getPool(): Pool {
   if (!pool) {
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
-      max: 20,
+      max: 50, // Increased from 20 to handle concurrent users
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      connectionTimeoutMillis: 5000, // Increased from 2000
+      maxUses: 7500, // Close connections after 7500 uses to prevent leaks
+    });
+    
+    // Add error handling for pool
+    pool.on('error', (err) => {
+      console.error('Unexpected database pool error:', err);
     });
   }
   return pool;
@@ -512,16 +518,17 @@ export class ApplicationsService {
       }
       
       const pool = getPool();
-      
-      // Start transaction for atomic operation
-      await pool.query('BEGIN');
+      const client = await pool.connect();
       
       try {
+        // Start transaction for atomic operation
+        await client.query('BEGIN');
+        
         // Update application status and store submitter message
         // For now, store submitter message in a temporary way until schema is updated
         const submitterComments = submission.comments || null;
         
-        await pool.query(`
+        await client.query(`
           UPDATE applications 
           SET status = 'pending_review', 
               reviewer_id = $1, 
@@ -532,7 +539,7 @@ export class ApplicationsService {
         
         // Store submitter message in form_data temporarily
         if (submitterComments) {
-          await pool.query(`
+          await client.query(`
             UPDATE applications 
             SET form_data = form_data || jsonb_build_object('_submitter_message', $1::text)
             WHERE id = $2
@@ -541,7 +548,7 @@ export class ApplicationsService {
         
         // Get application data for notification title generation
         console.log('🔧 BACKEND: Getting application data for ID:', submission.application_id);
-        const appResult = await pool.query(`
+        const appResult = await client.query(`
           SELECT type, title, form_data FROM applications WHERE id = $1
         `, [submission.application_id]);
         console.log('🔧 BACKEND: Query result:', { 
@@ -580,7 +587,7 @@ export class ApplicationsService {
         }
         
         // Get submitter info for notification
-        const submitterResult = await pool.query(`
+        const submitterResult = await client.query(`
           SELECT full_name, employee_code FROM users WHERE id = $1
         `, [userId]);
         
@@ -605,11 +612,15 @@ export class ApplicationsService {
           }
         });
         
-        await pool.query('COMMIT');
+        await client.query('COMMIT');
         return true;
       } catch (error) {
-        await pool.query('ROLLBACK');
+        await client.query('ROLLBACK');
+        console.error('🔧 submitForReview transaction error:', error);
         throw error;
+      } finally {
+        // CRITICAL: Always release the client back to the pool
+        client.release();
       }
     }, false, 'submit_for_review');
   }
@@ -623,15 +634,16 @@ export class ApplicationsService {
       }
       
       const pool = getPool();
-      
-      // Start transaction for atomic operation
-      await pool.query('BEGIN');
+      const client = await pool.connect();
       
       try {
+        // Start transaction for atomic operation
+        await client.query('BEGIN');
+        
         // Update application status based on action
         const newStatus = action.action === 'approve' ? 'approved' : 'rejected';
         
-        await pool.query(`
+        await client.query(`
           UPDATE applications 
           SET status = $1, 
               review_comments = $2,
@@ -640,7 +652,7 @@ export class ApplicationsService {
         `, [newStatus, action.comments, action.application_id, userId]);
         
         // Get application details and reviewer info for notification
-        const appResult = await pool.query(`
+        const appResult = await client.query(`
           SELECT a.submitted_by_id, a.type, a.title, a.form_data, u.full_name as reviewer_name, u.employee_code as reviewer_employee_code
           FROM applications a
           JOIN users u ON a.reviewer_id = u.id
@@ -677,11 +689,15 @@ export class ApplicationsService {
           });
         }
         
-        await pool.query('COMMIT');
+        await client.query('COMMIT');
         return true;
       } catch (error) {
-        await pool.query('ROLLBACK');
+        await client.query('ROLLBACK');
+        console.error('🔧 performReviewAction transaction error:', error);
         throw error;
+      } finally {
+        // CRITICAL: Always release the client back to the pool
+        client.release();
       }
     }, false, 'perform_review_action');
   }
