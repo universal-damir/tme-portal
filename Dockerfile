@@ -1,8 +1,9 @@
 # TME Portal Production Dockerfile
 # Multi-stage build for optimized production image
+# Supports cross-platform builds (AMD64)
 
 # Stage 1: Dependencies
-FROM node:20-alpine AS deps
+FROM --platform=linux/amd64 node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -11,7 +12,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 # Stage 2: Builder
-FROM node:20-alpine AS builder
+FROM --platform=linux/amd64 node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -33,7 +34,7 @@ ENV SKIP_REDIS_CONNECTION=true
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:20-alpine AS runner
+FROM --platform=linux/amd64 node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

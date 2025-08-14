@@ -12,7 +12,9 @@
     "test:migration": "node scripts/test-review-migration.js",
     "migrate:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system.sql",
     "rollback:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system_rollback.sql",
-    "migrate:urgency-levels": "psql $DATABASE_URL -f database/migrations/002_update_urgency_levels.sql"
+    "migrate:urgency-levels": "psql $DATABASE_URL -f database/migrations/002_update_urgency_levels.sql",
+    "export-translations": "node scripts/translation-export-excel.js",
+    "import-translations": "node scripts/translation-import-excel.js"
   },
   "dependencies": {
     "@azure/msal-browser": "^4.18.0",
@@ -46,6 +48,7 @@
     "critters": "^0.0.23",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.0",
+    "exceljs": "^4.4.0",
     "framer-motion": "^12.23.9",
     "jose": "^6.0.12",
     "jsonwebtoken": "^9.0.2",

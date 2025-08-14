@@ -203,6 +203,9 @@ export const useCompanyServicesApplication = ({
         if (config.debugMode) {
           console.log('Created new Company Services application:', newApp.id);
         }
+        
+        // Return the new application for immediate use
+        return newApp;
       }
       
       return true;
@@ -263,8 +266,36 @@ export const useCompanyServicesApplication = ({
     urgency: UrgencyLevel;
     comments?: string;
   }): Promise<boolean> => {
-    if (!config.enabled || !application) {
+    console.log('🔧 submitForReview called:', { 
+      enabled: config.enabled, 
+      hasApplication: !!application,
+      applicationId: application?.id 
+    });
+    
+    if (!config.enabled) {
+      console.error('🔧 Company Services review is disabled in config');
       return false;
+    }
+    
+    let appToSubmit = application;
+    
+    if (!appToSubmit) {
+      console.log('🔧 No application exists yet, creating one first...');
+      // First save the application to create it
+      const saveResult = await saveApplication();
+      if (!saveResult) {
+        console.error('🔧 Failed to create application');
+        return false;
+      }
+      
+      // If saveResult is an object (new application), use it
+      if (typeof saveResult === 'object' && saveResult.id) {
+        appToSubmit = saveResult;
+        console.log('🔧 Using newly created application:', appToSubmit.id);
+      } else {
+        console.error('🔧 Application creation did not return valid application');
+        return false;
+      }
     }
     
     setIsLoading(true);
@@ -278,7 +309,7 @@ export const useCompanyServicesApplication = ({
       }
       
       // Submit for review
-      const response = await fetch(`/api/applications/${application.id}/submit-review`, {
+      const response = await fetch(`/api/applications/${appToSubmit.id}/submit-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

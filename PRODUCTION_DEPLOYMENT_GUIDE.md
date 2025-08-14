@@ -1,343 +1,184 @@
-# TME Portal v5.2 - Production Deployment Guide
+# TME Portal Production Deployment Guide
 
-## Server Information
-- **Server IP**: 192.168.97.149
-- **User**: tme-user
-- **Environment**: Local Production Server
-- **Docker Compose**: Production configuration with Docker secrets
+This guide documents the complete process for deploying the TME Portal to production.
 
 ## Prerequisites
 
-### 1. SSH Access
+- Local development environment with Docker
+- SSH access to production server
+- Production server with Docker and Docker Compose installed
+
+## Step-by-Step Deployment Process
+
+### 1. Build Production Images (Local)
+
 ```bash
+# Build the application for linux/amd64 architecture
+docker build --platform linux/amd64 -t tme-portal-app:production .
+
+# Save the image to a tar file
+docker save -o ~/tme-portal-app.tar tme-portal-app:production
+```
+
+### 2. Export Database Data (Local)
+
+```bash
+# Create export script if not exists
+chmod +x scripts/export-user-data.sh
+
+# Export user data from development database
+./scripts/export-user-data.sh
+# This creates: database/user_data_export.sql
+```
+
+### 3. Transfer Files to Production Server (Local)
+
+```bash
+# Transfer Docker image
+scp ~/tme-portal-app.tar tme-user@192.168.97.149:~/
+
+# Transfer database export
+scp database/user_data_export.sql tme-user@192.168.97.149:~/
+
+# Transfer docker-compose and database files
+scp docker-compose.yml tme-user@192.168.97.149:~/tme-portal/
+scp -r database/ tme-user@192.168.97.149:~/tme-portal/
+```
+
+### 4. Server Setup (On Server)
+
+```bash
+# SSH into server
 ssh tme-user@192.168.97.149
-```
 
-### 2. Required Software on Server
-```bash
-# Update system
-sudo apt update && sudo apt upgrade -y
-
-# Install Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
-sudo usermod -aG docker tme-user
-
-# Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-
-# Logout and login again to apply Docker group changes
-exit
-ssh tme-user@192.168.97.149
-```
-
-## Deployment Steps
-
-### 1. Transfer Application Files
-
-**From your local machine:**
-```bash
-# Create deployment archive (exclude development files)
-tar -czf tme-portal-production.tar.gz \
-  --exclude=node_modules \
-  --exclude=.next \
-  --exclude=.git \
-  --exclude="*.log" \
-  --exclude=backups \
-  .
-
-# Transfer to server
-scp tme-portal-production.tar.gz tme-user@192.168.97.149:~/
-```
-
-**On the server:**
-```bash
-# Create application directory
-mkdir -p ~/tme-portal
+# Navigate to project directory
 cd ~/tme-portal
 
-# Extract application files
-tar -xzf ~/tme-portal-production.tar.gz
-rm ~/tme-portal-production.tar.gz
+# Load Docker image
+docker load -i ~/tme-portal-app.tar
 
-# Set proper permissions
-chmod +x scripts/*.sh
+# Create .env file with production configuration
+cat > .env << EOF
+NODE_ENV=production
+DATABASE_URL=postgresql://tme_user:YOUR_DB_PASSWORD@postgres:5432/tme_portal
+REDIS_URL=redis://default:YOUR_REDIS_PASSWORD@redis:6379
+REDIS_PASSWORD=YOUR_REDIS_PASSWORD
+POSTGRES_PASSWORD=YOUR_DB_PASSWORD
+NEXTAUTH_SECRET=YOUR_SECRET_KEY
+NEXTAUTH_URL=http://YOUR_SERVER_IP
+SECURE_COOKIES=false  # Set to true if using HTTPS
+BREVO_SMTP_USER=YOUR_BREVO_USER
+BREVO_SMTP_PASSWORD=YOUR_BREVO_PASSWORD
+OPENAI_API_KEY=YOUR_OPENAI_KEY
+EOF
+
+# Start all services
+docker compose up -d
 ```
 
-### 2. Configure Environment
+### 5. Import Database Data (On Server)
 
-**Create production environment file:**
 ```bash
-cd ~/tme-portal
+# Import user data
+docker exec -i tme-portal-postgres-1 psql -U tme_user -d tme_portal < ~/user_data_export.sql
 
-# Copy production environment
-cp .env.production .env
+# Apply migrations in order
+docker exec -i tme-portal-postgres-1 psql -U tme_user -d tme_portal < database/migrations/001_review_system.sql
+docker exec -i tme-portal-postgres-1 psql -U tme_user -d tme_portal < database/migrations/002_add_notification_metadata.sql
+docker exec -i tme-portal-postgres-1 psql -U tme_user -d tme_portal < database/migrations/002_update_urgency_levels.sql
+docker exec -i tme-portal-postgres-1 psql -U tme_user -d tme_portal < database/migrations/003_user_todos_system.sql
+docker exec -i tme-portal-postgres-1 psql -U tme_user -d tme_portal < database/migrations/003_user_todos_system_patch.sql
 
-# Verify secrets directory exists and has correct permissions
-ls -la secrets/
-chmod 600 secrets/*
+# Fix search path (if needed)
+docker exec -it tme-portal-postgres-1 psql -U tme_user -d tme_portal -c "ALTER USER tme_user SET search_path TO public;"
 ```
 
-**Update production URL in environment:**
+### 6. Update Default Passwords (Optional)
+
 ```bash
-# Edit .env.production to use server IP
-sed -i 's|NEXTAUTH_URL=.*|NEXTAUTH_URL=http://192.168.97.149:3000|g' .env.production
+# Generate new password hash
+# First create a simple script locally:
+node -e "const bcrypt = require('bcryptjs'); bcrypt.hash('YOUR_NEW_PASSWORD', 12).then(console.log)"
+
+# Update all users with default password
+docker exec -it tme-portal-postgres-1 psql -U tme_user -d tme_portal -c \
+  "UPDATE users SET hashed_password = 'YOUR_HASH_HERE' WHERE must_change_password = true;"
 ```
 
-### 3. Verify Docker Configuration
+### 7. Verify Deployment
 
-**Check docker-compose.secrets.yml:**
+1. Access the application at `http://YOUR_SERVER_IP`
+2. Test login with a user account
+3. Verify all features work:
+   - Profile photos load
+   - Todo lists function
+   - Review submission works
+   - Email sending works
+
+### 8. Troubleshooting Common Issues
+
+#### 400 Error on Login
+- Check `SECURE_COOKIES` setting matches your protocol (false for HTTP, true for HTTPS)
+- Restart app container: `docker compose restart app`
+
+#### 401 Authorization Errors
+- Clear browser cookies and cache
+- Ensure Redis is running: `docker exec -it tme-portal-redis-1 redis-cli ping`
+
+#### "Relation does not exist" Errors
+- Re-run migrations in order
+- Restart app to refresh connections: `docker compose restart app`
+
+#### Email Sending Fails
+- Verify Brevo SMTP credentials in .env
+- Ensure server has internet access to `smtp-relay.brevo.com`
+
+#### AI Assistant Not Working
+- Verify OpenAI API key in .env
+- Ensure server has access to `api.openai.com`
+
+## Network Requirements
+
+The production server needs outbound HTTPS access to:
+- `smtp-relay.brevo.com` - For email sending
+- `api.openai.com` - For AI assistant functionality
+
+## Important Notes
+
+1. Always backup existing data before deployment
+2. Use strong passwords for database and Redis
+3. Keep the .env file secure and never commit it to git
+4. Monitor logs for any errors: `docker logs -f tme-portal-app-1`
+5. Default passwords:
+   - Original pattern: `TME2024_[EMPLOYEE_CODE]`
+   - Can be updated to any secure password using the steps above
+
+## Container Management
+
 ```bash
-# Verify the production compose file
-cat docker-compose.secrets.yml | grep -A 5 -B 5 "NEXTAUTH_URL"
+# View running containers
+docker ps
 
-# Should show: NEXTAUTH_URL=http://tme-portal.tme.local:3000
-# You may need to update this to: NEXTAUTH_URL=http://192.168.97.149:3000
-```
-
-**Update Docker Compose for server IP:**
-```bash
-# Edit docker-compose.secrets.yml
-nano docker-compose.secrets.yml
-
-# Change line 16 from:
-# - NEXTAUTH_URL=http://tme-portal.tme.local:3000
-# To:
-# - NEXTAUTH_URL=http://192.168.97.149:3000
-```
-
-### 4. Deploy Application
-
-**Start production deployment:**
-```bash
-cd ~/tme-portal
-
-# Use the production Docker Compose file
-docker-compose -f docker-compose.secrets.yml up -d --build
-
-# Monitor deployment
-docker-compose -f docker-compose.secrets.yml logs -f
-```
-
-**Verify deployment:**
-```bash
-# Check container status
-docker-compose -f docker-compose.secrets.yml ps
-
-# All containers should show "Up" and "healthy"
-# App container should show: Up X minutes (healthy)
-# PostgreSQL should show: Up X minutes (healthy)  
-# Redis should show: Up X minutes (healthy)
-```
-
-### 5. Test Application
-
-**Health checks:**
-```bash
-# Test application health endpoint
-curl -i http://192.168.97.149:3000/api/health
-
-# Should return: {"status":"ok","timestamp":"..."}
-
-# Test main page
-curl -i http://192.168.97.149:3000/
-
-# Should return HTTP 200 with HTML content
-```
-
-**Database verification:**
-```bash
-# Check if database is initialized
-docker-compose -f docker-compose.secrets.yml exec postgres psql -U tme_user -d tme_portal -c "\\dt"
-
-# Should list tables: users, sessions, audit_logs
-```
-
-### 6. Create Admin User (First Time Only)
-
-**Access the database:**
-```bash
-# Connect to PostgreSQL
-docker-compose -f docker-compose.secrets.yml exec postgres psql -U tme_user -d tme_portal
-
-# Create admin user (replace with your details)
-INSERT INTO users (
-  employee_code, email, hashed_password, full_name, 
-  department, designation, role, status, must_change_password
-) VALUES (
-  'ADMIN001',
-  'admin@tme-services.com',
-  '$2b$12$HASH_GENERATED_PASSWORD_HERE',
-  'Administrator',
-  'IT',
-  'System Administrator', 
-  'admin',
-  'active',
-  true
-);
-
-# Exit database
-\q
-```
-
-**Generate password hash:**
-```bash
-# On your local machine, create a password hash
-node -e "
-const bcrypt = require('bcryptjs');
-const password = 'YourSecurePassword123!';
-console.log(bcrypt.hashSync(password, 12));
-"
-```
-
-## 7. Configure Firewall (Optional)
-
-**Open required ports:**
-```bash
-sudo ufw allow 3000/tcp
-sudo ufw allow ssh
-sudo ufw enable
-```
-
-## 8. Setup SSL/TLS (Recommended)
-
-**Install and configure Nginx reverse proxy:**
-```bash
-# Install Nginx
-sudo apt install nginx -y
-
-# Create Nginx configuration
-sudo nano /etc/nginx/sites-available/tme-portal
-
-# Add configuration:
-server {
-    listen 80;
-    server_name 192.168.97.149;
-    
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-
-# Enable site
-sudo ln -s /etc/nginx/sites-available/tme-portal /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
-## 9. Backup Configuration
-
-**Setup automated backups:**
-```bash
-# The backup container runs automatically
-# Check backup logs
-docker-compose -f docker-compose.secrets.yml logs backup
-
-# Manual backup
-docker-compose -f docker-compose.secrets.yml run --rm backup
-```
-
-**Backup files location:**
-```bash
-ls -la ~/tme-portal/backups/
-```
-
-## 10. Monitoring and Maintenance
-
-**View application logs:**
-```bash
-# All services
-docker-compose -f docker-compose.secrets.yml logs -f
-
-# Specific service
-docker-compose -f docker-compose.secrets.yml logs -f app
-```
-
-**Restart services:**
-```bash
-# Restart all services
-docker-compose -f docker-compose.secrets.yml restart
+# Stop all services
+docker compose down
 
 # Restart specific service
-docker-compose -f docker-compose.secrets.yml restart app
+docker compose restart app
+
+# View logs
+docker logs tme-portal-app-1 --tail 100
+
+# Execute commands in containers
+docker exec -it tme-portal-postgres-1 psql -U tme_user -d tme_portal
+docker exec -it tme-portal-redis-1 redis-cli
 ```
 
-**Update application:**
-```bash
-# Pull latest changes (if using git)
-git pull origin main
+## Updating the Application
 
-# Rebuild and restart
-docker-compose -f docker-compose.secrets.yml up -d --build
-```
+To deploy updates:
+1. Build new image locally
+2. Save and transfer to server
+3. Load image on server
+4. Restart app container: `docker compose restart app`
 
-## 11. Troubleshooting
-
-**Common issues:**
-
-1. **Port already in use:**
-```bash
-sudo netstat -tlnp | grep :3000
-sudo kill -9 PID_NUMBER
-```
-
-2. **Database connection issues:**
-```bash
-docker-compose -f docker-compose.secrets.yml logs postgres
-```
-
-3. **Redis connection issues:**
-```bash
-docker-compose -f docker-compose.secrets.yml logs redis
-```
-
-4. **Container won't start:**
-```bash
-docker-compose -f docker-compose.secrets.yml down
-docker system prune -f
-docker-compose -f docker-compose.secrets.yml up -d --build
-```
-
-## 12. Security Checklist
-
-- [ ] Firewall configured
-- [ ] Default passwords changed
-- [ ] SSL/TLS enabled (if public-facing)
-- [ ] Database backups working
-- [ ] Log rotation configured
-- [ ] Monitoring alerts setup
-
-## Access URLs
-
-- **Application**: http://192.168.97.149:3000
-- **Health Check**: http://192.168.97.149:3000/api/health
-
-## Production Environment Variables
-
-The application uses these key environment variables in production:
-
-- `NODE_ENV=production`
-- `DATABASE_URL=postgresql://tme_user:PASSWORD@postgres:5432/tme_portal`
-- `REDIS_URL=redis://:PASSWORD@redis:6379`
-- `NEXTAUTH_URL=http://192.168.97.149:3000`
-- `NEXTAUTH_SECRET=SECURE_SECRET_KEY`
-
-## Support
-
-For issues during deployment, check:
-1. Container logs: `docker-compose -f docker-compose.secrets.yml logs`
-2. System resources: `htop` or `docker stats`
-3. Network connectivity: `curl http://localhost:3000/api/health`
-
----
-
-**Deployment completed!** Your TME Portal v5.2 should now be running at http://192.168.97.149:3000
+Remember to run any new migrations after updating!
