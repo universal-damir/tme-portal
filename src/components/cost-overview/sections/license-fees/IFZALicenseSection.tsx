@@ -231,8 +231,8 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                 register={register}
                 setValue={setValue}
                 checked={watchedData.ifzaLicense?.mofaPowerOfAttorney || false}
-                label="Power of Attorney"
-                cost={initialSetup.mofaTranslations.powerOfAttorney.toLocaleString()}
+                label={`Power of Attorney${(watchedData.clientDetails?.numberOfShareholders || 1) > 1 ? ` (${watchedData.clientDetails?.numberOfShareholders} shareholders)` : ''}`}
+                cost={(initialSetup.mofaTranslations.powerOfAttorney * (watchedData.clientDetails?.numberOfShareholders || 1)).toLocaleString()}
               />
             )}
 

@@ -353,8 +353,8 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
                 register={register}
                 setValue={setValue}
                 checked={watchedData.detLicense?.mofaPowerOfAttorney || false}
-                label="Power Of Attorney"
-                cost={initialSetup.mofaTranslations.powerOfAttorney.toLocaleString()}
+                label={`Power Of Attorney${(watchedData.clientDetails?.numberOfShareholders || 1) > 1 ? ` (${watchedData.clientDetails?.numberOfShareholders} shareholders)` : ''}`}
+                cost={(initialSetup.mofaTranslations.powerOfAttorney * (watchedData.clientDetails?.numberOfShareholders || 1)).toLocaleString()}
               />
             )}
 

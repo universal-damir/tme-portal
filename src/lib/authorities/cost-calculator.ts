@@ -562,7 +562,8 @@ export class CostCalculator {
         }
       } else if (data.clientDetails.companySetupType === 'Individual Setup') {
         if (data.detLicense?.mofaPowerOfAttorney && mofaConfig.powerOfAttorney) {
-          total += mofaConfig.powerOfAttorney;
+          const numberOfShareholders = data.clientDetails?.numberOfShareholders || 1;
+          total += mofaConfig.powerOfAttorney * numberOfShareholders;
         }
       }
     } else {
@@ -582,7 +583,8 @@ export class CostCalculator {
         }
       } else if (data.clientDetails.companySetupType === 'Individual Setup') {
         if (data.ifzaLicense?.mofaPowerOfAttorney && mofaConfig.powerOfAttorney) {
-          total += mofaConfig.powerOfAttorney;
+          const numberOfShareholders = data.clientDetails?.numberOfShareholders || 1;
+          total += mofaConfig.powerOfAttorney * numberOfShareholders;
         }
       }
     }

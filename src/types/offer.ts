@@ -8,6 +8,7 @@ export interface ClientDetails {
   secondaryCurrency: string;
   exchangeRate: number;
   clientEmails: string[];
+  numberOfShareholders?: number;
 }
 
 export interface AuthorityInformation {

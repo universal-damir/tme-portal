@@ -128,7 +128,10 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     if (data.detLicense?.mofaCertificateOfIncorporation) mofaTotal += 2000;
     if (data.detLicense?.mofaActualMemorandumOrArticles) mofaTotal += 2000;
     if (data.detLicense?.mofaCommercialRegister) mofaTotal += 2000;
-    if (data.detLicense?.mofaPowerOfAttorney) mofaTotal += 2000;
+    if (data.detLicense?.mofaPowerOfAttorney) {
+      const numberOfShareholders = data.clientDetails?.numberOfShareholders || 1;
+      mofaTotal += 2000 * numberOfShareholders;
+    }
 
     if (mofaTotal > 0) {
       let description = 'PoA (Power of Attorney) cost';
@@ -137,6 +140,11 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
       if (setupType === 'Corporate Setup') {
         description = 'Document translation cost';
         explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
+      } else if (setupType === 'Individual Setup') {
+        const numberOfShareholders = data.clientDetails?.numberOfShareholders || 1;
+        description = numberOfShareholders > 1 
+          ? `PoA (Power of Attorney) cost for ${numberOfShareholders} shareholders`
+          : 'PoA (Power of Attorney) cost';
       }
 
       services.push({
@@ -310,14 +318,20 @@ export const generateServiceDescriptions = (data: OfferData): ServiceItem[] => {
     if (data.ifzaLicense?.mofaCertificateOfIncorporation) mofaTotal += 2000;
     if (data.ifzaLicense?.mofaActualMemorandumOrArticles) mofaTotal += 2000;
     if (data.ifzaLicense?.mofaCommercialRegister) mofaTotal += 2000;
-    if (data.ifzaLicense?.mofaPowerOfAttorney) mofaTotal += 2000;
+    if (data.ifzaLicense?.mofaPowerOfAttorney) {
+      const numberOfShareholders = data.clientDetails?.numberOfShareholders || 1;
+      mofaTotal += 2000 * numberOfShareholders;
+    }
 
     if (mofaTotal > 0) {
       let description = 'MoFA document translations';
       let explanation = 'Includes official translation and attestation of documents by the MoFA (Ministry of Foreign Affairs).';
       
       if (setupType === 'Individual Setup') {
-        description = 'PoA (Power of Attorney) cost';
+        const numberOfShareholders = data.clientDetails?.numberOfShareholders || 1;
+        description = numberOfShareholders > 1 
+          ? `PoA (Power of Attorney) cost for ${numberOfShareholders} shareholders`
+          : 'PoA (Power of Attorney) cost';
         explanation = 'Includes obtaining an official document that authorizes TME Services to act on your behalf for all matters related to your company setup.';
       } else if (setupType === 'Corporate Setup') {
         description = 'Document translation cost';
