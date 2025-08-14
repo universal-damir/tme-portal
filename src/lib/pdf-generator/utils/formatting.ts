@@ -9,6 +9,11 @@ export const formatNumber = (num: number): string => {
   return num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
 
+// Format secondary currency - always round to nearest whole number
+export const formatSecondaryCurrency = (num: number): string => {
+  return Math.round(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+};
+
 // Helper function for visa text pluralization
 export const getVisaText = (count: number): string => {
   return count === 1 ? 'visa' : 'visas';

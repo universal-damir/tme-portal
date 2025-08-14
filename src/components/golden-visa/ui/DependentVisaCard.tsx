@@ -37,7 +37,7 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
     },
     authorityFields: [
       { key: 'standardAuthorityCostsSpouse', label: 'Standard Authority Costs', placeholder: '4,710' },
-      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460' },
+      { key: 'thirdPartyCostsSpouse', label: 'Third Party Costs', placeholder: '1,460' },
     ],
     visaCancellationLabel: 'Visa cancellation (AED 185)',
   },
@@ -51,7 +51,7 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
     },
     authorityFields: [
       { key: 'standardAuthorityCostsChild', label: 'Standard Authority Costs', placeholder: '4,604' },
-      { key: 'thirdPartyCosts', label: 'Third Party Costs', placeholder: '1,460' },
+      { key: 'thirdPartyCostsChild', label: 'Third Party Costs', placeholder: '1,460' },
     ],
     visaCancellationLabel: 'Visa cancellation (AED 185 per child)',
   },

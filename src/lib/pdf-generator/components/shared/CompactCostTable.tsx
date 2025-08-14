@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
-import { formatNumber } from '../../utils';
+import { formatNumber, formatSecondaryCurrency } from '../../utils';
 import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../translations/golden-visa';
 import type { CostItem } from '../../types';
 
@@ -117,7 +117,7 @@ export const CompactCostTable: React.FC<{
               textAlign: 'right',
               paddingRight: 2
             }}>
-              {item.isReduction ? '-' : ''}{formatNumber(item.secondaryAmount)}
+              {item.isReduction ? '-' : ''}{formatSecondaryCurrency(item.secondaryAmount)}
             </Text>
           </View>
         ))}
@@ -162,7 +162,7 @@ export const CompactCostTable: React.FC<{
             textAlign: 'right',
             paddingRight: 2
           }}>
-            {formatNumber(secondaryTotal)}
+            {formatSecondaryCurrency(secondaryTotal)}
           </Text>
         </View>
       </View>

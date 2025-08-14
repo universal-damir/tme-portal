@@ -335,7 +335,7 @@ export default function StyleGuidePage() {
                 {/* Example Usage */}
                 <div className="mt-4 p-3 rounded border" style={{ backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }}>
                   <p className="text-xs font-medium text-gray-700">TME Service Fee - Spouse (AED)</p>
-                  <p className="text-sm font-semibold mt-1" style={{ color: '#243F7B' }}>3,490</p>
+                  <p className="text-sm font-semibold mt-1" style={{ color: '#243F7B' }}>2,240</p>
                 </div>
               </div>
 
@@ -357,7 +357,7 @@ export default function StyleGuidePage() {
                 {/* Example Usage */}
                 <div className="mt-4 p-3 rounded border" style={{ backgroundColor: '#E2E8F0', borderColor: '#94A3B8' }}>
                   <p className="text-xs font-medium text-gray-700">TME Service Fee per Child (AED)</p>
-                  <p className="text-sm font-semibold mt-1" style={{ color: '#243F7B' }}>2,930</p>
+                  <p className="text-sm font-semibold mt-1" style={{ color: '#243F7B' }}>1,690</p>
                 </div>
               </div>
             </div>

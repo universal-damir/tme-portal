@@ -94,6 +94,12 @@ export const VisaTypeSection: React.FC<VisaTypeSectionProps> = ({
       // Auto-populate the NOC fee based on the selected freezone
       const cost = getFreezoneCost(freezoneValue);
       onFieldChange('freezoneNocFee', cost);
+      
+      // If salary certificate is also required, sync the freezone selection
+      if (data?.requiresSalaryCertificate) {
+        onFieldChange('selectedSalaryCertificateFreezone', freezoneValue);
+        onFieldChange('salaryCertificateFee', cost);
+      }
     }
     setIsFreezoneDropdownOpen(false);
   };
@@ -362,6 +368,18 @@ export const VisaTypeSection: React.FC<VisaTypeSectionProps> = ({
                             <input
                               type="checkbox"
                               {...register('requiresSalaryCertificate')}
+                              onChange={(e) => {
+                                const isChecked = e.target.checked;
+                                if (onFieldChange) {
+                                  onFieldChange('requiresSalaryCertificate', isChecked);
+                                  // If NOC is already selected and salary certificate is now checked, sync the freezone
+                                  if (isChecked && data?.requiresNOC && data?.selectedFreezone) {
+                                    onFieldChange('selectedSalaryCertificateFreezone', data.selectedFreezone);
+                                    const cost = getFreezoneCost(data.selectedFreezone);
+                                    onFieldChange('salaryCertificateFee', cost);
+                                  }
+                                }
+                              }}
                               className="sr-only"
                             />
                             <div 
@@ -396,15 +414,32 @@ export const VisaTypeSection: React.FC<VisaTypeSectionProps> = ({
                           >
                             <label className="block text-xs font-medium text-green-800">
                               Select Freezone for Salary Certificate *
+                              {data?.requiresNOC && data?.selectedFreezone && (
+                                <span className="text-xs text-gray-600 ml-1">(Auto-synced with NOC)</span>
+                              )}
                             </label>
                             <div className="relative">
                               <motion.button
-                                whileHover={{ scale: 1.01 }}
-                                whileTap={{ scale: 0.99 }}
+                                whileHover={{ scale: data?.requiresNOC && data?.selectedFreezone ? 1 : 1.01 }}
+                                whileTap={{ scale: data?.requiresNOC && data?.selectedFreezone ? 1 : 0.99 }}
                                 type="button"
-                                onClick={() => setIsSalaryCertificateDropdownOpen(!isSalaryCertificateDropdownOpen)}
-                                className="w-full px-3 py-2 rounded-lg border-2 border-green-200 bg-white text-left flex items-center justify-between focus:outline-none transition-all duration-200 text-sm"
-                                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                                onClick={() => {
+                                  // Only allow opening dropdown if NOC is not selected
+                                  if (!(data?.requiresNOC && data?.selectedFreezone)) {
+                                    setIsSalaryCertificateDropdownOpen(!isSalaryCertificateDropdownOpen);
+                                  }
+                                }}
+                                disabled={data?.requiresNOC && data?.selectedFreezone}
+                                className={`w-full px-3 py-2 rounded-lg border-2 border-green-200 text-left flex items-center justify-between focus:outline-none transition-all duration-200 text-sm ${
+                                  data?.requiresNOC && data?.selectedFreezone 
+                                    ? 'bg-gray-100 cursor-not-allowed opacity-75' 
+                                    : 'bg-white'
+                                }`}
+                                onFocus={(e) => {
+                                  if (!(data?.requiresNOC && data?.selectedFreezone)) {
+                                    e.target.style.borderColor = '#243F7B';
+                                  }
+                                }}
                                 onBlur={(e) => e.target.style.borderColor = '#bbf7d0'}
                               >
                                 <span className={selectedSalaryCertificateFreezone ? 'text-gray-900' : 'text-gray-500'}>

@@ -38,7 +38,8 @@ export interface DependentAuthorityFeesData {
   immigrationResidencyFeeChild: number;
   visaCancelation: boolean;
   visaCancelationFee: number;
-  thirdPartyCosts: number;
+  thirdPartyCostsSpouse: number;
+  thirdPartyCostsChild: number;
 }
 
 export interface GoldenVisaData {
@@ -184,6 +185,7 @@ export const GOLDEN_VISA_DEFAULTS = {
     immigrationResidencyFeeChild: 2750.00,
     visaCancelation: false,
     visaCancelationFee: 185.00,
-    thirdPartyCosts: 1460.00,
+    thirdPartyCostsSpouse: 1460.00,
+    thirdPartyCostsChild: 1460.00,
   }
 }; 

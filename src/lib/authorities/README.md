@@ -126,7 +126,7 @@ export const NEW_AUTHORITY_CONFIG: AuthorityConfig = {
 - `baseLicenseRenewal`: Annual license renewal cost
 - `visaQuotaRenewalCost`: Annual cost per visa in quota
 - `crossBorderRenewal`: Annual cross-border license renewal
-- `immigrationRenewalFee`: Annual immigration establishment card renewal
+- `immigrationRenewalFee`: Annual Immigration Establishment Card renewal
 - `tmeYearlyFee`: Annual TME services fee
 
 ### `features`

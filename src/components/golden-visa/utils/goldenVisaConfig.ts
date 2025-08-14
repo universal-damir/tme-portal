@@ -116,7 +116,6 @@ export const DEPENDENT_FEE_FIELDS = [
  * Freezone options for NOC selection
  */
 export const FREEZONE_OPTIONS = [
-  { value: 'det', label: 'DXB DET', pdfLabel: 'DET', cost: 2000 },
   { value: 'difc', label: 'DXB DIFC FZ', pdfLabel: 'DIFC', cost: 1000 },
   { value: 'dmcc', label: 'DXB DMCC FZ', pdfLabel: 'DMCC', cost: 2020 },
   { value: 'dso', label: 'DXB DSO FZ', pdfLabel: 'DSO', cost: 1020 },

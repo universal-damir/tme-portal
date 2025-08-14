@@ -255,7 +255,7 @@ export const accountingServicesSchema = z.object({
 // Back-Office Services validation schema
 export const backOfficeServicesSchema = z.object({
   enabled: z.boolean().optional(),
-  teamSize: z.enum(['micro', 'small', 'medium', 'large', ''], {
+  teamSize: z.enum(['micro', 'small', 'medium', 'large', 'custom', ''], {
     required_error: 'Please select a team size',
   }).optional(),
 }).optional();

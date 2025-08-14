@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
 import { styles, getTableTheme } from '../../styles';
-import { formatNumber } from '../../utils';
+import { formatNumber, formatSecondaryCurrency } from '../../utils';
 import type { CostTableProps, CostItem } from '../../types';
 
 // CostTable - the most reusable component in the PDF
@@ -154,7 +154,7 @@ export const CostTable: React.FC<CostTableProps> = ({
                   ? styles.tableCellAmountRed
                   : styles.tableCellAmount
               }>
-                {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatNumber(item.secondaryAmount)}
+                {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatSecondaryCurrency(item.secondaryAmount)}
               </Text>
             </View>
           );
@@ -172,7 +172,7 @@ export const CostTable: React.FC<CostTableProps> = ({
                 Total (Without Deposits)
               </Text>
               <Text style={styles.totalAmount}>{formatNumber(total)}</Text>
-              <Text style={styles.totalAmount}>{formatNumber(secondaryTotal)}</Text>
+              <Text style={styles.totalAmount}>{formatSecondaryCurrency(secondaryTotal)}</Text>
             </View>
 
             {/* Deposits header */}
@@ -199,7 +199,7 @@ export const CostTable: React.FC<CostTableProps> = ({
               <View key={`deposit-item-${index}`} style={styles.tableRow}>
                 <Text style={styles.tableCellDescription}>{deposit.description}</Text>
                 <Text style={styles.tableCellAmount}>{formatNumber(deposit.amount)}</Text>
-                <Text style={styles.tableCellAmount}>{formatNumber(deposit.secondaryAmount)}</Text>
+                <Text style={styles.tableCellAmount}>{formatSecondaryCurrency(deposit.secondaryAmount)}</Text>
               </View>
             ))}
           </>
@@ -218,7 +218,7 @@ export const CostTable: React.FC<CostTableProps> = ({
               {formatNumber(showDeposits && depositsItems.length > 0 ? total + depositsTotal : total)}
             </Text>
             <Text style={styles.totalAmount}>
-              {formatNumber(showDeposits && depositsItems.length > 0 ? secondaryTotal + depositsSecondaryTotal : secondaryTotal)}
+              {formatSecondaryCurrency(showDeposits && depositsItems.length > 0 ? secondaryTotal + depositsSecondaryTotal : secondaryTotal)}
             </Text>
           </View>
         )}

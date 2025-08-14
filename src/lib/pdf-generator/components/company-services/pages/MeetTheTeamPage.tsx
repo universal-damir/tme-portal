@@ -27,25 +27,25 @@ const staffPhotoMapping = {
 const teamMembers = [
   {
     name: 'Uwe Hohmann',
-    title: 'Commercial- & Tax Consultant',
+    title: 'CEO (Chief Executive Officer)',
     email: 'uwe@TME-Services.com',
     initials: 'UH',
   },
   {
     name: 'Malavika Kolera',
-    title: 'Director - Tax & Compliance',
+    title: 'CTCO (Chief Tax Compliance Officer)',
     email: 'malavika@TME-Services.com',
     initials: 'MK',
   },
   {
     name: 'Dijendra Hegde',
-    title: 'Chief Financial Officer (CFO)',
+    title: 'CFO (Chief Financial Officer)',
     email: 'dijendra@TME-Services.com',
     initials: 'DH',
   },
   {
     name: 'Natali Fernando',
-    title: 'Manager - Client Support',
+    title: 'CCO (Chief Client Officer)',
     email: 'natali@TME-Services.com',
     initials: 'NF',
   },
@@ -69,7 +69,7 @@ const teamMembers = [
   },
   {
     name: 'Hafees Hameed',
-    title: 'Manager - IT Consulting',
+    title: 'CIO (Chief Information Officer)',
     email: 'hafees@TME-Services.com',
     initials: 'HH',
   },
@@ -93,7 +93,7 @@ const teamMembers = [
   },
   {
     name: 'Damir Novalic',
-    title: 'Manager - Digital Marketing',
+    title: 'CDO (Chief Digital Officer)',
     email: 'damir@TME-Services.com',
     initials: 'DN',
   },
@@ -115,7 +115,7 @@ export const MeetTheTeamPage: React.FC<PDFComponentProps> = ({ data }) => {
           
           {/* Intro paragraph */}
           <Text style={[styles.introText, { marginBottom: 16 }]}>
-            Your dedicated contact at TME Services is here to support you with any questions or service coordination you may need. Please feel free to reach out directly for assistance tailored to your business.
+            Your dedicated contacts at TME Services are here to support you with any questions or service coordination you may need. Please feel free to reach out directly for assistance tailored to your business.
           </Text>
           
           {/* Team Grid - 4 columns (4x3 layout) with 15% larger photos and text */}
@@ -130,7 +130,7 @@ export const MeetTheTeamPage: React.FC<PDFComponentProps> = ({ data }) => {
               <View 
                 key={index} 
                 style={{
-                  width: '22%',
+                  width: '23.5%',
                   marginBottom: 16,
                   alignItems: 'center',
                   textAlign: 'center'

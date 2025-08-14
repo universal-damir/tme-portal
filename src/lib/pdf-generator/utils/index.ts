@@ -4,6 +4,7 @@
 // Formatting utilities
 export { 
   formatNumber, 
+  formatSecondaryCurrency,
   formatDate, 
   formatDateDDMMYYYY, 
   getVisaText, 

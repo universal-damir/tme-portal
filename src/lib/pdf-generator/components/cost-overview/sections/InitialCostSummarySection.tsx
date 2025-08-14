@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
-import { formatNumber, calculateAllCosts, calculateTotals } from '../../../utils';
+import { formatNumber, formatSecondaryCurrency, calculateAllCosts, calculateTotals } from '../../../utils';
 import type { PDFComponentProps } from '../../../types';
 
 // InitialCostSummarySection - Summary table for first page
@@ -44,7 +44,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
             })()}
           </Text>
           <Text style={styles.tableCellAmount}>{formatNumber(setupTotal)}</Text>
-          <Text style={styles.tableCellAmount}>{formatNumber(setupTotal / exchangeRate)}</Text>
+          <Text style={styles.tableCellAmount}>{formatSecondaryCurrency(setupTotal / exchangeRate)}</Text>
         </View>
 
         {/* Company Visa Cost Row - Only show if visa cost > 0 */}
@@ -52,7 +52,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
           <View style={styles.tableRow}>
             <Text style={styles.tableCellDescription}>Company visa cost</Text>
             <Text style={styles.tableCellAmount}>{formatNumber(companyVisaTotal)}</Text>
-            <Text style={styles.tableCellAmount}>{formatNumber(companyVisaTotal / exchangeRate)}</Text>
+            <Text style={styles.tableCellAmount}>{formatSecondaryCurrency(companyVisaTotal / exchangeRate)}</Text>
           </View>
         )}
 
@@ -60,7 +60,7 @@ export const InitialCostSummarySection: React.FC<PDFComponentProps> = ({ data })
         <View style={styles.totalRowGrey}>
           <Text style={[styles.totalLabel, { flex: 5, paddingLeft: 8 }]}>Total initial cost</Text>
           <Text style={styles.totalAmount}>{formatNumber(totalInitialCost)}</Text>
-          <Text style={styles.totalAmount}>{formatNumber(totalInitialCost / exchangeRate)}</Text>
+          <Text style={styles.totalAmount}>{formatSecondaryCurrency(totalInitialCost / exchangeRate)}</Text>
         </View>
       </View>
     </View>

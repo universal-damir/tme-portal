@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
-import { formatNumber } from '../../../utils';
+import { formatNumber, formatSecondaryCurrency } from '../../../utils';
 import { 
   generateGoldenVisaSpouseVisaBreakdown,
   generateGoldenVisaChildrenVisaBreakdown 
@@ -224,7 +224,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
           <View key={index} style={styles.tableRow}>
             <Text style={styles.tableCellDescription}>{item.description}</Text>
             <Text style={styles.tableCellAmount}>{formatNumber(item.amount)}</Text>
-            <Text style={styles.tableCellAmount}>{formatNumber(item.secondaryAmount)}</Text>
+            <Text style={styles.tableCellAmount}>{formatSecondaryCurrency(item.secondaryAmount)}</Text>
           </View>
         ))}
 
@@ -232,7 +232,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
         <View style={styles.totalRowYellow}>
           <Text style={[styles.totalLabel, { color: 'white', flex: 5, paddingLeft: 8 }]}>{t.costSummary.tableHeaders.total}</Text>
           <Text style={[styles.totalAmount, { color: 'white' }]}>{formatNumber(totalAmount)}</Text>
-          <Text style={[styles.totalAmount, { color: 'white' }]}>{formatNumber(totalAmount / exchangeRate)}</Text>
+          <Text style={[styles.totalAmount, { color: 'white' }]}>{formatSecondaryCurrency(totalAmount / exchangeRate)}</Text>
         </View>
       </View>
     </View>

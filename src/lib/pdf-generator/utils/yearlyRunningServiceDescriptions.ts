@@ -37,7 +37,7 @@ export const generateYearlyRunningServiceDescriptions = (
       services.push({
         id: 'immigration-renewal',
         condition: true,
-        description: 'GDRFA (Immigration establishment card) renewal cost',
+        description: 'GDRFA (Immigration Establishment Card) renewal cost',
         amount: yearlyRunningData.immigrationRenewal,
         explanation: 'Mandatory annual renewal cost.'
       });
@@ -103,7 +103,7 @@ export const generateYearlyRunningServiceDescriptions = (
     services.push({
       id: 'det-immigration-renewal',
       condition: true,
-      description: 'GDRFA (Immigration establishment card) renewal cost',
+      description: 'GDRFA (Immigration Establishment Card) renewal cost',
       amount: 2000,
       explanation: 'Mandatory annual renewal cost.'
     });

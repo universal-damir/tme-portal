@@ -300,7 +300,7 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
       id: 'spouse-third-party-costs',
       condition: true,
       description: `${hasVisaCancellation ? '4' : '3'}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
-      amount: fees.thirdPartyCosts,
+      amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
       explanation: t.dependentCosts.explanations.thirdPartyCosts
     });
   } else {
@@ -413,7 +413,7 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       id: 'children-third-party-costs',
       condition: true,
       description: `${thirdPartyNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
-      amount: fees.thirdPartyCosts * numberOfChildren,
+      amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
       explanation: locale === 'de' ? 
         `Von verschiedenen Abteilungen erhobene Verwaltungskosten für ${childText}.` : 
         `Administrative costs charged by various departments for ${childText}.`
@@ -516,7 +516,7 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
         description: locale === 'de' ? 
           (hasVisaCancellation ? '3. Drittanbieterkosten' : '2. Drittanbieterkosten') :
           (hasVisaCancellation ? '3. Third party costs' : '2. Third party costs'),
-        amount: fees.thirdPartyCosts,
+        amount: fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0,
         explanation: locale === 'de' ? 'Von verschiedenen Abteilungen erhobene Verwaltungskosten.' : 'Administrative costs charged by various departments.'
       });
     } else {
