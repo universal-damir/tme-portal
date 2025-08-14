@@ -565,6 +565,19 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          // Clear form after successfully sending the email
+          reset();
+          // Clear shared client info as well
+          updateClientInfo({
+            firstName: '',
+            lastName: '',
+            companyName: '',
+            shortCompanyName: '',
+            date: new Date().toISOString().split('T')[0],
+          });
+          toast.success('Email sent successfully', {
+            description: 'The form has been cleared for the next application.'
+          });
         },
         onError: (error: string) => {
           console.error('Email sending failed:', error);
@@ -737,6 +750,19 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          // Clear form after successfully sending the email
+          reset();
+          // Clear shared client info as well
+          updateClientInfo({
+            firstName: '',
+            lastName: '',
+            companyName: '',
+            shortCompanyName: '',
+            date: new Date().toISOString().split('T')[0],
+          });
+          toast.success('Email sent successfully', {
+            description: 'The form has been cleared for the next application.'
+          });
         },
         onError: (error: string) => {
           console.error('Email sending failed:', error);
@@ -1276,7 +1302,25 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
             return `${formattedDate} ${nameForTitle} offer ${authority}`;
           }
         })()}
-        onSubmit={reviewApp.submitForReview}
+        onSubmit={async (submission) => {
+          const success = await reviewApp.submitForReview(submission);
+          if (success) {
+            // Clear form after successful submission
+            reset();
+            // Clear shared client info as well
+            updateClientInfo({
+              firstName: '',
+              lastName: '',
+              companyName: '',
+              shortCompanyName: '',
+              date: new Date().toISOString().split('T')[0],
+            });
+            toast.success('Application submitted for review', {
+              description: 'The form has been cleared for the next application.'
+            });
+          }
+          return success;
+        }}
       />
       
       {/* Email Draft Generator with Preview Modal */}
