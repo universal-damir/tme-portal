@@ -3,7 +3,7 @@
  * Shows formatted email preview with editable fields before sending via SMTP
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Edit2, Paperclip, Download, Languages } from 'lucide-react';
 import { EMAIL_TEMPLATES, EMAIL_TEMPLATES_DE, EmailTemplate, EmailRecipientData, processEmailTemplate, createFormattedEmailHTML } from './EmailDraftGenerator';
@@ -76,6 +76,8 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   const [currentPdfBlob, setCurrentPdfBlob] = useState<Blob | undefined>(pdfBlob);
   const [currentPdfFilename, setCurrentPdfFilename] = useState<string | undefined>(pdfFilename);
   const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
+  const contentEditableRef = useRef<HTMLDivElement>(null);
+  const tempContentRef = useRef<string>(emailData.htmlContent);
 
   // Convert HTML to plain text for editing (preserve some formatting indicators)
   const htmlToPlainText = (html: string): string => {
@@ -85,26 +87,65 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
     
     // Get text content but preserve some structure
     let text = '';
-    const elements = tempDiv.querySelectorAll('p, span, div');
     
-    elements.forEach((element, index) => {
-      const content = element.textContent || '';
-      if (content.trim()) {
-        // Add visual indicators for colored/styled content
-        const style = element.getAttribute('style') || '';
-        if (style.includes('color: #0066cc')) {
-          text += `🔵 ${content}\n`; // Blue text indicator
-        } else if (style.includes('color: #006600')) {
-          text += `✅ ${content}\n`; // Green text indicator  
-        } else if (style.includes('color: #DAA520')) {
-          text += `⚠️ ${content}\n`; // Orange text indicator
-        } else if (style.includes('color: #cc0000')) {
-          text += `❗ ${content}\n`; // Red text indicator
-        } else {
-          text += `${content}\n`;
+    // Only process direct <p> elements to avoid duplication from nested elements
+    const paragraphs = tempDiv.querySelectorAll('p');
+    
+    if (paragraphs.length > 0) {
+      // Process paragraph elements
+      paragraphs.forEach((element) => {
+        const content = element.textContent || '';
+        if (content.trim()) {
+          // Add visual indicators for colored/styled content
+          const style = element.getAttribute('style') || '';
+          
+          // Check for colored spans within the paragraph
+          const hasColoredSpan = element.querySelector('span[style*="color"]');
+          let colorFound = false;
+          
+          if (hasColoredSpan) {
+            const spanStyle = hasColoredSpan.getAttribute('style') || '';
+            if (spanStyle.includes('color: #0066cc') || spanStyle.includes('color: rgb(0, 102, 204)')) {
+              text += `🔵 ${content.trim()}\n`; // Blue text indicator
+              colorFound = true;
+            } else if (spanStyle.includes('color: #006600') || spanStyle.includes('color: rgb(0, 102, 0)')) {
+              text += `✅ ${content.trim()}\n`; // Green text indicator
+              colorFound = true;
+            } else if (spanStyle.includes('color: #DAA520') || spanStyle.includes('color: rgb(218, 165, 32)')) {
+              text += `⚠️ ${content.trim()}\n`; // Yellow text indicator
+              colorFound = true;
+            } else if (spanStyle.includes('color: #FF8C00') || spanStyle.includes('color: rgb(255, 140, 0)')) {
+              text += `🟠 ${content.trim()}\n`; // Orange text indicator
+              colorFound = true;
+            } else if (spanStyle.includes('color: #cc0000') || spanStyle.includes('color: rgb(204, 0, 0)')) {
+              text += `❗ ${content.trim()}\n`; // Red text indicator
+              colorFound = true;
+            }
+          }
+          
+          // If no colored span, check the paragraph itself
+          if (!colorFound) {
+            if (style.includes('color: #0066cc') || style.includes('color: rgb(0, 102, 204)')) {
+              text += `🔵 ${content.trim()}\n`; // Blue text indicator
+            } else if (style.includes('color: #006600') || style.includes('color: rgb(0, 102, 0)')) {
+              text += `✅ ${content.trim()}\n`; // Green text indicator  
+            } else if (style.includes('color: #DAA520') || style.includes('color: rgb(218, 165, 32)')) {
+              text += `⚠️ ${content.trim()}\n`; // Yellow text indicator
+            } else if (style.includes('color: #FF8C00') || style.includes('color: rgb(255, 140, 0)')) {
+              text += `🟠 ${content.trim()}\n`; // Orange text indicator
+            } else if (style.includes('color: #cc0000') || style.includes('color: rgb(204, 0, 0)')) {
+              text += `❗ ${content.trim()}\n`; // Red text indicator
+            } else {
+              text += `${content.trim()}\n`;
+            }
+          }
         }
-      }
-    });
+      });
+    } else {
+      // Fallback: if no paragraphs, try to get clean text from the root
+      const lines = tempDiv.innerText || tempDiv.textContent || '';
+      text = lines.trim();
+    }
     
     return text.trim();
   };
@@ -112,27 +153,64 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   // Convert plain text back to formatted HTML (restore color formatting)
   const plainTextToHtml = (text: string): string => {
     // Split by lines and wrap in proper HTML
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    const lines = text.split('\n');
     let htmlContent = '<div style="font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; color: #333;">\n';
     
-    lines.forEach((line, index) => {
-      if (line.trim()) {
-        let processedLine = line.trim();
+    lines.forEach((line) => {
+      let processedLine = line.trim();
+      if (processedLine) {
         let style = 'margin-bottom: 12px;';
+        let hasColor = false;
         
-        // Convert emoji indicators back to HTML colors
+        // Convert emoji indicators back to HTML colors - check for colored keywords
         if (processedLine.startsWith('🔵 ')) {
-          processedLine = processedLine.substring(3); // Remove emoji
-          style += ' color: #0066cc; font-weight: bold;';
+          processedLine = processedLine.substring(3).trim(); // Remove emoji and trim
+          // Check if this line contains the word "blue" to apply color to the whole line or just the word
+          if (processedLine.toLowerCase().includes('blue')) {
+            // Apply color to just the word "blue" in a span
+            processedLine = processedLine.replace(/(blue)/gi, '<span style="color: #0066cc; font-weight: bold;">$1</span>');
+          } else {
+            style += ' color: #0066cc; font-weight: bold;';
+          }
+          hasColor = true;
         } else if (processedLine.startsWith('✅ ')) {
-          processedLine = processedLine.substring(3);
-          style += ' color: #006600; font-weight: bold;';
+          processedLine = processedLine.substring(3).trim();
+          if (processedLine.toLowerCase().includes('green')) {
+            processedLine = processedLine.replace(/(green)/gi, '<span style="color: #006600; font-weight: bold;">$1</span>');
+          } else {
+            style += ' color: #006600; font-weight: bold;';
+          }
+          hasColor = true;
         } else if (processedLine.startsWith('⚠️ ')) {
-          processedLine = processedLine.substring(3);
-          style += ' color: #DAA520;';
+          processedLine = processedLine.substring(3).trim();
+          if (processedLine.toLowerCase().includes('yellow')) {
+            processedLine = processedLine.replace(/(yellow)/gi, '<span style="color: #DAA520; font-weight: bold;">$1</span>');
+          } else {
+            style += ' color: #DAA520; font-weight: bold;';
+          }
+          hasColor = true;
+        } else if (processedLine.startsWith('🟠 ')) {
+          processedLine = processedLine.substring(3).trim();
+          if (processedLine.toLowerCase().includes('orange')) {
+            processedLine = processedLine.replace(/(orange)/gi, '<span style="color: #FF8C00; font-weight: bold;">$1</span>');
+          } else {
+            style += ' color: #FF8C00; font-weight: bold;';
+          }
+          hasColor = true;
         } else if (processedLine.startsWith('❗ ')) {
-          processedLine = processedLine.substring(3);
-          style += ' color: #cc0000; text-decoration: underline;';
+          processedLine = processedLine.substring(3).trim();
+          style += ' color: #cc0000; font-weight: bold;';
+          hasColor = true;
+        }
+        
+        // Only escape HTML if we haven't already added HTML spans for color keywords
+        if (!hasColor || (!processedLine.includes('<span'))) {
+          processedLine = processedLine
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
         }
         
         htmlContent += `  <p style="${style}">${processedLine}</p>\n`;
@@ -147,6 +225,24 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   useEffect(() => {
     setPlainTextContent(htmlToPlainText(editableContent));
   }, []);
+
+  // Update contentEditable when switching to edit mode
+  useEffect(() => {
+    if (isEditingContent && contentEditableRef.current) {
+      // Set the content when entering edit mode
+      contentEditableRef.current.innerHTML = editableContent;
+      // Update temp ref
+      tempContentRef.current = editableContent;
+    }
+  }, [isEditingContent]);
+  
+  // Handle saving content when exiting edit mode
+  useEffect(() => {
+    if (!isEditingContent && tempContentRef.current !== editableContent) {
+      // Content was changed, update it
+      setEditableContent(tempContentRef.current);
+    }
+  }, [isEditingContent]);
 
   const handleSend = async () => {
     const updatedEmailData: EmailPreviewData = {
@@ -460,22 +556,37 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
               </div>
               
               {isEditingContent ? (
-                /* Editable textarea with plain text */
-                <textarea
-                  value={plainTextContent}
-                  onChange={(e) => {
-                    setPlainTextContent(e.target.value);
-                    // Convert back to HTML and update editableContent
-                    setEditableContent(plainTextToHtml(e.target.value));
-                  }}
-                  className="w-full border rounded-lg p-4 bg-white min-h-[300px] resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  style={{ 
-                    fontFamily: 'Arial, sans-serif',
-                    fontSize: '10pt',
-                    lineHeight: '1.4'
-                  }}
-                  placeholder="Edit your email content here (plain text)..."
-                />
+                /* Rich text editor with contentEditable */
+                <>
+                  <div
+                    ref={contentEditableRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={(e) => {
+                      // Store content in ref to avoid re-renders that cause cursor jumps
+                      tempContentRef.current = e.currentTarget.innerHTML;
+                    }}
+                    onBlur={(e) => {
+                      // Save the final content when losing focus
+                      const newContent = e.currentTarget.innerHTML;
+                      tempContentRef.current = newContent;
+                      setEditableContent(newContent);
+                      setPlainTextContent(htmlToPlainText(newContent));
+                    }}
+                    className="w-full border-2 rounded-lg p-4 bg-white min-h-[300px] focus:outline-none focus:border-blue-500 transition-colors"
+                    style={{ 
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '10pt',
+                      lineHeight: '1.4',
+                      wordBreak: 'break-word',
+                      overflowWrap: 'break-word',
+                      backgroundColor: '#fafafa'
+                    }}
+                  />
+                  <div className="mt-1 text-xs text-gray-500">
+                    Tip: Click on the text above to edit. Colors and formatting are preserved.
+                  </div>
+                </>
               ) : (
                 /* Preview mode */
                 <div 
