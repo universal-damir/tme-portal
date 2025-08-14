@@ -307,7 +307,7 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
         shareCapitalError: null
       }));
     }
-  }, [JSON.stringify(watchedData?.visaCosts?.visaDetails), watchedData?.authorityInformation?.shareCapitalAED]);
+  }, [watchedData?.visaCosts?.visaDetails, watchedData?.authorityInformation?.shareCapitalAED]);
 
   const handlers: FormattedInputHandlers = {
     handleShareCapitalChange,

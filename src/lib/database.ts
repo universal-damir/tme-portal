@@ -10,9 +10,11 @@ const pool = new Pool({
   database: dbConfig.database,
   user: dbConfig.user,
   password: dbConfig.password,
-  max: 20,
+  max: 100,  // Increased from 20 to handle 100 concurrent users
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000,  // Increased from 2s to 5s for better stability
+  statement_timeout: 10000,  // Kill queries running longer than 10 seconds
+  query_timeout: 10000,  // Overall query timeout
 });
 
 // Auto-detected Redis configuration

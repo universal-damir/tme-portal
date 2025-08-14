@@ -1,5 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { applySecurityHeaders, rateLimit, getClientIP } from '@/lib/security';
+
+// Security headers configuration
+const SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'X-XSS-Protection': '1; mode=block',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
+  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' data: blob:; frame-ancestors 'none';",
+};
+
+function applySecurityHeaders(response: NextResponse): NextResponse {
+  Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {
+    response.headers.set(key, value);
+  });
+  return response;
+}
 
 // Define protected routes
 const protectedRoutes = [
@@ -28,28 +45,8 @@ export async function middleware(request: NextRequest) {
   // Apply security headers to all responses
   response = applySecurityHeaders(response);
   
-  // Apply rate limiting for API routes
-  if (pathname.startsWith('/api/')) {
-    const endpoint = pathname.startsWith('/api/auth/login') ? 'login' : 
-                    pathname.startsWith('/api/admin/') ? 'admin' : 'api';
-    
-    const rateCheck = rateLimit(endpoint)(request);
-    
-    if (rateCheck.blocked) {
-      return new NextResponse('Too Many Requests', { 
-        status: 429,
-        headers: {
-          'Retry-After': Math.ceil((rateCheck.resetTime - Date.now()) / 1000).toString(),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': new Date(rateCheck.resetTime).toISOString()
-        }
-      });
-    }
-    
-    // Add rate limit headers
-    response.headers.set('X-RateLimit-Remaining', rateCheck.remaining.toString());
-    response.headers.set('X-RateLimit-Reset', new Date(rateCheck.resetTime).toISOString());
-  }
+  // No rate limiting needed for internal network with 50-100 trusted users
+  // The database pool has been increased to handle the load
   
   // Allow static files and public routes
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
