@@ -46,7 +46,6 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
   // Reset CIT fields when CIT checkbox is unchecked
   useEffect(() => {
     if (!watchedData.taxConsultingServices?.citEnabled) {
-      setValue('taxConsultingServices.citRegistration', 0);
       setValue('taxConsultingServices.citType', '');
     }
   }, [watchedData.taxConsultingServices?.citEnabled, setValue]);
@@ -62,13 +61,11 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
     }
   }, [watchedData.taxConsultingServices?.vatEnabled, setValue]);
 
-  // Auto-populate default values when CIT is enabled
+  // Reset citRegistrationEnabled when CIT is disabled
   useEffect(() => {
-    if (watchedData.taxConsultingServices?.citEnabled) {
-      // Auto-populate CIT Registration if not already set
-      if (!watchedData.taxConsultingServices?.citRegistration || watchedData.taxConsultingServices?.citRegistration === 0) {
-        setValue('taxConsultingServices.citRegistration', DEFAULT_FEES.citRegistration);
-      }
+    if (!watchedData.taxConsultingServices?.citEnabled) {
+      setValue('taxConsultingServices.citRegistrationEnabled', false);
+      setValue('taxConsultingServices.citRegistration', 0);
     }
   }, [watchedData.taxConsultingServices?.citEnabled, setValue]);
 
@@ -178,18 +175,66 @@ export const TaxConsultingServicesSection: React.FC<TaxConsultingServicesSection
                 </h3>
                 
                 <div className="space-y-3">
-                  {/* CIT Registration */}
-                  <div>
-                    <NumberInputField
-                      label="CIT (Corporate Income Tax) Registration (AED)"
-                      value={watchedData.taxConsultingServices?.citRegistration || 0}
-                      onChange={(value) => setValue('taxConsultingServices.citRegistration', value)}
-                      placeholder={FORMATTED_DEFAULT_FEES.citRegistration}
-                      className="w-full max-w-xs"
-                      error={errors.taxConsultingServices?.citRegistration?.message}
-                      min={0}
-                    />
-                  </div>
+                  {/* CIT Registration Checkbox */}
+                  <motion.label
+                    whileHover={{ scale: 1.01 }}
+                    className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        {...register('taxConsultingServices.citRegistrationEnabled')}
+                        checked={watchedData.taxConsultingServices?.citRegistrationEnabled || false}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setValue('taxConsultingServices.citRegistrationEnabled', isChecked);
+                          if (isChecked && (!watchedData.taxConsultingServices?.citRegistration || watchedData.taxConsultingServices?.citRegistration === 0)) {
+                            setValue('taxConsultingServices.citRegistration', DEFAULT_FEES.citRegistration);
+                          } else if (!isChecked) {
+                            setValue('taxConsultingServices.citRegistration', 0);
+                          }
+                        }}
+                        className="sr-only"
+                      />
+                      <div 
+                        className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                        style={{ 
+                          borderColor: watchedData.taxConsultingServices?.citRegistrationEnabled ? '#243F7B' : '#d1d5db',
+                          backgroundColor: watchedData.taxConsultingServices?.citRegistrationEnabled ? '#243F7B' : 'white'
+                        }}
+                      >
+                        {watchedData.taxConsultingServices?.citRegistrationEnabled && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-3 h-3 text-white flex items-center justify-center"
+                          >
+                            ✓
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                        CIT Registration
+                      </span>
+                    </div>
+                  </motion.label>
+
+                  {/* CIT Registration Fee Input - Show only if checkbox is checked */}
+                  {watchedData.taxConsultingServices?.citRegistrationEnabled && (
+                    <div>
+                      <NumberInputField
+                        label="CIT Registration Fee (AED)"
+                        value={watchedData.taxConsultingServices?.citRegistration || 0}
+                        onChange={(value) => setValue('taxConsultingServices.citRegistration', value)}
+                        placeholder={FORMATTED_DEFAULT_FEES.citRegistration}
+                        className="w-full max-w-xs"
+                        error={errors.taxConsultingServices?.citRegistration?.message}
+                        min={0}
+                      />
+                    </div>
+                  )}
 
                   {/* CIT Type Selection */}
                   <div>

@@ -10,6 +10,7 @@ export interface TaxConsultingServices {
   citEnabled?: boolean;
   vatEnabled?: boolean;
   // CIT-related fields
+  citRegistrationEnabled?: boolean; // New checkbox field for CIT registration
   citRegistration?: number;
   citReturnFiling?: number;
   citType?: 'sbr-regular' | 'qfzp' | '' | undefined;

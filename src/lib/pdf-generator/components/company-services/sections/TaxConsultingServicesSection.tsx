@@ -35,9 +35,12 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
         <View style={{ marginBottom: 16 }}>
           <Text style={styles.sectionTitle}>CIT (Corporate Income Tax)</Text>
           
-          <Text style={[styles.introText, { marginBottom: 8 }]}>
-            To comply with UAE requirements, <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>ALL</Text> companies <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>MUST</Text> create an EmaraTax account and complete CIT registration with the FTA (Federal Tax Authority) to obtain a 15-digit CIT TRN (Tax Registration Number).
-          </Text>
+          {/* Only show compliance text if citRegistrationEnabled is true */}
+          {taxServices.citRegistrationEnabled && (
+            <Text style={[styles.introText, { marginBottom: 8 }]}>
+              To comply with UAE requirements, <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>ALL</Text> companies <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>MUST</Text> create an EmaraTax account and complete CIT registration with the FTA (Federal Tax Authority) to obtain a 15-digit CIT TRN (Tax Registration Number).
+            </Text>
+          )}
           
           {taxServices.citRegistration && taxServices.citRegistration > 0 && (
             <Text style={[styles.introText, { marginBottom: 8 }]}>
