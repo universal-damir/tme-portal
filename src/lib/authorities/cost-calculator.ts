@@ -436,6 +436,11 @@ export class CostCalculator {
     if (this.config.id === 'det') {
       // DET-specific yearly running costs
       
+      // DET License renewal - dynamic based on license type (same as initial setup)
+      if (data.detLicense?.licenseType && this.config.initialSetup.detLicenseFees) {
+        costs.baseLicenseRenewal = this.config.initialSetup.detLicenseFees[data.detLicense.licenseType] || 0;
+      }
+      
       // Immigration renewal (GDRFA) - fixed yearly cost for DET
       if (this.config.yearlyRunning.immigrationRenewalFee) {
         costs.immigrationRenewal = this.config.yearlyRunning.immigrationRenewalFee;

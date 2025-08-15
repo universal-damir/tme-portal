@@ -68,7 +68,7 @@ export const DET_CONFIG: AuthorityConfig = {
   },
   
   yearlyRunning: {
-    baseLicenseRenewal: 13000, // License fee DET
+    baseLicenseRenewal: 13000, // Default - will be overridden by dynamic license type selection
     visaQuotaRenewalCost: 0, // DET doesn't have visa quota renewal
     crossBorderRenewal: 0, // DET doesn't have cross border renewal
     immigrationRenewalFee: 2000, // GDRFA (Immigration) renewal fee Establishment Card for visa

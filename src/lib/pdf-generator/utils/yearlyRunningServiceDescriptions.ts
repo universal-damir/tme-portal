@@ -91,13 +91,15 @@ export const generateYearlyRunningServiceDescriptions = (
   // DET Yearly Running Services
   if (data.authorityInformation.responsibleAuthority === 'DET (Dubai Department of Economy and Tourism)') {
     // 1. DET License Renewal
-    services.push({
-      id: 'det-license-renewal',
-      condition: true,
-      description: 'DET license renewal cost',
-      amount: 13000,
-      explanation: 'Annual renewal cost with the DET (Dubai Department of Economy and Tourism).'
-    });
+    if (yearlyRunningData.baseLicenseRenewal > 0) {
+      services.push({
+        id: 'det-license-renewal',
+        condition: true,
+        description: 'DET license renewal cost',
+        amount: yearlyRunningData.baseLicenseRenewal,
+        explanation: 'Annual renewal cost with the DET (Dubai Department of Economy and Tourism).'
+      });
+    }
 
     // 2. DET Immigration Renewal
     services.push({
