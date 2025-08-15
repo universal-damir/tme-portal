@@ -97,17 +97,17 @@ export const generateAdditionalServiceDescriptions = (
   if (data.additionalServices.accountingFee && data.additionalServices.accountingFee > 0) {
     const frequency = data.additionalServices.accountingFrequency || 'yearly';
     const frequencyLabels = {
-      yearly: 'Yearly',
-      quarterly: 'Quarterly', 
-      monthly: 'Monthly'
+      yearly: 'Yearly fee for accounting up to 360 transactions',
+      quarterly: 'Quarterly fee for accounting up to 30 transactions', 
+      monthly: 'Monthly fee for accounting up to 100 transactions'
     };
     
     services.push({
       id: 'accounting-fee',
       condition: true,
-      description: `${frequencyLabels[frequency]} fee for accounting`,
+      description: frequencyLabels[frequency],
       amount: data.additionalServices.accountingFee,
-      explanation: `${frequencyLabels[frequency]} accounting and bookkeeping services based on 360 transactions per year, including financial record maintenance and basic reporting.`
+      explanation: `${frequency === 'yearly' ? 'Yearly' : frequency === 'quarterly' ? 'Quarterly' : 'Monthly'} accounting and bookkeeping services based on ${frequency === 'yearly' ? '360 transactions per year' : frequency === 'quarterly' ? '30 transactions per quarter' : '100 transactions per month'}, including financial record maintenance and basic reporting.`
     });
   }
 
