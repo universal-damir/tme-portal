@@ -338,23 +338,46 @@ export const CompanySetupSection: React.FC<CompanySetupSectionProps> = ({
                   >
                     -
                   </motion.button>
-                  <motion.input
-                    whileFocus={{ scale: 1.01 }}
+                  <input
                     type="text"
-                    {...register('clientDetails.exchangeRate', { 
-                      valueAsNumber: true,
-                      setValueAs: (value) => parseFloat(value) || 0
-                    })}
-                    value={watchedData.clientDetails?.exchangeRate || 4}
+                    value={watchedData.clientDetails?.exchangeRate || ''}
                     onChange={(e) => {
-                      const value = e.target.value.replace(/[^\d.]/g, '');
-                      const parsed = parseFloat(value) || 0;
-                      setValue('clientDetails.exchangeRate', parsed);
+                      const input = e.target.value;
+                      
+                      // Replace comma with dot
+                      let cleaned = input.replace(',', '.');
+                      
+                      // Remove any character that is not a number or dot
+                      cleaned = cleaned.replace(/[^0-9.]/g, '');
+                      
+                      // Ensure only one decimal point
+                      const parts = cleaned.split('.');
+                      if (parts.length > 2) {
+                        // Keep only first dot
+                        cleaned = parts[0] + '.' + parts.slice(1).join('');
+                      }
+                      
+                      // Limit to 2 decimal places
+                      if (parts.length === 2 && parts[1] && parts[1].length > 2) {
+                        cleaned = parts[0] + '.' + parts[1].substring(0, 2);
+                      }
+                      
+                      // Set the value - keep it as string during editing
+                      setValue('clientDetails.exchangeRate', cleaned);
+                    }}
+                    onBlur={(e) => {
+                      // Convert to number on blur
+                      const val = e.target.value;
+                      const num = parseFloat(val) || 0;
+                      setValue('clientDetails.exchangeRate', num);
+                      e.target.style.borderColor = '#e5e7eb';
                     }}
                     className="w-28 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="4"
+                    style={{
+                      borderColor: '#e5e7eb'
+                    }}
                     onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                   />
                   <motion.button
                     whileHover={{ scale: 1.05 }}
