@@ -45,3 +45,11 @@ secrets/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Deployment archives
+*.tar.gz
+*.tar
+*.zip
+deployment-backups/
+update-*.tar.gz
+EMERGENCY-*.tar.gz
