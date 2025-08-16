@@ -31,6 +31,9 @@ export async function GET(request: NextRequest) {
 
     const url = new URL(request.url);
     const mode = url.searchParams.get('mode');
+    const type = url.searchParams.get('type');
+    const status = url.searchParams.get('status');
+    const limit = url.searchParams.get('limit');
 
     let applications;
     if (mode === 'review') {
@@ -39,6 +42,22 @@ export async function GET(request: NextRequest) {
     } else {
       // Get user's own applications
       applications = await ApplicationsService.getByUser(userId);
+    }
+
+    // Filter by type if specified
+    if (type) {
+      applications = applications.filter(app => app.type === type);
+    }
+
+    // Filter by status if specified
+    if (status) {
+      applications = applications.filter(app => app.status === status);
+    }
+
+    // Limit results if specified
+    if (limit) {
+      const limitNum = parseInt(limit);
+      applications = applications.slice(0, limitNum);
     }
 
     return NextResponse.json({ applications }, { status: 200 });

@@ -22,7 +22,7 @@ interface UseCostOverviewApplicationReturn {
   error: string | null;
   
   // Actions
-  saveApplication: () => Promise<boolean>;
+  saveApplication: () => Promise<boolean | Application>;
   submitForReview: (submission: {
     reviewer_id: number;
     urgency: UrgencyLevel;
@@ -165,8 +165,8 @@ export const useCostOverviewApplication = ({
     }
   };
   
-  // Save application to database
-  const saveApplication = async (): Promise<boolean> => {
+  // Save application to database - returns boolean or Application object
+  const saveApplication = async (): Promise<boolean | Application> => {
     if (!config.canUseCostOverviewReview) {
       return true; // Return success if review system is disabled
     }
@@ -177,8 +177,8 @@ export const useCostOverviewApplication = ({
     try {
       const title = generateApplicationTitle(formData);
       
-      if (application) {
-        // Update existing application
+      if (application && application.id) {
+        // Update existing application only if it has a valid ID
         console.log('🔧 Updating existing Cost Overview application:', { 
           id: application.id, 
           title, 
@@ -209,7 +209,7 @@ export const useCostOverviewApplication = ({
           console.log('Updated Cost Overview application:', updatedApp.id);
         }
         
-        return true;
+        return updatedApp;
       } else {
         // Create new application
         console.log('🔧 Creating new Cost Overview application:', { 
@@ -242,7 +242,8 @@ export const useCostOverviewApplication = ({
           console.log('Created new Cost Overview application:', newApp.id);
         }
         
-        return true;
+        // Return the new application for immediate use
+        return newApp;
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to save application';
@@ -301,30 +302,18 @@ export const useCostOverviewApplication = ({
     urgency: UrgencyLevel;
     comments?: string;
   }): Promise<boolean> => {
+    console.log('🔧 submitForReview called:', { 
+      enabled: config.canUseCostOverviewReview, 
+      hasApplication: !!application,
+      applicationId: application?.id 
+    });
+    
     if (!config.canUseCostOverviewReview) {
-      console.log('🔧 submitForReview blocked: review system disabled');
+      console.error('🔧 Cost Overview review is disabled in config');
       return false;
     }
     
-    if (!application) {
-      console.log('🔧 submitForReview blocked: no application found, trying to create one first...');
-      const saveSuccess = await saveApplication();
-      if (!saveSuccess) {
-        console.log('🔧 submitForReview: failed to create application');
-        return false;
-      }
-      
-      // Check if application was created
-      if (!application) {
-        console.log('🔧 submitForReview: still no application after save attempt');
-        return false;
-      }
-    }
-    
-    console.log('🔧 submitForReview: proceeding with application:', { 
-      id: application.id, 
-      title: application.title 
-    });
+    let appToSubmit = application;
     
     setIsLoading(true);
     setError(null);
@@ -332,19 +321,28 @@ export const useCostOverviewApplication = ({
     try {
       // First ensure application is saved with latest form data
       console.log('🔧 submitForReview: saving application before submission...');
-      const saveSuccess = await saveApplication();
-      if (!saveSuccess) {
+      const saveResult = await saveApplication();
+      if (!saveResult) {
         throw new Error('Failed to save application before submission');
       }
       
-      console.log('🔧 submitForReview: making API call to:', `/api/applications/${application.id}/submit-review`);
+      // If saveResult is an Application object (new or updated), use it
+      if (typeof saveResult === 'object' && saveResult.id) {
+        appToSubmit = saveResult;
+        console.log('🔧 Using application:', appToSubmit.id);
+      } else if (!appToSubmit) {
+        console.error('🔧 No application available to submit');
+        throw new Error('No application available to submit');
+      }
+      
+      console.log('🔧 submitForReview: making API call to:', `/api/applications/${appToSubmit.id}/submit-review`);
       console.log('🔧 submitForReview: request body:', submission);
       
       // Submit for review with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      const response = await fetch(`/api/applications/${application.id}/submit-review`, {
+      const response = await fetch(`/api/applications/${appToSubmit.id}/submit-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -366,17 +364,14 @@ export const useCostOverviewApplication = ({
       const result = await response.json();
       console.log('🔧 API success response:', result);
       
-      // Update application status locally since API doesn't return updated app
-      if (application) {
-        setApplication({
-          ...application,
-          status: 'pending_review' as const,
-          submitted_at: new Date().toISOString()
-        });
-      }
+      // Clear application state after successful submission
+      // The form will be reset and we start fresh
+      setApplication(null);
+      lastSavedDataRef.current = ''; // Reset the last saved data reference
       
       if (config.debugMode) {
         console.log('Submitted Cost Overview application for review:', result);
+        console.log('Cleared application state for fresh start');
       }
       
       return true;

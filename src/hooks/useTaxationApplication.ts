@@ -22,7 +22,7 @@ interface UseTaxationApplicationReturn {
   error: string | null;
   
   // Actions
-  saveApplication: () => Promise<boolean>;
+  saveApplication: () => Promise<boolean | Application>;
   submitForReview: (submission: {
     reviewer_id: number;
     urgency: UrgencyLevel;
@@ -159,8 +159,8 @@ export const useTaxationApplication = ({
     }
   };
   
-  // Save application to database
-  const saveApplication = async (): Promise<boolean> => {
+  // Save application to database - returns boolean or Application object
+  const saveApplication = async (): Promise<boolean | Application> => {
     if (!config.canUseTaxationReview) {
       return true; // Return success if review system is disabled
     }
@@ -171,8 +171,8 @@ export const useTaxationApplication = ({
     try {
       const title = generateApplicationTitle(formData);
       
-      if (application) {
-        // Update existing application
+      if (application && application.id) {
+        // Update existing application only if it has a valid ID
         const response = await fetch(`/api/applications/${application.id}`, {
           method: 'PUT',
           headers: {
@@ -195,6 +195,8 @@ export const useTaxationApplication = ({
         if (config.debugMode) {
           console.log('Updated Taxation application:', updatedApp.id);
         }
+        
+        return updatedApp;
       } else {
         // Create new application
         const response = await fetch('/api/applications', {
@@ -219,6 +221,9 @@ export const useTaxationApplication = ({
         if (config.debugMode) {
           console.log('Created new Taxation application:', newApp.id);
         }
+        
+        // Return the new application for immediate use
+        return newApp;
       }
       
       return true;
@@ -279,22 +284,40 @@ export const useTaxationApplication = ({
     urgency: UrgencyLevel;
     comments?: string;
   }): Promise<boolean> => {
-    if (!config.canUseTaxationReview || !application) {
+    console.log('🔧 submitForReview called:', { 
+      enabled: config.canUseTaxationReview, 
+      hasApplication: !!application,
+      applicationId: application?.id 
+    });
+    
+    if (!config.canUseTaxationReview) {
+      console.error('🔧 Taxation review is disabled in config');
       return false;
     }
+    
+    let appToSubmit = application;
     
     setIsLoading(true);
     setError(null);
     
     try {
       // First ensure application is saved with latest form data
-      const saveSuccess = await saveApplication();
-      if (!saveSuccess) {
+      const saveResult = await saveApplication();
+      if (!saveResult) {
         throw new Error('Failed to save application before submission');
       }
       
+      // If saveResult is an Application object (new or updated), use it
+      if (typeof saveResult === 'object' && saveResult.id) {
+        appToSubmit = saveResult;
+        console.log('🔧 Using application:', appToSubmit.id);
+      } else if (!appToSubmit) {
+        console.error('🔧 No application available to submit');
+        throw new Error('No application available to submit');
+      }
+      
       // Submit for review
-      const response = await fetch(`/api/applications/${application.id}/submit-review`, {
+      const response = await fetch(`/api/applications/${appToSubmit.id}/submit-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -308,17 +331,14 @@ export const useTaxationApplication = ({
       
       const result = await response.json();
       
-      // Update application status locally since API doesn't return updated app
-      if (application) {
-        setApplication({
-          ...application,
-          status: 'pending_review' as const,
-          submitted_at: new Date().toISOString()
-        });
-      }
+      // Clear application state after successful submission
+      // The form will be reset and we start fresh
+      setApplication(null);
+      lastSavedDataRef.current = ''; // Reset the last saved data reference
       
       if (config.debugMode) {
         console.log('Submitted Taxation application for review:', result);
+        console.log('Cleared application state for fresh start');
       }
       
       return true;

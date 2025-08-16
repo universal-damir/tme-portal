@@ -19,10 +19,25 @@ import {
 } from '../../taxation';
 
 const TaxationTab: React.FC = () => {
-  const { clientInfo, updateClientInfo } = useSharedClient();
+  const { 
+    clientInfo, 
+    updateClientInfo, 
+    clearClientInfo, 
+    setWorkflowState, 
+    workflowState,
+    loadFromApplication,
+    getPreservedFormData 
+  } = useSharedClient();
   const [isGenerating, setIsGenerating] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  
+  // Debug logging for workflow state
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
+      console.log('[TaxationTab] Current workflow state:', workflowState);
+    }
+  }, [workflowState]);
 
   // Form state management
   const {
@@ -30,6 +45,7 @@ const TaxationTab: React.FC = () => {
     watch,
     setValue,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<TaxationData>({
     resolver: zodResolver(taxationSchema),
@@ -67,7 +83,17 @@ const TaxationTab: React.FC = () => {
 
   // Initialize form with shared client context (only once on mount)
   const initializedRef = useRef(false);
+  const isLoadingRejectedRef = useRef(false); // Track if we're loading a rejected application
   useEffect(() => {
+    // NEVER sync/clear when in review-rejected or review-approved state or when loading
+    if (workflowState === 'review-rejected' || workflowState === 'review-approved' || isLoadingRejectedRef.current) {
+      return; // Don't touch the form data when loading from review
+    }
+    
+    // Check if context is cleared (all fields empty) and we're in fresh state
+    const isContextCleared = !clientInfo.firstName && !clientInfo.lastName && !clientInfo.companyName && !clientInfo.shortCompanyName;
+    const shouldSyncWhenCleared = isContextCleared && workflowState === 'fresh' && initializedRef.current && !isLoadingRejectedRef.current;
+    
     if (!initializedRef.current && (clientInfo.firstName || clientInfo.lastName || clientInfo.companyName)) {
       setValue('firstName', clientInfo.firstName || '');
       setValue('lastName', clientInfo.lastName || '');
@@ -75,12 +101,26 @@ const TaxationTab: React.FC = () => {
       setValue('shortCompanyName', clientInfo.shortCompanyName || '');
       setValue('date', clientInfo.date);
       initializedRef.current = true;
+    } else if (shouldSyncWhenCleared) {
+      // Also sync when context is cleared (all fields empty) and we're in fresh state
+      setValue('firstName', '');
+      setValue('lastName', '');
+      setValue('companyName', '');
+      setValue('shortCompanyName', '');
+      setValue('date', new Date().toISOString().split('T')[0]);
+      // Reset the flag so we can sync again if needed
+      initializedRef.current = false;
     }
-  }, [clientInfo, setValue]);
+  }, [clientInfo, setValue, workflowState]);
 
   // Update shared client info when form changes (debounced)
   const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
+    // DON'T update SharedClientContext when in review states - let the form data stay as-is
+    if (workflowState === 'review-rejected' || workflowState === 'review-approved') {
+      return; // Don't sync to SharedClientContext when working with review data
+    }
+    
     const { firstName, lastName, companyName, shortCompanyName, date } = watchedData;
     
     // Clear previous timeout
@@ -110,7 +150,8 @@ const TaxationTab: React.FC = () => {
     watchedData.companyName,
     watchedData.shortCompanyName,
     watchedData.date,
-    updateClientInfo
+    workflowState // Also watch workflowState to skip updates during review
+    // updateClientInfo removed - it's stable from context and was causing infinite loop
   ]);
 
   // Handle company type change
@@ -149,14 +190,12 @@ const TaxationTab: React.FC = () => {
           setEmailDraftProps(null);
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info as well
-          updateClientInfo({
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            shortCompanyName: '',
-            date: new Date().toISOString().split('T')[0],
+          // Clear shared client info completely after email sent (final step)
+          clearClientInfo({ 
+            completeReset: true,
+            source: 'email-sent'
           });
+          setWorkflowState('fresh');
           toast.success('Email sent successfully', {
             description: 'The form has been cleared for the next application.'
           });
@@ -254,14 +293,12 @@ const TaxationTab: React.FC = () => {
           setEmailDraftProps(null);
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info as well
-          updateClientInfo({
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            shortCompanyName: '',
-            date: new Date().toISOString().split('T')[0],
+          // Clear shared client info completely after email sent (final step)
+          clearClientInfo({ 
+            completeReset: true,
+            source: 'email-sent'
           });
+          setWorkflowState('fresh');
           toast.success('Email sent successfully', {
             description: 'The form has been cleared for the next application.'
           });
@@ -399,14 +436,12 @@ const TaxationTab: React.FC = () => {
           setEmailDraftProps(null);
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info as well
-          updateClientInfo({
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            shortCompanyName: '',
-            date: new Date().toISOString().split('T')[0],
+          // Clear shared client info completely after email sent (final step)
+          clearClientInfo({ 
+            completeReset: true,
+            source: 'email-sent'
           });
+          setWorkflowState('fresh');
           toast.success('Email sent successfully', {
             description: 'The form has been cleared for the next application.'
           });
@@ -447,14 +482,63 @@ const TaxationTab: React.FC = () => {
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Pre-filling Taxation form with application data:', applicationId);
+      console.log('🟡 [TaxationTab] Received edit-taxation-application event', event.detail);
       
-      // Pre-fill the form with the application data
-      Object.keys(formData).forEach((key) => {
-        if (key in watchedData) {
-          setValue(key as any, formData[key]);
+      // Set loading flag FIRST to prevent any clearing
+      isLoadingRejectedRef.current = true;
+      
+      // Reset the initialization flag to prevent re-syncing
+      initializedRef.current = true;
+      
+      // Don't use reset() - manually set each field to ensure proper updates
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== undefined) {
+          setValue(key as any, formData[key], {
+            shouldValidate: false,
+            shouldDirty: true,
+            shouldTouch: true
+          });
         }
       });
+      
+      // Double-check critical fields with a delay
+      setTimeout(() => {
+        console.log('🟡 [TaxationTab] Double-checking critical fields');
+        if (formData.firstName) {
+          setValue('firstName', formData.firstName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.lastName) {
+          setValue('lastName', formData.lastName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.companyName) {
+          setValue('companyName', formData.companyName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        
+        // Force a re-render by triggering validation
+        trigger(['firstName', 'lastName', 'companyName']);
+      }, 100);
+      
+      // NOW set workflow state after data is loaded
+      setWorkflowState('review-rejected');
+      
+      // Clear loading flag after a short delay to ensure all effects have run
+      setTimeout(() => {
+        isLoadingRejectedRef.current = false;
+      }, 500);
+      
+      console.log('🟡 [TaxationTab] Form loaded with rejected application data (NOT in SharedClient)');
       
       // Show a toast notification to inform the user
       toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
@@ -465,9 +549,12 @@ const TaxationTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 TAXATION-TAB: Event received - send approved application:', applicationId);
-      console.log('🔧 TAXATION-TAB: Form data received:', formData);
-      console.log('🔧 TAXATION-TAB: Current tab active?', window.location.hash === '#taxation');
+      console.log('🟢 [TaxationTab] Received send-approved-application event', { applicationId, hasFormData: !!formData });
+      
+      // DON'T load into SharedClientContext - just use the formData directly
+      setWorkflowState('review-approved');
+      
+      console.log('🟢 [TaxationTab] Processing approved application data');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -505,7 +592,7 @@ const TaxationTab: React.FC = () => {
       window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
       console.log('🔧 TAXATION-TAB: Event listeners removed');
     };
-  }, []); // Remove dependencies to prevent listener re-registration
+  }, [loadFromApplication, setWorkflowState]); // Include dependencies for event handlers
 
   return (
     <div className="space-y-8">
@@ -706,19 +793,24 @@ const TaxationTab: React.FC = () => {
         onSubmit={async (submission) => {
           const success = await reviewApp.submitForReview(submission);
           if (success) {
-            // Clear form after successful submission
+            // Clear form after successful submission but preserve data for review workflow
             reset();
-            // Clear shared client info as well
-            updateClientInfo({
-              firstName: '',
-              lastName: '',
-              companyName: '',
-              shortCompanyName: '',
-              date: new Date().toISOString().split('T')[0],
+            // Clear UI but preserve data for when it comes back from review
+            console.log('🟢 [TaxationTab] Successfully submitted for review');
+            
+            // Clear form completely - data is now in DB
+            clearClientInfo({ 
+              source: 'review-submit'
             });
+            setWorkflowState('fresh');
             toast.success('Application submitted for review', {
-              description: 'The form has been cleared for the next application.'
+              description: 'The form has been cleared for the next application. Data is saved for the review process.'
             });
+            
+            // Debug log
+            if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
+              console.log('[TaxationTab] Submitted for review - workflow state set to review-pending');
+            }
           }
           return success;
         }}

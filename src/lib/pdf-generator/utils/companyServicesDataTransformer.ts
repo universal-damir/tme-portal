@@ -86,16 +86,27 @@ export function generateCompanyServicesFilename(
   companyServicesData: CompanyServicesData,
   clientInfo: SharedClientInfo
 ): string {
-  // Format date as YYMMDD
-  const date = new Date(companyServicesData.date || clientInfo.date);
+  // Guard against undefined data
+  if (!companyServicesData) {
+    console.warn('generateCompanyServicesFilename: companyServicesData is undefined, using defaults');
+    const date = new Date();
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    return `${yy}${mm}${dd} TME Services.pdf`;
+  }
+  
+  // Format date as YYMMDD - use today if no date provided
+  const dateValue = companyServicesData?.date || clientInfo?.date || new Date().toISOString().split('T')[0];
+  const date = new Date(dateValue);
   const yy = date.getFullYear().toString().slice(-2);
   const mm = (date.getMonth() + 1).toString().padStart(2, '0');
   const dd = date.getDate().toString().padStart(2, '0');
   const formattedDate = `${yy}${mm}${dd}`;
   
-  // Get client names
-  const lastName = companyServicesData.lastName || clientInfo.lastName || '';
-  const shortCompanyName = companyServicesData.shortCompanyName || clientInfo.shortCompanyName || '';
+  // Get client names with safe access
+  const lastName = companyServicesData?.lastName || clientInfo?.lastName || '';
+  const shortCompanyName = companyServicesData?.shortCompanyName || clientInfo?.shortCompanyName || '';
   
   // Build filename based on available data
   let filename = '';

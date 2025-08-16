@@ -17,6 +17,7 @@ import { NotificationPanel } from '@/components/review-system/ui/NotificationPan
 import { ReviewModal } from '@/components/review-system/modals/ReviewModal'
 import { FeedbackModal } from '@/components/review-system/modals/FeedbackModal'
 import { Notification, Application } from '@/types/review-system'
+import { useSharedClient } from '@/contexts/SharedClientContext'
 
 interface TMEPortalHeaderProps {
   title?: string;
@@ -30,6 +31,7 @@ export function TMEPortalHeader({
   onPreview
 }: TMEPortalHeaderProps) {
   const { user } = useAuth()
+  const { clearClientInfo } = useSharedClient()
   const [isNotificationPanelOpen, setIsNotificationPanelOpen] = React.useState(false)
   
   // Review modal state - centralized here
@@ -172,6 +174,14 @@ export function TMEPortalHeader({
       });
 
       if (response.ok) {
+        // If User 2 rejected the application, clear their form
+        if (action === 'reject') {
+          console.log('🔴 [TMEPortalHeader] User 2 rejected application - clearing their form');
+          clearClientInfo({ 
+            source: 'reviewer-rejected'
+          });
+        }
+        
         // Close the review modal
         setReviewModalOpen(false);
         setSelectedApplication(null);

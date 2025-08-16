@@ -52,6 +52,16 @@ export const useCompanyServicesApplication = ({
   
   // Generate application title from form data using PDF filename standards
   const generateApplicationTitle = useCallback(async (data: CompanyServicesData): Promise<string> => {
+    // Validate data before processing
+    if (!data || !data.date) {
+      console.log('🔧 generateApplicationTitle: Missing date, using default');
+      const date = new Date();
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      return `${yy}${mm}${dd} TME Services Application`;
+    }
+    
     try {
       // Use dynamic import for client-side compatibility
       const { generateCompanyServicesFilename } = await import('@/lib/pdf-generator/integrations/FilenameIntegrations');
@@ -155,8 +165,8 @@ export const useCompanyServicesApplication = ({
     try {
       const title = await generateApplicationTitle(formData);
       
-      if (application) {
-        // Update existing application
+      if (application && application.id) {
+        // Update existing application only if it has a valid ID
         const response = await fetch(`/api/applications/${application.id}`, {
           method: 'PUT',
           headers: {
@@ -233,6 +243,12 @@ export const useCompanyServicesApplication = ({
       return; // Don't auto-save if disabled
     }
     
+    // Don't auto-save if essential data is missing
+    if (!formData || !formData.date) {
+      console.log('🔧 Skipping auto-save - missing essential data (date)');
+      return;
+    }
+    
     const currentDataString = JSON.stringify(formData);
     
     // Only auto-save if data has changed
@@ -279,33 +295,23 @@ export const useCompanyServicesApplication = ({
     
     let appToSubmit = application;
     
-    if (!appToSubmit) {
-      console.log('🔧 No application exists yet, creating one first...');
-      // First save the application to create it
-      const saveResult = await saveApplication();
-      if (!saveResult) {
-        console.error('🔧 Failed to create application');
-        return false;
-      }
-      
-      // If saveResult is an object (new application), use it
-      if (typeof saveResult === 'object' && saveResult.id) {
-        appToSubmit = saveResult;
-        console.log('🔧 Using newly created application:', appToSubmit.id);
-      } else {
-        console.error('🔧 Application creation did not return valid application');
-        return false;
-      }
-    }
-    
     setIsLoading(true);
     setError(null);
     
     try {
       // First ensure application is saved with latest form data
-      const saveSuccess = await saveApplication();
-      if (!saveSuccess) {
+      const saveResult = await saveApplication();
+      if (!saveResult) {
         throw new Error('Failed to save application before submission');
+      }
+      
+      // If saveResult is an Application object (new or updated), use it
+      if (typeof saveResult === 'object' && saveResult.id) {
+        appToSubmit = saveResult;
+        console.log('🔧 Using application:', appToSubmit.id);
+      } else if (!appToSubmit) {
+        console.error('🔧 No application available to submit');
+        throw new Error('No application available to submit');
       }
       
       // Submit for review
@@ -323,17 +329,14 @@ export const useCompanyServicesApplication = ({
       
       const result = await response.json();
       
-      // Update application status locally since API doesn't return updated app
-      if (application) {
-        setApplication({
-          ...application,
-          status: 'pending_review' as const,
-          submitted_at: new Date().toISOString()
-        });
-      }
+      // Clear application state after successful submission
+      // The form will be reset and we start fresh
+      setApplication(null);
+      lastSavedDataRef.current = ''; // Reset the last saved data reference
       
       if (config.debugMode) {
         console.log('Submitted Company Services application for review:', result);
+        console.log('Cleared application state for fresh start');
       }
       
       return true;

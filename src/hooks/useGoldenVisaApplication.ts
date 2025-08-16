@@ -22,7 +22,7 @@ interface UseGoldenVisaApplicationReturn {
   error: string | null;
   
   // Actions
-  saveApplication: () => Promise<boolean>;
+  saveApplication: () => Promise<boolean | Application>;
   submitForReview: (submission: {
     reviewer_id: number;
     urgency: UrgencyLevel;
@@ -52,6 +52,16 @@ export const useGoldenVisaApplication = ({
   
   // Generate application title from form data using PDF filename standards
   const generateApplicationTitle = useCallback((data: GoldenVisaData): string => {
+    // First check if we have minimum data for title generation
+    if (!data.firstName && !data.lastName && !data.companyName) {
+      // Return a default title if no client info
+      const date = new Date(data.date || new Date());
+      const yy = date.getFullYear().toString().slice(-2);
+      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+      const dd = date.getDate().toString().padStart(2, '0');
+      return `${yy}${mm}${dd} Draft Golden Visa Application`;
+    }
+    
     try {
       // Use the same filename generation as PDF export for consistency
       const { generateGoldenVisaFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
@@ -65,7 +75,7 @@ export const useGoldenVisaApplication = ({
       // Remove the .pdf extension for database storage
       return filename.replace('.pdf', '');
     } catch (error) {
-      console.error('🔧 GOLDEN-VISA-HOOK: Failed to generate filename, using fallback:', error);
+      console.log('🔧 GOLDEN-VISA-HOOK: Using fallback title generation');
       
       // Enhanced fallback that matches PDF format (keep current working logic)
       const date = new Date(data.date || new Date());
@@ -113,18 +123,10 @@ export const useGoldenVisaApplication = ({
   
   // Load existing application on mount
   useEffect(() => {
-    console.log('🔧 useGoldenVisaApplication - Config Check:', {
-      canUseGoldenVisaReview: config.canUseGoldenVisaReview,
-      enabled: config.enabled,
-      enableGoldenVisaReview: config.enableGoldenVisaReview
-    });
-    
     if (!config.canUseGoldenVisaReview) {
-      console.log('🔧 Review system disabled for Golden Visa');
       return; // Don't load anything if review system is disabled
     }
     
-    console.log('🔧 Loading existing application...');
     loadExistingApplication();
   }, [config.canUseGoldenVisaReview]);
   
@@ -138,8 +140,7 @@ export const useGoldenVisaApplication = ({
       const response = await fetch('/api/applications?type=golden-visa&status=draft&limit=1');
       if (!response.ok) {
         if (response.status === 404) {
-          // No existing draft application found - this is fine
-          return;
+          return; // No existing draft - normal state
         }
         throw new Error(`Failed to load application: ${response.statusText}`);
       }
@@ -147,6 +148,13 @@ export const useGoldenVisaApplication = ({
       const data = await response.json();
       if (data.applications && data.applications.length > 0) {
         const app = data.applications[0];
+        
+        // Verify this is actually a Golden Visa application
+        if (app.type !== 'golden-visa') {
+          console.error('Wrong application type loaded:', app.type);
+          return; // Don't load wrong type of application
+        }
+        
         setApplication(app);
         
         if (config.debugMode) {
@@ -157,9 +165,6 @@ export const useGoldenVisaApplication = ({
       const errorMessage = err instanceof Error ? err.message : 'Failed to load application';
       setError(errorMessage);
       
-      if (config.debugMode) {
-        console.error('Error loading application:', err);
-      }
       
       // Don't show error toast for network issues - fail silently
       if (!errorMessage.includes('fetch')) {
@@ -172,8 +177,8 @@ export const useGoldenVisaApplication = ({
     }
   };
   
-  // Save application to database
-  const saveApplication = async (): Promise<boolean> => {
+  // Save application to database - returns boolean or Application object
+  const saveApplication = async (): Promise<boolean | Application> => {
     if (!config.canUseGoldenVisaReview) {
       return true; // Return success if review system is disabled
     }
@@ -184,8 +189,9 @@ export const useGoldenVisaApplication = ({
     try {
       const title = generateApplicationTitle(formData);
       
-      if (application) {
-        // Update existing application
+      
+      if (application && application.id) {
+        // Update existing application only if it has a valid ID
         const response = await fetch(`/api/applications/${application.id}`, {
           method: 'PUT',
           headers: {
@@ -208,17 +214,21 @@ export const useGoldenVisaApplication = ({
         if (config.debugMode) {
           console.log('Updated Golden Visa application:', updatedApp.id);
         }
+        
+        return updatedApp;
       } else {
         // Create new application
+        
         const response = await fetch('/api/applications', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            type: 'golden-visa',
+            type: 'golden-visa',  // CRITICAL: Must be golden-visa
             title,
             form_data: formData,
+            status: 'draft',
           }),
         });
         
@@ -226,7 +236,8 @@ export const useGoldenVisaApplication = ({
           throw new Error(`Failed to create application: ${response.statusText}`);
         }
         
-        const newApp = await response.json();
+        const result = await response.json();
+        const newApp = result.application || result; // Handle both response formats
         setApplication(newApp);
         
         if (config.debugMode) {
@@ -262,6 +273,11 @@ export const useGoldenVisaApplication = ({
       return; // Don't auto-save if disabled
     }
     
+    // Don't auto-save if essential fields are missing
+    if (!formData.firstName && !formData.lastName && !formData.companyName) {
+      return; // No client data yet
+    }
+    
     const currentDataString = JSON.stringify(formData);
     
     // Only auto-save if data has changed
@@ -276,9 +292,13 @@ export const useGoldenVisaApplication = ({
     
     // Set new timeout for auto-save
     autoSaveTimeoutRef.current = setTimeout(async () => {
-      const success = await saveApplication();
-      if (success) {
-        lastSavedDataRef.current = currentDataString;
+      try {
+        const success = await saveApplication();
+        if (success) {
+          lastSavedDataRef.current = currentDataString;
+        }
+      } catch (error) {
+        console.error('🔧 Auto-save error:', error);
       }
     }, 2000); // Auto-save after 2 seconds of inactivity
     
@@ -287,7 +307,7 @@ export const useGoldenVisaApplication = ({
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
-  }, [formData, config.canAutoSaveGoldenVisa]);
+  }, [formData, config.canAutoSaveGoldenVisa, saveApplication]);
   
   // Submit application for review
   const submitForReview = async (submission: {
@@ -296,7 +316,7 @@ export const useGoldenVisaApplication = ({
     comments?: string;
   }): Promise<boolean> => {
     console.log('🔧 submitForReview called:', { 
-      canUseGoldenVisaReview: config.canUseGoldenVisaReview, 
+      enabled: config.canUseGoldenVisaReview, 
       hasApplication: !!application,
       applicationId: application?.id 
     });
@@ -308,33 +328,23 @@ export const useGoldenVisaApplication = ({
     
     let appToSubmit = application;
     
-    if (!appToSubmit) {
-      console.log('🔧 No application exists yet, creating one first...');
-      // First save the application to create it
-      const saveResult = await saveApplication();
-      if (!saveResult) {
-        console.error('🔧 Failed to create application');
-        return false;
-      }
-      
-      // If saveResult is an object (new application), use it
-      if (typeof saveResult === 'object' && saveResult.id) {
-        appToSubmit = saveResult;
-        console.log('🔧 Using newly created application:', appToSubmit.id);
-      } else {
-        console.error('🔧 Application creation did not return valid application');
-        return false;
-      }
-    }
-    
     setIsLoading(true);
     setError(null);
     
     try {
       // First ensure application is saved with latest form data
-      const saveSuccess = await saveApplication();
-      if (!saveSuccess) {
+      const saveResult = await saveApplication();
+      if (!saveResult) {
         throw new Error('Failed to save application before submission');
+      }
+      
+      // If saveResult is an Application object (new or updated), use it
+      if (typeof saveResult === 'object' && saveResult.id) {
+        appToSubmit = saveResult;
+        console.log('🔧 Using application:', appToSubmit.id);
+      } else if (!appToSubmit) {
+        console.error('🔧 No application available to submit');
+        throw new Error('No application available to submit');
       }
       
       // Submit for review
@@ -352,17 +362,14 @@ export const useGoldenVisaApplication = ({
       
       const result = await response.json();
       
-      // Update application status locally since API doesn't return updated app
-      if (application) {
-        setApplication({
-          ...application,
-          status: 'pending_review' as const,
-          submitted_at: new Date().toISOString()
-        });
-      }
+      // Clear application state after successful submission
+      // The form will be reset and we start fresh
+      setApplication(null);
+      lastSavedDataRef.current = ''; // Reset the last saved data reference
       
       if (config.debugMode) {
         console.log('Submitted Golden Visa application for review:', result);
+        console.log('Cleared application state for fresh start');
       }
       
       return true;

@@ -23,11 +23,27 @@ import {
 } from '../../golden-visa';
 import { useGoldenVisaApplication } from '@/hooks/useGoldenVisaApplication';
 import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
+import '@/utils/debug-shared-context'; // Import debug utilities
 
 
 const GoldenVisaTab: React.FC = () => {
   
-  const { clientInfo, updateClientInfo } = useSharedClient();
+  const { 
+    clientInfo, 
+    updateClientInfo, 
+    clearClientInfo, 
+    setWorkflowState, 
+    workflowState,
+    loadFromApplication,
+    getPreservedFormData 
+  } = useSharedClient();
+  
+  // Debug logging for workflow state
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
+      console.log('[GoldenVisaTab] Current workflow state:', workflowState);
+    }
+  }, [workflowState]);
   const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -44,6 +60,7 @@ const GoldenVisaTab: React.FC = () => {
     setValue,
     trigger,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<GoldenVisaData>({
     resolver: zodResolver(goldenVisaSchema),
@@ -224,9 +241,16 @@ const GoldenVisaTab: React.FC = () => {
     clientName: clientInfo.companyName || `${watchedData.firstName} ${watchedData.lastName}`.trim()
   });
 
-  // Initialize form with shared client context (only once on mount)
+  // Initialize form with shared client context and sync when cleared
   const initializedRef = useRef(false);
+  const isLoadingRejectedRef = useRef(false); // Track if we're loading a rejected application
   useEffect(() => {
+    // NEVER sync/clear when in review-rejected or review-approved state or when loading
+    if (workflowState === 'review-rejected' || workflowState === 'review-approved' || isLoadingRejectedRef.current) {
+      return; // Don't touch the form data when loading from review
+    }
+    
+    // Initialize on mount if we have data
     if (!initializedRef.current && (clientInfo.firstName || clientInfo.lastName)) {
       setValue('firstName', clientInfo.firstName || '');
       setValue('lastName', clientInfo.lastName || '');
@@ -234,11 +258,25 @@ const GoldenVisaTab: React.FC = () => {
       setValue('date', clientInfo.date);
       initializedRef.current = true;
     }
-  }, [clientInfo, setValue]);
+    
+    // Also sync when context is cleared (all fields empty) and we're in fresh state
+    if (initializedRef.current && workflowState === 'fresh' && !isLoadingRejectedRef.current &&
+        !clientInfo.firstName && !clientInfo.lastName && !clientInfo.companyName) {
+      setValue('firstName', '');
+      setValue('lastName', '');
+      setValue('companyName', '');
+      setValue('date', clientInfo.date || new Date().toISOString().split('T')[0]);
+    }
+  }, [clientInfo, setValue, workflowState]);
 
   // Update shared client info when form changes (debounced)
   const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
+    // DON'T update SharedClientContext when in review states - let the form data stay as-is
+    if (workflowState === 'review-rejected' || workflowState === 'review-approved') {
+      return; // Don't sync to SharedClientContext when working with review data
+    }
+    
     const { firstName, lastName, date } = watchedData;
     
     // Clear previous timeout
@@ -265,7 +303,8 @@ const GoldenVisaTab: React.FC = () => {
     watchedData.firstName, 
     watchedData.lastName, 
     watchedData.date,
-    updateClientInfo
+    workflowState // Also watch workflowState to skip updates during review
+    // updateClientInfo removed - it's stable from context and was causing infinite loop
   ]);
 
   // Handle visa type change - update defaults
@@ -414,14 +453,12 @@ const GoldenVisaTab: React.FC = () => {
           setEmailDraftProps(null);
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info as well
-          updateClientInfo({
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            shortCompanyName: '',
-            date: new Date().toISOString().split('T')[0],
+          // Clear shared client info completely after email sent (final step)
+          clearClientInfo({ 
+            completeReset: true,
+            source: 'email-sent'
           });
+          setWorkflowState('fresh');
           toast.success('Email sent successfully', {
             description: 'The form has been cleared for the next application.'
           });
@@ -682,14 +719,12 @@ const GoldenVisaTab: React.FC = () => {
           setEmailDraftProps(null);
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info as well
-          updateClientInfo({
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            shortCompanyName: '',
-            date: new Date().toISOString().split('T')[0],
+          // Clear shared client info completely after email sent (final step)
+          clearClientInfo({ 
+            completeReset: true,
+            source: 'email-sent'
           });
+          setWorkflowState('fresh');
           toast.success('Email sent successfully', {
             description: 'The form has been cleared for the next application.'
           });
@@ -744,14 +779,61 @@ const GoldenVisaTab: React.FC = () => {
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Pre-filling form with application data:', applicationId);
+      console.log('🟡 [GoldenVisaTab] Received edit-golden-visa-application event', event.detail);
       
-      // Pre-fill the form with the application data
-      Object.keys(formData).forEach((key) => {
-        if (key in watchedData) {
-          setValue(key as any, formData[key]);
+      // Set loading flag FIRST to prevent any clearing
+      isLoadingRejectedRef.current = true;
+      
+      // Reset the initialization flag to prevent re-syncing
+      initializedRef.current = true;
+      
+      // Don't use reset() - manually set each field to ensure proper updates
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== undefined) {
+          setValue(key as any, formData[key], {
+            shouldValidate: false,
+            shouldDirty: true,
+            shouldTouch: true
+          });
         }
       });
+      
+      // Double-check critical fields with a delay
+      setTimeout(() => {
+        console.log('🟡 [GoldenVisaTab] Double-checking critical fields');
+        if (formData.firstName) {
+          setValue('firstName', formData.firstName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.lastName) {
+          setValue('lastName', formData.lastName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.companyName) {
+          setValue('companyName', formData.companyName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        
+        // Force a re-render by triggering validation
+        trigger(['firstName', 'lastName', 'companyName']);
+      }, 100);
+      
+      // NOW set workflow state after data is loaded
+      setWorkflowState('review-rejected');
+      
+      // Clear loading flag after a short delay to ensure all effects have run
+      setTimeout(() => {
+        isLoadingRejectedRef.current = false;
+      }, 500);
       
       // Special handling for client emails to update the component's local state
       if (formData.clientEmails) {
@@ -760,6 +842,8 @@ const GoldenVisaTab: React.FC = () => {
         });
         window.dispatchEvent(emailUpdateEvent);
       }
+      
+      console.log('🟡 [GoldenVisaTab] Form loaded with rejected application data (NOT in SharedClient)');
       
       // Show a toast notification to inform the user
       toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
@@ -770,9 +854,12 @@ const GoldenVisaTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 GOLDEN-VISA-TAB: Event received - send approved application:', applicationId);
-      console.log('🔧 GOLDEN-VISA-TAB: Form data received:', formData);
-      console.log('🔧 GOLDEN-VISA-TAB: Current tab active?', window.location.hash === '#golden-visa');
+      console.log('🟢 [GoldenVisaTab] Received send-approved-application event', { applicationId, hasFormData: !!formData });
+      
+      // DON'T load into SharedClientContext - just use the formData directly
+      setWorkflowState('review-approved');
+      
+      console.log('🟢 [GoldenVisaTab] Processing approved application data');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -810,7 +897,7 @@ const GoldenVisaTab: React.FC = () => {
       window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
       console.log('🔧 GOLDEN-VISA-TAB: Event listeners removed');
     };
-  }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
+  }, [handleSendPDF, loadFromApplication, setWorkflowState]); // Include dependencies for event handlers
 
   // Long press handlers for German preview
   const handleLongPressStart = () => {
@@ -1062,19 +1149,24 @@ const GoldenVisaTab: React.FC = () => {
         onSubmit={async (submission) => {
           const success = await reviewApp.submitForReview(submission);
           if (success) {
-            // Clear form after successful submission
+            // Clear form after successful submission but preserve data for review workflow
             reset();
-            // Clear shared client info as well
-            updateClientInfo({
-              firstName: '',
-              lastName: '',
-              companyName: '',
-              shortCompanyName: '',
-              date: new Date().toISOString().split('T')[0],
+            // Clear UI but preserve data for when it comes back from review
+            console.log('🟢 [GoldenVisaTab] Successfully submitted for review');
+            
+            // Clear form completely - data is now in DB
+            clearClientInfo({ 
+              source: 'review-submit'
             });
+            setWorkflowState('fresh');
             toast.success('Application submitted for review', {
-              description: 'The form has been cleared for the next application.'
+              description: 'The form has been cleared for the next application. Data is saved for the review process.'
             });
+            
+            // Debug log
+            if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
+              console.log('[GoldenVisaTab] Submitted for review - workflow state set to review-pending');
+            }
           }
           return success;
         }}

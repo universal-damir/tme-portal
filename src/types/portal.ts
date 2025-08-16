@@ -33,7 +33,24 @@ export interface SharedClientInfo {
 export interface SharedClientContextType {
   clientInfo: SharedClientInfo;
   updateClientInfo: (info: Partial<SharedClientInfo>) => void;
-  clearClientInfo: () => void;
+  clearClientInfo: (options?: any) => void;
+  setWorkflowState: (state: string) => void;
+  workflowState: string;
+  loadFromApplication: (applicationData: any) => void;
+  getPreservedFormData: () => any;
+  fetchRejectedApplications: () => Promise<any[]>;
+  loadRejectedApplication: (applicationId: string) => Promise<any>;
+}
+
+// Simplified workflow state for backward compatibility
+export type WorkflowState = 'fresh' | 'review-pending' | 'review-approved' | 'review-rejected' | 'loading-from-review';
+
+// Simplified clear options
+export interface ClearClientInfoOptions {
+  preserveForReview?: boolean;
+  formData?: any; // Include form data when preserving
+  completeReset?: boolean; // Complete reset including sessionStorage
+  source?: 'email-sent' | 'review-submit' | 'manual' | 'form-reset';
 }
 
 // Auto-save system

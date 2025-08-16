@@ -24,11 +24,26 @@ import {
 } from '../../company-services';
 
 const CompanyServicesTab: React.FC = () => {
-  const { clientInfo, updateClientInfo } = useSharedClient();
+  const { 
+    clientInfo, 
+    updateClientInfo, 
+    clearClientInfo, 
+    setWorkflowState, 
+    workflowState,
+    loadFromApplication,
+    getPreservedFormData 
+  } = useSharedClient();
   const { user } = useAuth();
   const [isGenerating, setIsGenerating] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  
+  // Debug logging for workflow state
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
+      console.log('[CompanyServicesTab] Current workflow state:', workflowState);
+    }
+  }, [workflowState]);
 
   // Form state management
   const {
@@ -37,6 +52,7 @@ const CompanyServicesTab: React.FC = () => {
     setValue,
     trigger,
     reset,
+    getValues,
     formState: { errors },
   } = useForm<CompanyServicesData>({
     resolver: zodResolver(companyServicesSchema),
@@ -196,7 +212,17 @@ const CompanyServicesTab: React.FC = () => {
 
   // Initialize form with shared client context (only once on mount)
   const initializedRef = useRef(false);
+  const isLoadingRejectedRef = useRef(false); // Track if we're loading a rejected application
   useEffect(() => {
+    // NEVER sync/clear when in review-rejected or review-approved state or when loading
+    if (workflowState === 'review-rejected' || workflowState === 'review-approved' || isLoadingRejectedRef.current) {
+      return; // Don't touch the form data when loading from review
+    }
+    
+    // Check if context is cleared (all fields empty) and we're in fresh state
+    const isContextCleared = !clientInfo.firstName && !clientInfo.lastName && !clientInfo.companyName && !clientInfo.shortCompanyName;
+    const shouldSyncWhenCleared = isContextCleared && workflowState === 'fresh' && initializedRef.current && !isLoadingRejectedRef.current;
+    
     if (!initializedRef.current && (clientInfo.firstName || clientInfo.lastName || clientInfo.companyName)) {
       setValue('firstName', clientInfo.firstName || '');
       setValue('lastName', clientInfo.lastName || '');
@@ -204,12 +230,26 @@ const CompanyServicesTab: React.FC = () => {
       setValue('shortCompanyName', clientInfo.shortCompanyName || '');
       setValue('date', clientInfo.date);
       initializedRef.current = true;
+    } else if (shouldSyncWhenCleared) {
+      // Also sync when context is cleared (all fields empty) and we're in fresh state
+      setValue('firstName', '');
+      setValue('lastName', '');
+      setValue('companyName', '');
+      setValue('shortCompanyName', '');
+      setValue('date', new Date().toISOString().split('T')[0]);
+      // Reset the flag so we can sync again if needed
+      initializedRef.current = false;
     }
-  }, [clientInfo, setValue]);
+  }, [clientInfo, setValue, workflowState]);
 
   // Update shared client info when form changes (debounced)
   const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
+    // DON'T update SharedClientContext when in review states - let the form data stay as-is
+    if (workflowState === 'review-rejected' || workflowState === 'review-approved') {
+      return; // Don't sync to SharedClientContext when working with review data
+    }
+    
     const { firstName, lastName, companyName, shortCompanyName, date } = watchedData;
     
     // Clear previous timeout
@@ -239,7 +279,8 @@ const CompanyServicesTab: React.FC = () => {
     watchedData.companyName, 
     watchedData.shortCompanyName,
     watchedData.date,
-    updateClientInfo
+    workflowState // Also watch workflowState to skip updates during review
+    // updateClientInfo removed - it's stable from context and was causing infinite loop
   ]);
 
   // Handle company type change
@@ -299,14 +340,12 @@ const CompanyServicesTab: React.FC = () => {
           setEmailDraftProps(null);
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info as well
-          updateClientInfo({
-            firstName: '',
-            lastName: '',
-            companyName: '',
-            shortCompanyName: '',
-            date: new Date().toISOString().split('T')[0],
+          // Clear shared client info completely after email sent (final step)
+          clearClientInfo({ 
+            completeReset: true,
+            source: 'email-sent'
           });
+          setWorkflowState('fresh');
           toast.success('Email sent successfully', {
             description: 'The form has been cleared for the next application.'
           });
@@ -526,14 +565,63 @@ const CompanyServicesTab: React.FC = () => {
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 Pre-filling Company Services form with application data:', applicationId);
+      console.log('🟡 [CompanyServicesTab] Received edit-company-services-application event', event.detail);
       
-      // Pre-fill the form with the application data
-      Object.keys(formData).forEach((key) => {
-        if (key in watchedData) {
-          setValue(key as any, formData[key]);
+      // Set loading flag FIRST to prevent any clearing
+      isLoadingRejectedRef.current = true;
+      
+      // Reset the initialization flag to prevent re-syncing
+      initializedRef.current = true;
+      
+      // Don't use reset() - manually set each field to ensure proper updates
+      Object.keys(formData).forEach(key => {
+        if (formData[key] !== undefined) {
+          setValue(key as any, formData[key], {
+            shouldValidate: false,
+            shouldDirty: true,
+            shouldTouch: true
+          });
         }
       });
+      
+      // Double-check critical fields with a delay
+      setTimeout(() => {
+        console.log('🟡 [CompanyServicesTab] Double-checking critical fields');
+        if (formData.firstName) {
+          setValue('firstName', formData.firstName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.lastName) {
+          setValue('lastName', formData.lastName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.companyName) {
+          setValue('companyName', formData.companyName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        
+        // Force a re-render by triggering validation
+        trigger(['firstName', 'lastName', 'companyName']);
+      }, 100);
+      
+      // NOW set workflow state after data is loaded
+      setWorkflowState('review-rejected');
+      
+      // Clear loading flag after a short delay to ensure all effects have run
+      setTimeout(() => {
+        isLoadingRejectedRef.current = false;
+      }, 500);
+      
+      console.log('🟡 [CompanyServicesTab] Form loaded with rejected application data (NOT in SharedClient)');
       
       // Show a toast notification to inform the user
       toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
@@ -544,9 +632,12 @@ const CompanyServicesTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🔧 COMPANY-SERVICES-TAB: Event received - send approved application:', applicationId);
-      console.log('🔧 COMPANY-SERVICES-TAB: Form data received:', formData);
-      console.log('🔧 COMPANY-SERVICES-TAB: Current tab active?', window.location.hash === '#company-services');
+      console.log('🟢 [CompanyServicesTab] Received send-approved-application event', { applicationId, hasFormData: !!formData });
+      
+      // DON'T load into SharedClientContext - just use the formData directly
+      setWorkflowState('review-approved');
+      
+      console.log('🟢 [CompanyServicesTab] Processing approved application data');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
@@ -583,7 +674,7 @@ const CompanyServicesTab: React.FC = () => {
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
       window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
     };
-  }, [handleSendPDF]); // Include handleSendPDF so it can be accessed in event handlers
+  }, [handleSendPDF, loadFromApplication, setWorkflowState]); // Include dependencies for event handlers
 
   return (
     <div className="space-y-8">
@@ -728,6 +819,15 @@ const CompanyServicesTab: React.FC = () => {
         applicationTitle={(() => {
           // Use the same filename generation as PDF export for consistency
           try {
+            // Ensure watchedData has required fields before calling
+            if (!watchedData || !watchedData.date) {
+              const date = new Date();
+              const yy = date.getFullYear().toString().slice(-2);
+              const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+              const dd = date.getDate().toString().padStart(2, '0');
+              return `${yy}${mm}${dd} TME Services Application`;
+            }
+            
             const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
             const filename = generateCompanyServicesFilename(watchedData, clientInfo);
             return filename.replace('.pdf', '');
@@ -758,19 +858,19 @@ const CompanyServicesTab: React.FC = () => {
         onSubmit={async (submission) => {
           const success = await reviewApp.submitForReview(submission);
           if (success) {
-            // Clear form after successful submission
+            console.log('🟢 [CompanyServicesTab] Successfully submitted for review');
+            
+            // Clear form completely - data is now in DB
             reset();
-            // Clear shared client info as well
-            updateClientInfo({
-              firstName: '',
-              lastName: '',
-              companyName: '',
-              shortCompanyName: '',
-              date: new Date().toISOString().split('T')[0],
+            clearClientInfo({ 
+              source: 'review-submit'
             });
+            setWorkflowState('fresh');
             toast.success('Application submitted for review', {
               description: 'The form has been cleared for the next application.'
             });
+            
+            console.log('🟢 [CompanyServicesTab] Form cleared after review submission');
           }
           return success;
         }}

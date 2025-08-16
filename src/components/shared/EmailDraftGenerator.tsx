@@ -5,7 +5,7 @@
  * Creates formatted emails with PDF attachments using SMTP with preview modal
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { EmailPreviewModal, EmailPreviewData } from './EmailPreviewModal';
 import { useEmailSender } from '@/hooks/useEmailSender';
 
@@ -211,6 +211,11 @@ export const useEmailDraftGenerator = () => {
   const [additionalPdfs, setAdditionalPdfs] = useState<Array<{blob: Blob; filename: string}>>([]);
   const { sendEmail, loading } = useEmailSender();
   
+  // Store callbacks in refs so they can be accessed in handleSendEmail
+  const onSuccessRef = useRef<((draftId: string) => void) | undefined>();
+  const onErrorRef = useRef<((error: string) => void) | undefined>();
+  const onCloseRef = useRef<(() => void) | undefined>();
+  
   const generateEmailDraft = async ({
     recipients,
     template,
@@ -219,6 +224,11 @@ export const useEmailDraftGenerator = () => {
     onError,
     onClose
   }: EmailDraftGeneratorProps) => {
+    
+    // Store callbacks in refs
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+    onCloseRef.current = onClose;
     
     try {
       // Process template variables
@@ -271,8 +281,13 @@ export const useEmailDraftGenerator = () => {
     try {
       await sendEmail(emailData, currentAttachments);
       // Call success callback if provided
-      // onSuccess?.('email-sent'); // Could be enhanced to return email ID
+      if (onSuccessRef.current) {
+        onSuccessRef.current('email-sent');
+      }
     } catch (error) {
+      if (onErrorRef.current) {
+        onErrorRef.current(error instanceof Error ? error.message : 'Unknown error');
+      }
       throw error; // Let modal handle the error display
     }
   };
