@@ -52,7 +52,21 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
         const data = await response.json();
         
         if (response.ok) {
-          setReviewers(data.reviewers || []);
+          // Sort reviewers by employee_code (lowest to highest)
+          const sortedReviewers = (data.reviewers || []).sort((a: Reviewer, b: Reviewer) => {
+            // Extract numeric part from employee codes for proper numeric sorting
+            const getNumericCode = (code: string) => {
+              const match = code.match(/\d+/);
+              return match ? parseInt(match[0], 10) : 0;
+            };
+            
+            const codeA = getNumericCode(a.employee_code);
+            const codeB = getNumericCode(b.employee_code);
+            
+            return codeA - codeB;
+          });
+          
+          setReviewers(sortedReviewers);
         } else {
           setFetchError(data.error || 'Failed to load reviewers');
         }
@@ -154,8 +168,9 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
                 )}
               </div>
               <div className="flex flex-col items-start min-w-0 flex-1">
-                <span className="text-sm font-medium text-gray-900 truncate">
-                  {selectedReviewer.full_name.split(' ')[0]} {selectedReviewer.employee_code}
+                <span className="text-sm font-medium truncate">
+                  <span style={{ color: '#243F7B' }}>{selectedReviewer.employee_code}</span>
+                  <span className="text-gray-900"> {selectedReviewer.full_name.split(' ')[0]}</span>
                 </span>
               </div>
             </>
@@ -270,8 +285,9 @@ export const ReviewerDropdown: React.FC<ReviewerDropdownProps> = ({
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {reviewer.full_name.split(' ')[0]} {reviewer.employee_code}
+                            <p className="text-sm font-medium truncate">
+                              <span style={{ color: '#243F7B' }}>{reviewer.employee_code}</span>
+                              <span className="text-gray-900"> {reviewer.full_name.split(' ')[0]}</span>
                             </p>
                             {value === reviewer.id && (
                               <Check className="w-4 h-4" style={{ color: '#243F7B' }} />
