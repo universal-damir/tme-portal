@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
       return response;
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       authenticated: true,
       user: {
         id: sessionData.user.id,
@@ -43,6 +43,13 @@ export async function GET(request: NextRequest) {
         last_login: sessionData.user.last_login,
       },
     });
+    
+    // Prevent browser caching of session data
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    response.headers.set('Pragma', 'no-cache');
+    response.headers.set('Expires', '0');
+    
+    return response;
   } catch (error) {
     console.error('Session validation error:', error);
     return NextResponse.json({ authenticated: false }, { status: 500 });

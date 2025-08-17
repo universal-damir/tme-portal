@@ -20,7 +20,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshSession = async () => {
     try {
-      const response = await fetch('/api/auth/session')
+      // Add cache-busting to force fresh data
+      const response = await fetch('/api/auth/session?t=' + Date.now())
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)

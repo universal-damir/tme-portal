@@ -47,18 +47,23 @@ export async function POST(request: NextRequest) {
       userAgent
     );
 
-    // Create response
+    // Create response with complete user data
     const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
         employee_code: user.employee_code,
         email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
         full_name: user.full_name,
+        phone: user.phone,
         department: user.department,
         designation: user.designation,
         role: user.role,
+        status: user.status,
         must_change_password: user.must_change_password,
+        last_login: user.last_login,
       },
     });
 
