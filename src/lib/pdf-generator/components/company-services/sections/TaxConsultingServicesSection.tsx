@@ -99,6 +99,10 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
               {'\n'}• Our service fee for nil VAT return filing is AED 562 {formatSecondaryCurrency(562, exchangeRate, secondaryCurrency)} per return
             </Text>
           )}
+          
+          <Text style={[styles.introText, { marginTop: 8 }]}>
+            For clarifying VAT refund matters in response to FTA inquiries, our service fee is AED 664 {formatSecondaryCurrency(664, exchangeRate, secondaryCurrency)} per hour.
+          </Text>
         </View>
       )}
 
@@ -154,8 +158,7 @@ export const TaxConsultingServicesSection: React.FC<PDFComponentProps> = ({ data
         <Text style={styles.sectionTitle}>Tax Consulting Support</Text>
         
         <Text style={styles.introText}>
-          For clarifying VAT refund matters in response to FTA inquiries, our service fee is AED 664 {formatSecondaryCurrency(664, exchangeRate, secondaryCurrency)} per hour.
-          {'\n'}For consulting on VAT, CIT, UBO (Ultimate Beneficial Owner), or related topics, our fee is AED 1,450 {formatSecondaryCurrency(1450, exchangeRate, secondaryCurrency)} per hour.
+          For consulting on VAT, CIT, UBO (Ultimate Beneficial Owner), or related topics, our fee is AED 1,450 {formatSecondaryCurrency(1450, exchangeRate, secondaryCurrency)} per hour.
           {'\n'}Email correspondence is billed at 5 minutes per email, based on the applicable hourly rate.
           {'\n'}For VAT or CIT profile amendments on the FTA portal, our fee is AED 158 {formatSecondaryCurrency(158, exchangeRate, secondaryCurrency)} per amendment per profile.
         </Text>
