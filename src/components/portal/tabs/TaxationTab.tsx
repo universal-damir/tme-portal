@@ -728,7 +728,7 @@ const TaxationTab: React.FC = () => {
             ) : (
               <>
                 <Send className="h-5 w-5" />
-                <span>Send</span>
+                <span>Download and Send</span>
               </>
             )}
           </motion.button>

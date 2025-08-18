@@ -1448,7 +1448,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
               ) : (
                 <>
                   <Send className="h-5 w-5" />
-                  <span>Send</span>
+                  <span>Download and Send</span>
                 </>
               )}
             </button>

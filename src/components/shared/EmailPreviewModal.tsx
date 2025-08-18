@@ -380,8 +380,8 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
               </div>
             </div>
 
-            {/* CC Field */}
-            {emailData.cc && emailData.cc.length > 0 && (
+            {/* CC Field - Show dynamically based on template type */}
+            {(emailData.cc && emailData.cc.length > 0) || editableCc ? (
               <div>
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                   CC:
@@ -403,7 +403,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                       className="flex-1 px-3 py-2 rounded-lg border border-gray-200 h-[42px] flex items-center cursor-pointer hover:bg-gray-50"
                       onClick={() => setIsEditingCc(true)}
                     >
-                      <span className="text-gray-700">{editableCc}</span>
+                      <span className="text-gray-700">{editableCc || 'No CC recipients'}</span>
                     </div>
                   )}
                   <button
@@ -414,7 +414,7 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
                   </button>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Subject Field */}
             <div>

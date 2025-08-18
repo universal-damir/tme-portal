@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
       return attachmentObj;
     });
 
-    // Prepare email options with contact@tme-services.com FROM and user REPLY-TO
+    // Prepare email options with portal@TME-Services.com FROM and user REPLY-TO
     const mailOptions = {
-      from: 'TME Services Portal <contact@tme-services.com>', // Professional company email with display name
+      from: 'TME Services Portal <portal@TME-Services.com>', // Professional company email with display name
       replyTo: session.user.email, // User's email for replies
       to: Array.isArray(to) ? to.join(', ') : to,
       cc: cc ? (Array.isArray(cc) ? cc.join(', ') : cc) : undefined,

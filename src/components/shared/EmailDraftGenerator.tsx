@@ -34,6 +34,7 @@ export interface EmailRecipientData {
   senderDesignation?: string;
   senderPhone?: string;
   senderDepartment?: string;
+  senderEmployeeCode?: string;
 }
 
 // PDF attachment data interface
@@ -341,8 +342,8 @@ export const processEmailTemplate = (template: EmailTemplate, recipients: EmailR
     phoneNumbers += `<br><span style="font-family: Arial, sans-serif; font-size: 10pt;"><span style="color: #243F7B;">M UAE:</span> <span style="color: #666;">${recipients.senderPhone}</span></span>`;
   }
   
-  // Add German department phone if available
-  const departmentPhone = getDepartmentPhone(recipients.senderDepartment);
+  // Add German department phone if available (with special case for Uwe Hohmann)
+  const departmentPhone = getDepartmentPhone(recipients.senderDepartment, recipients.senderEmployeeCode);
   if (departmentPhone) {
     phoneNumbers += `<br><span style="font-family: Arial, sans-serif; font-size: 10pt;"><span style="color: #243F7B;">T GER:</span> <span style="color: #666;">${departmentPhone}</span></span>`;
   }
@@ -472,7 +473,7 @@ export const createEmailDataFromFormData = async (
 
   // Add CC email for specific templates
   const ccEmailsForTemplate = ['COST_OVERVIEW', 'GOLDEN_VISA', 'COMPANY_SERVICES'].includes(templateType) 
-    ? ['newsletter@news.TME-Services.com'] 
+    ? ['setup@TME-Services.com'] 
     : undefined;
 
   const recipients: EmailRecipientData = {
@@ -486,7 +487,8 @@ export const createEmailDataFromFormData = async (
     senderName: userInfo?.full_name || 'TME Services Team', // Use actual user name if available
     senderDesignation: userInfo?.designation || '', // Use actual user designation if available
     senderPhone: userInfo?.phone || '', // Use actual user phone if available
-    senderDepartment: userInfo?.department || '' // Use actual user department if available
+    senderDepartment: userInfo?.department || '', // Use actual user department if available
+    senderEmployeeCode: userInfo?.employee_code || '' // Use actual employee code if available
   };
 
   const template: EmailTemplate = {
