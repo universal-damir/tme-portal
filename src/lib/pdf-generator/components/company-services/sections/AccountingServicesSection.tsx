@@ -51,7 +51,7 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
       {hasMainServices && (
         <>
           <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-            Keeping your financial records accurate and compliant is essential for smooth business operations and compliance in the UAE. At TME Services, we provide {serviceType === 'monthly' ? 'monthly' : ''} financial accounting tailored to the volume of your transactions. Our services include preparing trial balances and P/L (Profit/Loss) statements, providing you with a clear overview of your business performance.
+            Keeping your financial records accurate and compliant is essential for smooth business operations and compliance in the UAE. At TME Services, we provide {serviceType === 'monthly' ? 'monthly' : ''} financial accounting tailored to the volume of your transactions. Our services include preparing trial balances and P/L (Profit/Loss) statements per financial year, providing you with a clear overview of your business performance.
           </Text>
 
           <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
