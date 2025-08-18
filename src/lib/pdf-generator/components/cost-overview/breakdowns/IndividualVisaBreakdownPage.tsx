@@ -5,7 +5,8 @@ import { HeaderComponent, FooterComponent, IntroSection, CompactCostTable } from
 import { 
   calculateAllCosts, 
   calculateIndividualVisaCosts,
-  formatNumber
+  formatNumber,
+  formatSecondaryCurrency
 } from '../../../utils';
 import type { PDFComponentProps, CostItem } from '../../../types';
 import { generateCompanyVisaExplanations } from '../../../utils/visaServiceDescriptions';
@@ -249,7 +250,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
                 textAlign: 'right', 
                 color: 'white' 
               }}>
-                {formatNumber(grandTotal / exchangeRate)}
+                {formatSecondaryCurrency(grandTotal / exchangeRate)}
               </Text>
             </View>
           )}

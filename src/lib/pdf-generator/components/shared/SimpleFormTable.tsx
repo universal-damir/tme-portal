@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from '@react-pdf/renderer';
 import { styles } from '../../styles';
-import { formatNumber } from '../../utils';
+import { formatNumber, formatSecondaryCurrency } from '../../utils';
 import { getBrandingByAuthority } from '../../branding';
 import type { PDFComponentProps } from '../../types';
 
@@ -34,6 +34,7 @@ export const SimpleFormTable: React.FC<SimpleFormTableProps> = ({
 }) => {
   const branding = getBrandingByAuthority(data.authorityInformation.responsibleAuthority);
   const exchangeRate = data.clientDetails?.exchangeRate || 3.67;
+  const secondaryCurrency = data.clientDetails?.secondaryCurrency || 'USD';
 
   // Theme colors based on existing cost table themes
   const themeColors = {
@@ -86,7 +87,7 @@ export const SimpleFormTable: React.FC<SimpleFormTableProps> = ({
                 item.isTotal ? { fontWeight: 'bold', color: colors.border } : {}
               ]}>
                 {item.isCurrency 
-                  ? `AED ${formatNumber(Number(item.value))} (${formatNumber(Number(item.value) / exchangeRate)} USD)`
+                  ? `AED ${formatNumber(Number(item.value))} (${formatSecondaryCurrency(Number(item.value) / exchangeRate)} ${secondaryCurrency})`
                   : item.value
                 }
               </Text>
@@ -104,7 +105,7 @@ export const SimpleFormTable: React.FC<SimpleFormTableProps> = ({
             </View>
             <View style={[styles.tableCell, { flex: 1 }]}>
               <Text style={[styles.tableCellDescription, { textAlign: 'right', fontWeight: 'bold', color: colors.border }]}>
-                AED {formatNumber(totalValue)} ({formatNumber(totalValue / exchangeRate)} USD)
+                AED {formatNumber(totalValue)} ({formatSecondaryCurrency(totalValue / exchangeRate)} ${secondaryCurrency})
               </Text>
             </View>
           </View>

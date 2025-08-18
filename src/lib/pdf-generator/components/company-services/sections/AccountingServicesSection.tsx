@@ -139,12 +139,10 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
         </Text>
       )}
 
-      {/* Annual Services Section - Only render for monthly services */}
+      {/* Annual Services Section - Only for monthly (for quarterly/yearly it's in AnnualAccountingServicesSection) */}
       {serviceType === 'monthly' && (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee) && (
         <View style={{ marginTop: 16 }}>
-          <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8, fontWeight: 'bold' }]}>
-            Annual Accounting Services
-          </Text>
+          <Text style={styles.sectionTitle}>Annual Accounting Services</Text>
           
           {accountingServices.plStatementFee && accountingServices.plStatementFee > 0 && (
             <>
@@ -181,6 +179,29 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
                 Based on our experience, the fee charged by an external local auditor typically ranges between AED 8,000 and AED 10,000. Upon request, we can recommend a trusted auditor we have worked with extensively - one who is familiar with our standards and procedures.
               </Text>
             </>
+          )}
+        </View>
+      )}
+
+      {/* Payroll Services Section - Only for monthly (for quarterly/yearly it's in AnnualAccountingServicesSection) */}
+      {serviceType === 'monthly' && (accountingServices.payrollServices || accountingServices.payrollServicesEnabled) && (
+        <View style={{ marginTop: 16 }}>
+          <Text style={styles.sectionTitle}>Payroll Services</Text>
+          
+          <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
+            Managing employee salaries accurately and on time is essential for maintaining trust and compliance within your organization. We offer reliable payroll services to ensure your staff are paid efficiently and in line with UAE labor regulations.
+          </Text>
+          
+          {accountingServices.payrollServices && accountingServices.payrollSetupFee && accountingServices.payrollSetupFee > 0 && (
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
+              For a one-time company payroll setup, our service fee is AED {formatCurrency(accountingServices.payrollSetupFee)} {formatSecondaryCurrency(accountingServices.payrollSetupFee, exchangeRate, secondaryCurrency)}.
+            </Text>
+          )}
+          
+          {accountingServices.payrollServicesEnabled && accountingServices.payrollServicesPerPersonFee && accountingServices.payrollServicesPerPersonFee > 0 && (
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
+              Ongoing payroll management, including the preparation of monthly salary slips, is charged at AED {formatCurrency(accountingServices.payrollServicesPerPersonFee)} {formatSecondaryCurrency(accountingServices.payrollServicesPerPersonFee, exchangeRate, secondaryCurrency)} per employee per month.
+            </Text>
           )}
         </View>
       )}

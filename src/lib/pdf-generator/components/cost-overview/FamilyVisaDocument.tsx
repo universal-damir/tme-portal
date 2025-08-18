@@ -9,7 +9,8 @@ import {
   generateChildVisaServiceDescriptions,
   generateNumberedVisaServices,
   formatVisaServiceDescription,
-  formatNumber
+  formatNumber,
+  formatSecondaryCurrency
 } from '../../utils';
 import type { PDFComponentProps, CostItem } from '../../types';
 
@@ -439,7 +440,7 @@ ${content}`;
                     {formatNumber(childVisaTotal)}
                   </Text>
                   <Text style={{ flex: 1, paddingRight: 6, fontSize: 11, fontWeight: 'bold', textAlign: 'right', color: 'white' }}>
-                    {formatNumber(childVisaTotal / exchangeRate)}
+                    {formatSecondaryCurrency(childVisaTotal / exchangeRate)}
                   </Text>
                 </View>
               )}
@@ -567,7 +568,7 @@ ${content}`;
                     {formatNumber(familyVisaTotal)}
                   </Text>
                   <Text style={{ flex: 1, paddingRight: 6, fontSize: 11, fontWeight: 'bold', textAlign: 'right', color: 'white' }}>
-                    {formatNumber(familyVisaTotal / exchangeRate)}
+                    {formatSecondaryCurrency(familyVisaTotal / exchangeRate)}
                   </Text>
                 </View>
               )}

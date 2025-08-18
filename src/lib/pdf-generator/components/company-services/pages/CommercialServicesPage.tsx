@@ -30,14 +30,12 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
 
   // Check if we have any commercial services to display
   const hasCommercialServices = accountingServices?.commercialServices && accountingServices.commercialServicesFee && accountingServices.commercialServicesFee > 0;
-  const hasPayrollServices = (accountingServices?.payrollServices && accountingServices.payrollSetupFee && accountingServices.payrollSetupFee > 0) || 
-                           (accountingServices?.payrollServicesEnabled && accountingServices.payrollServicesPerPersonFee && accountingServices.payrollServicesPerPersonFee > 0);
   const hasBankAccountServices = (accountingServices?.personalUAEBank && accountingServices.personalUAEBankFee && accountingServices.personalUAEBankFee > 0) ||
                                (accountingServices?.digitalBankWIO && accountingServices.digitalBankWIOFee && accountingServices.digitalBankWIOFee > 0) ||
                                (accountingServices?.traditionalUAEBank && accountingServices.traditionalUAEBankFee && accountingServices.traditionalUAEBankFee > 0);
 
   // Don't render if no services are enabled
-  if (!hasCommercialServices && !hasPayrollServices && !hasBankAccountServices) {
+  if (!hasCommercialServices && !hasBankAccountServices) {
     return null;
   }
 
@@ -58,30 +56,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           </View>
         )}
 
-        {/* Payroll Services Section */}
-        {hasPayrollServices && (
-          <View style={{ marginBottom: 16 }}>
-            <Text style={styles.sectionTitle}>Payroll Services</Text>
-            
-            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
-              Managing employee salaries accurately and on time is essential for maintaining trust and compliance within your organization. We offer reliable payroll services to ensure your staff are paid efficiently and in line with UAE labor regulations.
-            </Text>
-            
-            {accountingServices.payrollServices && accountingServices.payrollSetupFee && accountingServices.payrollSetupFee > 0 && (
-              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                For a one-time company payroll setup, our service fee is AED {formatCurrency(accountingServices.payrollSetupFee)} {formatSecondaryCurrency(accountingServices.payrollSetupFee, exchangeRate, secondaryCurrency)}.
-              </Text>
-            )}
-            
-            {accountingServices.payrollServicesEnabled && accountingServices.payrollServicesPerPersonFee && accountingServices.payrollServicesPerPersonFee > 0 && (
-              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                Ongoing payroll management, including the preparation of monthly salary slips, is charged at AED {formatCurrency(accountingServices.payrollServicesPerPersonFee)} {formatSecondaryCurrency(accountingServices.payrollServicesPerPersonFee, exchangeRate, secondaryCurrency)} per employee per month.
-              </Text>
-            )}
-          </View>
-        )}
-
-        {/* Bank Account Setup Services Section */}
+{/* Bank Account Setup Services Section */}
         {hasBankAccountServices && (
           <View style={{ marginBottom: 16 }}>
             <Text style={styles.sectionTitle}>Bank Account Setup Services</Text>

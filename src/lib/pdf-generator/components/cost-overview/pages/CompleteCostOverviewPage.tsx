@@ -18,7 +18,7 @@ import {
   formatYearlyRunningServiceDescription,
   generateAdditionalServiceDescriptions
 } from '../../../utils';
-import { formatNumber } from '../../../utils';
+import { formatNumber, formatSecondaryCurrency } from '../../../utils';
 import type { PDFComponentProps, CostItem } from '../../../types';
 
 // Type definitions
@@ -508,7 +508,7 @@ export const CompleteCostOverviewPage: React.FC<PDFComponentProps> = ({ data }) 
                 ? dynamicTableStyles.tableCellAmountRed
                 : dynamicTableStyles.tableCellAmount
             }>
-              {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatNumber(item.secondaryAmount)}
+              {(item.isReduction || item.description.startsWith('TME Services Professional Fee Reduction')) ? '-' : ''}{formatSecondaryCurrency(item.secondaryAmount)}
             </Text>
           </View>
         ))}
@@ -518,7 +518,7 @@ export const CompleteCostOverviewPage: React.FC<PDFComponentProps> = ({ data }) 
           <View style={themeStyles.totalRow}>
             <Text style={dynamicTableStyles.totalLabel}>{totalLabel}</Text>
             <Text style={dynamicTableStyles.totalAmount}>{formatNumber(total)}</Text>
-            <Text style={dynamicTableStyles.totalAmount}>{formatNumber(secondaryTotal)}</Text>
+            <Text style={dynamicTableStyles.totalAmount}>{formatSecondaryCurrency(secondaryTotal)}</Text>
           </View>
         )}
       </View>

@@ -115,7 +115,7 @@ export const AccountingPricingTable: React.FC<{
           {/* Tier Header */}
           <View style={{
             backgroundColor: '#f3f4f6',
-            padding: 6,
+            padding: 4,
             borderBottom: '1px solid #e5e7eb'
           }}>
             <Text style={{
@@ -123,7 +123,7 @@ export const AccountingPricingTable: React.FC<{
               fontWeight: 'bold',
               color: '#374151',
               textAlign: 'center',
-              marginBottom: 8
+              marginBottom: 4
             }}>
               {group.transactionVolume}
             </Text>
@@ -132,7 +132,7 @@ export const AccountingPricingTable: React.FC<{
             <View style={{
               flexDirection: 'row',
               backgroundColor: '#243F7B',
-              padding: 6,
+              padding: 4,
               borderRadius: 4
             }}>
               <Text style={{
@@ -181,7 +181,7 @@ export const AccountingPricingTable: React.FC<{
           {group.rows.map((row, rowIndex) => (
             <View key={rowIndex} style={{
               flexDirection: 'row',
-              padding: 4,
+              padding: 3,
               borderBottom: rowIndex < group.rows.length - 1 ? '1px solid #f3f4f6' : 'none',
               backgroundColor: rowIndex % 2 === 0 ? '#ffffff' : '#f9fafb'
             }}>
@@ -191,7 +191,7 @@ export const AccountingPricingTable: React.FC<{
                 color: '#374151',
                 textAlign: 'center',
                 borderRight: '1px solid #e5e7eb',
-                paddingVertical: 4
+                paddingVertical: 3
               }}>
                 {row.paymentFrequency}
               </Text>
@@ -201,8 +201,8 @@ export const AccountingPricingTable: React.FC<{
                 color: '#374151',
                 textAlign: 'right',
                 borderRight: '1px solid #e5e7eb',
-                paddingVertical: 4,
-                paddingRight: 6
+                paddingVertical: 3,
+                paddingRight: 4
               }}>
                 AED {formatCurrency(row.costPerPeriod)}<Text style={{ color: '#9ca3af', fontSize: 7 }}> ({secondaryCurrency} {Math.round(row.costPerPeriod / exchangeRate).toLocaleString()})</Text>
               </Text>
@@ -212,8 +212,8 @@ export const AccountingPricingTable: React.FC<{
                 color: '#374151',
                 textAlign: 'right',
                 borderRight: '1px solid #e5e7eb',
-                paddingVertical: 4,
-                paddingRight: 6
+                paddingVertical: 3,
+                paddingRight: 4
               }}>
                 AED {formatCurrency(row.annualTotal)}<Text style={{ color: '#9ca3af', fontSize: 7 }}> ({secondaryCurrency} {Math.round(row.annualTotal / exchangeRate).toLocaleString()})</Text>
               </Text>
@@ -223,8 +223,8 @@ export const AccountingPricingTable: React.FC<{
                 color: row.annualSavings === '-' ? '#374151' : '#059669',
                 textAlign: 'right',
                 fontWeight: row.annualSavings === '-' ? 'normal' : 'bold',
-                paddingVertical: 4,
-                paddingRight: 6
+                paddingVertical: 3,
+                paddingRight: 4
               }}>
                 {row.annualSavings === '-' ? '-' : <>AED {formatCurrency(row.annualSavingsAmount)}<Text style={{ color: '#9ca3af', fontSize: 7 }}> ({secondaryCurrency} {Math.round(row.annualSavingsAmount / exchangeRate).toLocaleString()})</Text></>}
               </Text>

@@ -79,6 +79,29 @@ export const AnnualAccountingServicesSection: React.FC<PDFComponentProps> = ({ d
           </Text>
         </>
       )}
+
+      {/* Payroll Services Section */}
+      {(accountingServices.payrollServices || accountingServices.payrollServicesEnabled) && (
+        <View style={{ marginTop: 16 }}>
+          <Text style={styles.sectionTitle}>Payroll Services</Text>
+          
+          <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 8 }]}>
+            Managing employee salaries accurately and on time is essential for maintaining trust and compliance within your organization. We offer reliable payroll services to ensure your staff are paid efficiently and in line with UAE labor regulations.
+          </Text>
+          
+          {accountingServices.payrollServices && accountingServices.payrollSetupFee && accountingServices.payrollSetupFee > 0 && (
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
+              For a one-time company payroll setup, our service fee is AED {formatCurrency(accountingServices.payrollSetupFee)} {formatSecondaryCurrency(accountingServices.payrollSetupFee, exchangeRate, secondaryCurrency)}.
+            </Text>
+          )}
+          
+          {accountingServices.payrollServicesEnabled && accountingServices.payrollServicesPerPersonFee && accountingServices.payrollServicesPerPersonFee > 0 && (
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
+              Ongoing payroll management, including the preparation of monthly salary slips, is charged at AED {formatCurrency(accountingServices.payrollServicesPerPersonFee)} {formatSecondaryCurrency(accountingServices.payrollServicesPerPersonFee, exchangeRate, secondaryCurrency)} per employee per month.
+            </Text>
+          )}
+        </View>
+      )}
     </View>
   );
 }; 

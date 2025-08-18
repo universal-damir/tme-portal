@@ -126,6 +126,6 @@ export const ANNUAL_SERVICES = [
     key: 'auditReportFee',
     label: 'Audit Guiding Fee (AED)',
     placeholder: FORMATTED_DEFAULT_FEES.auditReport,
-    description: 'If an audit report is requested by the authority or based on shareholder request. If accounting is not performed by us or the audit is done by one of the BIG 4, the service fee for audit guiding is AED 10,428.',
+    description: 'If an audit report is requested by the authority or based on shareholder request.',
   },
 ] as const; 
