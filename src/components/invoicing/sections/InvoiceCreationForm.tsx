@@ -20,11 +20,13 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
-  Trash2
+  Trash2,
+  Eye
 } from 'lucide-react';
 import { InvoiceClient, Invoice, InvoiceFormData, ServiceCategory } from '@/types/invoicing';
 import { InvoiceNumberGenerator } from '@/lib/invoicing/invoice-number-generator';
 import { toast } from 'sonner';
+import { InvoicePreviewModal } from './InvoicePreviewModal';
 
 interface InvoiceCreationFormProps {
   preselectedClient?: InvoiceClient | null;
@@ -75,7 +77,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   onInvoiceCreated,
   onCancel
 }) => {
-  const [selectedClient, setSelectedClient] = useState<InvoiceClient | null>(preselectedClient);
+  const [selectedClient, setSelectedClient] = useState<InvoiceClient | null>(preselectedClient || null);
   const [clients, setClients] = useState<InvoiceClient[]>([]);
   const [filteredClients, setFilteredClients] = useState<InvoiceClient[]>([]);
   const [clientSearchTerm, setClientSearchTerm] = useState('');
@@ -100,6 +102,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [previewInvoice, setPreviewInvoice] = useState<any>(null);
 
   useEffect(() => {
     fetchClients();
@@ -284,6 +287,56 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
       currency: 'AED',
       minimumFractionDigits: 2
     }).format(amount);
+  };
+
+  const handlePreview = () => {
+    if (!selectedClient) {
+      toast.error('Please select a client');
+      return;
+    }
+
+    if (serviceLines.length === 0) {
+      toast.error('Please add at least one service item');
+      return;
+    }
+
+    // Create preview invoice object
+    const previewData = {
+      invoiceNumber: generateInvoiceNumber(),
+      client: selectedClient,
+      invoiceDate,
+      dueDate,
+      notes,
+      internalNotes,
+      subtotal,
+      vatRate: 5,
+      vatAmount,
+      totalAmount,
+      paidAmount: 0,
+      balanceDue: totalAmount,
+      status: 'draft',
+      sections: serviceLines.reduce((acc: any[], line) => {
+        let section = acc.find(s => s.name === line.category);
+        if (!section) {
+          section = {
+            name: line.category,
+            items: []
+          };
+          acc.push(section);
+        }
+        section.items.push({
+          description: line.description,
+          quantity: line.quantity,
+          unit: line.unit || '',
+          unit_price: line.unitPrice,
+          net_amount: line.netAmount
+        });
+        return acc;
+      }, [])
+    };
+
+    setPreviewInvoice(previewData);
+    setShowPreview(true);
   };
 
   return (
@@ -637,6 +690,17 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
         </button>
         <div className="flex items-center space-x-4">
           <motion.button
+            onClick={handlePreview}
+            disabled={!selectedClient || serviceLines.length === 0}
+            className="flex items-center space-x-2 px-6 py-2 rounded-lg border-2 font-medium disabled:opacity-50"
+            style={{ borderColor: '#D2BC99', color: '#D2BC99' }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Eye className="w-4 h-4" />
+            <span>Preview</span>
+          </motion.button>
+          <motion.button
             onClick={() => handleSubmit(false)}
             disabled={isSubmitting || !selectedClient || serviceLines.length === 0}
             className="flex items-center space-x-2 px-6 py-2 rounded-lg border-2 font-medium disabled:opacity-50"
@@ -660,6 +724,13 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
           </motion.button>
         </div>
       </motion.div>
+
+      {/* Invoice Preview Modal */}
+      <InvoicePreviewModal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        invoice={previewInvoice}
+      />
     </div>
   );
 };
