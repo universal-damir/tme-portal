@@ -26,7 +26,7 @@ import {
 import { InvoiceClient, Invoice, InvoiceFormData, ServiceCategory } from '@/types/invoicing';
 import { InvoiceNumberGenerator } from '@/lib/invoicing/invoice-number-generator';
 import { toast } from 'sonner';
-import { InvoicePreviewModal } from './InvoicePreviewModal';
+import { TMEDatePicker } from '@/components/common/TMEDatePicker';
 
 interface InvoiceCreationFormProps {
   preselectedClient?: InvoiceClient | null;
@@ -101,8 +101,6 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewInvoice, setPreviewInvoice] = useState<any>(null);
 
   useEffect(() => {
     fetchClients();
@@ -271,7 +269,17 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
         toast.success(`Invoice ${invoice.invoiceNumber} created successfully`);
         onInvoiceCreated(invoice);
       } else {
-        throw new Error('Failed to create invoice');
+        // Get detailed error information
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Invoice creation failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          requestData: invoiceData
+        });
+        
+        toast.error(errorData.error || `Failed to create invoice (${response.status})`);
+        throw new Error(errorData.error || 'Failed to create invoice');
       }
     } catch (error) {
       console.error('Error creating invoice:', error);
@@ -289,7 +297,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
     }).format(amount);
   };
 
-  const handlePreview = () => {
+  const handlePreview = async () => {
     if (!selectedClient) {
       toast.error('Please select a client');
       return;
@@ -300,43 +308,64 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
       return;
     }
 
-    // Create preview invoice object
-    const previewData = {
-      invoiceNumber: generateInvoiceNumber(),
-      client: selectedClient,
-      invoiceDate,
-      dueDate,
-      notes,
-      internalNotes,
-      subtotal,
-      vatRate: 5,
-      vatAmount,
-      totalAmount,
-      paidAmount: 0,
-      balanceDue: totalAmount,
-      status: 'draft',
-      sections: serviceLines.reduce((acc: any[], line) => {
-        let section = acc.find(s => s.name === line.category);
-        if (!section) {
-          section = {
-            name: line.category,
-            items: []
-          };
-          acc.push(section);
-        }
-        section.items.push({
-          description: line.description,
-          quantity: line.quantity,
-          unit: line.unit || '',
-          unit_price: line.unitPrice,
-          net_amount: line.netAmount
-        });
-        return acc;
-      }, [])
-    };
+    try {
+      // Create preview invoice object
+      const previewData: Invoice = {
+        invoiceNumber: generateInvoiceNumber(),
+        clientId: selectedClient.id!,
+        client: selectedClient,
+        invoiceDate,
+        dueDate,
+        status: 'draft' as const,
+        subtotal,
+        vatRate: 5,
+        vatAmount,
+        totalAmount,
+        paidAmount: 0,
+        balanceDue: totalAmount,
+        isRecurring: false,
+        notes,
+        internalNotes,
+        sections: serviceLines.reduce((acc: any[], line) => {
+          let section = acc.find(s => s.name === line.category);
+          if (!section) {
+            section = {
+              name: line.category,
+              items: []
+            };
+            acc.push(section);
+          }
+          section.items.push({
+            description: line.description,
+            quantity: line.quantity,
+            unit: line.unit || '',
+            unit_price: line.unitPrice,
+            net_amount: line.netAmount
+          });
+          return acc;
+        }, [])
+      };
 
-    setPreviewInvoice(previewData);
-    setShowPreview(true);
+      // Generate PDF and open in new window (like Golden Visa)
+      const { InvoicePDFGenerator } = await import('@/lib/invoicing/invoice-pdf-generator');
+      const { blob } = await InvoicePDFGenerator.generatePDFWithFilename(previewData);
+      
+      // Open PDF in new tab for preview
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      
+      // Clean up the URL after a delay
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+
+      toast.success('Invoice Preview Generated', {
+        description: 'PDF preview opened in new tab'
+      });
+    } catch (error) {
+      console.error('Error generating invoice preview:', error);
+      toast.error('Failed to generate preview - please try again');
+    }
   };
 
   return (
@@ -436,32 +465,17 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
 
           {/* Invoice Dates */}
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                Invoice Date *
-              </label>
-              <input
-                type="date"
-                value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                Due Date
-              </label>
-              <input
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              />
-            </div>
+            <TMEDatePicker
+              label="Invoice Date"
+              value={invoiceDate}
+              onChange={setInvoiceDate}
+              required
+            />
+            <TMEDatePicker
+              label="Due Date"
+              value={dueDate}
+              onChange={setDueDate}
+            />
           </div>
         </div>
       </motion.div>
@@ -725,12 +739,6 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
         </div>
       </motion.div>
 
-      {/* Invoice Preview Modal */}
-      <InvoicePreviewModal
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-        invoice={previewInvoice}
-      />
     </div>
   );
 };

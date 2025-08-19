@@ -133,8 +133,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(invoice, { status: 201 });
   } catch (error) {
     console.error('Error creating invoice:', error);
+    console.error('Request body was:', body);
     
     if (error instanceof z.ZodError) {
+      console.error('Validation errors:', error.errors);
       return NextResponse.json(
         { error: 'Invalid request data', details: error.errors },
         { status: 400 }
@@ -142,7 +144,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'Failed to create invoice' },
+      { 
+        error: 'Failed to create invoice',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
