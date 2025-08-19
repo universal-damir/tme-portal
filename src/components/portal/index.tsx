@@ -20,6 +20,9 @@ const TaxationTab = React.lazy(() => import('./tabs/TaxationTab'))
 // Preload CIT Return Letters to avoid double-click issues
 import CITReturnLettersTab from './tabs/CITReturnLettersTab'
 
+// Conditionally load Invoicing tab if feature is enabled
+const InvoicingTab = React.lazy(() => import('./tabs/InvoicingTab'))
+
 // Enhanced skeleton loading component for better UX
 const TabContentSkeleton = () => (
   <div className="space-y-8 p-6">
@@ -132,6 +135,12 @@ export default function TMEPortal() {
         return <TaxationTab />
       case 'cit-return-letters':
         return <CITReturnLettersTab />
+      case 'invoicing':
+        // Feature flag check - only show if enabled
+        if (process.env.NEXT_PUBLIC_FEATURE_INVOICING === 'true') {
+          return <InvoicingTab />
+        }
+        return <ProfileTab />
       default:
         return <ProfileTab />
     }
