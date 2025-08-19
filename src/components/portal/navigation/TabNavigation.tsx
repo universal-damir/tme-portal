@@ -40,7 +40,14 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
     },
   ];
 
-  const tabs = allTabs;
+  // Conditionally add Invoicing tab if feature is enabled
+  const tabs = process.env.NEXT_PUBLIC_FEATURE_INVOICING === 'true' 
+    ? [...allTabs, {
+        id: 'invoicing' as TabId,
+        label: 'Invoicing',
+        description: 'Invoice management and billing',
+      }]
+    : allTabs;
 
   return (
     <div className="border-b border-gray-200 bg-white rounded-t-lg shadow-sm">
