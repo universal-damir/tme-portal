@@ -107,10 +107,11 @@ export const EMAIL_TEMPLATES = {
     greeting: 'Hello {firstName},',
     previewText: 'Your customized company services proposal is ready - tailored for your UAE business needs',
     bodyContent: [
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Attached is a customized overview of our services and pricing, tailored to support your business setup and compliance needs in the UAE.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The proposal outlines the areas where we can assist and gives you a clear picture of how we can add value to your operations.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please feel free to reach out if you have any questions or would like to proceed.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Regards</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached a customized overview of our services and pricing, tailored to support your business setup and compliance needs in the UAE.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Our offer details the services we provide and highlights how we can contribute to the success of your operations.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Should you have any questions or require further information after reviewing the offer, please feel free to contact us.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">We look forward to your feedback and the opportunity to work with you.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Best regards,</span>',
       '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
     ],
     includeColoredText: true,
@@ -174,8 +175,9 @@ export const EMAIL_TEMPLATES_DE = {
     previewText: 'Ihr maßgeschneidertes Unternehmensservice-Angebot ist bereit - zugeschnitten auf Ihre UAE Geschäftsbedürfnisse',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie eine maßgeschneiderte Übersicht unserer Services und Preise, die darauf ausgerichtet sind, Ihre Unternehmensgründung und Compliance-Anforderungen in den VAE zu unterstützen.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Das Angebot beschreibt die Bereiche, in denen wir Sie unterstützen können und gibt Ihnen einen klaren Überblick darüber, wie wir Mehrwert für Ihre Geschäftstätigkeit schaffen können.</span>',
-      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte zögern Sie nicht, sich zu melden, falls Sie Fragen haben oder fortfahren möchten.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Unser Angebot beschreibt die Services, die wir bereitstellen und zeigt auf, wie wir zum Erfolg Ihrer Geschäftstätigkeit beitragen können.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Sollten Sie Fragen haben oder weitere Informationen benötigen, nachdem Sie das Angebot geprüft haben, können Sie sich gerne an uns wenden.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Wir freuen uns auf Ihr Feedback und auf die Gelegenheit, mit Ihnen zusammenzuarbeiten.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
       '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
     ],
