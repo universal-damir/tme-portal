@@ -1,12 +1,13 @@
 import React from 'react';
-import { Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer';
+import { Document, Page, View, Text, StyleSheet, Image } from '@react-pdf/renderer';
 import { Invoice } from '@/types/invoicing';
-import { globalStyles } from '../../styles';
+import { layoutStyles } from '../../styles';
+import { getBrandingById } from '../../branding';
 
 // Invoice-specific styles
 const styles = StyleSheet.create({
   page: {
-    ...globalStyles.page,
+    ...layoutStyles.page,
     padding: 30,
   },
   header: {
@@ -57,7 +58,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#243F7B',
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -117,7 +117,6 @@ const styles = StyleSheet.create({
   sectionName: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#243F7B',
     flex: 1,
   },
   totalsSection: {
@@ -146,16 +145,13 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginTop: 8,
     borderTopWidth: 2,
-    borderTopColor: '#243F7B',
   },
   grandTotalLabel: {
     fontSize: 14,
-    color: '#243F7B',
     fontWeight: 'bold',
   },
   grandTotalValue: {
     fontSize: 16,
-    color: '#243F7B',
     fontWeight: 'bold',
   },
   footer: {
@@ -173,7 +169,6 @@ const styles = StyleSheet.create({
   paymentTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#243F7B',
     marginBottom: 8,
   },
   paymentDetails: {
@@ -188,7 +183,6 @@ const styles = StyleSheet.create({
   notesTitle: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: '#243F7B',
     marginBottom: 8,
   },
   notesText: {
@@ -225,77 +219,69 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice }) => 
     });
   };
 
-  const getCompanyDetails = (company: string) => {
-    switch (company) {
-      case 'DET':
-        return {
-          name: 'Dynamic Experts Trading LLC',
-          address: 'Office 123, Business Center\nDubai, United Arab Emirates',
-          trn: 'TRN: 100000000000003',
-          phone: '+971-4-123-4567',
-          email: 'info@dettrading.ae'
-        };
+  // Get branding configuration based on issuing company
+  const getBrandingForInvoice = (issuingCompany: string) => {
+    // Map issuing company codes to branding configurations
+    switch (issuingCompany?.toUpperCase()) {
       case 'FZCO':
-        return {
-          name: 'TME Professional Services FZCO',
-          address: 'Free Zone Office 456\nDubai, United Arab Emirates', 
-          trn: 'TRN: 100000000000003',
-          phone: '+971-4-234-5678',
-          email: 'info@tmepro.ae'
-        };
+      case 'IFZA':
+        return getBrandingById('tme-fzco');
+      case 'DET':
       case 'DMCC':
-        return {
-          name: 'TME Global Services DMCC',
-          address: 'DMCC Business Centre\nDubai, United Arab Emirates',
-          trn: 'TRN: 100000000000003',
-          phone: '+971-4-345-6789',
-          email: 'info@tmeglobal.ae'
-        };
+      case 'MGT':
+      case 'MANAGEMENT':
+        return getBrandingById('management-consultants');
       default:
-        return {
-          name: 'TME Professional Services',
-          address: 'Dubai, United Arab Emirates',
-          trn: 'TRN: 100000000000003',
-          phone: '+971-4-123-4567',
-          email: 'info@tmepro.ae'
-        };
+        // Default to FZCO if not specified
+        return getBrandingById('tme-fzco');
     }
   };
 
-  const companyDetails = getCompanyDetails(invoice.client?.issuingCompany || 'FZCO');
+  const branding = getBrandingForInvoice(invoice.client?.issuingCompany || 'FZCO');
 
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
+        {/* Clean Professional Header */}
         <View style={styles.header}>
-          <View>
-            <Text style={[styles.companyInfo, { fontSize: 14, fontWeight: 'bold', color: '#243F7B' }]}>
-              {companyDetails.name}
-            </Text>
-            <Text style={styles.companyInfo}>
-              {companyDetails.address}
-            </Text>
-            <Text style={styles.companyInfo}>
-              {companyDetails.trn}
-            </Text>
-            <Text style={styles.companyInfo}>
-              Phone: {companyDetails.phone}
-            </Text>
-            <Text style={styles.companyInfo}>
-              Email: {companyDetails.email}
-            </Text>
-          </View>
-          <View>
-            <Text style={styles.invoiceTitle}>INVOICE</Text>
-            <Text style={styles.invoiceNumber}>{invoice.invoiceNumber}</Text>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            {/* Company Info */}
+            <View style={{ flex: 1 }}>
+              <Text style={{ 
+                fontSize: 16, 
+                fontWeight: 'bold', 
+                color: branding.colors.primary, 
+                marginBottom: 6 
+              }}>
+                {branding.header.companyName}
+              </Text>
+              <Text style={{ fontSize: 10, color: branding.colors.secondary, marginBottom: 2 }}>
+                ({branding.header.citTrn} | {branding.header.vatTrn})
+              </Text>
+              <Text style={{ fontSize: 10, color: branding.colors.secondary, marginBottom: 2 }}>
+                {branding.header.poBox} | {branding.header.location}
+              </Text>
+              <Text style={{ fontSize: 10, color: branding.colors.secondary }}>
+                T {branding.header.phone} | {branding.header.email} | {branding.header.website}
+              </Text>
+            </View>
+            
+            {/* Invoice Title */}
+            <View style={{ alignItems: 'flex-end' }}>
+              <Text style={{ fontSize: 32, fontWeight: 'bold', color: branding.colors.primary }}>
+                INVOICE
+              </Text>
+              <Text style={{ fontSize: 16, fontWeight: 'bold', color: branding.colors.primary, marginTop: 4 }}>
+                {invoice.invoiceNumber}
+              </Text>
+            </View>
           </View>
         </View>
 
         {/* Invoice and Client Details */}
         <View style={styles.invoiceDetails}>
           <View style={styles.clientInfo}>
-            <Text style={styles.sectionTitle}>Bill To:</Text>
+            <Text style={[styles.sectionTitle, { color: branding.colors.primary }]}>Bill To:</Text>
             <Text style={[styles.detailValue, { fontSize: 12, fontWeight: 'bold', marginBottom: 5 }]}>
               {invoice.client?.clientName}
             </Text>
@@ -312,7 +298,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice }) => 
             </Text>
           </View>
           <View style={styles.invoiceInfo}>
-            <Text style={styles.sectionTitle}>Invoice Details:</Text>
+            <Text style={[styles.sectionTitle, { color: branding.colors.primary }]}>Invoice Details:</Text>
             <View style={styles.detailRow}>
               <Text style={styles.detailLabel}>Invoice Date:</Text>
               <Text style={styles.detailValue}>{formatDate(invoice.invoiceDate)}</Text>
@@ -352,7 +338,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice }) => 
             <React.Fragment key={sectionIndex}>
               {/* Section Header */}
               <View style={styles.sectionRow}>
-                <Text style={styles.sectionName}>{section.name}</Text>
+                <Text style={[styles.sectionName, { color: branding.colors.primary }]}>{section.name}</Text>
               </View>
               
               {/* Section Items */}
@@ -387,16 +373,18 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice }) => 
             <Text style={styles.totalLabel}>VAT ({invoice.vatRate}%):</Text>
             <Text style={styles.totalValue}>{formatCurrency(invoice.vatAmount)}</Text>
           </View>
-          <View style={styles.grandTotalRow}>
-            <Text style={styles.grandTotalLabel}>Total Amount:</Text>
-            <Text style={styles.grandTotalValue}>{formatCurrency(invoice.totalAmount)}</Text>
+          <View style={[styles.grandTotalRow, { borderTopColor: branding.colors.primary }]}>
+            <Text style={[styles.grandTotalLabel, { color: branding.colors.primary }]}>Total Amount:</Text>
+            <Text style={[styles.grandTotalValue, { color: branding.colors.primary }]}>
+              {formatCurrency(invoice.totalAmount)}
+            </Text>
           </View>
         </View>
 
         {/* Notes */}
         {invoice.notes && (
           <View style={styles.notes}>
-            <Text style={styles.notesTitle}>Notes:</Text>
+            <Text style={[styles.notesTitle, { color: branding.colors.primary }]}>Notes:</Text>
             <Text style={styles.notesText}>{invoice.notes}</Text>
           </View>
         )}
@@ -405,10 +393,10 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice }) => 
         <View style={styles.footer}>
           {/* Payment Information */}
           <View style={styles.paymentInfo}>
-            <Text style={styles.paymentTitle}>Payment Information</Text>
+            <Text style={[styles.paymentTitle, { color: branding.colors.primary }]}>Payment Information</Text>
             <Text style={styles.paymentDetails}>
               Bank: Emirates NBD Bank{'\n'}
-              Account Name: {companyDetails.name}{'\n'}
+              Account Name: {branding.header.companyName}{'\n'}
               Account Number: 1234567890{'\n'}
               IBAN: AE070260001234567890{'\n'}
               Swift Code: EBILAEAD{'\n'}
@@ -419,7 +407,7 @@ export const InvoiceDocument: React.FC<InvoiceDocumentProps> = ({ invoice }) => 
 
           <Text style={styles.footerText}>
             This invoice is generated electronically and is valid without signature.{'\n'}
-            Thank you for your business with TME Professional Services.
+            Thank you for your business with {branding.header.companyName}.
           </Text>
         </View>
       </Page>

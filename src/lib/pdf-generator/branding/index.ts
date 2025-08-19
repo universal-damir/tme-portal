@@ -1,16 +1,19 @@
 // PDF Branding System - Central exports and utilities
 export { TME_FZCO_CONFIG } from './TME_FZCO_CONFIG';
 export { MANAGEMENT_CONSULTANTS_CONFIG } from './MANAGEMENT_CONSULTANTS_CONFIG';
+export { DMCC_CONFIG } from './DMCC_CONFIG';
 export type { BrandingConfig } from './TME_FZCO_CONFIG';
 
 import { TME_FZCO_CONFIG } from './TME_FZCO_CONFIG';
 import { MANAGEMENT_CONSULTANTS_CONFIG } from './MANAGEMENT_CONSULTANTS_CONFIG';
+import { DMCC_CONFIG } from './DMCC_CONFIG';
 import type { BrandingConfig } from './TME_FZCO_CONFIG';
 
 // Registry of all available branding configurations
 export const BRANDING_CONFIGS: BrandingConfig[] = [
   TME_FZCO_CONFIG,
-  MANAGEMENT_CONSULTANTS_CONFIG
+  MANAGEMENT_CONSULTANTS_CONFIG,
+  DMCC_CONFIG
 ];
 
 // Get branding configuration by authority
@@ -25,7 +28,7 @@ export const getBrandingByAuthority = (authority: string): BrandingConfig => {
 };
 
 // Get branding configuration by ID
-export const getBrandingById = (id: 'tme-fzco' | 'management-consultants'): BrandingConfig => {
+export const getBrandingById = (id: 'tme-fzco' | 'management-consultants' | 'dmcc'): BrandingConfig => {
   const config = BRANDING_CONFIGS.find(brand => brand.id === id);
   return config || TME_FZCO_CONFIG;
 };

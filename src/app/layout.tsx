@@ -5,7 +5,11 @@ import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { ClientProvider } from '@/components/providers/ClientProvider';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ 
+  subsets: ['latin'],
+  display: 'swap', // Improves loading performance
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+});
 
 export const metadata: Metadata = {
   title: 'TME Portal',

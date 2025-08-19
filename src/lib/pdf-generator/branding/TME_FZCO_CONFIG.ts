@@ -2,7 +2,7 @@
 // Used for IFZA (International Free Zone Authority) documents
 
 export interface BrandingConfig {
-  id: 'tme-fzco' | 'management-consultants';
+  id: 'tme-fzco' | 'management-consultants' | 'dmcc';
   companyName: string;
   legalName: string;
   logo: string;

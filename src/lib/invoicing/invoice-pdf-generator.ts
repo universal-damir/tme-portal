@@ -6,7 +6,7 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { Invoice } from '@/types/invoicing';
-import { InvoiceDocument } from '@/lib/pdf-generator/components/invoicing';
+import { NewInvoiceDocument } from '@/lib/pdf-generator/components/invoicing';
 
 export class InvoicePDFGenerator {
   /**
@@ -27,8 +27,8 @@ export class InvoicePDFGenerator {
         throw new Error('Invoice must have at least one section with items');
       }
 
-      // Create PDF document
-      const doc = React.createElement(InvoiceDocument, { invoice }) as any;
+      // Create PDF document using new architecture
+      const doc = React.createElement(NewInvoiceDocument, { invoice }) as any;
       const asPdf = pdf(doc);
       
       return await asPdf.toBlob();

@@ -2,19 +2,25 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Download, FileText } from 'lucide-react';
+import { X, Download, FileText, Save, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface InvoicePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   invoice: any; // Preview invoice data
+  onCreateDraft?: () => void;
+  onSubmitForApproval?: () => void;
+  isCreating?: boolean;
 }
 
 export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
   isOpen,
   onClose,
-  invoice
+  invoice,
+  onCreateDraft,
+  onSubmitForApproval,
+  isCreating = false
 }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-AE', {
@@ -61,9 +67,33 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
     }
   };
 
-  const handleGeneratePreviewPDF = () => {
-    // TODO: Implement preview PDF generation
-    toast.info('PDF generation for preview is not yet implemented');
+  const handleGeneratePreviewPDF = async () => {
+    if (!invoice) {
+      toast.error('No invoice data available');
+      return;
+    }
+
+    try {
+      // Use the existing PDF generation system for previews
+      const { InvoicePDFGenerator } = await import('@/lib/invoicing/invoice-pdf-generator');
+      
+      const { blob, filename } = await InvoicePDFGenerator.generatePDFWithFilename(invoice);
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      toast.success('PDF downloaded successfully');
+    } catch (error) {
+      console.error('Error generating preview PDF:', error);
+      toast.error('Failed to generate PDF - please try again');
+    }
   };
 
   if (!isOpen || !invoice) return null;
@@ -114,7 +144,7 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
 
           {/* Invoice Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-3xl mx-auto bg-white">
+            <div className="max-w-3xl mx-auto bg-white invoice-preview-content">
               {/* Invoice Header */}
               <div className="flex justify-between items-start mb-8">
                 <div>
@@ -301,16 +331,43 @@ export const InvoicePreviewModal: React.FC<InvoicePreviewModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
-            <motion.button
+          <div className="flex justify-between items-center p-6 border-t border-gray-200">
+            <button
               onClick={onClose}
-              className="px-6 py-2 rounded-lg font-medium"
-              style={{ backgroundColor: '#243F7B', color: 'white' }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              className="px-4 py-2 rounded-lg font-medium text-gray-600 hover:bg-gray-100 transition-colors"
             >
-              Close Preview
-            </motion.button>
+              Cancel
+            </button>
+            
+            <div className="flex items-center space-x-3">
+              {onCreateDraft && (
+                <motion.button
+                  onClick={onCreateDraft}
+                  disabled={isCreating}
+                  className="flex items-center space-x-2 px-6 py-2 rounded-lg border-2 font-medium disabled:opacity-50 transition-all duration-200"
+                  style={{ borderColor: '#243F7B', color: '#243F7B' }}
+                  whileHover={!isCreating ? { scale: 1.02 } : {}}
+                  whileTap={!isCreating ? { scale: 0.98 } : {}}
+                >
+                  <Save className="w-4 h-4" />
+                  <span>{isCreating ? 'Creating...' : 'Save as Draft'}</span>
+                </motion.button>
+              )}
+              
+              {onSubmitForApproval && (
+                <motion.button
+                  onClick={onSubmitForApproval}
+                  disabled={isCreating}
+                  className="flex items-center space-x-2 px-6 py-2 rounded-lg text-white font-medium disabled:opacity-50 transition-all duration-200"
+                  style={{ backgroundColor: '#243F7B' }}
+                  whileHover={!isCreating ? { scale: 1.02 } : {}}
+                  whileTap={!isCreating ? { scale: 0.98 } : {}}
+                >
+                  <Send className="w-4 h-4" />
+                  <span>{isCreating ? 'Creating...' : 'Submit for Approval'}</span>
+                </motion.button>
+              )}
+            </div>
           </div>
         </motion.div>
       </div>
