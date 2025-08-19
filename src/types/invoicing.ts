@@ -103,7 +103,6 @@ export interface Invoice {
 }
 
 export type InvoiceStatus = 
-  | 'draft'
   | 'pending_approval'
   | 'approved'
   | 'sent'

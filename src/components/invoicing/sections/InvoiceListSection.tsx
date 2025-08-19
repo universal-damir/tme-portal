@@ -66,69 +66,18 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
   const fetchInvoices = async () => {
     try {
       setLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/invoicing/invoices');
-      // const data = await response.json();
+      const response = await fetch('/api/invoicing/invoices', {
+        credentials: 'same-origin'
+      });
       
-      // Mock data for development
-      const mockInvoices: Invoice[] = [
-        {
-          id: 1,
-          invoiceNumber: '241201-10001-10 PMS',
-          clientId: 1,
-          invoiceDate: '2024-12-01',
-          dueDate: '2024-12-31',
-          status: 'sent',
-          subtotal: 5000,
-          vatRate: 5,
-          vatAmount: 250,
-          totalAmount: 5250,
-          paidAmount: 0,
-          balanceDue: 5250,
-          isRecurring: true,
-          client: {
-            id: 1,
-            clientCode: '10001',
-            clientName: 'ABC Trading LLC',
-            clientAddress: 'Dubai, UAE',
-            managerName: 'John Doe',
-            annualCode: '001',
-            annualCodeYear: 2024,
-            issuingCompany: 'FZCO',
-            isActive: true,
-            isRecurring: true
-          }
-        },
-        {
-          id: 2,
-          invoiceNumber: '241202-10002-30 PMS',
-          clientId: 2,
-          invoiceDate: '2024-12-02',
-          dueDate: '2024-12-31',
-          status: 'draft',
-          subtotal: 8000,
-          vatRate: 5,
-          vatAmount: 400,
-          totalAmount: 8400,
-          paidAmount: 0,
-          balanceDue: 8400,
-          isRecurring: false,
-          client: {
-            id: 2,
-            clientCode: '10002',
-            clientName: 'XYZ Consulting',
-            clientAddress: 'Abu Dhabi, UAE',
-            managerName: 'Jane Smith',
-            annualCode: '002',
-            annualCodeYear: 2024,
-            issuingCompany: 'DET',
-            isActive: true,
-            isRecurring: false
-          }
-        }
-      ];
-      
-      setInvoices(mockInvoices);
+      if (response.ok) {
+        const data = await response.json();
+        setInvoices(data.invoices || []);
+      } else {
+        console.error('Failed to fetch invoices:', response.status);
+        toast.error('Failed to load invoices');
+        setInvoices([]);
+      }
     } catch (error) {
       console.error('Error fetching invoices:', error);
       toast.error('Failed to load invoices');
@@ -201,7 +150,6 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
 
   const getStatusIcon = (status: InvoiceStatus) => {
     switch (status) {
-      case 'draft': return <Edit2 className="w-4 h-4" />;
       case 'pending_approval': return <Clock className="w-4 h-4" />;
       case 'approved': return <CheckCircle className="w-4 h-4" />;
       case 'sent': return <Send className="w-4 h-4" />;
@@ -215,7 +163,6 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
 
   const getStatusColor = (status: InvoiceStatus) => {
     switch (status) {
-      case 'draft': return '#6B7280';
       case 'pending_approval': return '#F59E0B';
       case 'approved': return '#10B981';
       case 'sent': return '#3B82F6';
@@ -236,11 +183,11 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}.${month}.${year}`;
   };
 
   const handleSendEmail = async (invoice: Invoice) => {
@@ -353,6 +300,36 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
     }
   };
 
+  const handleViewPDF = async (invoice: Invoice) => {
+    try {
+      const response = await fetch(`/api/invoicing/invoices/${invoice.id}/pdf`, {
+        credentials: 'same-origin'
+      });
+
+      if (response.ok) {
+        // Create blob from response
+        const blob = await response.blob();
+        
+        // Open PDF in new tab
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
+
+        toast.success('PDF opened in new tab');
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to open PDF');
+      }
+    } catch (error) {
+      console.error('Error opening PDF:', error);
+      toast.error('Failed to open PDF');
+    }
+  };
+
   const handleDownloadPDF = async (invoice: Invoice) => {
     try {
       const response = await fetch(`/api/invoicing/invoices/${invoice.id}/pdf`, {
@@ -462,7 +439,6 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
             onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
           >
             <option value="all">All Status</option>
-            <option value="draft">Draft</option>
             <option value="pending_approval">Pending Approval</option>
             <option value="approved">Approved</option>
             <option value="sent">Sent</option>
@@ -622,13 +598,14 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
                           <motion.button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Handle view action
+                              handleViewPDF(invoice);
                             }}
                             className="p-1 hover:bg-gray-100 rounded"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            title="View PDF in new tab"
                           >
-                            <Eye className="w-4 h-4 text-gray-600" />
+                            <Eye className="w-4 h-4 text-blue-600" />
                           </motion.button>
                           <motion.button
                             onClick={(e) => {

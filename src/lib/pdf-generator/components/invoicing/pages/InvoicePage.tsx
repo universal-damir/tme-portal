@@ -2,6 +2,7 @@ import React from 'react';
 import { Page, View, Text, StyleSheet } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
 import { HeaderComponent, FooterComponent } from '../../shared';
+import { InvoiceHeaderComponent } from '../components/InvoiceHeaderComponent';
 import { Invoice } from '@/types/invoicing';
 import { getBrandingForInvoice } from '../utils/invoiceBrandingMapper';
 
@@ -279,8 +280,8 @@ Please reference invoice number ${invoice.invoiceNumber} in your payment.`;
 
   return (
     <Page size="A4" style={styles.page}>
-      {/* Use the proven HeaderComponent */}
-      <HeaderComponent data={transformedData} />
+      {/* Use the dedicated InvoiceHeaderComponent */}
+      <InvoiceHeaderComponent invoice={invoice} />
 
       {/* Invoice Title Section */}
       <View style={invoiceStyles.invoiceHeader}>

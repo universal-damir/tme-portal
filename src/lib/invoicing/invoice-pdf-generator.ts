@@ -166,7 +166,7 @@ export class InvoicePDFGenerator {
             if (item.quantity <= 0) {
               errors.push(`Item ${itemIndex + 1} in section "${section.name}" must have a positive quantity`);
             }
-            if (item.unit_price < 0) {
+            if ((item.unitPrice || item.unit_price) < 0) {
               errors.push(`Item ${itemIndex + 1} in section "${section.name}" cannot have negative unit price`);
             }
           });
