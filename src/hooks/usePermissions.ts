@@ -66,6 +66,7 @@ export function usePermissions() {
       'corporate_changes': ['IT', 'Management', 'Legal', 'Administration'],
       'taxation': ['IT', 'Management', 'Finance', 'Tax and Compliance'],
       'cit_return_letters': ['IT', 'Management'], // Admin access + specific employee codes handled separately
+      'invoicing': ['IT', 'Management', 'Finance', 'Administration'], // Added invoicing feature
       'user_management': ['IT', 'HR'],
       'system_admin': ['IT'],
       'audit_logs': ['IT', 'Management'],

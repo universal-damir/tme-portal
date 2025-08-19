@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { ClientService } from '@/lib/invoicing/client-service';
 import { z } from 'zod';
 import { logAuditEvent } from '@/lib/audit';
@@ -39,8 +39,8 @@ export async function GET(
 ) {
   try {
     // Check authentication
-    const session = await getServerSession();
-    if (!session?.user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -89,8 +89,8 @@ export async function PUT(
 ) {
   try {
     // Check authentication
-    const session = await getServerSession();
-    if (!session?.user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -126,7 +126,7 @@ export async function PUT(
 
     // Log audit event
     await logAuditEvent({
-      userId: session.user.id,
+      userId: parseInt(session.userId),
       action: 'client_updated',
       resource: 'invoice_clients',
       resourceId: clientId.toString(),
@@ -165,8 +165,8 @@ export async function DELETE(
 ) {
   try {
     // Check authentication
-    const session = await getServerSession();
-    if (!session?.user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -207,7 +207,7 @@ export async function DELETE(
 
     // Log audit event
     await logAuditEvent({
-      userId: session.user.id,
+      userId: parseInt(session.userId),
       action: 'client_deleted',
       resource: 'invoice_clients',
       resourceId: clientId.toString(),
