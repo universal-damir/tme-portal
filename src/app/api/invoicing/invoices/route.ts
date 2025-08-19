@@ -36,7 +36,15 @@ const createInvoiceSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -80,7 +88,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -95,7 +111,7 @@ export async function POST(request: NextRequest) {
     // Create invoice
     const invoice = await InvoiceService.createInvoice(
       validatedData,
-      parseInt(session.userId)
+      session.user.id
     );
 
     // Log audit event
