@@ -65,6 +65,7 @@ export function usePermissions() {
       'company_services': ['IT', 'Management', 'Finance', 'Legal', 'Administration', 'HR', 'Company Setup'],
       'corporate_changes': ['IT', 'Management', 'Legal', 'Administration'],
       'taxation': ['IT', 'Management', 'Finance', 'Tax and Compliance'],
+      'invoicing': ['IT', 'Management', 'Finance', 'Administration'], // Added invoicing feature
       'user_management': ['IT', 'HR'],
       'system_admin': ['IT'],
       'audit_logs': ['IT', 'Management'],

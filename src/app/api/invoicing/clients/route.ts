@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from '@/lib/auth';
+import { getSession } from '@/lib/auth';
 import { ClientService } from '@/lib/invoicing/client-service';
 import { z } from 'zod';
 import { logAuditEvent } from '@/lib/audit';
@@ -35,8 +35,8 @@ const createClientSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession();
-    if (!session?.user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -85,8 +85,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getServerSession();
-    if (!session?.user) {
+    const session = await getSession();
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -109,12 +109,12 @@ export async function POST(request: NextRequest) {
         ...validatedData,
         annualCodeYear: new Date().getFullYear()
       },
-      session.user.id
+      parseInt(session.userId)
     );
 
     // Log audit event
     await logAuditEvent({
-      userId: session.user.id,
+      userId: parseInt(session.userId),
       action: 'client_created',
       resource: 'invoice_clients',
       resourceId: client.id?.toString() || '',
