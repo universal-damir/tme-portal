@@ -77,6 +77,9 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
 }) => {
   const [selectedClient, setSelectedClient] = useState<InvoiceClient | null>(preselectedClient);
   const [clients, setClients] = useState<InvoiceClient[]>([]);
+  const [filteredClients, setFilteredClients] = useState<InvoiceClient[]>([]);
+  const [clientSearchTerm, setClientSearchTerm] = useState('');
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [loadingClients, setLoadingClients] = useState(true);
   
   // Invoice details
@@ -110,12 +113,34 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
     calculateTotals();
   }, [serviceLines]);
 
+  useEffect(() => {
+    // Filter clients based on search term
+    if (!clientSearchTerm.trim()) {
+      setFilteredClients(clients);
+    } else {
+      const searchLower = clientSearchTerm.toLowerCase();
+      const filtered = clients.filter(client => 
+        client.clientCode.toLowerCase().includes(searchLower) ||
+        client.clientName.toLowerCase().includes(searchLower) ||
+        `${client.clientCode} ${client.clientName}`.toLowerCase().includes(searchLower)
+      );
+      setFilteredClients(filtered);
+    }
+  }, [clientSearchTerm, clients]);
+
   const fetchClients = async () => {
     try {
       setLoadingClients(true);
-      const response = await fetch('/api/invoicing/clients?isActive=true');
+      const response = await fetch('/api/invoicing/clients?isActive=true', {
+        credentials: 'same-origin'
+      });
       const data = await response.json();
-      setClients(data.clients || []);
+      // Sort clients by code
+      const sortedClients = (data.clients || []).sort((a: InvoiceClient, b: InvoiceClient) => 
+        a.clientCode.localeCompare(b.clientCode)
+      );
+      setClients(sortedClients);
+      setFilteredClients(sortedClients);
     } catch (error) {
       console.error('Error fetching clients:', error);
       toast.error('Failed to load clients');
@@ -234,6 +259,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
       const response = await fetch('/api/invoicing/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body: JSON.stringify(invoiceData)
       });
 
@@ -289,32 +315,67 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
         {/* Client Selection and Invoice Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Client Selection */}
-          <div>
+          <div className="relative">
             <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
               Client *
             </label>
-            <select
-              value={selectedClient?.id || ''}
-              onChange={(e) => {
-                const client = clients.find(c => c.id === parseInt(e.target.value));
-                setSelectedClient(client || null);
-              }}
-              className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              disabled={loadingClients}
-            >
-              <option value="">Select a client</option>
-              {clients.map(client => (
-                <option key={client.id} value={client.id}>
-                  {client.clientName} ({client.clientCode})
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <input
+                type="text"
+                value={selectedClient ? `${selectedClient.clientCode} ${selectedClient.clientName}` : clientSearchTerm}
+                onChange={(e) => {
+                  setClientSearchTerm(e.target.value);
+                  setSelectedClient(null);
+                  setShowClientDropdown(true);
+                }}
+                placeholder="Search by code or name..."
+                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#243F7B';
+                  setShowClientDropdown(true);
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#e5e7eb';
+                  // Delay to allow click on dropdown items
+                  setTimeout(() => setShowClientDropdown(false), 200);
+                }}
+                disabled={loadingClients}
+              />
+              {showClientDropdown && filteredClients.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border-2 border-gray-200 max-h-60 overflow-y-auto">
+                  {filteredClients.map(client => (
+                    <button
+                      key={client.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedClient(client);
+                        setClientSearchTerm('');
+                        setShowClientDropdown(false);
+                      }}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-100 transition-colors flex items-center justify-between group"
+                    >
+                      <div>
+                        <span className="font-semibold" style={{ color: '#243F7B' }}>
+                          {client.clientCode} {client.clientName}
+                        </span>
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({client.issuingCompany})
+                        </span>
+                      </div>
+                      {client.isRecurring && (
+                        <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">
+                          Recurring
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {selectedClient && (
               <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
                 <p><strong>Company:</strong> {selectedClient.issuingCompany}</p>
-                <p><strong>Annual Code:</strong> {selectedClient.annualCode}</p>
+                <p><strong>Annual Invoice Code:</strong> {selectedClient.annualCode}</p>
                 <p><strong>VAT:</strong> {selectedClient.vatNumber || 'N/A'}</p>
               </div>
             )}

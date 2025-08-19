@@ -12,6 +12,8 @@ import { logAuditEvent } from '@/lib/audit';
 
 // Validation schema for creating a client
 const createClientSchema = z.object({
+  clientCode: z.string().regex(/^\d{5}$/, 'Client code must be exactly 5 digits').optional(),
+  annualCode: z.string().regex(/^\d{3}$/, 'Annual code must be exactly 3 digits').optional(),
   clientName: z.string().min(1).max(255),
   clientAddress: z.string().min(1),
   managerName: z.string().min(1).max(255),
@@ -35,7 +37,15 @@ const createClientSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -85,7 +95,15 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -102,19 +120,20 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = createClientSchema.parse(body);
 
-    // Create client
+    // Create client - use provided codes or generate them
     const client = await ClientService.createClient(
       {
-        clientCode: '', // Will be generated
+        clientCode: validatedData.clientCode || '', // Use provided or generate
+        annualCode: validatedData.annualCode || '', // Use provided or generate
         ...validatedData,
         annualCodeYear: new Date().getFullYear()
       },
-      parseInt(session.userId)
+      session.user.id
     );
 
     // Log audit event
     await logAuditEvent({
-      userId: parseInt(session.userId),
+      userId: session.user.id,
       action: 'client_created',
       resource: 'invoice_clients',
       resourceId: client.id?.toString() || '',
