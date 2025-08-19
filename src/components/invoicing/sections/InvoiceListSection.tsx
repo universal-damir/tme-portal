@@ -1,0 +1,496 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FileText,
+  Search,
+  Filter,
+  Calendar,
+  Download,
+  Send,
+  Eye,
+  Edit2,
+  DollarSign,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  XCircle,
+  ChevronDown,
+  Plus
+} from 'lucide-react';
+import { Invoice, InvoiceStatus } from '@/types/invoicing';
+import { toast } from 'sonner';
+
+interface InvoiceListSectionProps {
+  selectedInvoice?: Invoice | null;
+  onInvoiceSelect?: (invoice: Invoice) => void;
+  onCreateNew?: () => void;
+}
+
+export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
+  selectedInvoice,
+  onInvoiceSelect,
+  onCreateNew
+}) => {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('month');
+  const [sortBy, setSortBy] = useState<'date' | 'number' | 'amount' | 'status'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortInvoices();
+  }, [invoices, searchTerm, statusFilter, dateFilter, sortBy, sortOrder]);
+
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/invoicing/invoices');
+      // const data = await response.json();
+      
+      // Mock data for development
+      const mockInvoices: Invoice[] = [
+        {
+          id: 1,
+          invoiceNumber: '241201-10001-10 PMS',
+          clientId: 1,
+          invoiceDate: '2024-12-01',
+          dueDate: '2024-12-31',
+          status: 'sent',
+          subtotal: 5000,
+          vatRate: 5,
+          vatAmount: 250,
+          totalAmount: 5250,
+          paidAmount: 0,
+          balanceDue: 5250,
+          isRecurring: true,
+          client: {
+            id: 1,
+            clientCode: '10001',
+            clientName: 'ABC Trading LLC',
+            clientAddress: 'Dubai, UAE',
+            managerName: 'John Doe',
+            annualCode: '001',
+            annualCodeYear: 2024,
+            issuingCompany: 'FZCO',
+            isActive: true,
+            isRecurring: true
+          }
+        },
+        {
+          id: 2,
+          invoiceNumber: '241202-10002-30 PMS',
+          clientId: 2,
+          invoiceDate: '2024-12-02',
+          dueDate: '2024-12-31',
+          status: 'draft',
+          subtotal: 8000,
+          vatRate: 5,
+          vatAmount: 400,
+          totalAmount: 8400,
+          paidAmount: 0,
+          balanceDue: 8400,
+          isRecurring: false,
+          client: {
+            id: 2,
+            clientCode: '10002',
+            clientName: 'XYZ Consulting',
+            clientAddress: 'Abu Dhabi, UAE',
+            managerName: 'Jane Smith',
+            annualCode: '002',
+            annualCodeYear: 2024,
+            issuingCompany: 'DET',
+            isActive: true,
+            isRecurring: false
+          }
+        }
+      ];
+      
+      setInvoices(mockInvoices);
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+      toast.error('Failed to load invoices');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterAndSortInvoices = () => {
+    let filtered = [...invoices];
+
+    // Search filter
+    if (searchTerm) {
+      filtered = filtered.filter(invoice =>
+        invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.client?.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        invoice.client?.clientCode.includes(searchTerm)
+      );
+    }
+
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(invoice => invoice.status === statusFilter);
+    }
+
+    // Date filter
+    const now = new Date();
+    if (dateFilter !== 'all') {
+      filtered = filtered.filter(invoice => {
+        const invoiceDate = new Date(invoice.invoiceDate);
+        switch (dateFilter) {
+          case 'today':
+            return invoiceDate.toDateString() === now.toDateString();
+          case 'week':
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return invoiceDate >= weekAgo;
+          case 'month':
+            return invoiceDate.getMonth() === now.getMonth() && 
+                   invoiceDate.getFullYear() === now.getFullYear();
+          case 'year':
+            return invoiceDate.getFullYear() === now.getFullYear();
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case 'date':
+          comparison = new Date(a.invoiceDate).getTime() - new Date(b.invoiceDate).getTime();
+          break;
+        case 'number':
+          comparison = a.invoiceNumber.localeCompare(b.invoiceNumber);
+          break;
+        case 'amount':
+          comparison = a.totalAmount - b.totalAmount;
+          break;
+        case 'status':
+          comparison = a.status.localeCompare(b.status);
+          break;
+      }
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    setFilteredInvoices(filtered);
+  };
+
+  const getStatusIcon = (status: InvoiceStatus) => {
+    switch (status) {
+      case 'draft': return <Edit2 className="w-4 h-4" />;
+      case 'pending_approval': return <Clock className="w-4 h-4" />;
+      case 'approved': return <CheckCircle className="w-4 h-4" />;
+      case 'sent': return <Send className="w-4 h-4" />;
+      case 'partially_paid': return <DollarSign className="w-4 h-4" />;
+      case 'paid': return <CheckCircle className="w-4 h-4" />;
+      case 'overdue': return <AlertCircle className="w-4 h-4" />;
+      case 'cancelled': return <XCircle className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
+    }
+  };
+
+  const getStatusColor = (status: InvoiceStatus) => {
+    switch (status) {
+      case 'draft': return '#6B7280';
+      case 'pending_approval': return '#F59E0B';
+      case 'approved': return '#10B981';
+      case 'sent': return '#3B82F6';
+      case 'partially_paid': return '#8B5CF6';
+      case 'paid': return '#10B981';
+      case 'overdue': return '#EF4444';
+      case 'cancelled': return '#6B7280';
+      default: return '#6B7280';
+    }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-AE', {
+      style: 'currency',
+      currency: 'AED',
+      minimumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header and Filters */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border-2" style={{ borderColor: '#243F7B20' }}>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
+            Invoice Management
+          </h2>
+          <motion.button
+            onClick={onCreateNew}
+            className="flex items-center space-x-2 px-4 py-2 rounded-lg text-white font-medium"
+            style={{ backgroundColor: '#D2BC99' }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Invoice</span>
+          </motion.button>
+        </div>
+
+        {/* Filters Row */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {/* Search */}
+          <div className="relative md:col-span-2">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search invoices..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+          </div>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+            className="px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          >
+            <option value="all">All Status</option>
+            <option value="draft">Draft</option>
+            <option value="pending_approval">Pending Approval</option>
+            <option value="approved">Approved</option>
+            <option value="sent">Sent</option>
+            <option value="partially_paid">Partially Paid</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
+          {/* Date Filter */}
+          <select
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value as any)}
+            className="px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+
+          {/* Sort By */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+            onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+          >
+            <option value="date">Sort by Date</option>
+            <option value="number">Sort by Number</option>
+            <option value="amount">Sort by Amount</option>
+            <option value="status">Sort by Status</option>
+          </select>
+        </div>
+
+        {/* Results Count */}
+        <div className="flex items-center justify-between mt-4">
+          <span className="text-sm text-gray-600">
+            {filteredInvoices.length} invoices found
+          </span>
+          <button
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="text-sm text-gray-600 hover:text-gray-900"
+          >
+            {sortOrder === 'asc' ? '↑ Ascending' : '↓ Descending'}
+          </button>
+        </div>
+      </div>
+
+      {/* Invoice Table */}
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border-2 overflow-hidden" style={{ borderColor: '#243F7B20' }}>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b" style={{ backgroundColor: '#243F7B10' }}>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Invoice Number
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Client
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Balance
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                <AnimatePresence>
+                  {filteredInvoices.map((invoice, index) => (
+                    <motion.tr
+                      key={invoice.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => onInvoiceSelect?.(invoice)}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium" style={{ color: '#243F7B' }}>
+                          {invoice.invoiceNumber}
+                        </div>
+                        {invoice.isRecurring && (
+                          <span className="text-xs text-gray-500">Recurring</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {invoice.client?.clientName}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {invoice.client?.clientCode}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                        {formatDate(invoice.invoiceDate)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {formatCurrency(invoice.totalAmount)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          VAT: {formatCurrency(invoice.vatAmount)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className="inline-flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium"
+                          style={{
+                            backgroundColor: getStatusColor(invoice.status) + '20',
+                            color: getStatusColor(invoice.status)
+                          }}
+                        >
+                          {getStatusIcon(invoice.status)}
+                          <span className="capitalize">{invoice.status.replace('_', ' ')}</span>
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {invoice.balanceDue && invoice.balanceDue > 0 ? (
+                          <div>
+                            <div className="text-sm font-medium text-red-600">
+                              {formatCurrency(invoice.balanceDue)}
+                            </div>
+                            {invoice.paidAmount > 0 && (
+                              <div className="text-xs text-gray-500">
+                                Paid: {formatCurrency(invoice.paidAmount)}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-green-600 font-medium">Paid</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                        <div className="flex items-center justify-center space-x-2">
+                          <motion.button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Handle view action
+                            }}
+                            className="p-1 hover:bg-gray-100 rounded"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <Eye className="w-4 h-4 text-gray-600" />
+                          </motion.button>
+                          <motion.button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Handle download action
+                            }}
+                            className="p-1 hover:bg-gray-100 rounded"
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                          >
+                            <Download className="w-4 h-4 text-gray-600" />
+                          </motion.button>
+                          {invoice.status === 'approved' && (
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Handle send action
+                              }}
+                              className="p-1 hover:bg-gray-100 rounded"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Send className="w-4 h-4 text-gray-600" />
+                            </motion.button>
+                          )}
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+
+          {filteredInvoices.length === 0 && (
+            <div className="text-center py-12">
+              <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No invoices found</p>
+              <button
+                onClick={onCreateNew}
+                className="mt-4 text-sm font-medium"
+                style={{ color: '#243F7B' }}
+              >
+                Create your first invoice
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
