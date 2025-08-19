@@ -4,13 +4,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
-  DollarSign,
-  Calendar,
-  CreditCard,
-  FileText,
   CheckCircle,
-  AlertCircle,
-  Hash
+  AlertCircle
 } from 'lucide-react';
 import { Invoice } from '@/types/invoicing';
 import { toast } from 'sonner';
@@ -134,7 +129,11 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-AE');
+    return new Date(dateString).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).replace(/\//g, '.');
   };
 
   const balanceAfterPayment = (invoice.balanceDue || invoice.totalAmount) - paymentData.amount;
@@ -153,9 +152,8 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold flex items-center space-x-2" style={{ color: '#243F7B' }}>
-                <DollarSign className="w-5 h-5" />
-                <span>Record Payment</span>
+              <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
+                Record Payment
               </h2>
               <p className="text-sm text-gray-600 mt-1">
                 Invoice: <span className="font-semibold">{invoice.invoiceNumber}</span>
@@ -215,26 +213,27 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                   Payment Amount *
                 </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    max={invoice.balanceDue || invoice.totalAmount}
-                    value={paymentData.amount}
-                    onChange={(e) => setPaymentData(prev => ({
-                      ...prev,
-                      amount: parseFloat(e.target.value) || 0
-                    }))}
-                    className={`w-full pl-10 pr-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
-                      errors.amount ? 'border-red-500' : 'border-gray-200'
-                    }`}
-                    onFocus={(e) => !errors.amount && (e.target.style.borderColor = '#243F7B')}
-                    onBlur={(e) => !errors.amount && (e.target.style.borderColor = '#e5e7eb')}
-                    placeholder="0.00"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={paymentData.amount === 0 ? '' : paymentData.amount.toLocaleString('en-US')}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[^\d.]/g, '');
+                    if (value === '') {
+                      setPaymentData(prev => ({ ...prev, amount: 0 }));
+                    } else {
+                      const numValue = parseFloat(value);
+                      if (!isNaN(numValue)) {
+                        setPaymentData(prev => ({ ...prev, amount: numValue }));
+                      }
+                    }
+                  }}
+                  className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    errors.amount ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                  onFocus={(e) => !errors.amount && (e.target.style.borderColor = '#243F7B')}
+                  onBlur={(e) => !errors.amount && (e.target.style.borderColor = '#e5e7eb')}
+                  placeholder="Enter amount"
+                />
                 {errors.amount && (
                   <p className="text-red-500 text-xs mt-1 flex items-center space-x-1">
                     <AlertCircle className="w-3 h-3" />
@@ -248,22 +247,19 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                   Payment Date *
                 </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="date"
-                    value={paymentData.paymentDate}
-                    onChange={(e) => setPaymentData(prev => ({
-                      ...prev,
-                      paymentDate: e.target.value
-                    }))}
-                    className={`w-full pl-10 pr-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
-                      errors.paymentDate ? 'border-red-500' : 'border-gray-200'
-                    }`}
-                    onFocus={(e) => !errors.paymentDate && (e.target.style.borderColor = '#243F7B')}
-                    onBlur={(e) => !errors.paymentDate && (e.target.style.borderColor = '#e5e7eb')}
-                  />
-                </div>
+                <input
+                  type="date"
+                  value={paymentData.paymentDate}
+                  onChange={(e) => setPaymentData(prev => ({
+                    ...prev,
+                    paymentDate: e.target.value
+                  }))}
+                  className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
+                    errors.paymentDate ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                  onFocus={(e) => !errors.paymentDate && (e.target.style.borderColor = '#243F7B')}
+                  onBlur={(e) => !errors.paymentDate && (e.target.style.borderColor = '#e5e7eb')}
+                />
                 {errors.paymentDate && (
                   <p className="text-red-500 text-xs mt-1 flex items-center space-x-1">
                     <AlertCircle className="w-3 h-3" />
@@ -277,25 +273,22 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                   Payment Method *
                 </label>
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <select
-                    value={paymentData.paymentMethod}
-                    onChange={(e) => setPaymentData(prev => ({
-                      ...prev,
-                      paymentMethod: e.target.value
-                    }))}
-                    className={`w-full pl-10 pr-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
-                      errors.paymentMethod ? 'border-red-500' : 'border-gray-200'
-                    }`}
-                    onFocus={(e) => !errors.paymentMethod && (e.target.style.borderColor = '#243F7B')}
-                    onBlur={(e) => !errors.paymentMethod && (e.target.style.borderColor = '#e5e7eb')}
-                  >
-                    {PAYMENT_METHODS.map(method => (
-                      <option key={method} value={method}>{method}</option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  value={paymentData.paymentMethod}
+                  onChange={(e) => setPaymentData(prev => ({
+                    ...prev,
+                    paymentMethod: e.target.value
+                  }))}
+                  className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
+                    errors.paymentMethod ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                  onFocus={(e) => !errors.paymentMethod && (e.target.style.borderColor = '#243F7B')}
+                  onBlur={(e) => !errors.paymentMethod && (e.target.style.borderColor = '#e5e7eb')}
+                >
+                  {PAYMENT_METHODS.map(method => (
+                    <option key={method} value={method}>{method}</option>
+                  ))}
+                </select>
                 {errors.paymentMethod && (
                   <p className="text-red-500 text-xs mt-1 flex items-center space-x-1">
                     <AlertCircle className="w-3 h-3" />
@@ -309,23 +302,20 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
                 <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                   Reference Number *
                 </label>
-                <div className="relative">
-                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    value={paymentData.referenceNumber}
-                    onChange={(e) => setPaymentData(prev => ({
-                      ...prev,
-                      referenceNumber: e.target.value
-                    }))}
-                    className={`w-full pl-10 pr-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
-                      errors.referenceNumber ? 'border-red-500' : 'border-gray-200'
-                    }`}
-                    onFocus={(e) => !errors.referenceNumber && (e.target.style.borderColor = '#243F7B')}
-                    onBlur={(e) => !errors.referenceNumber && (e.target.style.borderColor = '#e5e7eb')}
-                    placeholder="Transaction/Check/Reference number"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={paymentData.referenceNumber}
+                  onChange={(e) => setPaymentData(prev => ({
+                    ...prev,
+                    referenceNumber: e.target.value
+                  }))}
+                  className={`w-full px-3 py-2 rounded-lg border-2 focus:outline-none transition-all duration-200 h-[42px] ${
+                    errors.referenceNumber ? 'border-red-500' : 'border-gray-200'
+                  }`}
+                  onFocus={(e) => !errors.referenceNumber && (e.target.style.borderColor = '#243F7B')}
+                  onBlur={(e) => !errors.referenceNumber && (e.target.style.borderColor = '#e5e7eb')}
+                  placeholder="Transaction/Check/Reference number"
+                />
                 {errors.referenceNumber && (
                   <p className="text-red-500 text-xs mt-1 flex items-center space-x-1">
                     <AlertCircle className="w-3 h-3" />
@@ -340,21 +330,18 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Notes (Optional)
               </label>
-              <div className="relative">
-                <FileText className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-                <textarea
-                  value={paymentData.notes}
-                  onChange={(e) => setPaymentData(prev => ({
-                    ...prev,
-                    notes: e.target.value
-                  }))}
-                  className="w-full pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200"
-                  rows={3}
-                  onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  placeholder="Additional notes about this payment..."
-                />
-              </div>
+              <textarea
+                value={paymentData.notes}
+                onChange={(e) => setPaymentData(prev => ({
+                  ...prev,
+                  notes: e.target.value
+                }))}
+                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200"
+                rows={3}
+                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                placeholder="Additional notes about this payment..."
+              />
             </div>
 
             {/* Payment Summary */}
@@ -365,7 +352,7 @@ export const PaymentRecordingModal: React.FC<PaymentRecordingModalProps> = ({
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span>Payment Amount:</span>
-                  <span className="font-medium">{formatCurrency(paymentData.amount)}</span>
+                  <span className="font-medium">AED {paymentData.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Remaining Balance:</span>
