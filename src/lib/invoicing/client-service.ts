@@ -147,16 +147,41 @@ export class ClientService {
    * Create a new client
    */
   static async createClient(
-    clientData: Omit<InvoiceClient, 'id' | 'createdAt' | 'updatedAt' | 'annualCode' | 'annualCodeYear'>,
+    clientData: Omit<InvoiceClient, 'id' | 'createdAt' | 'updatedAt'> & { clientCode?: string; annualCode?: string; annualCodeYear?: number },
     createdBy: number
   ): Promise<InvoiceClient> {
     return await transaction(async (client) => {
-      // Generate the next client code (5-digit)
-      const clientCode = await this.generateNextClientCode();
+      // Use provided client code or generate a new one
+      let clientCode = clientData.clientCode;
+      if (!clientCode) {
+        clientCode = await this.generateNextClientCode();
+      } else {
+        // Validate that the provided client code doesn't already exist
+        const existing = await this.getClientByCode(clientCode);
+        if (existing) {
+          throw new Error(`Client code ${clientCode} already exists`);
+        }
+      }
       
-      // Get annual code for the new client
-      const currentYear = AnnualCodeManager.getCurrentYear();
-      const annualCode = await AnnualCodeManager.getNextAnnualCode();
+      // Use provided annual code or generate a new one
+      const currentYear = clientData.annualCodeYear || AnnualCodeManager.getCurrentYear();
+      let annualCode = clientData.annualCode;
+      if (!annualCode) {
+        annualCode = await AnnualCodeManager.getNextAnnualCode();
+      } else {
+        // Validate that the annual code is valid (3 digits)
+        if (!/^\d{3}$/.test(annualCode)) {
+          throw new Error('Annual code must be exactly 3 digits');
+        }
+        // Check if annual code is already used this year
+        const existingAnnual = await client.query(
+          'SELECT id FROM invoice_clients WHERE annual_code = $1 AND annual_code_year = $2',
+          [annualCode, currentYear]
+        );
+        if (existingAnnual.rows.length > 0) {
+          throw new Error(`Annual code ${annualCode} is already used for year ${currentYear}`);
+        }
+      }
 
       const result = await client.query(
         `INSERT INTO invoice_clients (
@@ -201,19 +226,44 @@ export class ClientService {
    */
   static async updateClient(
     id: number,
-    updates: Partial<Omit<InvoiceClient, 'id' | 'clientCode' | 'createdAt' | 'updatedAt'>>
+    updates: Partial<Omit<InvoiceClient, 'id' | 'createdAt' | 'updatedAt'>>
   ): Promise<InvoiceClient | null> {
+    // If updating client code, check it's not already taken
+    if (updates.clientCode) {
+      const existing = await query(
+        'SELECT id FROM invoice_clients WHERE client_code = $1 AND id != $2',
+        [updates.clientCode, id]
+      );
+      if (existing.rows.length > 0) {
+        throw new Error(`Client code ${updates.clientCode} is already in use`);
+      }
+    }
+
+    // If updating annual code, check it's not already taken for this year
+    if (updates.annualCode) {
+      const currentYear = new Date().getFullYear();
+      const existing = await query(
+        'SELECT id FROM invoice_clients WHERE annual_code = $1 AND annual_code_year = $2 AND id != $3',
+        [updates.annualCode, currentYear, id]
+      );
+      if (existing.rows.length > 0) {
+        throw new Error(`Annual code ${updates.annualCode} is already in use for year ${currentYear}`);
+      }
+    }
+
     const updateFields: string[] = [];
     const updateValues: any[] = [];
     let paramCounter = 1;
 
     // Build dynamic update query
     const allowedFields = [
+      'client_code',
       'client_name',
       'client_address',
       'manager_name',
       'manager_email',
       'vat_number',
+      'annual_code',
       'issuing_company',
       'is_active',
       'is_recurring',
@@ -221,11 +271,13 @@ export class ClientService {
     ];
 
     const fieldMappings: Record<string, string> = {
+      clientCode: 'client_code',
       clientName: 'client_name',
       clientAddress: 'client_address',
       managerName: 'manager_name',
       managerEmail: 'manager_email',
       vatNumber: 'vat_number',
+      annualCode: 'annual_code',
       issuingCompany: 'issuing_company',
       isActive: 'is_active',
       isRecurring: 'is_recurring',
@@ -265,11 +317,11 @@ export class ClientService {
   }
 
   /**
-   * Delete a client (soft delete by setting is_active = false)
+   * Delete a client (hard delete - completely removes from database)
    */
   static async deleteClient(id: number): Promise<boolean> {
     const result = await query(
-      'UPDATE invoice_clients SET is_active = false, updated_at = CURRENT_TIMESTAMP WHERE id = $1',
+      'DELETE FROM invoice_clients WHERE id = $1',
       [id]
     );
 

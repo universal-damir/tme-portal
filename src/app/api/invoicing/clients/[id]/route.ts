@@ -13,6 +13,8 @@ import { logAuditEvent } from '@/lib/audit';
 
 // Validation schema for updating a client
 const updateClientSchema = z.object({
+  clientCode: z.string().regex(/^\d{5}$/, 'Client code must be exactly 5 digits').optional(),
+  annualCode: z.string().regex(/^\d{3}$/, 'Annual code must be exactly 3 digits').optional(),
   clientName: z.string().min(1).max(255).optional(),
   clientAddress: z.string().min(1).optional(),
   managerName: z.string().min(1).max(255).optional(),
@@ -39,7 +41,15 @@ export async function GET(
 ) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -89,7 +99,15 @@ export async function PUT(
 ) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -126,7 +144,7 @@ export async function PUT(
 
     // Log audit event
     await logAuditEvent({
-      userId: parseInt(session.userId),
+      userId: session.user.id,
       action: 'client_updated',
       resource: 'invoice_clients',
       resourceId: clientId.toString(),
@@ -157,7 +175,7 @@ export async function PUT(
 
 /**
  * DELETE /api/invoicing/clients/[id]
- * Soft delete a client (set is_active = false)
+ * Hard delete a client (permanently remove from database)
  */
 export async function DELETE(
   request: NextRequest,
@@ -165,7 +183,15 @@ export async function DELETE(
 ) {
   try {
     // Check authentication
-    const session = await getSession();
+    const sessionId = request.cookies.get('session')?.value;
+    if (!sessionId) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionId);
     if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -195,7 +221,7 @@ export async function DELETE(
       );
     }
 
-    // Soft delete the client
+    // Hard delete the client
     const success = await ClientService.deleteClient(clientId);
     
     if (!success) {
@@ -207,7 +233,7 @@ export async function DELETE(
 
     // Log audit event
     await logAuditEvent({
-      userId: parseInt(session.userId),
+      userId: session.user.id,
       action: 'client_deleted',
       resource: 'invoice_clients',
       resourceId: clientId.toString(),
