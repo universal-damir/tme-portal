@@ -7,6 +7,7 @@ import { query, transaction } from '@/lib/database';
 import { Invoice, InvoiceStatus, InvoiceFormData } from '@/types/invoicing';
 import { InvoiceNumberGenerator } from './invoice-number-generator';
 import { ClientService } from './client-service';
+import { ApprovalService } from './approval-service';
 
 export class InvoiceService {
   /**
@@ -135,13 +136,15 @@ export class InvoiceService {
 
       // If status is pending_approval, create approval record
       if (data.status === 'pending_approval') {
+        const managerId = await ApprovalService.getManagerForApproval(createdBy);
+        
         await client.query(
           `INSERT INTO invoice_approvals (invoice_id, requested_by, assigned_to, status)
            VALUES ($1, $2, $3, $4)`,
           [
             invoice.id,
             createdBy,
-            createdBy, // TODO: Get actual manager ID
+            managerId,
             'pending'
           ]
         );
