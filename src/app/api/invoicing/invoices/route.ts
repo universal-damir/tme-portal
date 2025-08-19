@@ -17,7 +17,7 @@ const createInvoiceSchema = z.object({
   dueDate: z.string().optional(),
   notes: z.string().optional(),
   internalNotes: z.string().optional(),
-  status: z.enum(['draft', 'pending_approval']).optional(),
+  status: z.enum(['pending_approval']).default('pending_approval'),
   sections: z.array(z.object({
     name: z.string(),
     items: z.array(z.object({
@@ -86,6 +86,8 @@ export async function GET(request: NextRequest) {
  * Create a new invoice
  */
 export async function POST(request: NextRequest) {
+  let body: any = null;
+  
   try {
     // Check authentication
     const sessionId = request.cookies.get('session')?.value;
@@ -105,7 +107,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse and validate request body
-    const body = await request.json();
+    body = await request.json();
     const validatedData = createInvoiceSchema.parse(body);
 
     // Create invoice

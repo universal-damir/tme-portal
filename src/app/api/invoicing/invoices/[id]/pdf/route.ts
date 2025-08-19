@@ -58,6 +58,8 @@ export async function GET(
     // Validate invoice data for PDF generation
     const validation = InvoicePDFGenerator.validateInvoiceForPDF(invoice);
     if (!validation.isValid) {
+      console.error('PDF validation failed for invoice', invoiceId, ':', validation.errors);
+      console.error('Invoice data structure:', JSON.stringify(invoice, null, 2));
       return NextResponse.json(
         { error: 'Invoice data is invalid for PDF generation', details: validation.errors },
         { status: 400 }
@@ -159,6 +161,8 @@ export async function POST(
     // Validate invoice data for PDF generation
     const validation = InvoicePDFGenerator.validateInvoiceForPDF(invoice);
     if (!validation.isValid) {
+      console.error('PDF validation failed for invoice', invoiceId, ':', validation.errors);
+      console.error('Invoice data structure:', JSON.stringify(invoice, null, 2));
       return NextResponse.json(
         { error: 'Invoice data is invalid for PDF generation', details: validation.errors },
         { status: 400 }

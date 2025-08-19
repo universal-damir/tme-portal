@@ -27,6 +27,7 @@ import { InvoiceClient, Invoice, InvoiceFormData, ServiceCategory } from '@/type
 import { InvoiceNumberGenerator } from '@/lib/invoicing/invoice-number-generator';
 import { toast } from 'sonner';
 import { TMEDatePicker } from '@/components/common/TMEDatePicker';
+import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 
 interface InvoiceCreationFormProps {
   preselectedClient?: InvoiceClient | null;
@@ -101,6 +102,8 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null);
 
   useEffect(() => {
     fetchClients();
@@ -216,7 +219,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
     }
   };
 
-  const handleSubmit = async (sendForApproval: boolean = false) => {
+  const handleSubmit = async () => {
     if (!selectedClient) {
       toast.error('Please select a client');
       return;
@@ -225,6 +228,20 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
     if (serviceLines.length === 0) {
       toast.error('Please add at least one service item');
       return;
+    }
+
+    // Create invoice and show reviewer selection modal
+    const invoice = await createInvoice('pending_approval');
+    if (invoice) {
+      setCreatedInvoice(invoice);
+      setShowReviewModal(true);
+    }
+  };
+
+  const createInvoice = async (status: 'pending_approval'): Promise<Invoice | null> => {
+    if (!selectedClient) {
+      toast.error('Please select a client');
+      return null;
     }
 
     setIsSubmitting(true);
@@ -254,7 +271,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
           name,
           items
         })),
-        status: sendForApproval ? 'pending_approval' : 'draft'
+        status
       };
 
       const response = await fetch('/api/invoicing/invoices', {
@@ -266,26 +283,109 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
 
       if (response.ok) {
         const invoice = await response.json();
-        toast.success(`Invoice ${invoice.invoiceNumber} created successfully`);
-        onInvoiceCreated(invoice);
+        
+        // Create application record for review system (EXACT COPY of Golden Visa pattern)
+        if (invoice.id) {
+          try {
+            const appResponse = await fetch('/api/applications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'golden-visa', // Use existing allowed type temporarily
+                title: `Invoice ${invoice.invoiceNumber}`,
+                form_data: {
+                  invoice_id: invoice.id,
+                  invoice_number: invoice.invoiceNumber,
+                  client_name: selectedClient?.clientName,
+                  total_amount: invoice.totalAmount
+                }
+              })
+            });
+            
+            if (appResponse.ok) {
+              const app = await appResponse.json();
+              console.log('Application created:', app);
+              invoice.application_id = app.id; // This should be a UUID now
+            } else {
+              const errorText = await appResponse.text();
+              console.error('Failed to create application:', appResponse.status, errorText);
+            }
+          } catch (appError) {
+            console.error('Application creation error:', appError);
+          }
+        }
+        
+        toast.success(`Invoice ${invoice.invoiceNumber} created and ready for approval submission`);
+        
+        return invoice;
       } else {
         // Get detailed error information
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('Invoice creation failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData,
-          requestData: invoiceData
-        });
+        console.error('Response status:', response.status);
+        console.error('Response status text:', response.statusText);
+        console.error('Request data sent:', invoiceData);
         
+        let errorData;
+        try {
+          const responseText = await response.text();
+          console.error('Raw response text:', responseText);
+          try {
+            errorData = JSON.parse(responseText);
+          } catch (e) {
+            errorData = { error: responseText || 'Unknown error' };
+          }
+        } catch (e) {
+          console.error('Failed to read response:', e);
+          errorData = { error: 'Failed to read response' };
+        }
+        
+        console.error('Parsed error data:', errorData);
         toast.error(errorData.error || `Failed to create invoice (${response.status})`);
-        throw new Error(errorData.error || 'Failed to create invoice');
+        return null;
       }
     } catch (error) {
       console.error('Error creating invoice:', error);
       toast.error('Failed to create invoice');
+      return null;
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleReviewSubmit = async (submission: {
+    reviewer_id: number;
+    urgency: 'standard' | 'urgent';
+    comments?: string;
+  }) => {
+    if (!createdInvoice) return false;
+
+    try {
+      // EXACT COPY of Golden Visa - call /api/applications/{id}/submit-review
+      const applicationId = (createdInvoice as any).application_id || createdInvoice.id;
+      const response = await fetch(`/api/applications/${applicationId}/submit-review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(submission)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Submit review failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          applicationId,
+          submission
+        });
+        throw new Error(`Failed to submit for review: ${response.statusText}`);
+      }
+
+      toast.success(`Invoice ${createdInvoice.invoiceNumber} submitted for review`);
+      onInvoiceCreated(createdInvoice);
+      return true;
+    } catch (error) {
+      console.error('Error submitting for review:', error);
+      toast.error('Failed to submit for review');
+      return false;
     }
   };
 
@@ -316,7 +416,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
         client: selectedClient,
         invoiceDate,
         dueDate,
-        status: 'draft' as const,
+        status: 'pending_approval' as const,
         subtotal,
         vatRate: 5,
         vatAmount,
@@ -715,18 +815,7 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
             <span>Preview</span>
           </motion.button>
           <motion.button
-            onClick={() => handleSubmit(false)}
-            disabled={isSubmitting || !selectedClient || serviceLines.length === 0}
-            className="flex items-center space-x-2 px-6 py-2 rounded-lg border-2 font-medium disabled:opacity-50"
-            style={{ borderColor: '#243F7B', color: '#243F7B' }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Save className="w-4 h-4" />
-            <span>Save as Draft</span>
-          </motion.button>
-          <motion.button
-            onClick={() => handleSubmit(true)}
+            onClick={handleSubmit}
             disabled={isSubmitting || !selectedClient || serviceLines.length === 0}
             className="flex items-center space-x-2 px-6 py-2 rounded-lg text-white font-medium disabled:opacity-50"
             style={{ backgroundColor: '#243F7B' }}
@@ -734,10 +823,25 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
             whileTap={{ scale: 0.98 }}
           >
             <Send className="w-4 h-4" />
-            <span>Submit for Approval</span>
+            <span>Create & Submit for Approval</span>
           </motion.button>
         </div>
       </motion.div>
+
+      {/* Review Submission Modal */}
+      {createdInvoice && (
+        <ReviewSubmissionModal
+          isOpen={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false);
+            setCreatedInvoice(null);
+          }}
+          applicationId={createdInvoice.id?.toString() || ''}
+          applicationTitle={`Invoice ${createdInvoice.invoiceNumber} - ${formatCurrency(createdInvoice.totalAmount)}`}
+          documentType="invoice"
+          onSubmit={handleReviewSubmit}
+        />
+      )}
 
     </div>
   );
