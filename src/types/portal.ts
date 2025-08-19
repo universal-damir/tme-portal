@@ -6,7 +6,8 @@ export type TabId =
   | 'company-services'
   | 'corporate-changes'
   | 'taxation'
-  | 'cit-return-letters';
+  | 'cit-return-letters'
+  | 'invoicing';
 
 export interface TabInfo {
   id: TabId;

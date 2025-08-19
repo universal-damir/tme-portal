@@ -71,6 +71,20 @@ const baseNavItems = [
   },
 ];
 
+// Conditionally add Invoicing if feature flag is enabled
+const getAllNavItems = () => {
+  const items = [...baseNavItems];
+  if (process.env.NEXT_PUBLIC_FEATURE_INVOICING === 'true') {
+    items.push({
+      title: 'Invoicing',
+      url: '#invoicing',
+      icon: FileText,
+      feature: 'invoicing',
+    });
+  }
+  return items;
+};
+
 // Admin-only navigation items
 const adminNavItems = [
   {
@@ -107,7 +121,7 @@ export function TMEPortalSidebar({ activeTab, onTabChange }: TMEPortalSidebarPro
     onTabChange(tabId);
   };
 
-  const visibleNavItems = baseNavItems.filter(item => canAccessFeature(item.feature));
+  const visibleNavItems = getAllNavItems().filter(item => canAccessFeature(item.feature));
   const visibleAdminItems = adminNavItems.filter(item => canAccessFeature(item.feature));
 
   const navData = {
