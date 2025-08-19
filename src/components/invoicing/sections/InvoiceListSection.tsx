@@ -11,7 +11,7 @@ import {
   Send,
   Eye,
   Edit2,
-  DollarSign,
+  Banknote,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -153,7 +153,7 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
       case 'pending_approval': return <Clock className="w-4 h-4" />;
       case 'approved': return <CheckCircle className="w-4 h-4" />;
       case 'sent': return <Send className="w-4 h-4" />;
-      case 'partially_paid': return <DollarSign className="w-4 h-4" />;
+      case 'partially_paid': return <Banknote className="w-4 h-4" />;
       case 'paid': return <CheckCircle className="w-4 h-4" />;
       case 'overdue': return <AlertCircle className="w-4 h-4" />;
       case 'cancelled': return <XCircle className="w-4 h-4" />;
@@ -644,7 +644,7 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
                               whileTap={{ scale: 0.9 }}
                               title="Record payment"
                             >
-                              <DollarSign className="w-4 h-4 text-purple-600" />
+                              <Banknote className="w-4 h-4 text-purple-600" />
                             </motion.button>
                           )}
                         </div>

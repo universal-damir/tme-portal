@@ -13,7 +13,7 @@ import {
   User,
   Building,
   Hash,
-  DollarSign,
+  Banknote,
   Percent,
   Clock,
   CheckCircle,
@@ -38,27 +38,27 @@ interface InvoiceCreationFormProps {
 // Service catalog - based on your requirements
 const SERVICE_CATALOG = {
   'Consulting/PRO/Commercial services': [
-    { name: 'PRO/Commercial services', unit: 'month', defaultPrice: 0 },
-    { name: 'Company setup / restructuring service', unit: null, defaultPrice: 0 },
-    { name: 'Bank periodic review service', unit: null, defaultPrice: 0, description: 'prepare and provide the requested legal and transaction documents and information to the RM and Compliance Department and follow up' },
-    { name: 'VAT consulting / reg / exception / dereg', unit: 'hours', defaultPrice: 0 },
-    { name: 'FTA portal update', unit: null, defaultPrice: 0, customDescription: true },
-    { name: 'Compliance consulting (ESR / UBO)', unit: 'hours', defaultPrice: 0 },
-    { name: 'IT AMC service fee', unit: 'month', defaultPrice: 0 },
-    { name: 'IT consulting', unit: 'hours', defaultPrice: 0 }
+    { name: 'PRO/Commercial services', unit: 'month', defaultPrice: 1000 },
+    { name: 'Company setup / restructuring service', unit: null, defaultPrice: 1000 },
+    { name: 'Bank periodic review service', unit: null, defaultPrice: 1000, description: 'prepare and provide the requested legal and transaction documents and information to the RM and Compliance Department and follow up' },
+    { name: 'VAT consulting / reg / exception / dereg', unit: 'hours', defaultPrice: 1000 },
+    { name: 'FTA portal update', unit: null, defaultPrice: 1000, customDescription: true },
+    { name: 'Compliance consulting (ESR / UBO)', unit: 'hours', defaultPrice: 1000 },
+    { name: 'IT AMC service fee', unit: 'month', defaultPrice: 1000 },
+    { name: 'IT consulting', unit: 'hours', defaultPrice: 1000 }
   ],
   'Accounting service': [
-    { name: 'Accounting service', unit: 'month', defaultPrice: 0 },
+    { name: 'Accounting service', unit: 'month', defaultPrice: 1000 },
     { name: 'VAT booking fee', unit: '%', defaultPrice: 20 },
-    { name: 'VAT return filing', unit: 'quarter', defaultPrice: 0 },
-    { name: 'VAT figures for tax group return filing', unit: 'quarter', defaultPrice: 0 },
-    { name: 'Cost center booking', unit: 'month', defaultPrice: 0 }
+    { name: 'VAT return filing', unit: 'quarter', defaultPrice: 1000 },
+    { name: 'VAT figures for tax group return filing', unit: 'quarter', defaultPrice: 1000 },
+    { name: 'Cost center booking', unit: 'month', defaultPrice: 1000 }
   ],
   'Salary preparation': [
-    { name: 'Salary preparation', unit: 'salaries', defaultPrice: 0 }
+    { name: 'Salary preparation', unit: 'salaries', defaultPrice: 1000 }
   ],
   'Others': [
-    { name: 'Writing and receiving of emails', unit: 'hours', defaultPrice: 0, customDescription: true },
+    { name: 'Writing and receiving of emails', unit: 'hours', defaultPrice: 1000, customDescription: true },
     { name: 'Admin fee', unit: '%', defaultPrice: 2 }
   ]
 };
@@ -104,14 +104,24 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [createdInvoice, setCreatedInvoice] = useState<Invoice | null>(null);
+  const [formErrors, setFormErrors] = useState<string[]>([]);
 
   useEffect(() => {
     fetchClients();
-    // Set default due date to 30 days from invoice date
+    // Set default due date to 7 days from invoice date
     const date = new Date(invoiceDate);
-    date.setDate(date.getDate() + 30);
+    date.setDate(date.getDate() + 7);
     setDueDate(date.toISOString().split('T')[0]);
   }, []);
+
+  // Auto-update due date when invoice date changes
+  useEffect(() => {
+    if (invoiceDate) {
+      const date = new Date(invoiceDate);
+      date.setDate(date.getDate() + 7);
+      setDueDate(date.toISOString().split('T')[0]);
+    }
+  }, [invoiceDate]);
 
   useEffect(() => {
     calculateTotals();
@@ -162,14 +172,15 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   };
 
   const addServiceLine = (category: string, service: any) => {
+    const unitPrice = Math.max(0, Number(service.defaultPrice) || 0);
     const newLine: ServiceLine = {
       id: `${Date.now()}-${Math.random()}`,
-      category,
-      description: service.customDescription ? '' : (service.description || service.name),
+      category: category.trim(),
+      description: service.customDescription ? '' : (service.description || service.name || '').trim(),
       quantity: 1,
-      unit: service.unit,
-      unitPrice: service.defaultPrice || 0,
-      netAmount: service.defaultPrice || 0
+      unit: service.unit || '',
+      unitPrice,
+      netAmount: unitPrice
     };
     setServiceLines([...serviceLines, newLine]);
   };
@@ -179,10 +190,20 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
       lines.map(line => {
         if (line.id === id) {
           const updated = { ...line, ...updates };
+          
+          // Ensure numeric values are valid
+          if ('quantity' in updates) {
+            updated.quantity = Math.max(0, Number(updated.quantity) || 0);
+          }
+          if ('unitPrice' in updates) {
+            updated.unitPrice = Math.max(0, Number(updated.unitPrice) || 0);
+          }
+          
           // Recalculate net amount
           if ('quantity' in updates || 'unitPrice' in updates) {
             updated.netAmount = updated.quantity * updated.unitPrice;
           }
+          
           return updated;
         }
         return line;
@@ -220,26 +241,47 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (!selectedClient) {
-      toast.error('Please select a client');
-      return;
+    setFormErrors([]);
+    const errors: string[] = [];
+    
+    // Validation
+    if (!selectedClient || !selectedClient.id) {
+      errors.push('Please select a client');
     }
 
     if (serviceLines.length === 0) {
-      toast.error('Please add at least one service item');
+      errors.push('Please add at least one service item');
+    }
+
+    // Validate service lines
+    serviceLines.forEach((line, index) => {
+      if (!line.description?.trim()) {
+        errors.push(`Service item ${index + 1}: Please add a description`);
+      }
+      if (line.quantity <= 0) {
+        errors.push(`Service item ${index + 1}: Quantity must be greater than 0`);
+      }
+      if (line.unitPrice < 0) {
+        errors.push(`Service item ${index + 1}: Unit price cannot be negative`);
+      }
+    });
+
+    if (errors.length > 0) {
+      setFormErrors(errors);
+      toast.error(`Please fix ${errors.length} validation error(s)`);
       return;
     }
 
     // Create invoice and show reviewer selection modal
-    const invoice = await createInvoice('pending_approval');
+    const invoice = await createInvoice();
     if (invoice) {
       setCreatedInvoice(invoice);
       setShowReviewModal(true);
     }
   };
 
-  const createInvoice = async (status: 'pending_approval'): Promise<Invoice | null> => {
-    if (!selectedClient) {
+  const createInvoice = async (): Promise<Invoice | null> => {
+    if (!selectedClient?.id) {
       toast.error('Please select a client');
       return null;
     }
@@ -247,32 +289,44 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      // Group service lines by category
+      // Group service lines by category and validate
       const sections = serviceLines.reduce((acc, line) => {
         if (!acc[line.category]) {
           acc[line.category] = [];
         }
+        
+        // Ensure data is clean and valid
         acc[line.category].push({
-          description: line.description,
-          quantity: line.quantity,
-          unit: line.unit || '',
-          unitPrice: line.unitPrice
+          description: line.description?.trim() || '',
+          quantity: Math.max(0, Number(line.quantity) || 0),
+          unit: line.unit?.trim() || '',
+          unitPrice: Math.max(0, Number(line.unitPrice) || 0)
         });
         return acc;
       }, {} as Record<string, any[]>);
 
+      // Convert to API format
+      const sectionsArray = Object.entries(sections).map(([name, items]) => ({
+        name: name.trim(),
+        items: items.filter(item => item.description && item.quantity > 0) // Remove invalid items
+      })).filter(section => section.items.length > 0); // Remove empty sections
+
+      if (sectionsArray.length === 0) {
+        toast.error('No valid service items found');
+        return null;
+      }
+
       const invoiceData = {
         clientId: selectedClient.id,
-        invoiceDate,
-        dueDate,
-        notes,
-        internalNotes,
-        sections: Object.entries(sections).map(([name, items]) => ({
-          name,
-          items
-        })),
-        status
+        invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
+        dueDate: dueDate || undefined,
+        notes: notes?.trim() || undefined,
+        internalNotes: internalNotes?.trim() || undefined,
+        status: 'pending_approval' as const,
+        sections: sectionsArray
       };
+
+      console.log('Sending invoice data:', invoiceData);
 
       const response = await fetch('/api/invoicing/invoices', {
         method: 'POST',
@@ -284,19 +338,20 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
       if (response.ok) {
         const invoice = await response.json();
         
-        // Create application record for review system (EXACT COPY of Golden Visa pattern)
-        if (invoice.id) {
+        // Create application record for review system
+        if (invoice?.id) {
           try {
             const appResponse = await fetch('/api/applications', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
               body: JSON.stringify({
                 type: 'golden-visa', // Use existing allowed type temporarily
                 title: `Invoice ${invoice.invoiceNumber}`,
                 form_data: {
                   invoice_id: invoice.id,
                   invoice_number: invoice.invoiceNumber,
-                  client_name: selectedClient?.clientName,
+                  client_name: selectedClient.clientName,
                   total_amount: invoice.totalAmount
                 }
               })
@@ -304,47 +359,47 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
             
             if (appResponse.ok) {
               const app = await appResponse.json();
-              console.log('Application created:', app);
-              invoice.application_id = app.id; // This should be a UUID now
+              console.log('Application created for review:', app.id);
+              invoice.application_id = app.id;
             } else {
-              const errorText = await appResponse.text();
-              console.error('Failed to create application:', appResponse.status, errorText);
+              console.warn('Failed to create application for review - this is not critical');
             }
           } catch (appError) {
-            console.error('Application creation error:', appError);
+            console.warn('Application creation failed - this is not critical:', appError);
           }
         }
         
-        toast.success(`Invoice ${invoice.invoiceNumber} created and ready for approval submission`);
-        
+        toast.success(`Invoice ${invoice.invoiceNumber} created successfully`);
         return invoice;
       } else {
-        // Get detailed error information
-        console.error('Response status:', response.status);
-        console.error('Response status text:', response.statusText);
-        console.error('Request data sent:', invoiceData);
+        // Handle API errors
+        let errorMessage = 'Failed to create invoice';
         
-        let errorData;
         try {
-          const responseText = await response.text();
-          console.error('Raw response text:', responseText);
-          try {
-            errorData = JSON.parse(responseText);
-          } catch (e) {
-            errorData = { error: responseText || 'Unknown error' };
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          
+          if (errorData.details && Array.isArray(errorData.details)) {
+            // Validation errors
+            const validationErrors = errorData.details.map((err: any) => 
+              `${err.path?.join('.')} ${err.message}`
+            ).join(', ');
+            errorMessage = `Validation error: ${validationErrors}`;
+          } else if (errorData.error) {
+            errorMessage = errorData.error;
           }
         } catch (e) {
-          console.error('Failed to read response:', e);
-          errorData = { error: 'Failed to read response' };
+          // Can't parse error response
+          console.error('Failed to parse error response:', e);
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
         }
         
-        console.error('Parsed error data:', errorData);
-        toast.error(errorData.error || `Failed to create invoice (${response.status})`);
+        toast.error(errorMessage);
         return null;
       }
     } catch (error) {
-      console.error('Error creating invoice:', error);
-      toast.error('Failed to create invoice');
+      console.error('Network/unexpected error creating invoice:', error);
+      toast.error('Network error - please check your connection and try again');
       return null;
     } finally {
       setIsSubmitting(false);
@@ -657,20 +712,20 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
               <table className="w-full">
                 <thead>
                   <tr className="border-b text-xs uppercase text-gray-600">
-                    <th className="text-left py-2">Description</th>
-                    <th className="text-center py-2">Quantity</th>
-                    <th className="text-center py-2">Unit</th>
-                    <th className="text-right py-2">AED Unit</th>
-                    <th className="text-right py-2">AED Net</th>
-                    <th className="text-right py-2">AED 5%</th>
-                    <th className="text-right py-2">AED Gross</th>
-                    <th className="text-center py-2"></th>
+                    <th className="text-left py-2 w-auto">Description</th>
+                    <th className="text-center py-2 w-20">Quantity</th>
+                    <th className="text-center py-2 w-20">Unit</th>
+                    <th className="text-right py-2 w-24">AED Unit</th>
+                    <th className="text-right py-2 w-28">AED Net</th>
+                    <th className="text-right py-2 w-28">AED 5%</th>
+                    <th className="text-right py-2 w-32">AED Gross</th>
+                    <th className="text-center py-2 w-12"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {serviceLines.map((line) => (
                     <tr key={line.id} className="border-b">
-                      <td className="py-2">
+                      <td className="py-2 w-auto">
                         <input
                           type="text"
                           value={line.description}
@@ -681,43 +736,49 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
                           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                         />
                       </td>
-                      <td className="py-2 px-2">
+                      <td className="py-2 w-20">
                         <input
-                          type="number"
+                          type="text"
                           value={line.quantity}
-                          onChange={(e) => updateServiceLine(line.id, { quantity: parseFloat(e.target.value) || 0 })}
-                          className="w-20 px-2 py-1 rounded border text-center focus:outline-none"
-                          min="0"
-                          step="0.01"
+                          onChange={(e) => {
+                            const cleanValue = e.target.value.replace(/[^\d.]/g, '');
+                            const value = Math.max(0, parseFloat(cleanValue) || 0);
+                            updateServiceLine(line.id, { quantity: value });
+                          }}
+                          className="w-full px-2 py-1 rounded border text-center focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="1"
                           onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                         />
                       </td>
-                      <td className="py-2 px-2 text-center text-sm">
+                      <td className="py-2 w-20 text-center text-sm">
                         {line.unit || '-'}
                       </td>
-                      <td className="py-2 px-2">
+                      <td className="py-2 w-24">
                         <input
-                          type="number"
-                          value={line.unitPrice}
-                          onChange={(e) => updateServiceLine(line.id, { unitPrice: parseFloat(e.target.value) || 0 })}
-                          className="w-24 px-2 py-1 rounded border text-right focus:outline-none"
-                          min="0"
-                          step="0.01"
+                          type="text"
+                          value={line.unitPrice.toLocaleString('en-US')}
+                          onChange={(e) => {
+                            const cleanValue = e.target.value.replace(/[^\d.]/g, '');
+                            const value = Math.max(0, parseFloat(cleanValue) || 0);
+                            updateServiceLine(line.id, { unitPrice: value });
+                          }}
+                          className="w-full px-2 py-1 rounded border text-right focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          placeholder="1,000"
                           onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                         />
                       </td>
-                      <td className="py-2 px-2 text-right text-sm">
+                      <td className="py-2 w-28 text-right text-sm px-2">
                         {formatCurrency(line.netAmount)}
                       </td>
-                      <td className="py-2 px-2 text-right text-sm">
+                      <td className="py-2 w-28 text-right text-sm px-2">
                         {formatCurrency(line.netAmount * 0.05)}
                       </td>
-                      <td className="py-2 px-2 text-right text-sm font-medium">
+                      <td className="py-2 w-32 text-right text-sm font-medium px-2">
                         {formatCurrency(line.netAmount * 1.05)}
                       </td>
-                      <td className="py-2 px-2 text-center">
+                      <td className="py-2 w-12 text-center">
                         <button
                           onClick={() => removeServiceLine(line.id)}
                           className="p-1 hover:bg-red-100 rounded text-red-500"
@@ -731,12 +792,12 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
                 <tfoot>
                   <tr className="font-medium">
                     <td colSpan={4} className="py-3 text-right">Subtotal:</td>
-                    <td className="py-3 px-2 text-right">{formatCurrency(subtotal)}</td>
-                    <td className="py-3 px-2 text-right">{formatCurrency(vatAmount)}</td>
-                    <td className="py-3 px-2 text-right text-lg" style={{ color: '#243F7B' }}>
+                    <td className="py-3 px-2 text-right w-28">{formatCurrency(subtotal)}</td>
+                    <td className="py-3 px-2 text-right w-28">{formatCurrency(vatAmount)}</td>
+                    <td className="py-3 px-2 text-right text-lg w-32" style={{ color: '#243F7B' }}>
                       {formatCurrency(totalAmount)}
                     </td>
-                    <td></td>
+                    <td className="w-12"></td>
                   </tr>
                 </tfoot>
               </table>
@@ -788,6 +849,25 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
         </div>
       </motion.div>
 
+      {/* Form Errors */}
+      {formErrors.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-50 border-2 border-red-200 rounded-xl p-4"
+        >
+          <h4 className="text-sm font-medium text-red-800 mb-2">Please fix the following errors:</h4>
+          <ul className="text-sm text-red-700 space-y-1">
+            {formErrors.map((error, index) => (
+              <li key={index} className="flex items-start">
+                <span className="text-red-500 mr-2">•</span>
+                {error}
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+      )}
+
       {/* Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -819,11 +899,20 @@ export const InvoiceCreationForm: React.FC<InvoiceCreationFormProps> = ({
             disabled={isSubmitting || !selectedClient || serviceLines.length === 0}
             className="flex items-center space-x-2 px-6 py-2 rounded-lg text-white font-medium disabled:opacity-50"
             style={{ backgroundColor: '#243F7B' }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+            whileTap={!isSubmitting ? { scale: 0.98 } : {}}
           >
-            <Send className="w-4 h-4" />
-            <span>Create & Submit for Approval</span>
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span>Creating Invoice...</span>
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                <span>Create & Submit for Approval</span>
+              </>
+            )}
           </motion.button>
         </div>
       </motion.div>

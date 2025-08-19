@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Users, Plus, Search, Calendar, DollarSign, Clock, CheckCircle } from 'lucide-react';
+import { FileText, Users, Plus, Search, Calendar, Banknote, Clock, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Import sections (to be created)
@@ -40,7 +40,7 @@ const InvoicingTab: React.FC = () => {
     {
       id: 'invoices' as ViewMode,
       label: 'Invoices',
-      icon: DollarSign,
+      icon: Banknote,
       color: '#243F7B'
     },
     {
