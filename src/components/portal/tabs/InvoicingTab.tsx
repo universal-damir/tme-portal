@@ -10,11 +10,12 @@ import { ClientManagementSection } from '@/components/invoicing/sections/ClientM
 import { InvoiceListSection } from '@/components/invoicing/sections/InvoiceListSection';
 import { InvoiceCreationForm } from '@/components/invoicing/sections/InvoiceCreationForm';
 import { InvoiceSummaryDashboard } from '@/components/invoicing/sections/InvoiceSummaryDashboard';
+import { ManagerDashboard } from '@/components/invoicing/sections/ManagerDashboard';
 
 // Types
 import { InvoiceClient, Invoice } from '@/types/invoicing';
 
-type ViewMode = 'dashboard' | 'clients' | 'invoices' | 'create';
+type ViewMode = 'dashboard' | 'clients' | 'invoices' | 'create' | 'approvals';
 
 const InvoicingTab: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('dashboard');
@@ -41,6 +42,12 @@ const InvoicingTab: React.FC = () => {
       label: 'Invoices',
       icon: DollarSign,
       color: '#243F7B'
+    },
+    {
+      id: 'approvals' as ViewMode,
+      label: 'Approvals',
+      icon: CheckCircle,
+      color: '#f59e0b'
     },
     {
       id: 'create' as ViewMode,
@@ -87,6 +94,13 @@ const InvoicingTab: React.FC = () => {
             selectedInvoice={selectedInvoice}
             onInvoiceSelect={setSelectedInvoice}
             onCreateNew={() => setViewMode('create')}
+          />
+        );
+
+      case 'approvals':
+        return (
+          <ManagerDashboard
+            onNavigate={(mode) => setViewMode(mode as ViewMode)}
           />
         );
       

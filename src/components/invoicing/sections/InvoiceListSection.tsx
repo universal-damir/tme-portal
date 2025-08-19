@@ -21,6 +21,9 @@ import {
 } from 'lucide-react';
 import { Invoice, InvoiceStatus } from '@/types/invoicing';
 import { toast } from 'sonner';
+import { EmailPreviewModal, EmailPreviewData } from '@/components/shared/EmailPreviewModal';
+import { generateInvoiceEmailContent, generateInvoiceEmailSubject, InvoiceEmailData } from '@/lib/invoicing/invoice-email-templates';
+import { PaymentRecordingModal } from './PaymentRecordingModal';
 
 interface InvoiceListSectionProps {
   selectedInvoice?: Invoice | null;
@@ -41,6 +44,16 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month' | 'year'>('month');
   const [sortBy, setSortBy] = useState<'date' | 'number' | 'amount' | 'status'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  
+  // Email modal state
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedInvoiceForEmail, setSelectedInvoiceForEmail] = useState<Invoice | null>(null);
+  const [emailData, setEmailData] = useState<EmailPreviewData | null>(null);
+  const [isEmailSending, setIsEmailSending] = useState(false);
+
+  // Payment recording modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedInvoiceForPayment, setSelectedInvoiceForPayment] = useState<Invoice | null>(null);
 
   useEffect(() => {
     fetchInvoices();
@@ -228,6 +241,180 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handleSendEmail = async (invoice: Invoice) => {
+    if (!invoice.client) {
+      toast.error('Client information is missing');
+      return;
+    }
+
+    try {
+      // Generate PDF for attachment
+      let pdfBlob: Blob | undefined;
+      let pdfFilename: string | undefined;
+
+      try {
+        const pdfResponse = await fetch(`/api/invoicing/invoices/${invoice.id}/pdf`, {
+          method: 'POST',
+          credentials: 'same-origin'
+        });
+
+        if (pdfResponse.ok) {
+          const pdfData = await pdfResponse.json();
+          // Convert base64 back to blob
+          const byteCharacters = atob(pdfData.data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          pdfBlob = new Blob([byteArray], { type: 'application/pdf' });
+          pdfFilename = pdfData.filename;
+        }
+      } catch (pdfError) {
+        console.warn('Failed to generate PDF for email attachment:', pdfError);
+        // Continue without PDF attachment
+      }
+
+      // Generate email content
+      const emailTemplateData: InvoiceEmailData = {
+        invoice,
+        clientName: invoice.client.clientName,
+        managerName: invoice.client.managerName,
+        companyName: invoice.client.issuingCompany,
+      };
+
+      const subject = generateInvoiceEmailSubject(invoice, invoice.client.clientName);
+      const htmlContent = generateInvoiceEmailContent(emailTemplateData);
+
+      // Prepare email data for modal
+      const emailPreviewData: EmailPreviewData = {
+        to: [invoice.client.managerName ? `${invoice.client.managerName}@example.com` : 'manager@example.com'], // TODO: Get actual email from client data
+        subject,
+        htmlContent,
+        attachments: pdfFilename ? [
+          {
+            filename: pdfFilename,
+            contentType: 'application/pdf',
+            size: pdfBlob?.size
+          }
+        ] : []
+      };
+
+      setSelectedInvoiceForEmail(invoice);
+      setEmailData(emailPreviewData);
+      setShowEmailModal(true);
+    } catch (error) {
+      console.error('Error preparing email:', error);
+      toast.error('Failed to prepare email');
+    }
+  };
+
+  const handleEmailSend = async (emailData: EmailPreviewData) => {
+    if (!selectedInvoiceForEmail) {
+      toast.error('No invoice selected');
+      return;
+    }
+
+    try {
+      setIsEmailSending(true);
+      
+      const response = await fetch(`/api/invoicing/invoices/${selectedInvoiceForEmail.id}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify(emailData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        toast.success(`Invoice ${selectedInvoiceForEmail.invoiceNumber} sent successfully`);
+        
+        // Update the invoice status in the local state
+        setInvoices(prev => prev.map(inv => 
+          inv.id === selectedInvoiceForEmail.id 
+            ? { ...inv, status: 'sent' as InvoiceStatus, sentAt: result.sentAt }
+            : inv
+        ));
+        
+        setShowEmailModal(false);
+        setSelectedInvoiceForEmail(null);
+        setEmailData(null);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to send invoice');
+      }
+    } catch (error) {
+      console.error('Error sending invoice:', error);
+      toast.error('Failed to send invoice');
+    } finally {
+      setIsEmailSending(false);
+    }
+  };
+
+  const handleDownloadPDF = async (invoice: Invoice) => {
+    try {
+      const response = await fetch(`/api/invoicing/invoices/${invoice.id}/pdf`, {
+        credentials: 'same-origin'
+      });
+
+      if (response.ok) {
+        // Create blob from response
+        const blob = await response.blob();
+        
+        // Get filename from response headers or generate one
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `Invoice_${invoice.invoiceNumber}.pdf`;
+        
+        if (contentDisposition) {
+          const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+          if (filenameMatch) {
+            filename = filenameMatch[1];
+          }
+        }
+
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast.success(`Downloaded ${filename}`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || 'Failed to download PDF');
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      toast.error('Failed to download PDF');
+    }
+  };
+
+  const handleRecordPayment = (invoice: Invoice) => {
+    setSelectedInvoiceForPayment(invoice);
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentRecorded = (paymentResult: any) => {
+    // Update the local invoice data with new payment information
+    setInvoices(prev => prev.map(inv => 
+      inv.id === paymentResult.invoiceId 
+        ? { 
+            ...inv, 
+            paidAmount: paymentResult.invoice.paidAmount,
+            balanceDue: paymentResult.invoice.balanceDue,
+            status: paymentResult.invoice.status as InvoiceStatus
+          }
+        : inv
+    ));
+
+    setShowPaymentModal(false);
+    setSelectedInvoiceForPayment(null);
   };
 
   return (
@@ -446,25 +633,41 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
                           <motion.button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // Handle download action
+                              handleDownloadPDF(invoice);
                             }}
                             className="p-1 hover:bg-gray-100 rounded"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            title="Download PDF"
                           >
-                            <Download className="w-4 h-4 text-gray-600" />
+                            <Download className="w-4 h-4 text-green-600" />
                           </motion.button>
                           {invoice.status === 'approved' && (
                             <motion.button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                // Handle send action
+                                handleSendEmail(invoice);
                               }}
                               className="p-1 hover:bg-gray-100 rounded"
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
+                              title="Send to client"
                             >
-                              <Send className="w-4 h-4 text-gray-600" />
+                              <Send className="w-4 h-4 text-blue-600" />
+                            </motion.button>
+                          )}
+                          {(invoice.balanceDue && invoice.balanceDue > 0) && (
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRecordPayment(invoice);
+                              }}
+                              className="p-1 hover:bg-gray-100 rounded"
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              title="Record payment"
+                            >
+                              <DollarSign className="w-4 h-4 text-purple-600" />
                             </motion.button>
                           )}
                         </div>
@@ -490,6 +693,37 @@ export const InvoiceListSection: React.FC<InvoiceListSectionProps> = ({
             </div>
           )}
         </div>
+      )}
+
+      {/* Email Preview Modal */}
+      {showEmailModal && emailData && (
+        <EmailPreviewModal
+          isOpen={showEmailModal}
+          onClose={() => {
+            setShowEmailModal(false);
+            setSelectedInvoiceForEmail(null);
+            setEmailData(null);
+          }}
+          emailData={emailData}
+          onSend={handleEmailSend}
+          loading={isEmailSending}
+          // TODO: Add PDF generation here when implemented
+          // pdfBlob={invoicePdfBlob}
+          // pdfFilename={`${selectedInvoiceForEmail?.invoiceNumber}.pdf`}
+        />
+      )}
+
+      {/* Payment Recording Modal */}
+      {showPaymentModal && selectedInvoiceForPayment && (
+        <PaymentRecordingModal
+          isOpen={showPaymentModal}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setSelectedInvoiceForPayment(null);
+          }}
+          invoice={selectedInvoiceForPayment}
+          onPaymentRecorded={handlePaymentRecorded}
+        />
       )}
     </div>
   );
