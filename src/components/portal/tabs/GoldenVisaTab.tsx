@@ -18,6 +18,7 @@ import {
   ClientDetailsSection,
   VisaTypeSection,
   CompanySelectionSection,
+  GoldenVisaTypeSelection,
   NOCRequirementsSection,
   DependentVisasSection
 } from '../../golden-visa';
@@ -961,7 +962,15 @@ const GoldenVisaTab: React.FC = () => {
         register={register}
       />
 
-      {/* Golden Visa Type Selection with Authority Costs on Right */}
+      {/* Golden Visa Type Selection - MOVED ABOVE */}
+      <GoldenVisaTypeSelection
+        register={register}
+        onVisaTypeChange={handleVisaTypeChange}
+        currentVisaType={watchedData.visaType}
+        errors={errors}
+      />
+
+      {/* Golden Visa Details Section (former VisaTypeSection without radio buttons) */}
       <VisaTypeSection
         register={register}
         errors={errors}

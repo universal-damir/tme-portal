@@ -90,6 +90,11 @@ interface DependentVisaCardProps {
   fileOpeningDisabled?: boolean;
   
   /**
+   * Current selected visa type - used to conditionally show third party costs
+   */
+  visaType?: string;
+  
+  /**
    * Handler for authority fee field changes
    */
   onAuthorityFeeChange: (field: string, value: number) => void;
@@ -117,6 +122,7 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
   visaCancellationFee = 0,
   fileOpening = false,
   fileOpeningDisabled = false,
+  visaType,
   onAuthorityFeeChange,
   onVisaCancellationChange,
   onVisaCancellationFeeChange,
@@ -124,6 +130,19 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
 }) => {
   const config = DEPENDENT_CONFIGS[type];
   const { colorScheme } = config;
+  
+  // Filter fields to only show third party costs for property investment visa
+  const filteredFields = config.authorityFields.filter(field => {
+    // Always show standard authority costs
+    if (field.key.includes('standardAuthority')) {
+      return true;
+    }
+    // Only show third party costs for property investment visa
+    if (field.key.includes('thirdPartyCosts')) {
+      return visaType === 'property-investment';
+    }
+    return true;
+  });
   
   return (
     <div 
@@ -147,7 +166,7 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
 
       {/* Authority Fee Fields */}
       <div className="space-y-4">
-        {config.authorityFields.map((field) => (
+        {filteredFields.map((field) => (
           <div key={field.key} className="max-w-sm">
             <NumberInputField
               label={field.label}

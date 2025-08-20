@@ -11,6 +11,7 @@ export * from './ui/ChildrenCounter';
 export * from './sections/AuthorityFeesSection';
 export * from './sections/ClientDetailsSection';
 export * from './sections/CompanySelectionSection';
+export * from './sections/GoldenVisaTypeSelection';
 export * from './sections/VisaTypeSection';
 export * from './sections/DependentVisasSection';
 export * from './sections/NOCRequirementsSection';

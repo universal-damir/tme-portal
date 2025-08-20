@@ -409,14 +409,17 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
       });
     }
 
-    itemNumber++;
-    services.push({
-      id: 'spouse-third-party-costs',
-      condition: true,
-      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
-      amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
-      explanation: t.dependentCosts.explanations.thirdPartyCosts
-    });
+    // Only include third party costs for property investment visa
+    if (goldenVisaData.visaType === 'property-investment') {
+      itemNumber++;
+      services.push({
+        id: 'spouse-third-party-costs',
+        condition: true,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+        amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
+        explanation: t.dependentCosts.explanations.thirdPartyCosts
+      });
+    }
   } else {
     // Fallback to legacy structure
     services.push({
@@ -513,14 +516,17 @@ export function generateGoldenVisaSpouseVisaBreakdownForExplanations(goldenVisaD
       });
     }
 
-    itemNumber++;
-    services.push({
-      id: 'spouse-third-party-costs',
-      condition: true,
-      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
-      amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
-      explanation: t.dependentCosts.explanations.thirdPartyCosts
-    });
+    // Only include third party costs for property investment visa
+    if (goldenVisaData.visaType === 'property-investment') {
+      itemNumber++;
+      services.push({
+        id: 'spouse-third-party-costs',
+        condition: true,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+        amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
+        explanation: t.dependentCosts.explanations.thirdPartyCosts
+      });
+    }
   } else {
     // Fallback to legacy structure
     services.push({
@@ -622,16 +628,19 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       });
     }
 
-    itemNumber++;
-    services.push({
-      id: 'children-third-party-costs',
-      condition: true,
-      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
-      amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
-      explanation: locale === 'de' ? 
-        `Von verschiedenen Abteilungen erhobene Verwaltungskosten für ${childText}.` : 
-        `Administrative costs charged by various departments for ${childText}.`
-    });
+    // Only include third party costs for property investment visa
+    if (goldenVisaData.visaType === 'property-investment') {
+      itemNumber++;
+      services.push({
+        id: 'children-third-party-costs',
+        condition: true,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+        amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
+        explanation: locale === 'de' ? 
+          'Von verschiedenen Abteilungen erhobene Verwaltungskosten.' : 
+          'Administrative costs charged by various departments.'
+      });
+    }
   } else {
     // Fallback to legacy structure
     services.push({
@@ -733,16 +742,19 @@ export function generateGoldenVisaChildrenVisaBreakdownForExplanations(goldenVis
       });
     }
 
-    itemNumber++;
-    services.push({
-      id: 'children-third-party-costs',
-      condition: true,
-      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
-      amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
-      explanation: locale === 'de' ? 
-        `Von verschiedenen Abteilungen erhobene Verwaltungskosten für ${childText}.` : 
-        `Administrative costs charged by various departments for ${childText}.`
-    });
+    // Only include third party costs for property investment visa
+    if (goldenVisaData.visaType === 'property-investment') {
+      itemNumber++;
+      services.push({
+        id: 'children-third-party-costs',
+        condition: true,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+        amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
+        explanation: locale === 'de' ? 
+          'Von verschiedenen Abteilungen erhobene Verwaltungskosten.' : 
+          'Administrative costs charged by various departments.'
+      });
+    }
   } else {
     // Fallback to legacy structure
     services.push({
@@ -825,15 +837,18 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
         });
       }
 
-      services.push({
-        id: `child-${childNumber}-third-party-costs`,
-        condition: true,
-        description: locale === 'de' ? 
-          (hasVisaCancellation ? '3. Drittanbieterkosten' : '2. Drittanbieterkosten') :
-          (hasVisaCancellation ? '3. Third party costs' : '2. Third party costs'),
-        amount: fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0,
-        explanation: locale === 'de' ? 'Von verschiedenen Abteilungen erhobene Verwaltungskosten.' : 'Administrative costs charged by various departments.'
-      });
+      // Only include third party costs for property investment visa
+      if (goldenVisaData.visaType === 'property-investment') {
+        services.push({
+          id: `child-${childNumber}-third-party-costs`,
+          condition: true,
+          description: locale === 'de' ? 
+            (hasVisaCancellation ? '3. Drittanbieterkosten' : '2. Drittanbieterkosten') :
+            (hasVisaCancellation ? '3. Third party costs' : '2. Third party costs'),
+          amount: fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0,
+          explanation: locale === 'de' ? 'Von verschiedenen Abteilungen erhobene Verwaltungskosten.' : 'Administrative costs charged by various departments.'
+        });
+      }
     } else {
       // Fallback to legacy structure
       services.push({

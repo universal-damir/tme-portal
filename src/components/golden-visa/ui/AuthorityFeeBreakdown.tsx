@@ -94,8 +94,8 @@ export const AuthorityFeeBreakdown: React.FC<AuthorityFeeBreakdownProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Authority Fee Fields - Single row layout */}
-      <div className="grid grid-cols-1 gap-4">
+      {/* Authority Fee Fields with Visa Cancellation in same row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {fields.map((field) => (
           <div key={field.key} className="max-w-sm">
             <NumberInputField
@@ -107,19 +107,18 @@ export const AuthorityFeeBreakdown: React.FC<AuthorityFeeBreakdownProps> = ({
             />
           </div>
         ))}
-      </div>
-
-      {/* Visa cancellation section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <VisaCancellationField
-          checked={data.visaCancellation as boolean || false}
-          onCheckedChange={onVisaCancellationChange}
-          fee={data.visaCancellationFee as number}
-          onFeeChange={onVisaCancellationFeeChange}
-          label="Visa Cancellation (AED 186)"
-          description="Check the box if visa cancellation is required"
-        />
-        <div></div> {/* Empty div to maintain grid structure */}
+        
+        {/* Visa Cancellation Field - Now in the same grid */}
+        <div className="max-w-sm">
+          <VisaCancellationField
+            checked={data.visaCancellation as boolean || false}
+            onCheckedChange={onVisaCancellationChange}
+            fee={data.visaCancellationFee as number}
+            onFeeChange={onVisaCancellationFeeChange}
+            label="Visa Cancellation (AED 186)"
+            description="Check the box if visa cancellation is required"
+          />
+        </div>
       </div>
     </div>
   );
