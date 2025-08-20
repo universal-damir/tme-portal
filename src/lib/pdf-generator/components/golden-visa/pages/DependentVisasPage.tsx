@@ -10,7 +10,9 @@ import {
 import { 
   generateGoldenVisaSpouseVisaBreakdown,
   generateGoldenVisaChildrenVisaBreakdown,
-  generateGoldenVisaIndividualChildVisaBreakdowns
+  generateGoldenVisaIndividualChildVisaBreakdowns,
+  generateGoldenVisaSpouseVisaBreakdownForExplanations,
+  generateGoldenVisaChildrenVisaBreakdownForExplanations
 } from '../../../utils/goldenVisaDataTransformer';
 import { DependentRequirementsSection } from '../sections/DependentRequirementsSection';
 import { GOLDEN_VISA_TRANSLATIONS, Locale } from '../../../translations/golden-visa';
@@ -65,9 +67,28 @@ export const DependentVisasPage: React.FC<PDFComponentProps> = ({ data }) => {
   // Get translated intro content
   const introContent = t.dependentCosts.introText;
 
+  // Helper function to get all services including TME (for explanations)
+  const getAllServicesForExplanations = () => {
+    const allServices = [];
+    
+    // Get spouse services including TME
+    if (hasSpouse) {
+      const spouseServices = generateGoldenVisaSpouseVisaBreakdownForExplanations(goldenVisaData, locale);
+      allServices.push(...spouseServices);
+    }
+    
+    // Get children services including TME
+    if (hasChildren) {
+      const childrenServices = generateGoldenVisaChildrenVisaBreakdownForExplanations(goldenVisaData, locale);
+      allServices.push(...childrenServices);
+    }
+    
+    return allServices;
+  };
+
   // Generate explanations from all services
   const generateExplanations = () => {
-    const allServices = [...spouseVisa, ...childrenVisa];
+    const allServices = getAllServicesForExplanations();
     
     // Group explanations by service type to avoid repetition
     const explanationGroups: { [key: string]: { contexts: string[]; explanation: string; } } = {};

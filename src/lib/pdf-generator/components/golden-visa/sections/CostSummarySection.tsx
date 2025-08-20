@@ -42,18 +42,18 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
     
     // Only include primary visa costs if primary visa is required
     if (goldenVisaData?.primaryVisaRequired) {
-      // Calculate authority total from detailed breakdown
+      // Calculate authority total to match detailed breakdown exactly
       let authorityTotal = 0;
       if (goldenVisaData?.visaType === 'property-investment' && goldenVisaData?.propertyAuthorityFees) {
         const fees = goldenVisaData.propertyAuthorityFees;
-        authorityTotal = fees.professionalPassportPicture + fees.dldApprovalFee + fees.mandatoryUaeMedicalTest + 
-                       fees.emiratesIdFee + fees.immigrationResidencyFee + fees.thirdPartyCosts;
-        if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
+        authorityTotal = fees.dldApprovalFee + 
+                       (fees.standardAuthorityCosts || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFee) || 5010) + 
+                       fees.thirdPartyCosts;
+        if (fees.visaCancellation && fees.visaCancellationFee > 0) authorityTotal += fees.visaCancellationFee;
       } else if ((goldenVisaData?.visaType === 'time-deposit' || goldenVisaData?.visaType === 'skilled-employee') && goldenVisaData?.skilledEmployeeAuthorityFees) {
         const fees = goldenVisaData.skilledEmployeeAuthorityFees;
-        authorityTotal = fees.professionalPassportPicture + fees.mandatoryUaeMedicalTest + 
-                       fees.emiratesIdFee + fees.immigrationResidencyFee;
-        if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
+        authorityTotal = (fees.standardAuthorityCosts || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFee) || 5010);
+        if (fees.visaCancellation && fees.visaCancellationFee > 0) authorityTotal += fees.visaCancellationFee;
       } else {
         // Fallback to legacy calculation
         authorityTotal = goldenVisaData?.governmentFee || 0;

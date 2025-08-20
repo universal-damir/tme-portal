@@ -49,7 +49,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
       mandatoryUaeMedicalTest: 700,
       emiratesIdFee: 1155,
       immigrationResidencyFeeSpouse: 2860,
-      thirdPartyCostsSpouse: 1460
+      thirdPartyCostsSpouse: 1086
     };
     
     // Set default authority fees if not already set
@@ -61,7 +61,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     
     // Set default TME service fee only if it's undefined (not just 0)
     if (dependents.spouse?.tmeServicesFee === undefined) {
-      onFieldChange('dependents.spouse.tmeServicesFee', 2240);
+      onFieldChange('dependents.spouse.tmeServicesFee', 3487);
     }
   };
 
@@ -92,7 +92,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
       mandatoryUaeMedicalTest: 700,
       emiratesIdFee: 1155,
       immigrationResidencyFeeChild: 2750,
-      thirdPartyCostsChild: 1460
+      thirdPartyCostsChild: 911
     };
     
     // Set default authority fees if not already set
@@ -104,7 +104,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
     
     // Set default TME service fee only if it's undefined (not just 0)
     if (dependents.children?.tmeServicesFee === undefined) {
-      onFieldChange('dependents.children.tmeServicesFee', 1690);
+      onFieldChange('dependents.children.tmeServicesFee', 2930);
     }
   };
 
@@ -221,9 +221,9 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <div className="bg-slate-100 border border-slate-300 rounded-lg p-4">
                 <NumberInputField
                   label="TME Professional Service Fee - Spouse (AED)"
-                  value={dependents.spouse?.tmeServicesFee !== undefined ? dependents.spouse.tmeServicesFee : 2240}
+                  value={dependents.spouse?.tmeServicesFee !== undefined ? dependents.spouse.tmeServicesFee : 3487}
                   onChange={handleSpouseTMEServicesFeeChange}
-                  placeholder="2,240"
+                  placeholder="3,487"
                   className="focus:ring-slate-500"
                 />
               </div>
@@ -337,9 +337,9 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
               <div className="bg-slate-200 border border-slate-400 rounded-lg p-4">
                 <NumberInputField
                   label="TME Professional Service Fee per Child (AED)"
-                  value={dependents.children?.tmeServicesFee !== undefined ? dependents.children.tmeServicesFee : 1690}
+                  value={dependents.children?.tmeServicesFee !== undefined ? dependents.children.tmeServicesFee : 2930}
                   onChange={handleChildrenTMEServicesFeeChange}
-                  placeholder="1,690"
+                  placeholder="2,930"
                   className="focus:ring-slate-500"
                 />
               </div>

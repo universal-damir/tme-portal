@@ -174,19 +174,23 @@ export const goldenVisaSchema = z.object({
     immigrationResidencyFee: z.number().min(0),
     visaCancelation: z.boolean(),
     visaCancelationFee: z.number().min(0),
-    thirdPartyCosts: z.number().min(0),
+    thirdPartyCosts: z.number().min(0).optional(),
   }).optional(),
   
   dependentAuthorityFees: z.object({
     professionalPassportPicture: z.number().min(0),
     dependentFileOpening: z.number().min(0),
+    dependentFileOpeningForSpouse: z.boolean().optional(),
+    dependentFileOpeningForChild: z.boolean().optional(),
     mandatoryUaeMedicalTest: z.number().min(0),
     emiratesIdFee: z.number().min(0),
     immigrationResidencyFeeSpouse: z.number().min(0),
     immigrationResidencyFeeChild: z.number().min(0),
     visaCancelation: z.boolean(),
     visaCancelationFee: z.number().min(0),
-    thirdPartyCosts: z.number().min(0),
+    thirdPartyCosts: z.number().min(0).optional(),
+    thirdPartyCostsSpouse: z.number().min(0).optional(),
+    thirdPartyCostsChild: z.number().min(0).optional(),
   }).optional(),
 
   // Legacy fields
@@ -194,8 +198,8 @@ export const goldenVisaSchema = z.object({
   selectedFreezone: z.enum(['dmcc', 'adgm', 'difc', 'ifza', 'abu-dhabi', 'dafza', 'jafza', 'dubai-internet-city', 'meydan'], {
     required_error: 'Please select a freezone',
   }).optional(),
-  governmentFee: z.number().min(0, 'Government fee must be positive'),
-  tmeServicesFee: z.number().min(0, 'TME services fee must be positive'),
+  governmentFee: z.number().min(0, 'Government fee must be positive').optional(),
+  tmeServicesFee: z.number().min(0, 'TME services fee must be positive').optional(),
   freezoneNocFee: z.number().min(0, 'Freezone NOC fee must be positive').optional(),
   governmentCostsSkilledEmployee: z.number().min(0, 'Government costs must be positive').optional(),
   dependents: z.object({

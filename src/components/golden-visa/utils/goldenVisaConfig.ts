@@ -71,7 +71,7 @@ export const AUTHORITY_FEE_PLACEHOLDERS = {
   immigrationResidencyFeeChild: '2,750.00',
   thirdPartyCosts: '1,385.00',
   dependentFileOpening: '319.00',
-  visaCancellationFee: '185',
+  visaCancellationFee: '186',
 } as const;
 
 /**

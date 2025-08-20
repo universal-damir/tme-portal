@@ -58,7 +58,7 @@ export const VisaCancellationField: React.FC<VisaCancellationFieldProps> = ({
   onCheckedChange,
   fee,
   onFeeChange,
-  label = 'Visa cancellation (AED 185)',
+  label = 'Visa cancellation (AED 186)',
   feeLabel = 'Visa cancellation fee',
   description = 'Check the box if visa cancellation is required',
   className = '',
@@ -74,9 +74,9 @@ export const VisaCancellationField: React.FC<VisaCancellationFieldProps> = ({
     // Auto-populate fee when checked, clear when unchecked
     if (onFeeChange) {
       if (isChecked) {
-        // Auto-populate with 185 (without decimals) if no fee is set
+        // Auto-populate with 186 (without decimals) if no fee is set
         if (!fee || fee === 0) {
-          onFeeChange(185);
+          onFeeChange(186);
         }
       } else {
         // Clear the fee when unchecked

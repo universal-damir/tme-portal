@@ -577,10 +577,29 @@ const GoldenVisaTab: React.FC = () => {
   };
 
   const handlePreviewPDF = async (data: GoldenVisaData) => {
+    console.log('🔍 DEBUG: Preview clicked with data:', data);
+    
     // Validate the entire form data using Zod schema
     try {
+      console.log('🔍 DEBUG: Starting form validation...');
       await goldenVisaSchema.parseAsync(data);
+      console.log('✅ DEBUG: Form validation passed');
     } catch (validationError: any) {
+      console.log('❌ DEBUG: Form validation failed:', validationError);
+      console.log('❌ DEBUG: Validation errors:', validationError.errors || validationError.issues);
+      
+      // Log each error with its path for easier debugging
+      const errors = validationError.errors || validationError.issues || [];
+      errors.forEach((error: any, index: number) => {
+        console.log(`❌ DEBUG: Error ${index + 1}:`, {
+          path: error.path,
+          message: error.message,
+          expected: error.expected,
+          received: error.received,
+          fullError: error
+        });
+      });
+      
       // Trigger form validation to show field-level errors
       await trigger();
       

@@ -38,9 +38,9 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
     },
     authorityFields: [
       { key: 'standardAuthorityCostsSpouse', label: 'Standard Authority Costs', placeholder: '4,710' },
-      { key: 'thirdPartyCostsSpouse', label: 'Third Party Costs', placeholder: '1,460' },
+      { key: 'thirdPartyCostsSpouse', label: 'Third Party Costs', placeholder: '1,086' },
     ],
-    visaCancellationLabel: 'Visa cancellation (AED 185)',
+    visaCancellationLabel: 'Visa cancellation (AED 186)',
   },
   children: {
     title: 'Children Authority Costs Breakdown (per child)',
@@ -52,9 +52,9 @@ const DEPENDENT_CONFIGS: Record<'spouse' | 'children', DependentVisaConfig> = {
     },
     authorityFields: [
       { key: 'standardAuthorityCostsChild', label: 'Standard Authority Costs', placeholder: '4,604' },
-      { key: 'thirdPartyCostsChild', label: 'Third Party Costs', placeholder: '1,460' },
+      { key: 'thirdPartyCostsChild', label: 'Third Party Costs', placeholder: '911' },
     ],
-    visaCancellationLabel: 'Visa cancellation (AED 185 per child)',
+    visaCancellationLabel: 'Visa cancellation (AED 186 per child)',
   },
 };
 
@@ -141,7 +141,7 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
           disabled={fileOpeningDisabled}
           onCheckedChange={onFileOpeningChange}
           label={`Dependent File Opening (AED 319) - ${type === 'spouse' ? 'Spouse' : 'First Child'}`}
-          description={`One-time fee for opening dependent visa file. Can only be applied to ${type === 'spouse' ? 'spouse' : 'first child'} if no spouse visa.`}
+          description="One-time fee for opening dependent visa file."
         />
       )}
 

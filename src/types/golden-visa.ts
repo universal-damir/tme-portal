@@ -120,25 +120,25 @@ export const GOLDEN_VISA_DEFAULTS = {
   primaryVisaRequired: true,
   propertyInvestment: {
     governmentFee: 10000,
-    tmeServicesFee: 4820 // Updated from 4585 to 4820
+    tmeServicesFee: 4818 // Updated from 4585 to 4818
   },
   timeDeposit: {
     governmentFee: 10000,
-    tmeServicesFee: 4820 // Updated from 4585 to 4820
+    tmeServicesFee: 4818 // Updated from 4585 to 4818
   },
   skilledEmployee: {
     freezoneNocFee: 2020,
     governmentCostsSkilledEmployee: 5000,
-    tmeServicesFee: 4820 // Updated from 4587 to 4820
+    tmeServicesFee: 4818 // Updated from 4587 to 4818
   },
   dependents: {
     spouse: {
       governmentFee: 6730,
-      tmeServicesFee: 2240 // Updated from 3490 to 2240
+      tmeServicesFee: 3487 // Updated from 3490 to 3487
     },
     child: {
       governmentFee: 5500,
-      tmeServicesFee: 1690 // Updated from 2930 to 1690
+      tmeServicesFee: 2930 // Updated from 2930 to 2930
     }
   },
   // New authority fee defaults for Property Investment Golden Visa
@@ -150,7 +150,7 @@ export const GOLDEN_VISA_DEFAULTS = {
     emiratesIdFee: 1155.00,
     immigrationResidencyFee: 3160.00,
     visaCancelation: false,
-    visaCancelationFee: 185.00,
+    visaCancelationFee: 186.00,
     thirdPartyCosts: 1385.00,
   },
   // New authority fee defaults for Skilled/Employee Golden Visa (no DLD, no third-party costs)
@@ -161,7 +161,7 @@ export const GOLDEN_VISA_DEFAULTS = {
     emiratesIdFee: 1155.00,
     immigrationResidencyFee: 3160.00,
     visaCancelation: false,
-    visaCancelationFee: 185.00,
+    visaCancelationFee: 186.00,
   },
   // New authority fee defaults for Time Deposit Golden Visa (same as skilled employee - no DLD, no third-party costs)
   timeDepositAuthorityFees: {
@@ -171,7 +171,7 @@ export const GOLDEN_VISA_DEFAULTS = {
     emiratesIdFee: 1155.00,
     immigrationResidencyFee: 3160.00,
     visaCancelation: false,
-    visaCancelationFee: 185.00,
+    visaCancelationFee: 186.00,
   },
   // New authority fee defaults for Dependent visas
   dependentAuthorityFees: {
@@ -184,8 +184,8 @@ export const GOLDEN_VISA_DEFAULTS = {
     immigrationResidencyFeeSpouse: 2860.00,
     immigrationResidencyFeeChild: 2750.00,
     visaCancelation: false,
-    visaCancelationFee: 185.00,
-    thirdPartyCostsSpouse: 1460.00,
-    thirdPartyCostsChild: 1460.00,
+    visaCancelationFee: 186.00,
+    thirdPartyCostsSpouse: 1086.00,
+    thirdPartyCostsChild: 911.00,
   }
 }; 

@@ -153,15 +153,17 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       explanation: locale === 'de' ? t.costsBreakdown.explanations.thirdPartyCosts : 'Administrative costs charged by various departments.'
     });
 
-    // Add TME Services Professional Fee as final point
+    // Add TME Services for explanations only (not shown in table)
     const baseTmeServicesFee = goldenVisaData.tmeServicesFee || 0;
-    services.push({
-      id: 'tme-professional-fee',
-      condition: true,
-      description: locale === 'de' ? (fees.visaCancellation ? '5. TME Services Beratungsgebühr' : '4. TME Services Beratungsgebühr') : (fees.visaCancellation ? '5. TME Services professional fee' : '4. TME Services professional fee'),
-      amount: baseTmeServicesFee,
-      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
-    });
+    if (baseTmeServicesFee > 0) {
+      services.push({
+        id: 'tme-professional-fee',
+        condition: false, // Not shown in table, only used for explanations
+        description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+        amount: baseTmeServicesFee,
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+      });
+    }
   } else if ((visaType === 'time-deposit' || visaType === 'skilled-employee') && goldenVisaData.skilledEmployeeAuthorityFees) {
     // Time Deposit and Skilled Employee (without NOC) - no DLD fee
     const fees = goldenVisaData.skilledEmployeeAuthorityFees;
@@ -185,15 +187,17 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
     }
 
 
-    // Add TME Services Professional Fee as final point
+    // Add TME Services for explanations only (not shown in table)
     const baseTmeServicesFee = goldenVisaData.tmeServicesFee || 0;
-    services.push({
-      id: 'tme-professional-fee',
-      condition: true,
-      description: locale === 'de' ? (fees.visaCancellation ? '3. TME Services Beratungsgebühr' : '2. TME Services Beratungsgebühr') : (fees.visaCancellation ? '3. TME Services professional fee' : '2. TME Services professional fee'),
-      amount: baseTmeServicesFee,
-      explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
-    });
+    if (baseTmeServicesFee > 0) {
+      services.push({
+        id: 'tme-professional-fee',
+        condition: false, // Not shown in table, only used for explanations
+        description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+        amount: baseTmeServicesFee,
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+      });
+    }
   } else {
     // Fallback to simple structure for backwards compatibility
     services.push({
@@ -206,6 +210,114 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
   }
 
   return services.filter(service => service.condition);
+}
+
+// Generate Golden Visa Authority Fees breakdown for explanations (includes TME services)
+export function generateGoldenVisaAuthorityFeesBreakdownForExplanations(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[] {
+  const services: GoldenVisaServiceItem[] = [];
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
+  
+  // Only generate authority fees if primary visa is required
+  if (!goldenVisaData.primaryVisaRequired) {
+    return services;
+  }
+  
+  const visaType = goldenVisaData.visaType;
+
+  if (visaType === 'property-investment' && goldenVisaData.propertyAuthorityFees) {
+    // Property Investment - includes DLD fee
+    const fees = goldenVisaData.propertyAuthorityFees;
+    
+    services.push({
+      id: 'dld-approval',
+      condition: true,
+      description: locale === 'de' ? 'DLD Genehmigungs-/Bewertungsgebühr' : 'DLD (Dubai Land Department) approval cost',
+      amount: fees.dldApprovalFee,
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.dldApprovalFee : 'Verification for property investment Golden Visa applications.'
+    });
+
+    services.push({
+      id: 'standard-authority-costs',
+      condition: true,
+      description: locale === 'de' ? 'Standard Behördenkosten' : 'Standard authority costs',
+      amount: fees.standardAuthorityCosts || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFee) || 5010,
+      explanation: locale === 'de' ? `${t.costsBreakdown.explanations.mandatoryUaeMedicalTest} ${t.costsBreakdown.explanations.emiratesIdFee} ${t.costsBreakdown.explanations.immigrationResidencyFee}` : 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
+    });
+
+    if (fees.visaCancellation && fees.visaCancellationFee > 0) {
+      services.push({
+        id: 'visa-cancellation',
+        condition: true,
+        description: locale === 'de' ? 'Visa-Stornierungskosten' : 'Visa cancellation cost',
+        amount: fees.visaCancellationFee,
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For cancelling existing visa status before applying for Golden Visa.'
+      });
+    }
+
+    services.push({
+      id: 'third-party-costs',
+      condition: true,
+      description: locale === 'de' ? 'Drittanbieterkosten' : 'Third party costs',
+      amount: fees.thirdPartyCosts,
+      explanation: locale === 'de' ? t.costsBreakdown.explanations.thirdPartyCosts : 'Administrative costs charged by various departments.'
+    });
+
+    // Add TME Services for explanations (always include, not filtered out)
+    const baseTmeServicesFee = goldenVisaData.tmeServicesFee || 0;
+    if (baseTmeServicesFee > 0) {
+      services.push({
+        id: 'tme-professional-fee',
+        condition: false, // Not shown in table, only used for explanations
+        description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+        amount: baseTmeServicesFee,
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+      });
+    }
+  } else if ((visaType === 'time-deposit' || visaType === 'skilled-employee') && goldenVisaData.skilledEmployeeAuthorityFees) {
+    // Time Deposit and Skilled Employee (without NOC) - no DLD fee
+    const fees = goldenVisaData.skilledEmployeeAuthorityFees;
+    
+    services.push({
+      id: 'standard-authority-costs',
+      condition: true,
+      description: locale === 'de' ? 'Standard Behördenkosten' : 'Standard authority costs',
+      amount: fees.standardAuthorityCosts || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFee) || 5010,
+      explanation: locale === 'de' ? `${t.costsBreakdown.explanations.mandatoryUaeMedicalTest} ${t.costsBreakdown.explanations.emiratesIdFee} ${t.costsBreakdown.explanations.immigrationResidencyFee}` : 'For mandatory UAE medical test, Emirates ID, and immigration residency processing.'
+    });
+
+    if (fees.visaCancellation && fees.visaCancellationFee > 0) {
+      services.push({
+        id: 'visa-cancellation',
+        condition: true,
+        description: locale === 'de' ? 'Visa-Stornierungskosten' : 'Visa cancellation cost',
+        amount: fees.visaCancellationFee,
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.visaCancellationFee : 'For cancelling existing visa status before applying for Golden Visa.'
+      });
+    }
+
+    // Add TME Services for explanations (always include, not filtered out)
+    const baseTmeServicesFee = goldenVisaData.tmeServicesFee || 0;
+    if (baseTmeServicesFee > 0) {
+      services.push({
+        id: 'tme-professional-fee',
+        condition: false, // Not shown in table, only used for explanations
+        description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+        amount: baseTmeServicesFee,
+        explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+      });
+    }
+  } else {
+    // Fallback to simple structure for backwards compatibility
+    services.push({
+      id: 'government-fees',
+      condition: true,
+      description: locale === 'de' ? 'Behördenkosten (Medizintest + Emirates ID + Bearbeitung)' : 'Government Costs (Medical Test + Emirates ID + Processing)',
+      amount: goldenVisaData.governmentFee || 0,
+      explanation: locale === 'de' ? 'Behördenkosten einschließlich medizinischer Untersuchung, Emirates ID Bearbeitung und Visa-Antragsgebühren.' : 'Government costs including medical examination, Emirates ID processing, and visa application charges.'
+    });
+  }
+
+  return services; // Return all services, not filtered
 }
 
 // Generate TME Services breakdown with detailed numbered items
@@ -232,8 +344,8 @@ export function generateGoldenVisaTMEServicesBreakdown(goldenVisaData: GoldenVis
 
 // Generate explanations for authority fees and TME services
 export function generateGoldenVisaExplanations(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): Array<{ id: string; title: string; explanation: string }> {
-  const authorityServices = generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData, locale);
-  // TME Services is now included in authority breakdown, so no need to add separately
+  const authorityServices = generateGoldenVisaAuthorityFeesBreakdownForExplanations(goldenVisaData, locale);
+  // Now uses the explanation function that includes TME Services with condition: false
   
   return authorityServices
     .filter(service => service.explanation)
@@ -327,23 +439,123 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
     }
   }
 
-  // TME Services for spouse visa
-  const spouseHasVisaCancellation = goldenVisaData.dependentAuthorityFees ? 
-    ((goldenVisaData.dependentAuthorityFees.visaCancellation && goldenVisaData.dependentAuthorityFees.visaCancellationFee > 0) || 
-     (spouse.visaCancelation && spouse.visaCancelationFee && spouse.visaCancelationFee > 0)) : 
-    (spouse.visaCancelation && spouse.visaCancelationFee && spouse.visaCancelationFee > 0);
-  
-  services.push({
-    id: 'spouse-tme-services',
-    condition: true,
-    description: goldenVisaData.dependentAuthorityFees ? 
-      (spouseHasVisaCancellation ? `5. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}` : `4. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}`) :
-      (spouseHasVisaCancellation ? `3. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}` : `2. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}`),
-    amount: spouse.tmeServicesFee || 2240,
-    explanation: t.dependentCosts.explanations.tmeServicesProfessionalFee
-  });
+  // Add TME Services for explanations only (not shown in table)
+  const spouseTmeServicesFee = goldenVisaData.dependents?.spouse?.tmeServicesFee || 0;
+  if (spouseTmeServicesFee > 0) {
+    services.push({
+      id: 'spouse-tme-services',
+      condition: false, // Not shown in table, only used for explanations
+      description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+      amount: spouseTmeServicesFee,
+      explanation: locale === 'de' ? t.dependentCosts.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+    });
+  }
 
   return services.filter(service => service.condition);
+}
+
+// Generate Spouse Visa breakdown for explanations (includes TME services)
+export function generateGoldenVisaSpouseVisaBreakdownForExplanations(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[] {
+  const services: GoldenVisaServiceItem[] = [];
+  const spouse = goldenVisaData.dependents?.spouse;
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
+
+  if (!spouse?.required) return services;
+
+  // Use detailed authority fees if available, otherwise fallback to legacy
+  if (goldenVisaData.dependentAuthorityFees) {
+    const fees = goldenVisaData.dependentAuthorityFees;
+    
+    // File opening fee only applies if specifically checked for spouse
+    if (fees.dependentFileOpeningForSpouse) {
+      services.push({
+        id: 'spouse-file-opening',
+        condition: true,
+        description: `1. ${t.dependentCosts.serviceDescriptions.dependentFileOpening}`,
+        amount: fees.dependentFileOpening,
+        explanation: locale === 'de' ? 
+          'Einmalgebühr für die Eröffnung der Angehörigen-Visa-Datei (gilt nur für den ersten Angehörigen).' : 
+          'One-time fee for opening dependent visa file (applies to first dependent only).'
+      });
+    }
+
+    // Dynamic numbering based on whether file opening is included
+    const hasFileOpening = fees.dependentFileOpeningForSpouse;
+    let itemNumber = hasFileOpening ? 2 : 1;
+
+    services.push({
+      id: 'spouse-standard-authority-costs',
+      condition: true,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
+      amount: fees.standardAuthorityCostsSpouse || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeSpouse) || 4604,
+      explanation: locale === 'de' ? 
+        'Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung für Ehepartner.' : 
+        'For mandatory UAE medical test, Emirates ID, and immigration residency processing for spouse.'
+    });
+
+    // Check for visa cancellation - either from global setting or individual spouse setting
+    const hasSpouseVisaCancellation = (fees.visaCancellation && fees.visaCancellationFee > 0) || 
+                                     (spouse.visaCancelation && spouse.visaCancelationFee && spouse.visaCancelationFee > 0);
+    const spouseCancellationFee = spouse.visaCancelation && spouse.visaCancelationFee 
+                                ? spouse.visaCancelationFee 
+                                : fees.visaCancellationFee;
+    
+    if (hasSpouseVisaCancellation) {
+      itemNumber++;
+      services.push({
+        id: 'spouse-visa-cancellation',
+        condition: true,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
+        amount: spouseCancellationFee,
+        explanation: locale === 'de' ? 
+          'Für die Stornierung des bestehenden Visa-Status vor der Beantragung des Ehepartner-Angehörigen-Visa.' : 
+          'For canceling existing visa status before applying for spouse dependent visa.'
+      });
+    }
+
+    itemNumber++;
+    services.push({
+      id: 'spouse-third-party-costs',
+      condition: true,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+      amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
+      explanation: t.dependentCosts.explanations.thirdPartyCosts
+    });
+  } else {
+    // Fallback to legacy structure
+    services.push({
+      id: 'spouse-government-fees',
+      condition: true,
+      description: '1. Government Costs (Medical + Emirates ID + Processing)',
+      amount: spouse.governmentFee || 0,
+      explanation: 'Government costs for spouse visa including medical examination, Emirates ID processing, and visa application charges.'
+    });
+    
+    // Check for individual spouse visa cancellation in legacy structure
+    if (spouse.visaCancelation && spouse.visaCancelationFee && spouse.visaCancelationFee > 0) {
+      services.push({
+        id: 'spouse-visa-cancellation',
+        condition: true,
+        description: '2. Visa cancellation cost',
+        amount: spouse.visaCancelationFee,
+        explanation: 'For canceling existing visa status before applying for spouse dependent visa (if applicable).'
+      });
+    }
+  }
+
+  // Add TME Services for explanations (always include, not filtered out)
+  const spouseTmeServicesFee = goldenVisaData.dependents?.spouse?.tmeServicesFee || 0;
+  if (spouseTmeServicesFee > 0) {
+    services.push({
+      id: 'spouse-tme-services',
+      condition: false, // Not shown in table, only used for explanations
+      description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+      amount: spouseTmeServicesFee,
+      explanation: locale === 'de' ? t.dependentCosts.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+    });
+  }
+
+  return services; // Return all services, not filtered
 }
 
 // Generate Children Visa breakdown with detailed numbered items
@@ -442,29 +654,130 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
     }
   }
 
-  // TME Services for children visa
-  const childrenHasVisaCancellationForTME = goldenVisaData.dependentAuthorityFees ? 
-    ((goldenVisaData.dependentAuthorityFees.visaCancellation && goldenVisaData.dependentAuthorityFees.visaCancellationFee > 0) || 
-     (children.visaCancelation && children.visaCancelationFee && children.visaCancelationFee > 0)) : 
-    (children.visaCancelation && children.visaCancelationFee && children.visaCancelationFee > 0);
-  
-  const tmeNumber = !goldenVisaData.dependentAuthorityFees ? 
-    (childrenHasVisaCancellationForTME ? '3' : '2') : 
-    (!goldenVisaData.dependents?.spouse?.required ? 
-      (childrenHasVisaCancellationForTME ? '5' : '4') : 
-      (childrenHasVisaCancellationForTME ? '4' : '3'));
-  
-  services.push({
-    id: 'children-tme-services',
-    condition: true,
-    description: `${tmeNumber}. ${t.dependentCosts.serviceDescriptions.tmeServicesProfessionalFee}`,
-    amount: (children.tmeServicesFee || 1690) * numberOfChildren,
-    explanation: locale === 'de' ? 
-      `TME Services Beratungsgebühr: Umfasst die vollständige Verwaltung des ${childText}-Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.` : 
-      `Covers the complete management of the ${childText} visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.`
-  });
+  // Add TME Services for explanations only (not shown in table)
+  const childrenTmeServicesFee = goldenVisaData.dependents?.children?.tmeServicesFee || 0;
+  if (childrenTmeServicesFee > 0) {
+    services.push({
+      id: 'children-tme-services',
+      condition: false, // Not shown in table, only used for explanations
+      description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+      amount: childrenTmeServicesFee * numberOfChildren,
+      explanation: locale === 'de' ? t.dependentCosts.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+    });
+  }
 
   return services.filter(service => service.condition);
+}
+
+// Generate Children Visa breakdown for explanations (includes TME services)
+export function generateGoldenVisaChildrenVisaBreakdownForExplanations(goldenVisaData: GoldenVisaData, locale: Locale = 'en'): GoldenVisaServiceItem[] {
+  const services: GoldenVisaServiceItem[] = [];
+  const children = goldenVisaData.dependents?.children;
+  const t = GOLDEN_VISA_TRANSLATIONS[locale];
+  
+  if (!children?.count || children.count <= 0) return services;
+
+  const numberOfChildren = children.count;
+  const childText = numberOfChildren === 1 ? 
+    (locale === 'de' ? 'Kind' : 'child') : 
+    (locale === 'de' ? 'Kinder' : 'children');
+
+  // Use detailed authority fees if available, otherwise fallback to legacy
+  if (goldenVisaData.dependentAuthorityFees) {
+    const fees = goldenVisaData.dependentAuthorityFees;
+    
+    // File opening fee only applies if specifically checked for children (first child only)
+    if (fees.dependentFileOpeningForChild) {
+      services.push({
+        id: 'children-file-opening',
+        condition: true,
+        description: `1. ${t.dependentCosts.serviceDescriptions.dependentFileOpening}`,
+        amount: fees.dependentFileOpening,
+        explanation: locale === 'de' ? 
+          'Einmalgebühr für die Eröffnung der Angehörigen-Visa-Datei (gilt nur für den ersten Angehörigen).' : 
+          'One-time fee for opening dependent visa file (applies to first dependent only).'
+      });
+    }
+
+    // Dynamic numbering based on whether file opening is included
+    const hasFileOpening = fees.dependentFileOpeningForChild;
+    let itemNumber = hasFileOpening ? 2 : 1;
+
+    services.push({
+      id: 'children-standard-authority-costs',
+      condition: true,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
+      amount: (fees.standardAuthorityCostsChild || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeChild) || 4604) * numberOfChildren,
+      explanation: locale === 'de' ? 
+        `Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung für ${childText}.` : 
+        `For mandatory UAE medical test, Emirates ID, and immigration residency processing for ${childText}.`
+    });
+
+    // Check for visa cancellation - either from global setting or individual children setting
+    const hasChildrenVisaCancellation = (fees.visaCancellation && fees.visaCancellationFee > 0) || 
+                                       (children.visaCancelation && children.visaCancelationFee && children.visaCancelationFee > 0);
+    const childrenCancellationFee = children.visaCancelation && children.visaCancelationFee 
+                                  ? children.visaCancelationFee 
+                                  : fees.visaCancellationFee;
+    
+    if (hasChildrenVisaCancellation) {
+      itemNumber++;
+      services.push({
+        id: 'children-visa-cancellation',
+        condition: true,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
+        amount: childrenCancellationFee * numberOfChildren,
+        explanation: locale === 'de' ? 
+          `Für die Stornierung des bestehenden Visa-Status vor der Beantragung des ${childText}-Angehörigen-Visa.` : 
+          `For canceling existing visa status before applying for ${childText} dependent visa.`
+      });
+    }
+
+    itemNumber++;
+    services.push({
+      id: 'children-third-party-costs',
+      condition: true,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+      amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
+      explanation: locale === 'de' ? 
+        `Von verschiedenen Abteilungen erhobene Verwaltungskosten für ${childText}.` : 
+        `Administrative costs charged by various departments for ${childText}.`
+    });
+  } else {
+    // Fallback to legacy structure
+    services.push({
+      id: 'children-government-fees',
+      condition: true,
+      description: '1. Government Costs (Medical + Emirates ID + Processing)',
+      amount: (children.governmentFee || 0) * numberOfChildren,
+      explanation: `Government costs for ${childText} visa including medical examination, Emirates ID processing, and visa application charges.`
+    });
+    
+    // Check for individual children visa cancellation in legacy structure
+    if (children.visaCancelation && children.visaCancelationFee && children.visaCancelationFee > 0) {
+      services.push({
+        id: 'children-visa-cancellation',
+        condition: true,
+        description: '2. Visa cancellation cost',
+        amount: children.visaCancelationFee * numberOfChildren,
+        explanation: `For canceling existing visa status before applying for ${childText} dependent visa (if applicable).`
+      });
+    }
+  }
+
+  // Add TME Services for explanations (always include, not filtered out)
+  const childrenTmeServicesFee = goldenVisaData.dependents?.children?.tmeServicesFee || 0;
+  if (childrenTmeServicesFee > 0) {
+    services.push({
+      id: 'children-tme-services',
+      condition: false, // Not shown in table, only used for explanations
+      description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+      amount: childrenTmeServicesFee * numberOfChildren,
+      explanation: locale === 'de' ? t.dependentCosts.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+    });
+  }
+
+  return services; // Return all services, not filtered
 }
 
 // Generate individual child visa breakdowns for detailed view
@@ -532,22 +845,17 @@ export function generateGoldenVisaIndividualChildVisaBreakdowns(goldenVisaData: 
       });
     }
 
-    // TME Services for this child visa
-    services.push({
-      id: `child-${childNumber}-tme-services`,
-      condition: true,
-      description: locale === 'de' ? 
-        (goldenVisaData.dependentAuthorityFees ? 
-          (hasVisaCancellation ? '4. TME Services Beratungshonorar' : '3. TME Services Beratungshonorar') :
-          '2. TME Services Beratungshonorar') :
-        (goldenVisaData.dependentAuthorityFees ? 
-          (hasVisaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee') :
-          '2. TME Services professional fee'),
-      amount: children.tmeServicesFee || 1690,
-      explanation: locale === 'de' ? 
-        'Umfasst die vollständige Verwaltung des Kinder-Visa- und Emirates ID-Antragsverfahrens, einschließlich Dokumentenvorbereitung, Kontakt mit den zuständigen Behörden und persönlicher Begleitung durch ein erfahrenes TME Services Teammitglied zu allen erforderlichen Terminen.' :
-        'Covers the complete management of the child visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
-    });
+    // Add TME Services for explanations only (not shown in table)
+    const childTmeServicesFee = goldenVisaData.dependents?.children?.tmeServicesFee || 0;
+    if (childTmeServicesFee > 0) {
+      services.push({
+        id: `child-${childNumber}-tme-services`,
+        condition: false, // Not shown in table, only used for explanations
+        description: locale === 'de' ? 'TME Services Beratungsgebühr' : 'TME Services professional fee',
+        amount: childTmeServicesFee,
+        explanation: locale === 'de' ? t.dependentCosts.explanations.tmeServicesFee : t.costsBreakdown.explanations.tmeServicesFee
+      });
+    }
 
     individualBreakdowns.push(services);
   }

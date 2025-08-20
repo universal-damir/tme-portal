@@ -116,7 +116,7 @@ export const AuthorityFeeBreakdown: React.FC<AuthorityFeeBreakdownProps> = ({
           onCheckedChange={onVisaCancellationChange}
           fee={data.visaCancellationFee as number}
           onFeeChange={onVisaCancellationFeeChange}
-          label="Visa Cancellation (AED 185)"
+          label="Visa Cancellation (AED 186)"
           description="Check the box if visa cancellation is required"
         />
         <div></div> {/* Empty div to maintain grid structure */}
