@@ -44,7 +44,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
   const initializeSpouseDefaults = () => {
     const defaultValues = {
       professionalPassportPicture: 25,
-      dependentFileOpening: 320,
+      dependentFileOpening: 319,
       standardAuthorityCostsSpouse: 4710,
       mandatoryUaeMedicalTest: 700,
       emiratesIdFee: 1155,
@@ -87,7 +87,7 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
   const initializeChildrenDefaults = () => {
     const defaultValues = {
       professionalPassportPicture: 25,
-      dependentFileOpening: 320,
+      dependentFileOpening: 319,
       standardAuthorityCostsChild: 4604,
       mandatoryUaeMedicalTest: 700,
       emiratesIdFee: 1155,
@@ -127,6 +127,23 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
 
   const handleChildrenTMEServicesFeeChange = (fee: number) => {
     onFieldChange('dependents.children.tmeServicesFee', fee);
+  };
+
+  // Handlers for file opening checkboxes
+  const handleSpouseFileOpeningChange = (checked: boolean) => {
+    onFieldChange('dependentAuthorityFees.dependentFileOpeningForSpouse', checked);
+    // If spouse file opening is checked, uncheck children file opening
+    if (checked) {
+      onFieldChange('dependentAuthorityFees.dependentFileOpeningForChild', false);
+    }
+  };
+
+  const handleChildrenFileOpeningChange = (checked: boolean) => {
+    onFieldChange('dependentAuthorityFees.dependentFileOpeningForChild', checked);
+    // If children file opening is checked, uncheck spouse file opening
+    if (checked) {
+      onFieldChange('dependentAuthorityFees.dependentFileOpeningForSpouse', false);
+    }
   };
 
   return (
@@ -192,9 +209,12 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
                 authorityFees={authorityFees}
                 visaCancellation={dependents.spouse?.visaCancelation || false}
                 visaCancellationFee={dependents.spouse?.visaCancelationFee}
+                fileOpening={authorityFees?.dependentFileOpeningForSpouse || false}
+                fileOpeningDisabled={authorityFees?.dependentFileOpeningForChild || false}
                 onAuthorityFeeChange={handleSpouseAuthorityFeeChange}
                 onVisaCancellationChange={handleSpouseVisaCancelationChange}
                 onVisaCancellationFeeChange={handleSpouseVisaCancelationFeeChange}
+                onFileOpeningChange={handleSpouseFileOpeningChange}
               />
               
               {/* TME Professional Service Fee for Spouse */}
@@ -305,9 +325,12 @@ export const DependentVisasSection: React.FC<DependentVisasSectionProps> = ({
                 authorityFees={authorityFees}
                 visaCancellation={dependents.children?.visaCancelation || false}
                 visaCancellationFee={dependents.children?.visaCancelationFee}
+                fileOpening={authorityFees?.dependentFileOpeningForChild || false}
+                fileOpeningDisabled={authorityFees?.dependentFileOpeningForSpouse || false}
                 onAuthorityFeeChange={handleChildrenAuthorityFeeChange}
                 onVisaCancellationChange={handleChildrenVisaCancelationChange}
                 onVisaCancellationFeeChange={handleChildrenVisaCancelationFeeChange}
+                onFileOpeningChange={handleChildrenFileOpeningChange}
               />
               
               {/* TME Professional Service Fee for Children */}

@@ -3,6 +3,7 @@
 import React from 'react';
 import { NumberInputField } from '../../portal/tabs/NumberInputField';
 import { VisaCancellationField } from './VisaCancellationField';
+import { FileOpeningField } from './FileOpeningField';
 
 /**
  * Configuration for dependent visa types - simplified structure
@@ -79,6 +80,16 @@ interface DependentVisaCardProps {
   visaCancellationFee?: number;
   
   /**
+   * Current file opening state
+   */
+  fileOpening?: boolean;
+  
+  /**
+   * Whether file opening checkbox is disabled
+   */
+  fileOpeningDisabled?: boolean;
+  
+  /**
    * Handler for authority fee field changes
    */
   onAuthorityFeeChange: (field: string, value: number) => void;
@@ -92,6 +103,11 @@ interface DependentVisaCardProps {
    * Handler for visa cancellation fee changes
    */
   onVisaCancellationFeeChange?: (fee: number) => void;
+  
+  /**
+   * Handler for file opening checkbox changes
+   */
+  onFileOpeningChange?: (checked: boolean) => void;
 }
 
 export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
@@ -99,9 +115,12 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
   authorityFees,
   visaCancellation = false,
   visaCancellationFee = 0,
+  fileOpening = false,
+  fileOpeningDisabled = false,
   onAuthorityFeeChange,
   onVisaCancellationChange,
   onVisaCancellationFeeChange,
+  onFileOpeningChange,
 }) => {
   const config = DEPENDENT_CONFIGS[type];
   const { colorScheme } = config;
@@ -115,6 +134,17 @@ export const DependentVisaCard: React.FC<DependentVisaCardProps> = ({
         {config.title}
       </h3>
       
+      {/* File Opening Section */}
+      {onFileOpeningChange && (
+        <FileOpeningField
+          checked={fileOpening}
+          disabled={fileOpeningDisabled}
+          onCheckedChange={onFileOpeningChange}
+          label={`Dependent File Opening (AED 319) - ${type === 'spouse' ? 'Spouse' : 'First Child'}`}
+          description={`One-time fee for opening dependent visa file. Can only be applied to ${type === 'spouse' ? 'spouse' : 'first child'} if no spouse visa.`}
+        />
+      )}
+
       {/* Authority Fee Fields */}
       <div className="space-y-4">
         {config.authorityFields.map((field) => (

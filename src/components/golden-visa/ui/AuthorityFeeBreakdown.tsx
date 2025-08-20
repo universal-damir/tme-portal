@@ -33,7 +33,7 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
     {
       key: 'thirdPartyCosts',
       label: 'Third Party Costs',
-      placeholder: '1,460.00',
+      placeholder: '1,385.00',
     },
   ],
   'time-deposit': [
@@ -42,22 +42,12 @@ const FIELD_CONFIGS: Record<GoldenVisaType, AuthorityFeeField[]> = {
       label: 'Standard Authority Costs',
       placeholder: '5,010',
     },
-    {
-      key: 'thirdPartyCosts',
-      label: 'Third Party Costs',
-      placeholder: '1,460.00',
-    },
   ],
   'skilled-employee': [
     {
       key: 'standardAuthorityCosts',
       label: 'Standard Authority Costs',
       placeholder: '5,010',
-    },
-    {
-      key: 'thirdPartyCosts',
-      label: 'Third Party Costs',
-      placeholder: '1,460.00',
     },
   ],
 };

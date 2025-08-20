@@ -30,6 +30,8 @@ export interface SkilledEmployeeAuthorityFeesData {
 export interface DependentAuthorityFeesData {
   professionalPassportPicture: number;
   dependentFileOpening: number; // Replaces DLD for dependents - only applies once
+  dependentFileOpeningForSpouse?: boolean; // Track if file opening is applied to spouse
+  dependentFileOpeningForChild?: boolean; // Track if file opening is applied to first child
   standardAuthorityCostsSpouse: number;
   standardAuthorityCostsChild: number;
   mandatoryUaeMedicalTest: number;
@@ -149,9 +151,9 @@ export const GOLDEN_VISA_DEFAULTS = {
     immigrationResidencyFee: 3160.00,
     visaCancelation: false,
     visaCancelationFee: 185.00,
-    thirdPartyCosts: 1460.00,
+    thirdPartyCosts: 1385.00,
   },
-  // New authority fee defaults for Skilled/Employee Golden Visa (no DLD)
+  // New authority fee defaults for Skilled/Employee Golden Visa (no DLD, no third-party costs)
   skilledEmployeeAuthorityFees: {
     professionalPassportPicture: 25.00,
     standardAuthorityCosts: 5010.00,
@@ -160,9 +162,8 @@ export const GOLDEN_VISA_DEFAULTS = {
     immigrationResidencyFee: 3160.00,
     visaCancelation: false,
     visaCancelationFee: 185.00,
-    thirdPartyCosts: 1460.00,
   },
-  // New authority fee defaults for Time Deposit Golden Visa (same as skilled employee - no DLD)
+  // New authority fee defaults for Time Deposit Golden Visa (same as skilled employee - no DLD, no third-party costs)
   timeDepositAuthorityFees: {
     professionalPassportPicture: 25.00,
     standardAuthorityCosts: 5010.00,
@@ -171,12 +172,11 @@ export const GOLDEN_VISA_DEFAULTS = {
     immigrationResidencyFee: 3160.00,
     visaCancelation: false,
     visaCancelationFee: 185.00,
-    thirdPartyCosts: 1460.00,
   },
   // New authority fee defaults for Dependent visas
   dependentAuthorityFees: {
     professionalPassportPicture: 25.00,
-    dependentFileOpening: 320.00, // Applies only once - either spouse or child
+    dependentFileOpening: 319.00, // Applies only once - either spouse or child
     standardAuthorityCostsSpouse: 4710.00,
     standardAuthorityCostsChild: 4604.00,
     mandatoryUaeMedicalTest: 700.00,

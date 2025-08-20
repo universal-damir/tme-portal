@@ -52,7 +52,7 @@ export const CostSummarySection: React.FC<PDFComponentProps> = ({ data }) => {
       } else if ((goldenVisaData?.visaType === 'time-deposit' || goldenVisaData?.visaType === 'skilled-employee') && goldenVisaData?.skilledEmployeeAuthorityFees) {
         const fees = goldenVisaData.skilledEmployeeAuthorityFees;
         authorityTotal = fees.professionalPassportPicture + fees.mandatoryUaeMedicalTest + 
-                       fees.emiratesIdFee + fees.immigrationResidencyFee + fees.thirdPartyCosts;
+                       fees.emiratesIdFee + fees.immigrationResidencyFee;
         if (fees.visaCancelation) authorityTotal += fees.visaCancelationFee;
       } else {
         // Fallback to legacy calculation

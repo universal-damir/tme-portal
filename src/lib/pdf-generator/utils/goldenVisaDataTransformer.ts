@@ -184,20 +184,13 @@ export function generateGoldenVisaAuthorityFeesBreakdown(goldenVisaData: GoldenV
       });
     }
 
-    services.push({
-      id: 'third-party-costs',
-      condition: true,
-      description: locale === 'de' ? (fees.visaCancellation ? '3. Drittanbieterkosten' : '2. Drittanbieterkosten') : (fees.visaCancellation ? '3. Third party costs' : '2. Third party costs'),
-      amount: fees.thirdPartyCosts,
-      explanation: locale === 'de' ? t.costsBreakdown.explanations.thirdPartyCosts : 'Administrative costs charged by various departments.'
-    });
 
     // Add TME Services Professional Fee as final point
     const baseTmeServicesFee = goldenVisaData.tmeServicesFee || 0;
     services.push({
       id: 'tme-professional-fee',
       condition: true,
-      description: locale === 'de' ? (fees.visaCancellation ? '4. TME Services Beratungsgebühr' : '3. TME Services Beratungsgebühr') : (fees.visaCancellation ? '4. TME Services professional fee' : '3. TME Services professional fee'),
+      description: locale === 'de' ? (fees.visaCancellation ? '3. TME Services Beratungsgebühr' : '2. TME Services Beratungsgebühr') : (fees.visaCancellation ? '3. TME Services professional fee' : '2. TME Services professional fee'),
       amount: baseTmeServicesFee,
       explanation: locale === 'de' ? t.costsBreakdown.explanations.tmeServicesFee : 'Covers the complete management of the visa and Emirates ID application process, including document preparation, liaison with the relevant authorities, and personal accompaniment by an experienced TME Services team member to all required appointments.'
     });
@@ -263,18 +256,25 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
   if (goldenVisaData.dependentAuthorityFees) {
     const fees = goldenVisaData.dependentAuthorityFees;
     
-    services.push({
-      id: 'spouse-file-opening',
-      condition: true,
-      description: `1. ${t.dependentCosts.serviceDescriptions.dependentFileOpening}`,
-      amount: fees.dependentFileOpening,
-      explanation: t.dependentCosts.explanations.dependentFileOpening
-    });
+    // Only include file opening if specifically checked for spouse
+    if (fees.dependentFileOpeningForSpouse) {
+      services.push({
+        id: 'spouse-file-opening',
+        condition: true,
+        description: `1. ${t.dependentCosts.serviceDescriptions.dependentFileOpening}`,
+        amount: fees.dependentFileOpening,
+        explanation: t.dependentCosts.explanations.dependentFileOpening
+      });
+    }
+
+    // Dynamic numbering based on whether file opening is included
+    const hasFileOpening = fees.dependentFileOpeningForSpouse;
+    let itemNumber = hasFileOpening ? 2 : 1;
 
     services.push({
       id: 'spouse-standard-authority-costs',
       condition: true,
-      description: `2. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
       amount: fees.standardAuthorityCostsSpouse || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeSpouse) || 4710,
       explanation: t.dependentCosts.explanations.standardAuthorityCosts
     });
@@ -287,19 +287,21 @@ export function generateGoldenVisaSpouseVisaBreakdown(goldenVisaData: GoldenVisa
                           : fees.visaCancellationFee;
     
     if (hasVisaCancellation) {
+      itemNumber++;
       services.push({
         id: 'spouse-visa-cancellation',
         condition: true,
-        description: `3. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
         amount: cancellationFee,
         explanation: t.dependentCosts.explanations.visaCancellation
       });
     }
 
+    itemNumber++;
     services.push({
       id: 'spouse-third-party-costs',
       condition: true,
-      description: `${hasVisaCancellation ? '4' : '3'}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
       amount: fees.thirdPartyCostsSpouse || fees.thirdPartyCosts || 0,
       explanation: t.dependentCosts.explanations.thirdPartyCosts
     });
@@ -361,9 +363,8 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
   if (goldenVisaData.dependentAuthorityFees) {
     const fees = goldenVisaData.dependentAuthorityFees;
     
-    // File opening fee only applies once if no spouse visa, or is already covered by spouse
-    const hasSpouse = goldenVisaData.dependents?.spouse?.required;
-    if (!hasSpouse) {
+    // File opening fee only applies if specifically checked for children (first child only)
+    if (fees.dependentFileOpeningForChild) {
       services.push({
         id: 'children-file-opening',
         condition: true,
@@ -375,11 +376,14 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       });
     }
 
-    const standardCostsNumber = !hasSpouse ? '2' : '1';
+    // Dynamic numbering based on whether file opening is included
+    const hasFileOpening = fees.dependentFileOpeningForChild;
+    let itemNumber = hasFileOpening ? 2 : 1;
+
     services.push({
       id: 'children-standard-authority-costs',
       condition: true,
-      description: `${standardCostsNumber}. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.standardAuthorityCosts}`,
       amount: (fees.standardAuthorityCostsChild || (fees.mandatoryUaeMedicalTest + fees.emiratesIdFee + fees.immigrationResidencyFeeChild) || 4604) * numberOfChildren,
       explanation: locale === 'de' ? 
         `Für Pflicht-VAE-Medizintest, Emirates ID und Einwanderungs-Aufenthaltsbearbeitung für ${childText}.` : 
@@ -394,11 +398,11 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
                                   : fees.visaCancellationFee;
     
     if (hasChildrenVisaCancellation) {
-      const cancellationNumber = !hasSpouse ? '3' : '2';
+      itemNumber++;
       services.push({
         id: 'children-visa-cancellation',
         condition: true,
-        description: `${cancellationNumber}. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
+        description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.visaCancellation}`,
         amount: childrenCancellationFee * numberOfChildren,
         explanation: locale === 'de' ? 
           `Für die Stornierung des bestehenden Visa-Status vor der Beantragung des ${childText}-Angehörigen-Visa.` : 
@@ -406,13 +410,11 @@ export function generateGoldenVisaChildrenVisaBreakdown(goldenVisaData: GoldenVi
       });
     }
 
-    const thirdPartyNumber = !hasSpouse ? 
-      (hasChildrenVisaCancellation ? '4' : '3') : 
-      (hasChildrenVisaCancellation ? '3' : '2');
+    itemNumber++;
     services.push({
       id: 'children-third-party-costs',
       condition: true,
-      description: `${thirdPartyNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
+      description: `${itemNumber}. ${t.dependentCosts.serviceDescriptions.thirdPartyCosts}`,
       amount: (fees.thirdPartyCostsChild || fees.thirdPartyCosts || 0) * numberOfChildren,
       explanation: locale === 'de' ? 
         `Von verschiedenen Abteilungen erhobene Verwaltungskosten für ${childText}.` : 

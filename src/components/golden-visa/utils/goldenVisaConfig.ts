@@ -69,8 +69,8 @@ export const AUTHORITY_FEE_PLACEHOLDERS = {
   immigrationResidencyFee: '3,160.00',
   immigrationResidencyFeeSpouse: '2,860.00',
   immigrationResidencyFeeChild: '2,750.00',
-  thirdPartyCosts: '1,460.00',
-  dependentFileOpening: '320.00',
+  thirdPartyCosts: '1,385.00',
+  dependentFileOpening: '319.00',
   visaCancellationFee: '185',
 } as const;
 
@@ -91,14 +91,12 @@ export const AUTHORITY_FEE_FIELDS = {
     { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test Fee' },
     { key: 'emiratesIdFee', label: 'Emirates ID Fee' },
     { key: 'immigrationResidencyFee', label: 'Immigration - Residency Fee' },
-    { key: 'thirdPartyCosts', label: 'Third party costs' },
   ],
   'skilled-employee': [
     { key: 'professionalPassportPicture', label: 'Professional Passport Picture Fee' },
     { key: 'mandatoryUaeMedicalTest', label: 'Mandatory UAE Medical Test Fee' },
     { key: 'emiratesIdFee', label: 'Emirates ID Fee' },
     { key: 'immigrationResidencyFee', label: 'Immigration - Residency Fee' },
-    { key: 'thirdPartyCosts', label: 'Third party costs' },
   ],
 } as const;
 
