@@ -50,8 +50,12 @@ RUN adduser --system --uid 1001 nextjs
 # Security: Remove unnecessary packages and clear cache
 RUN rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
-# Copy the public folder
+# Copy the public folder including staff photos
 COPY --from=builder /app/public ./public
+
+# Ensure staff photos are included for profile photos feature
+# Note: staff-photos directory should exist in project root/public/
+RUN mkdir -p /app/public/staff-photos
 
 # Set correct permissions for prerender cache
 RUN mkdir .next

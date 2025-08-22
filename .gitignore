@@ -54,3 +54,10 @@ deployment-backups/
 update-*.tar.gz
 EMERGENCY-*.tar.gz
 docker-images-export/
+
+# Deployment guides and plans
+*DEPLOYMENT*.md
+*deployment*.md
+PRODUCTION_DEPLOYMENT_PLAN.md
+TME_PORTAL_PRODUCTION_DEPLOYMENT_PLAN.md
+FAST_DEPLOYMENT_GUIDE.md
