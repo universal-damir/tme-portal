@@ -23,7 +23,7 @@ backup_current_data() {
     
     # Backup PostgreSQL
     echo "  - Backing up PostgreSQL database..."
-    docker exec tmeportalv52-postgres-1 pg_dump -U tme_user tme_portal > ./backups/pre-production/database_$(date +%Y%m%d_%H%M%S).sql
+    docker exec tme-portal-1-postgres-1 pg_dump -U tme_user tme_portal > ./backups/pre-production/database_$(date +%Y%m%d_%H%M%S).sql
     
     echo "✅ Backup completed: ./backups/pre-production/"
 }

@@ -111,9 +111,9 @@ get_disk_info() {
 # Get Docker volume sizes
 get_docker_volumes() {
     # Get TME Portal volume sizes
-    TME_POSTGRES_SIZE=$(docker system df -v | grep "tmeportalv52_postgres_data" | awk '{print $3}' || echo "Unknown")
-    TME_REDIS_SIZE=$(docker system df -v | grep "tmeportalv52_redis_data" | awk '{print $3}' || echo "Unknown")
-    TME_UPLOADS_SIZE=$(docker system df -v | grep "tmeportalv52_app_uploads" | awk '{print $3}' || echo "Unknown")
+    TME_POSTGRES_SIZE=$(docker system df -v | grep "tme-portal-1_postgres_data" | awk '{print $3}' || echo "Unknown")
+    TME_REDIS_SIZE=$(docker system df -v | grep "tme-portal-1_redis_data" | awk '{print $3}' || echo "Unknown")
+    TME_UPLOADS_SIZE=$(docker system df -v | grep "tme-portal-1_app_uploads" | awk '{print $3}' || echo "Unknown")
     
     # Get backup directory size if it exists
     BACKUP_SIZE="Unknown"
