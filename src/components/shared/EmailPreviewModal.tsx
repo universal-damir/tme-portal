@@ -79,6 +79,26 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const tempContentRef = useRef<string>(emailData.htmlContent);
 
+  // Helper function to extract preview text from HTML content
+  const extractPreviewTextFromHTML = (htmlContent: string): string | null => {
+    const previewMatch = htmlContent.match(/<div style="display: none[^>]*>([^<]*)<\/div>/);
+    return previewMatch ? previewMatch[1] : null;
+  };
+
+  // Helper function to preserve original preview text in edited content
+  const preserveOriginalPreviewText = (editedContent: string, originalPreviewText: string | null): string => {
+    if (!originalPreviewText) return editedContent;
+    
+    // Remove any existing preview text div from edited content
+    const contentWithoutPreview = editedContent.replace(/<div style="display: none[^>]*>[^<]*<\/div>\s*/g, '');
+    
+    // Add the original preview text back at the beginning with separator to prevent email clients from reading further
+    const previewSeparator = '‌'.repeat(100); // Zero-width non-joiner repeated 100 times
+    const previewDiv = `    <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">${originalPreviewText}${previewSeparator}</div>\n`;
+    
+    return previewDiv + contentWithoutPreview;
+  };
+
   // Convert HTML to plain text for editing (preserve some formatting indicators)
   const htmlToPlainText = (html: string): string => {
     // Create a temporary div to parse HTML
@@ -245,12 +265,18 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   }, [isEditingContent]);
 
   const handleSend = async () => {
+    // Get the current template's preview text based on language
+    const templates = language === 'de' ? EMAIL_TEMPLATES_DE : EMAIL_TEMPLATES;
+    const currentTemplate = templateType ? templates[templateType] : null;
+    const currentPreviewText = currentTemplate?.previewText || extractPreviewTextFromHTML(emailData.htmlContent);
+    const editedContentWithOriginalPreview = preserveOriginalPreviewText(editableContent, currentPreviewText);
+    
     const updatedEmailData: EmailPreviewData = {
       ...emailData,
       to: editableRecipients.split(',').map(email => email.trim()),
       cc: editableCc ? editableCc.split(',').map(email => email.trim()) : undefined,
       subject: editableSubject,
-      htmlContent: editableContent
+      htmlContent: editedContentWithOriginalPreview
     };
 
     try {

@@ -71,7 +71,6 @@ export const EMAIL_TEMPLATES = {
   COST_OVERVIEW: {
     subject: '', // Will be set from PDF filename
     greeting: 'Hello {firstName},',
-    previewText: 'Your UAE business setup offer is ready - detailed pricing and services included',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached our cost overview for setting up a company under the {authorityName} in Dubai.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The items marked in <span style="color: #006600; font-weight: bold;">green</span> represent one-time costs related to the company formation.</span>',
@@ -89,7 +88,6 @@ export const EMAIL_TEMPLATES = {
   GOLDEN_VISA: {
     subject: '', // Will be set from PDF filename
     greeting: 'Hello {firstName},',
-    previewText: 'Your UAE Golden Visa offer is ready - personalized documentation and pricing included',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached our personalized offer for the UAE Golden Visa, tailored to your specific needs.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">The document includes an overview of the visa requirements, a breakdown of the application process, and a description of our services. Should you have any questions or require further information after reviewing the offer, please feel free to contact us.</span>',
@@ -105,7 +103,6 @@ export const EMAIL_TEMPLATES = {
   COMPANY_SERVICES: {
     subject: '', // Will be set from PDF filename
     greeting: 'Hello {firstName},',
-    previewText: 'Your customized company services proposal is ready - tailored for your UAE business needs',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached a customized overview of our services and pricing, tailored to support your business setup and compliance needs in the UAE.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Our offer details the services we provide and highlights how we can contribute to the success of your operations.</span>',
@@ -138,7 +135,6 @@ export const EMAIL_TEMPLATES_DE = {
   COST_OVERVIEW: {
     subject: '', // Will be set from PDF filename
     greeting: 'Hallo {firstName},',
-    previewText: 'Ihre Kostenübersicht für die UAE Firmengründung ist bereit - detaillierte Preise und Services inklusive',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei erhalten Sie unsere Kostenübersicht für die Gründung einer Gesellschaft unter der {authorityName} in Dubai.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Die <span style="color: #006600; font-weight: bold;">grün</span> markierten Positionen stellen einmalige Kosten im Zusammenhang mit der Firmengründung dar.</span>',
@@ -156,7 +152,6 @@ export const EMAIL_TEMPLATES_DE = {
   GOLDEN_VISA: {
     subject: '', // Will be set from PDF filename
     greeting: 'Hallo {firstName},',
-    previewText: 'Ihr UAE Golden Visa Angebot ist bereit - personalisierte Dokumentation und Preise inklusive',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie unser personalisiertes Angebot für das UAE Golden Visa, das auf Ihre spezifischen Bedürfnisse zugeschnitten ist.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Das Dokument enthält eine Übersicht über die Visa-Anforderungen, eine Aufschlüsselung des Antragsverfahrens und eine Beschreibung unserer Dienstleistungen. Sollten Sie Fragen haben oder weitere Informationen benötigen, nachdem Sie das Angebot geprüft haben, können Sie sich gerne an uns wenden.</span>',
@@ -172,7 +167,6 @@ export const EMAIL_TEMPLATES_DE = {
   COMPANY_SERVICES: {
     subject: '', // Will be set from PDF filename
     greeting: 'Hallo {firstName},',
-    previewText: 'Ihr maßgeschneidertes Unternehmensservice-Angebot ist bereit - zugeschnitten auf Ihre UAE Geschäftsbedürfnisse',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie eine maßgeschneiderte Übersicht unserer Services und Preise, die darauf ausgerichtet sind, Ihre Unternehmensgründung und Compliance-Anforderungen in den VAE zu unterstützen.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Unser Angebot beschreibt die Services, die wir bereitstellen und zeigt auf, wie wir zum Erfolg Ihrer Geschäftstätigkeit beitragen können.</span>',
@@ -374,10 +368,7 @@ export const createFormattedEmailHTML = (template: EmailTemplate): string => {
   
   let htmlContent = ``;
   
-  // Add preview text for email clients (hidden but used for notifications)
-  if (previewText) {
-    htmlContent += `    <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: ${fontFamily}; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">${previewText}</div>\n`;
-  }
+  // Remove preview text - let email clients use the email body directly
   
   htmlContent += `
     <div style="font-family: ${fontFamily}; font-size: ${fontSize}; line-height: 1.4; color: #333;">
