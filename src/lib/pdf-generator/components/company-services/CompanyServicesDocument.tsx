@@ -36,23 +36,41 @@ export const CompanyServicesDocument: React.FC<CompanyServicesDocumentProps> = (
   // Transform company services data to standard PDF component format
   const transformedData = transformCompanyServicesData(companyServicesData, clientInfo);
 
+  // Determine which services are enabled and their order
+  const enabledServices = [
+    { name: 'taxConsulting', enabled: companyServicesData.taxConsultingServices?.enabled },
+    { name: 'accounting', enabled: companyServicesData.accountingServices?.enabled },
+    { name: 'commercial', enabled: companyServicesData.accountingServices?.commercialServices },
+    { name: 'backOffice', enabled: companyServicesData.backOfficeServices?.enabled },
+    { name: 'compliance', enabled: companyServicesData.complianceServices?.enabled }
+  ].filter(service => service.enabled);
+
+  // Find the last enabled service
+  const lastServiceName = enabledServices.length > 0 ? enabledServices[enabledServices.length - 1].name : null;
+
+  // Add isLastService flag to transformedData
+  const dataWithLastService = {
+    ...transformedData,
+    lastServiceName
+  };
+
   return (
     <Document>
       {/* Cover Page - Always shown */}
-      <CompanyServicesCoverPage data={transformedData} />
+      <CompanyServicesCoverPage data={dataWithLastService} />
 
       {/* Service Pages - Only shown when services are enabled */}
-      <TaxConsultingServicesPage data={transformedData} />
-      <AccountingServicesPage data={transformedData} />
-      <CommercialServicesPage data={transformedData} />
-      <BackOfficeServicesPage data={transformedData} />
-      <ComplianceServicesPage data={transformedData} />
+      <TaxConsultingServicesPage data={dataWithLastService} />
+      <AccountingServicesPage data={dataWithLastService} />
+      <CommercialServicesPage data={dataWithLastService} />
+      <BackOfficeServicesPage data={dataWithLastService} />
+      <ComplianceServicesPage data={dataWithLastService} />
 
       {/* Meet The Team Page - Always shown */}
-      <MeetTheTeamPage data={transformedData} />
+      <MeetTheTeamPage data={dataWithLastService} />
 
       {/* Service Portfolio Page - Always shown */}
-      <ServicePortfolioPage data={transformedData} />
+      <ServicePortfolioPage data={dataWithLastService} />
     </Document>
   );
 }; 

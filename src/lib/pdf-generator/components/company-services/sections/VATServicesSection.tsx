@@ -1,0 +1,122 @@
+import React from 'react';
+import { View, Text } from '@react-pdf/renderer';
+import { styles } from '../../../styles';
+import type { PDFComponentProps } from '../../../types';
+import type { TaxConsultingServices } from '@/types/company-services';
+
+// Helper function to format currency with comma separators
+const formatCurrency = (amount: number): string => {
+  return amount.toLocaleString('en-US');
+};
+
+// Helper function to format secondary currency amount in brackets
+const formatSecondaryCurrency = (amount: number, exchangeRate: number, currency: string): string => {
+  const converted = Math.round(amount / exchangeRate);
+  return `(~ ${currency} ${converted.toLocaleString()})`;
+};
+
+// VATServicesSection - Display VAT (Value Added Tax) services information in PDF
+export const VATServicesSection: React.FC<PDFComponentProps> = ({ data }) => {
+  // Access company services data from transformed data
+  const companyServicesData = (data as any).companyServicesData;
+  const taxServices = companyServicesData?.taxConsultingServices as TaxConsultingServices;
+  const exchangeRate = data.clientDetails.exchangeRate;
+  const secondaryCurrency = data.clientDetails.secondaryCurrency;
+
+  // Don't render if VAT services are not applicable
+  if (!((taxServices.vatRegistration && taxServices.vatRegistration > 0) || (taxServices.vatReturnFiling && taxServices.vatReturnFiling > 0) || taxServices.clientManagedAccounting)) {
+    return null;
+  }
+
+  return (
+    <View style={styles.section}>
+      {/* Value Added Tax Section */}
+      {((taxServices.vatRegistration && taxServices.vatRegistration > 0) || (taxServices.vatReturnFiling && taxServices.vatReturnFiling > 0)) && (
+        <View style={{ marginBottom: 16 }}>
+          <Text style={styles.sectionTitle}>VAT (Value Added Tax)</Text>
+          
+          {taxServices.vatRegistration && taxServices.vatRegistration > 0 && (
+            <Text style={[styles.introText, { marginBottom: 8 }]}>
+              For VAT {taxServices.vatType === 'registration' ? 'registration' : 
+                       taxServices.vatType === 'exception' ? 'exemption' : 'de-registration'} with the FTA to obtain a 15-digit VAT TRN (Tax Registration Number), or 15-digit VAT TIN (Tax Identification Number), our service fee is AED {formatCurrency(taxServices.vatRegistration)} {formatSecondaryCurrency(taxServices.vatRegistration, exchangeRate, secondaryCurrency)}.
+            </Text>
+          )}
+          
+          <Text style={[styles.introText, { marginBottom: 8 }]}>
+          The UAE VAT regulations apply two tax rates - 0% or 5% depending on the nature of the business activity. Businesses with taxable revenue exceeding AED 375,000 <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>MUST</Text> register for VAT, while those invoicing more than AED 187,500 <Text style={{ fontWeight: 'bold', textDecoration: 'underline' }}>CAN</Text> register voluntarily.
+          </Text>
+          
+          {taxServices.vatReturnFiling && taxServices.vatReturnFiling > 0 && (
+            <Text style={styles.introText}>
+              If TME Services handles the accounting:
+              {'\n'}• Our service fee for quarterly VAT return filing is AED {formatCurrency(taxServices.vatReturnFiling)} {formatSecondaryCurrency(taxServices.vatReturnFiling, exchangeRate, secondaryCurrency)} per return
+              {'\n'}• Our service fee for nil VAT return filing is AED 562 {formatSecondaryCurrency(562, exchangeRate, secondaryCurrency)} per return
+            </Text>
+          )}
+          
+          <Text style={[styles.introText, { marginTop: 8 }]}>
+            For clarifying VAT refund matters in response to FTA inquiries, our service fee is AED 664 {formatSecondaryCurrency(664, exchangeRate, secondaryCurrency)} per hour.
+          </Text>
+        </View>
+      )}
+
+      {/* Client-Managed Accounting Section */}
+      {taxServices.clientManagedAccounting && (
+        <View style={{ marginBottom: 16 }}>
+          <Text style={styles.sectionTitle}>VAT Review – Client-Managed Accounting</Text>
+          
+          <Text style={[styles.introText, { marginBottom: 8 }]}>
+            If the client handles the accounting (not TME Services), our service includes the review of VAT input/output, and revenue ledgers, as well as the reverse charge mechanism transactions, including the filing of the VAT return in line with the relevant tax period.
+          </Text>
+          
+          <Text style={[styles.introText, { marginBottom: 8 }]}>
+            Our service fee is based on when we receive all necessary accounting records and documentation:
+          </Text>
+          
+          <Text style={[styles.introText, { marginBottom: 8, fontWeight: 'bold' }]}>
+            Quarterly VAT Return Review
+          </Text>
+          
+          <View style={{ marginLeft: 16, marginBottom: 8 }}>
+            <Text style={[styles.introText, { marginBottom: 4 }]}>
+              • Documents received by the 10<Text style={{ fontSize: 8, verticalAlign: 'super' }}>th</Text> of the following month: AED 5,899 {formatSecondaryCurrency(5899, exchangeRate, secondaryCurrency)}
+            </Text>
+            <Text style={[styles.introText, { marginBottom: 4 }]}>
+              • Documents received by the 17<Text style={{ fontSize: 8, verticalAlign: 'super' }}>th</Text> of the following month: AED 6,489 {formatSecondaryCurrency(6489, exchangeRate, secondaryCurrency)}
+            </Text>
+            <Text style={[styles.introText, { marginBottom: 4 }]}>
+              • Documents received by the 24<Text style={{ fontSize: 8, verticalAlign: 'super' }}>th</Text> of the following month: AED 7,079 {formatSecondaryCurrency(7079, exchangeRate, secondaryCurrency)}
+            </Text>
+          </View>
+          
+          <Text style={[styles.introText, { marginBottom: 8, fontWeight: 'bold' }]}>
+            Monthly VAT Return Review
+          </Text>
+          
+          <View style={{ marginLeft: 16, marginBottom: 8 }}>
+            <Text style={[styles.introText, { marginBottom: 4 }]}>
+              • Documents received by the 10<Text style={{ fontSize: 8, verticalAlign: 'super' }}>th</Text> of the following month: AED 2,950 {formatSecondaryCurrency(2950, exchangeRate, secondaryCurrency)}
+            </Text>
+            <Text style={[styles.introText, { marginBottom: 4 }]}>
+              • Documents received by the 17<Text style={{ fontSize: 8, verticalAlign: 'super' }}>th</Text> of the following month: AED 3,245 {formatSecondaryCurrency(3245, exchangeRate, secondaryCurrency)}
+            </Text>
+            <Text style={[styles.introText, { marginBottom: 4 }]}>
+              • Documents received by the 24<Text style={{ fontSize: 8, verticalAlign: 'super' }}>th</Text> of the following month: AED 3,540 {formatSecondaryCurrency(3540, exchangeRate, secondaryCurrency)}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* Tax Consulting Support Section - Always shown on VAT page when VAT is enabled */}
+      <View style={{ marginBottom: 16 }}>
+        <Text style={styles.sectionTitle}>Tax Consulting Support</Text>
+        
+        <Text style={styles.introText}>
+          For consulting on VAT, CIT, UBO (Ultimate Beneficial Owner), or related topics, our fee is AED 1,450 {formatSecondaryCurrency(1450, exchangeRate, secondaryCurrency)} per hour.
+          {'\n'}Email correspondence is billed at 5 minutes per email, based on the applicable hourly rate.
+          {'\n'}For VAT or CIT profile amendments on the FTA portal, our fee is AED 158 {formatSecondaryCurrency(158, exchangeRate, secondaryCurrency)} per amendment per profile.
+        </Text>
+      </View>
+    </View>
+  );
+};

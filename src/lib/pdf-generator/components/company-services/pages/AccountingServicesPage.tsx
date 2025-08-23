@@ -3,7 +3,8 @@ import { Page, View } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
 import { 
   HeaderComponent, 
-  FooterComponent
+  FooterComponent,
+  SignatureSection
 } from '../../shared';
 import { 
   AccountingServicesSection,
@@ -17,6 +18,7 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   // Access company services data from transformed data
   const companyServicesData = (data as any).companyServicesData;
   const accountingServices = companyServicesData?.accountingServices;
+  const isLastService = (data as any).lastServiceName === 'accounting';
 
   // Don't render if accounting services are not enabled
   if (!accountingServices?.enabled) {
@@ -36,6 +38,17 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
         {/* Main content area that will flex to fill available space */}
         <View style={{ flex: 1, flexDirection: 'column' }}>
           <AccountingServicesSection data={data} />
+
+          {/* Add signature section if this is the last service page and no annual services page */}
+          {isLastService && !shouldShowAnnualServicesPage && (
+            <>
+              {/* Spacer to push signature to bottom */}
+              <View style={{ flex: 1 }} />
+              
+              {/* Fixed signature section at bottom */}
+              <SignatureSection data={data} />
+            </>
+          )}
         </View>
 
         <FooterComponent />
@@ -49,6 +62,17 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           {/* Main content area that will flex to fill available space */}
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <AnnualAccountingServicesSection data={data} />
+
+            {/* Add signature section if this is the last service page */}
+            {isLastService && (
+              <>
+                {/* Spacer to push signature to bottom */}
+                <View style={{ flex: 1 }} />
+                
+                {/* Fixed signature section at bottom */}
+                <SignatureSection data={data} />
+              </>
+            )}
           </View>
 
           <FooterComponent />

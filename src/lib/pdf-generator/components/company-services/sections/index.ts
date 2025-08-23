@@ -5,6 +5,8 @@
 // Section components
 export { CompanyServicesInfoSection } from './CompanyServicesInfoSection';
 export { TaxConsultingServicesSection } from './TaxConsultingServicesSection';
+export { CITServicesSection } from './CITServicesSection';
+export { VATServicesSection } from './VATServicesSection';
 export { AccountingServicesSection } from './AccountingServicesSection';
 export { AnnualAccountingServicesSection } from './AnnualAccountingServicesSection';
 export { BackOfficeServicesSection } from './BackOfficeServicesSection';

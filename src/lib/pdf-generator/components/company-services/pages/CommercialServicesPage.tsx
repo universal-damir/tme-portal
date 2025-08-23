@@ -3,7 +3,8 @@ import { Page, View, Text } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
 import { 
   HeaderComponent, 
-  FooterComponent
+  FooterComponent,
+  SignatureSection
 } from '../../shared';
 import type { PDFComponentProps } from '../../../types';
 import type { AccountingServices } from '@/types/company-services';
@@ -27,6 +28,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   const accountingServices = companyServicesData?.accountingServices as AccountingServices;
   const exchangeRate = data.clientDetails.exchangeRate;
   const secondaryCurrency = data.clientDetails.secondaryCurrency;
+  const isLastService = (data as any).lastServiceName === 'commercial';
 
   // Check if we have any commercial services to display
   const hasCommercialServices = accountingServices?.commercialServices && accountingServices.commercialServicesFee && accountingServices.commercialServicesFee > 0;
@@ -92,6 +94,17 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
               )}
             </View>
           </View>
+        )}
+
+        {/* Add signature section if this is the last service page */}
+        {isLastService && (
+          <>
+            {/* Spacer to push signature to bottom */}
+            <View style={{ flex: 1 }} />
+            
+            {/* Fixed signature section at bottom */}
+            <SignatureSection data={data} />
+          </>
         )}
       </View>
 
