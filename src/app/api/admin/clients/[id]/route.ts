@@ -22,7 +22,7 @@ export async function GET(
     const result = await query(
       `SELECT 
         id, company_code, company_name, company_name_short, registered_authority,
-        management_name, management_email, city, po_box, vat_trn, status, notes,
+        management_name, management_first_name, management_last_name, management_email, city, po_box, vat_trn, status, notes,
         created_at AT TIME ZONE 'UTC' as created_at, 
         updated_at AT TIME ZONE 'UTC' as updated_at,
         created_by, updated_by
@@ -66,7 +66,8 @@ export async function PATCH(
       company_name,
       company_name_short,
       registered_authority,
-      management_name,
+      management_first_name,
+      management_last_name,
       management_email,
       city,
       po_box,
@@ -134,9 +135,13 @@ export async function PATCH(
       updates.push(`registered_authority = $${paramIndex++}`);
       values.push(registered_authority);
     }
-    if (management_name !== undefined) {
-      updates.push(`management_name = $${paramIndex++}`);
-      values.push(management_name);
+    if (management_first_name !== undefined) {
+      updates.push(`management_first_name = $${paramIndex++}`);
+      values.push(management_first_name);
+    }
+    if (management_last_name !== undefined) {
+      updates.push(`management_last_name = $${paramIndex++}`);
+      values.push(management_last_name);
     }
     if (management_email !== undefined) {
       updates.push(`management_email = $${paramIndex++}`);

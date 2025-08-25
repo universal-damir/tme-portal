@@ -20,7 +20,9 @@ interface Client {
   company_name: string;
   company_name_short: string;
   registered_authority: string;
-  management_name: string;
+  management_name: string; // Keep for backward compatibility
+  management_first_name: string;
+  management_last_name: string;
   management_email: string;
   city: string;
   po_box?: string;
@@ -96,6 +98,8 @@ export default function ClientManagementPanel({ onRefresh }: ClientManagementPan
         client.company_name_short.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.company_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.management_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.management_first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.management_last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.management_email.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }

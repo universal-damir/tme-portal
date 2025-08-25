@@ -12,7 +12,9 @@ interface Client {
   company_name: string;
   company_name_short: string;
   registered_authority: string;
-  management_name: string;
+  management_name: string; // Keep for backward compatibility
+  management_first_name: string;
+  management_last_name: string;
   management_email: string;
   city: string;
   po_box?: string;
@@ -76,7 +78,8 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
     company_name: '',
     company_name_short: '',
     registered_authority: '',
-    management_name: '',
+    management_first_name: '',
+    management_last_name: '',
     management_email: '',
     city: '',
     po_box: '',
@@ -95,7 +98,8 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
         company_name: client.company_name || '',
         company_name_short: client.company_name_short || '',
         registered_authority: client.registered_authority || '',
-        management_name: client.management_name || '',
+        management_first_name: client.management_first_name || '',
+        management_last_name: client.management_last_name || '',
         management_email: client.management_email || '',
         city: client.city || '',
         po_box: client.po_box || '',
@@ -109,7 +113,8 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
         company_name: '',
         company_name_short: '',
         registered_authority: '',
-        management_name: '',
+        management_first_name: '',
+        management_last_name: '',
         management_email: '',
         city: '',
         po_box: '',
@@ -140,8 +145,8 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
       newErrors.registered_authority = 'Registered authority is required';
     }
 
-    if (!formData.management_name.trim()) {
-      newErrors.management_name = 'Management name is required';
+    if (!formData.management_first_name.trim() && !formData.management_last_name.trim()) {
+      newErrors.management_first_name = 'At least first or last name is required';
     }
 
     if (!formData.management_email.trim()) {
@@ -361,25 +366,42 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
                     <h4 className="text-sm font-semibold mb-3" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
                       Management Information
                     </h4>
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                          Management Name *
+                          First Name *
                         </label>
                         <motion.input
                           whileFocus={{ scale: 1.01 }}
                           type="text"
-                          value={formData.management_name}
-                          onChange={(e) => handleInputChange('management_name', e.target.value)}
+                          value={formData.management_first_name}
+                          onChange={(e) => handleInputChange('management_first_name', e.target.value)}
                           onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                           className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                          placeholder="Manager full name"
+                          placeholder="Dr. John"
                           style={{ fontFamily: 'Inter, sans-serif' }}
                         />
-                        {errors.management_name && (
-                          <p className="text-red-500 text-xs mt-1">{errors.management_name}</p>
+                        {errors.management_first_name && (
+                          <p className="text-red-500 text-xs mt-1">{errors.management_first_name}</p>
                         )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                          Last Name
+                        </label>
+                        <motion.input
+                          whileFocus={{ scale: 1.01 }}
+                          type="text"
+                          value={formData.management_last_name}
+                          onChange={(e) => handleInputChange('management_last_name', e.target.value)}
+                          onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                          className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                          placeholder="Smith Wilson"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                        />
                       </div>
 
                       <div>
