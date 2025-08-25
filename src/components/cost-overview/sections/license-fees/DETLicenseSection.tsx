@@ -82,6 +82,14 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
     }
   }, [watchedData.detLicense?.rentType, setValue]);
 
+  // Set default Third-party Approval amount when checkbox is checked
+  useEffect(() => {
+    if (watchedData.detLicense?.thirdPartyApproval && 
+        (!watchedData.detLicense?.thirdPartyApprovalAmount || watchedData.detLicense?.thirdPartyApprovalAmount === 0)) {
+      setValue('detLicense.thirdPartyApprovalAmount', 1000);
+    }
+  }, [watchedData.detLicense?.thirdPartyApproval, setValue]);
+
   return (
     <div className="space-y-3">
       {/* License Type and Rent Type Configuration */}
@@ -378,7 +386,7 @@ export const DETLicenseSection: React.FC<DETLicenseSectionProps> = ({
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
                   type="text"
-                  value={watchedData.detLicense?.thirdPartyApprovalAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.detLicense?.thirdPartyApprovalAmount || 0))}
+                  value={watchedData.detLicense?.thirdPartyApprovalAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.detLicense?.thirdPartyApprovalAmount || 1000))}
                   onChange={(e) => {
                     const value = e.target.value;
                     const parsed = parseFormattedNumber(value);

@@ -91,6 +91,14 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
     }
   }, [clientDetails?.companySetupType, watchedData.ifzaLicense?.tmeServicesFee, initialSetup]);
 
+  // Set default Third-party Approval amount when checkbox is checked
+  useEffect(() => {
+    if (watchedData.ifzaLicense?.thirdPartyApproval && 
+        (!watchedData.ifzaLicense?.thirdPartyApprovalAmount || watchedData.ifzaLicense?.thirdPartyApprovalAmount === 0)) {
+      setValue('ifzaLicense.thirdPartyApprovalAmount', 1000);
+    }
+  }, [watchedData.ifzaLicense?.thirdPartyApproval, setValue]);
+
   return (
     <div className="space-y-3">
       {/* Basic Configuration */}
@@ -303,7 +311,7 @@ export const IFZALicenseSection: React.FC<IFZALicenseSectionProps> = ({
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
                   type="text"
-                  value={watchedData.ifzaLicense?.thirdPartyApprovalAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.ifzaLicense?.thirdPartyApprovalAmount || 0))}
+                  value={watchedData.ifzaLicense?.thirdPartyApprovalAmount === 0 ? '' : formatNumberWithSeparators(String(watchedData.ifzaLicense?.thirdPartyApprovalAmount || 1000))}
                   onChange={(e) => {
                     const value = e.target.value;
                     const parsed = parseFormattedNumber(value);

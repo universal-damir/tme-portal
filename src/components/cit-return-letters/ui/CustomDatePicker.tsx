@@ -10,6 +10,7 @@ interface CustomDatePickerProps {
   placeholder?: string;
   label?: string;
   className?: string;
+  minDate?: string;
 }
 
 const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
@@ -18,6 +19,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   placeholder = 'dd.mm.yyyy',
   label,
   className = '',
+  minDate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -149,23 +151,31 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
                 {Array.from({ length: 20 }, (_, i) => {
                   const year = new Date().getFullYear() - 10 + i;
+                  const minYear = minDate ? new Date(minDate).getFullYear() : null;
+                  const isDisabled = minYear && year < minYear;
+                  
                   return (
                     <motion.button
                       key={year}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={!isDisabled ? { scale: 1.05 } : {}}
+                      whileTap={!isDisabled ? { scale: 0.95 } : {}}
                       onClick={() => {
-                        setSelectedYear(year);
-                        setSelectionStep('month');
+                        if (!isDisabled) {
+                          setSelectedYear(year);
+                          setSelectionStep('month');
+                        }
                       }}
                       type="button"
+                      disabled={isDisabled}
                       className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
-                        year === new Date().getFullYear()
+                        isDisabled
+                          ? 'text-gray-300 cursor-not-allowed bg-gray-50'
+                          : year === new Date().getFullYear()
                           ? 'text-white'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                       style={{
-                        backgroundColor: year === new Date().getFullYear() ? '#D2BC99' : 'transparent'
+                        backgroundColor: isDisabled ? '#f9fafb' : year === new Date().getFullYear() ? '#D2BC99' : 'transparent'
                       }}
                     >
                       {year}
@@ -195,30 +205,41 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 <div className="w-6" />
               </div>
               <div className="grid grid-cols-3 gap-2">
-                {monthNames.map((month, index) => (
-                  <motion.button
-                    key={month}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      setSelectedMonth(index);
-                      setCurrentMonth(index);
-                      setCurrentYear(selectedYear!);
-                      setSelectionStep('day');
-                    }}
-                    type="button"
-                    className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
-                      index === new Date().getMonth() && selectedYear === new Date().getFullYear()
-                        ? 'text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                    style={{
-                      backgroundColor: index === new Date().getMonth() && selectedYear === new Date().getFullYear() ? '#D2BC99' : 'transparent'
-                    }}
-                  >
-                    {month.slice(0, 3)}
-                  </motion.button>
-                ))}
+                {monthNames.map((month, index) => {
+                  const minYear = minDate ? new Date(minDate).getFullYear() : null;
+                  const minMonth = minDate ? new Date(minDate).getMonth() : null;
+                  const isDisabled = minYear && minMonth !== null && selectedYear === minYear && index < minMonth;
+                  
+                  return (
+                    <motion.button
+                      key={month}
+                      whileHover={!isDisabled ? { scale: 1.05 } : {}}
+                      whileTap={!isDisabled ? { scale: 0.95 } : {}}
+                      onClick={() => {
+                        if (!isDisabled) {
+                          setSelectedMonth(index);
+                          setCurrentMonth(index);
+                          setCurrentYear(selectedYear!);
+                          setSelectionStep('day');
+                        }
+                      }}
+                      type="button"
+                      disabled={isDisabled}
+                      className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
+                        isDisabled
+                          ? 'text-gray-300 cursor-not-allowed bg-gray-50'
+                          : index === new Date().getMonth() && selectedYear === new Date().getFullYear()
+                          ? 'text-white'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                      style={{
+                        backgroundColor: isDisabled ? '#f9fafb' : index === new Date().getMonth() && selectedYear === new Date().getFullYear() ? '#D2BC99' : 'transparent'
+                      }}
+                    >
+                      {month.slice(0, 3)}
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -272,22 +293,28 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                     new Date().getMonth() === currentMonth &&
                     new Date().getFullYear() === currentYear;
                   
+                  // Check if date is before minDate
+                  const isDisabled = minDate && dateString < minDate;
+                  
                   return (
                     <motion.button
                       key={day}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => handleDateSelect(day)}
+                      whileHover={!isDisabled ? { scale: 1.1 } : {}}
+                      whileTap={!isDisabled ? { scale: 0.9 } : {}}
+                      onClick={() => !isDisabled && handleDateSelect(day)}
                       type="button"
+                      disabled={isDisabled}
                       className={`h-8 w-8 rounded-md text-sm font-medium transition-all duration-150 flex items-center justify-center ${
-                        isSelected
+                        isDisabled
+                          ? 'text-gray-300 cursor-not-allowed bg-gray-50'
+                          : isSelected
                           ? 'text-white shadow-md'
                           : isToday
                           ? 'text-white'
                           : 'text-gray-700 hover:bg-gray-100'
                       }`}
                       style={{
-                        backgroundColor: isSelected ? '#243F7B' : isToday ? '#D2BC99' : 'transparent'
+                        backgroundColor: isDisabled ? '#f9fafb' : isSelected ? '#243F7B' : isToday ? '#D2BC99' : 'transparent'
                       }}
                     >
                       {day}

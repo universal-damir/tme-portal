@@ -18,25 +18,23 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
   onEndDateChange,
 }) => {
 
-  // Auto-populate end date when start date changes
+  // Auto-populate end date when start date changes (only if end date is empty)
   useEffect(() => {
-    if (startDate && startDate !== '') {
+    if (startDate && startDate !== '' && (!endDate || endDate === '')) {
       const startDateObj = new Date(startDate);
       if (!isNaN(startDateObj.getTime())) {
-        // Add 1 year to the start date
+        // Add 1 year to the start date, then subtract 1 day to get last day of tax period
         const endDateObj = new Date(startDateObj);
         endDateObj.setFullYear(endDateObj.getFullYear() + 1);
+        endDateObj.setDate(endDateObj.getDate() - 1);
         
         // Format as YYYY-MM-DD
         const formattedEndDate = endDateObj.toISOString().split('T')[0];
         
-        // Only update if the end date is different to prevent infinite loop
-        if (endDate !== formattedEndDate) {
-          onEndDateChange(formattedEndDate);
-        }
+        onEndDateChange(formattedEndDate);
       }
     }
-  }, [startDate, endDate]); // Include endDate in dependencies but use comparison to prevent infinite loop
+  }, [startDate, onEndDateChange]); // Remove endDate from dependencies to allow manual editing
 
   return (
     <motion.div
@@ -64,10 +62,11 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
             onChange={onEndDateChange}
             label="Tax Period End Date"
             placeholder="dd.mm.yyyy"
+            minDate={startDate}
           />
           {startDate && (
             <p className="text-xs text-gray-500 mt-1">
-              Auto-populated as +1 year from start date (editable)
+              Auto-populated as last day of tax year (editable, must be after start date)
             </p>
           )}
         </div>
