@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   HomeIcon,
   UsersIcon,
+  BuildingOfficeIcon,
   ChartBarIcon,
   CogIcon,
   ShieldCheckIcon,
@@ -18,13 +19,14 @@ import {
 
 interface AdminLayoutProps {
   children: React.ReactNode;
-  activeTab: 'overview' | 'users' | 'activity' | 'system' | 'security';
-  onTabChange: (tab: 'overview' | 'users' | 'activity' | 'system' | 'security') => void;
+  activeTab: 'overview' | 'users' | 'clients' | 'activity' | 'system' | 'security';
+  onTabChange: (tab: 'overview' | 'users' | 'clients' | 'activity' | 'system' | 'security') => void;
 }
 
 const navigation = [
   { name: 'Overview', key: 'overview', icon: HomeIcon },
   { name: 'User Management', key: 'users', icon: UsersIcon },
+  { name: 'Client Management', key: 'clients', icon: BuildingOfficeIcon },
   { name: 'Activity Logs', key: 'activity', icon: DocumentChartBarIcon },
   { name: 'System Health', key: 'system', icon: ChartBarIcon },
   { name: 'Security Monitor', key: 'security', icon: ShieldCheckIcon },
