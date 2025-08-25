@@ -45,7 +45,9 @@ export async function GET(req: NextRequest) {
         management_name ILIKE $${paramIndex} OR
         management_first_name ILIKE $${paramIndex} OR
         management_last_name ILIKE $${paramIndex} OR
-        management_email ILIKE $${paramIndex++}
+        management_email ILIKE $${paramIndex} OR
+        city ILIKE $${paramIndex} OR
+        country ILIKE $${paramIndex++}
       )`);
       queryParams.push(`%${search}%`);
     }
@@ -56,7 +58,7 @@ export async function GET(req: NextRequest) {
       `SELECT 
         id, company_code, company_name, company_name_short, registered_authority,
         management_name, management_first_name, management_last_name, management_email, 
-        city, po_box, vat_trn, status, notes,
+        city, country, po_box, vat_trn, status, notes,
         created_at AT TIME ZONE 'UTC' as created_at, 
         updated_at AT TIME ZONE 'UTC' as updated_at,
         created_by, updated_by
@@ -108,6 +110,7 @@ export async function POST(req: NextRequest) {
       management_last_name,
       management_email,
       city,
+      country,
       po_box,
       vat_trn,
       status,
@@ -116,7 +119,7 @@ export async function POST(req: NextRequest) {
 
     // Validate required fields
     if (!company_code || !company_name || !company_name_short || !registered_authority || 
-        (!management_first_name && !management_last_name) || !management_email || !city) {
+        (!management_first_name && !management_last_name) || !management_email || !city || !country) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -149,9 +152,9 @@ export async function POST(req: NextRequest) {
     const result = await query(
       `INSERT INTO clients (
         company_code, company_name, company_name_short, registered_authority,
-        management_first_name, management_last_name, management_email, city, po_box, vat_trn, status, notes,
+        management_first_name, management_last_name, management_email, city, country, po_box, vat_trn, status, notes,
         created_by, updated_by, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $13, NOW(), NOW()) 
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $14, NOW(), NOW()) 
       RETURNING *`,
       [
         company_code,
@@ -162,6 +165,7 @@ export async function POST(req: NextRequest) {
         management_last_name || null,
         management_email,
         city,
+        country,
         po_box || null,
         vat_trn || null,
         status || 'active',

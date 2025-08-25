@@ -17,6 +17,7 @@ interface Client {
   management_last_name: string;
   management_email: string;
   city: string;
+  country: string;
   po_box?: string;
   vat_trn?: string;
   status: 'active' | 'inactive' | 'archived';
@@ -82,6 +83,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
     management_last_name: '',
     management_email: '',
     city: '',
+    country: '',
     po_box: '',
     vat_trn: '',
     status: 'active' as const,
@@ -102,6 +104,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
         management_last_name: client.management_last_name || '',
         management_email: client.management_email || '',
         city: client.city || '',
+        country: client.country || '',
         po_box: client.po_box || '',
         vat_trn: client.vat_trn || '',
         status: client.status || 'active',
@@ -117,6 +120,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
         management_last_name: '',
         management_email: '',
         city: '',
+        country: '',
         po_box: '',
         vat_trn: '',
         status: 'active',
@@ -160,6 +164,10 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
 
     if (!formData.city.trim()) {
       newErrors.city = 'City is required';
+    }
+
+    if (!formData.country.trim()) {
+      newErrors.country = 'Country is required';
     }
 
     setErrors(newErrors);
@@ -431,7 +439,27 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
                     <h4 className="text-sm font-semibold mb-3" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
                       Location & Details
                     </h4>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                          Country *
+                        </label>
+                        <motion.input
+                          whileFocus={{ scale: 1.01 }}
+                          type="text"
+                          value={formData.country}
+                          onChange={(e) => handleInputChange('country', e.target.value)}
+                          onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                          onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                          className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                          placeholder="United Arab Emirates"
+                          style={{ fontFamily: 'Inter, sans-serif' }}
+                        />
+                        {errors.country && (
+                          <p className="text-red-500 text-xs mt-1">{errors.country}</p>
+                        )}
+                      </div>
+
                       <div>
                         <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                           City *
@@ -444,7 +472,7 @@ export default function ClientModal({ isOpen, onClose, client, onSave, authoriti
                           onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                           onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                           className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                          placeholder="City name"
+                          placeholder="Dubai"
                           style={{ fontFamily: 'Inter, sans-serif' }}
                         />
                         {errors.city && (

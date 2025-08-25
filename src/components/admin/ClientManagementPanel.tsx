@@ -25,6 +25,7 @@ interface Client {
   management_last_name: string;
   management_email: string;
   city: string;
+  country: string;
   po_box?: string;
   vat_trn?: string;
   status: 'active' | 'inactive' | 'archived';
@@ -100,7 +101,9 @@ export default function ClientManagementPanel({ onRefresh }: ClientManagementPan
         client.management_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.management_first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.management_last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.management_email.toLowerCase().includes(searchTerm.toLowerCase())
+        client.management_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.country?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
