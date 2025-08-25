@@ -111,4 +111,26 @@ export {
 // Taxation data transformer utilities
 export { 
   transformTaxationData
-} from './taxationDataTransformer'; 
+} from './taxationDataTransformer';
+
+// CIT Return Letters generator utilities
+export { 
+  generateCITReturnLettersPDF, 
+  generateCITReturnLettersPDFWithFilename,
+  generateCITTransferPricingPDF,
+  generateCITTransferPricingPDFWithFilename
+} from './citReturnLettersGenerator';
+
+// CIT Return Letters data transformer utilities
+export { 
+  transformCITReturnLettersData,
+  generateCITReturnLettersFilename
+} from './citReturnLettersDataTransformer';
+
+// CIT Return Letters authority mapping utilities
+export { 
+  getCompanyDetailsByAuthority,
+  getCompanyTypeByAuthority,
+  AUTHORITY_TO_COMPANY_TYPE,
+  COMPANY_DETAILS
+} from './citAuthorityMapping'; 

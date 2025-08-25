@@ -8,6 +8,7 @@ export interface Client {
   management_name: string;
   management_email: string;
   city: string;
+  country: string;
   po_box?: string;
   vat_trn?: string;
   status: 'active' | 'inactive' | 'archived';

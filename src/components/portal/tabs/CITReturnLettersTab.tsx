@@ -7,6 +7,7 @@ import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType } from '@/types/cit-return-letters';
 import { ClientDetailsSection, TaxPeriodSection, LetterTypeSection } from '@/components/cit-return-letters';
+import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
 
 const CITReturnLettersTab: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -46,7 +47,7 @@ const CITReturnLettersTab: React.FC = () => {
     setValue('letterType', letterType);
   };
 
-  // PDF generation handlers (placeholder)
+  // PDF generation handlers
   const handlePreviewPDF = async (data: CITReturnLettersData): Promise<void> => {
     // Validate required data before generating PDF
     if (!data.selectedClient) {
@@ -64,8 +65,32 @@ const CITReturnLettersTab: React.FC = () => {
       return;
     }
 
-    console.log('Preview PDF:', data);
-    toast.info('PDF preview functionality will be implemented');
+    setIsGenerating(true);
+
+    try {
+      // Generate the PDF using our new CIT return letters generator
+      const { blob, filename } = await generateCITReturnLettersPDFWithFilename(data);
+      
+      // Create a URL for the blob and open it in a new tab for preview
+      const url = URL.createObjectURL(blob);
+      const newWindow = window.open(url, '_blank');
+      
+      if (newWindow) {
+        newWindow.focus();
+        toast.success(`Preview generated: ${filename}`);
+      } else {
+        toast.error('Unable to open preview. Please check your popup blocker settings.');
+      }
+      
+      // Clean up the URL after a delay to free memory
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleSubmitForReview = async (): Promise<void> => {
@@ -106,8 +131,34 @@ const CITReturnLettersTab: React.FC = () => {
       return;
     }
 
-    console.log('Download and send:', data);
-    toast.info('Download and send functionality will be implemented');
+    setIsGenerating(true);
+
+    try {
+      // Generate the PDF using our new CIT return letters generator
+      const { blob, filename } = await generateCITReturnLettersPDFWithFilename(data);
+      
+      // Create a download link and trigger the download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the URL to free memory
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Downloaded: ${filename}`);
+      
+      // Note: Email sending functionality would be implemented separately
+      
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+      toast.error('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
