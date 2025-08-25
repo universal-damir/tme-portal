@@ -8,6 +8,7 @@ import {
   Crown,
   Briefcase,
   Receipt,
+  FileText,
   Users,
   Shield,
 } from 'lucide-react'
@@ -61,6 +62,12 @@ const baseNavItems = [
     url: '#taxation',
     icon: Receipt,
     feature: 'taxation',
+  },
+  {
+    title: 'CIT Return Letters',
+    url: '#cit-return-letters',
+    icon: FileText,
+    feature: 'cit_return_letters',
   },
 ];
 

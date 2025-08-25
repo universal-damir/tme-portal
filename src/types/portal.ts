@@ -5,7 +5,8 @@ export type TabId =
   | 'golden-visa'
   | 'company-services'
   | 'corporate-changes'
-  | 'taxation';
+  | 'taxation'
+  | 'cit-return-letters';
 
 export interface TabInfo {
   id: TabId;

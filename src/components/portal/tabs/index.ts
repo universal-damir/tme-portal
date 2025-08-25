@@ -3,4 +3,5 @@ export { default as CostOverviewTab } from './CostOverviewTab';
 export { default as GoldenVisaTab } from './GoldenVisaTab';
 export { default as CompanyServicesTab } from './CompanyServicesTab';
 export { default as CorporateChangesTab } from './CorporateChangesTab';
-export { default as TaxationTab } from './TaxationTab'; 
+export { default as TaxationTab } from './TaxationTab';
+export { default as CITReturnLettersTab } from './CITReturnLettersTab'; 

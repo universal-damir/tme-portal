@@ -27,6 +27,7 @@ const tabTitles: Record<TabId, string> = {
   'company-services': 'Company Services',
   'corporate-changes': 'Corporate Changes',
   'taxation': 'Tax Consultation & Filing',
+  'cit-return-letters': 'CIT Return Letters',
 }
 
 export function TMEPortalLayout({ 

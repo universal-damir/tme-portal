@@ -15,6 +15,7 @@ const GoldenVisaTab = React.lazy(() => import('./tabs/GoldenVisaTab'))
 const CompanyServicesTab = React.lazy(() => import('./tabs/CompanyServicesTab'))
 const CorporateChangesTab = React.lazy(() => import('./tabs/CorporateChangesTab'))
 const TaxationTab = React.lazy(() => import('./tabs/TaxationTab'))
+const CITReturnLettersTab = React.lazy(() => import('./tabs/CITReturnLettersTab'))
 
 // Enhanced skeleton loading component for better UX
 const TabContentSkeleton = () => (
@@ -126,6 +127,8 @@ export default function TMEPortal() {
         return <CorporateChangesTab />
       case 'taxation':
         return <TaxationTab />
+      case 'cit-return-letters':
+        return <CITReturnLettersTab />
       default:
         return <ProfileTab />
     }
