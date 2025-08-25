@@ -166,11 +166,12 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
 
   const exportUsers = () => {
     const csv = [
-      ['Employee Code', 'Name', 'Email', 'Department', 'Designation', 'Role', 'Status', 'Last Login'],
+      ['Employee Code', 'Name', 'Email', 'Phone', 'Department', 'Designation', 'Role', 'Status', 'Last Login'],
       ...filteredUsers.map(user => [
         user.employee_code,
         user.full_name,
         user.email,
+        user.phone || '',
         user.department,
         user.designation,
         user.role,
@@ -217,8 +218,8 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
         return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Admin</span>;
       case 'manager':
         return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Manager</span>;
-      case 'employee':
-        return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Employee</span>;
+      case 'staff':
+        return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">Staff</span>;
       default:
         return <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Unknown</span>;
     }
@@ -274,7 +275,7 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
             <option value="manager">Manager</option>
-            <option value="employee">Employee</option>
+            <option value="staff">Staff</option>
           </select>
           <select
             value={selectedStatus}
@@ -354,6 +355,7 @@ export default function UserManagementPanel({ onRefresh }: UserManagementPanelPr
                     <div className="mt-1 text-sm text-gray-500">
                       <span className="mr-4">{user.employee_code}</span>
                       <span className="mr-4">{user.email}</span>
+                      {user.phone && <span className="mr-4">{user.phone}</span>}
                       <span className="mr-4">{user.department}</span>
                       <span>{user.designation}</span>
                     </div>

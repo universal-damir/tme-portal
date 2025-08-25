@@ -4,15 +4,17 @@ import { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { formatPhoneNumber, validatePhoneNumber, normalizePhoneForStorage, getPhoneDisplayFormat } from '@/lib/phone-utils';
 
 interface User {
   id?: number;
   employee_code: string;
   email: string;
   full_name: string;
+  phone?: string;
   department: string;
   designation: string;
-  role: 'admin' | 'manager' | 'employee';
+  role: 'admin' | 'manager' | 'staff';
   status: 'active' | 'inactive' | 'locked';
 }
 
@@ -25,7 +27,7 @@ interface UserModalProps {
 }
 
 const ROLES = [
-  { value: 'employee', label: 'Employee' },
+  { value: 'staff', label: 'Staff' },
   { value: 'manager', label: 'Manager' },
   { value: 'admin', label: 'Administrator' },
 ];
@@ -40,6 +42,7 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
     employee_code: '',
     email: '',
     full_name: '',
+    phone: '',
     department: '',
     designation: '',
     role: 'employee' as const,
@@ -57,6 +60,7 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
         employee_code: user.employee_code,
         email: user.email,
         full_name: user.full_name,
+        phone: getPhoneDisplayFormat(user.phone || ''),
         department: user.department,
         designation: user.designation,
         role: user.role,
@@ -70,9 +74,10 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
         employee_code: '',
         email: '',
         full_name: '',
+        phone: '',
         department: departments[0] || '',
         designation: '',
-        role: 'employee',
+        role: 'staff',
         status: 'active',
         password: '',
         must_change_password: true,
@@ -97,6 +102,14 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
 
     if (!formData.full_name.trim()) {
       newErrors.full_name = 'Full name is required';
+    }
+
+    // Phone validation (optional field)
+    if (formData.phone.trim()) {
+      const phoneValidation = validatePhoneNumber(formData.phone);
+      if (!phoneValidation.isValid) {
+        newErrors.phone = phoneValidation.error || 'Invalid phone number';
+      }
     }
 
     if (!formData.department.trim()) {
@@ -138,6 +151,7 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
         },
         body: JSON.stringify({
           ...formData,
+          phone: normalizePhoneForStorage(formData.phone),
           ...(formData.password ? { password: formData.password } : {}),
         }),
       });
@@ -166,6 +180,16 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({ ...prev, phone: formatted }));
+    
+    // Clear phone error when user starts typing
+    if (errors.phone) {
+      setErrors(prev => ({ ...prev, phone: '' }));
     }
   };
 
@@ -273,6 +297,28 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
                         {errors.full_name && (
                           <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>
                         )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handlePhoneChange}
+                          placeholder="+971 55 123 45 67"
+                          className={`mt-1 block w-full rounded-md border ${
+                            errors.phone ? 'border-red-300' : 'border-gray-300'
+                          } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                        />
+                        {errors.phone && (
+                          <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                        )}
+                        <p className="mt-1 text-xs text-gray-500">
+                          UAE format: +971 XX X XX XX XX (optional)
+                        </p>
                       </div>
 
                       <div>

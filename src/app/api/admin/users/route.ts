@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
     const usersResult = await query(
       `SELECT 
-        id, employee_code, email, full_name, department, designation, 
+        id, employee_code, email, full_name, phone, department, designation, 
         role, status, created_at AT TIME ZONE 'UTC' as created_at, 
         last_login AT TIME ZONE 'UTC' as last_login, failed_login_attempts, 
         locked_until AT TIME ZONE 'UTC' as locked_until, must_change_password
@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
       employee_code,
       email,
       full_name,
+      phone,
       department,
       designation,
       role,
@@ -117,14 +118,15 @@ export async function POST(req: NextRequest) {
     // Create user
     const result = await query(
       `INSERT INTO users (
-        employee_code, email, full_name, department, designation, 
+        employee_code, email, full_name, phone, department, designation, 
         role, status, hashed_password, must_change_password, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW()) 
-      RETURNING id, employee_code, email, full_name, department, designation, role, status`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()) 
+      RETURNING id, employee_code, email, full_name, phone, department, designation, role, status`,
       [
         employee_code,
         email,
         full_name,
+        phone || null,
         department,
         designation,
         role || 'employee',

@@ -23,7 +23,7 @@ export async function GET(
 
     const userResult = await query(
       `SELECT 
-        id, employee_code, email, full_name, department, designation,
+        id, employee_code, email, full_name, phone, department, designation,
         role, status, created_at, last_login, failed_login_attempts,
         locked_until, must_change_password, last_password_change
       FROM users 
@@ -74,6 +74,7 @@ export async function PATCH(
       employee_code,
       email,
       full_name,
+      phone,
       department,
       designation,
       role,
@@ -97,6 +98,10 @@ export async function PATCH(
     if (full_name !== undefined) {
       updates.push(`full_name = $${paramIndex++}`);
       values.push(full_name);
+    }
+    if (phone !== undefined) {
+      updates.push(`phone = $${paramIndex++}`);
+      values.push(phone);
     }
     if (department !== undefined) {
       updates.push(`department = $${paramIndex++}`);
@@ -131,7 +136,7 @@ export async function PATCH(
 
     const result = await query(
       `UPDATE users SET ${updates.join(', ')} WHERE id = $${paramIndex} 
-       RETURNING id, employee_code, email, full_name, department, designation, role, status`,
+       RETURNING id, employee_code, email, full_name, phone, department, designation, role, status`,
       values
     );
 
