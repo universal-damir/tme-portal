@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import CustomDatePicker from '../ui/CustomDatePicker';
+import TaxPeriodDatePicker from '../ui/TaxPeriodDatePicker';
 
 interface TaxPeriodSectionProps {
   startDate: string;
@@ -17,10 +17,21 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
   onStartDateChange,
   onEndDateChange,
 }) => {
+  const hasInitialized = useRef(false);
 
-  // Auto-populate end date when start date changes (only if end date is empty)
+  // Set default start date to January 1st of previous year if no start date is provided
   useEffect(() => {
-    if (startDate && startDate !== '' && (!endDate || endDate === '')) {
+    if (!hasInitialized.current && (!startDate || startDate === '')) {
+      const previousYear = new Date().getFullYear() - 1;
+      const defaultStartDate = `${previousYear}-01-01`;
+      onStartDateChange(defaultStartDate);
+      hasInitialized.current = true;
+    }
+  }, [startDate, onStartDateChange]);
+
+  // Auto-populate end date when start date changes
+  useEffect(() => {
+    if (startDate && startDate !== '') {
       const startDateObj = new Date(startDate);
       if (!isNaN(startDateObj.getTime())) {
         // Add 1 year to the start date, then subtract 1 day to get last day of tax period
@@ -31,10 +42,13 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
         // Format as YYYY-MM-DD
         const formattedEndDate = endDateObj.toISOString().split('T')[0];
         
-        onEndDateChange(formattedEndDate);
+        // Only update end date if it's different to avoid loops
+        if (formattedEndDate !== endDate) {
+          onEndDateChange(formattedEndDate);
+        }
       }
     }
-  }, [startDate, onEndDateChange]); // Remove endDate from dependencies to allow manual editing
+  }, [startDate]); // Only depend on startDate
 
   return (
     <motion.div
@@ -48,7 +62,7 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Start Date */}
-        <CustomDatePicker
+        <TaxPeriodDatePicker
           value={startDate}
           onChange={onStartDateChange}
           label="Tax Period Start Date"
@@ -57,7 +71,7 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
 
         {/* End Date */}
         <div>
-          <CustomDatePicker
+          <TaxPeriodDatePicker
             value={endDate}
             onChange={onEndDateChange}
             label="Tax Period End Date"
@@ -89,13 +103,13 @@ const TaxPeriodSection: React.FC<TaxPeriodSectionProps> = ({
                 day: '2-digit',
                 month: '2-digit', 
                 year: 'numeric'
-              })} 
+              }).replace(/\//g, '.')} 
               {' - '}
               {new Date(endDate).toLocaleDateString('en-GB', {
                 day: '2-digit',
                 month: '2-digit',
                 year: 'numeric'
-              })}
+              }).replace(/\//g, '.')}
             </span>
           </div>
           <div className="text-xs text-gray-500 mt-1">

@@ -22,11 +22,9 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
   minDate,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const [selectionStep, setSelectionStep] = useState<'year' | 'month' | 'day'>('year');
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const today = new Date();
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth());
+  const [currentYear, setCurrentYear] = useState(today.getFullYear());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const monthNames = [
@@ -115,14 +113,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
       <motion.button
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) {
-            setSelectionStep('year');
-            setSelectedYear(null);
-            setSelectedMonth(null);
-          }
-        }}
+        onClick={() => setIsOpen(!isOpen)}
         type="button"
         className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 bg-white text-left flex items-center justify-between focus:outline-none transition-all duration-200 h-[42px]"
         style={{ fontFamily: 'Inter, sans-serif' }}
@@ -142,188 +133,94 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
           exit={{ opacity: 0, y: -10 }}
           className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl p-4 min-w-[320px]"
         >
-          {/* Year Selection */}
-          {selectionStep === 'year' && (
-            <div>
-              <h4 className="text-center text-lg font-semibold mb-4" style={{ color: '#243F7B' }}>
-                Select Year
-              </h4>
-              <div className="grid grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                {Array.from({ length: 20 }, (_, i) => {
-                  const year = new Date().getFullYear() - 10 + i;
-                  const minYear = minDate ? new Date(minDate).getFullYear() : null;
-                  const isDisabled = minYear && year < minYear;
-                  
-                  return (
-                    <motion.button
-                      key={year}
-                      whileHover={!isDisabled ? { scale: 1.05 } : {}}
-                      whileTap={!isDisabled ? { scale: 0.95 } : {}}
-                      onClick={() => {
-                        if (!isDisabled) {
-                          setSelectedYear(year);
-                          setSelectionStep('month');
-                        }
-                      }}
-                      type="button"
-                      disabled={isDisabled}
-                      className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
-                        isDisabled
-                          ? 'text-gray-300 cursor-not-allowed bg-gray-50'
-                          : year === new Date().getFullYear()
-                          ? 'text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      style={{
-                        backgroundColor: isDisabled ? '#f9fafb' : year === new Date().getFullYear() ? '#D2BC99' : 'transparent'
-                      }}
-                    >
-                      {year}
-                    </motion.button>
-                  );
-                })}
+          {/* Calendar Header */}
+          <div className="flex items-center justify-between mb-4">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigateMonth('prev')}
+              type="button"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+            >
+              <ChevronLeft className="w-5 h-5" style={{ color: '#243F7B' }} />
+            </motion.button>
+            
+            <h3 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
+              {monthNames[currentMonth]} {currentYear}
+            </h3>
+            
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => navigateMonth('next')}
+              type="button"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
+            >
+              <ChevronRight className="w-5 h-5" style={{ color: '#243F7B' }} />
+            </motion.button>
+          </div>
+          
+          {/* Day Headers */}
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {dayNames.map((day, index) => (
+              <div
+                key={`${day}-${index}`}
+                className="text-center text-sm font-semibold py-2 w-10 h-8 flex items-center justify-center"
+                style={{ color: '#243F7B' }}
+              >
+                {day}
               </div>
-            </div>
-          )}
-
-          {/* Month Selection */}
-          {selectionStep === 'month' && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setSelectionStep('year')}
-                  type="button"
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
-                >
-                  <ChevronLeft className="w-4 h-4" style={{ color: '#243F7B' }} />
-                </motion.button>
-                <h4 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
-                  Select Month - {selectedYear}
-                </h4>
-                <div className="w-6" />
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {monthNames.map((month, index) => {
-                  const minYear = minDate ? new Date(minDate).getFullYear() : null;
-                  const minMonth = minDate ? new Date(minDate).getMonth() : null;
-                  const isDisabled = minYear && minMonth !== null && selectedYear === minYear && index < minMonth;
-                  
-                  return (
-                    <motion.button
-                      key={month}
-                      whileHover={!isDisabled ? { scale: 1.05 } : {}}
-                      whileTap={!isDisabled ? { scale: 0.95 } : {}}
-                      onClick={() => {
-                        if (!isDisabled) {
-                          setSelectedMonth(index);
-                          setCurrentMonth(index);
-                          setCurrentYear(selectedYear!);
-                          setSelectionStep('day');
-                        }
-                      }}
-                      type="button"
-                      disabled={isDisabled}
-                      className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-150 ${
-                        isDisabled
-                          ? 'text-gray-300 cursor-not-allowed bg-gray-50'
-                          : index === new Date().getMonth() && selectedYear === new Date().getFullYear()
-                          ? 'text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      style={{
-                        backgroundColor: isDisabled ? '#f9fafb' : index === new Date().getMonth() && selectedYear === new Date().getFullYear() ? '#D2BC99' : 'transparent'
-                      }}
-                    >
-                      {month.slice(0, 3)}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Day Selection */}
-          {selectionStep === 'day' && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <motion.button
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setSelectionStep('month')}
-                  type="button"
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors duration-150"
-                >
-                  <ChevronLeft className="w-4 h-4" style={{ color: '#243F7B' }} />
-                </motion.button>
-                <h4 className="text-lg font-semibold" style={{ color: '#243F7B' }}>
-                  {monthNames[currentMonth]} {currentYear}
-                </h4>
-                <div className="w-6" />
-              </div>
+            ))}
+          </div>
+          
+          {/* Calendar Days */}
+          <div className="grid grid-cols-7 gap-1">
+            {/* Empty cells for days before month starts */}
+            {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, index) => (
+              <div key={`empty-${index}`} className="h-10 w-10" />
+            ))}
+            
+            {/* Days of the month */}
+            {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, index) => {
+              const day = index + 1;
+              const date = new Date(currentYear, currentMonth, day);
+              const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+              const isSelected = value === dateString;
+              const isToday = 
+                new Date().getDate() === day &&
+                new Date().getMonth() === currentMonth &&
+                new Date().getFullYear() === currentYear;
               
-              {/* Day Headers */}
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-                  <div
-                    key={day}
-                    className="text-center text-xs font-medium py-1 text-gray-500"
-                  >
-                    {day}
-                  </div>
-                ))}
-              </div>
+              // Check if date is before minDate
+              const isDisabled = minDate && dateString < minDate;
               
-              {/* Calendar Days */}
-              <div className="grid grid-cols-7 gap-1">
-                {/* Empty cells */}
-                {Array.from({ length: getFirstDayOfMonth(currentMonth, currentYear) }).map((_, index) => (
-                  <div key={`empty-${index}`} className="h-8 w-8" />
-                ))}
-                
-                {/* Days */}
-                {Array.from({ length: getDaysInMonth(currentMonth, currentYear) }).map((_, index) => {
-                  const day = index + 1;
-                  const date = new Date(currentYear, currentMonth, day);
-                  const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-                  const isSelected = value === dateString;
-                  const isToday = 
-                    new Date().getDate() === day &&
-                    new Date().getMonth() === currentMonth &&
-                    new Date().getFullYear() === currentYear;
-                  
-                  // Check if date is before minDate
-                  const isDisabled = minDate && dateString < minDate;
-                  
-                  return (
-                    <motion.button
-                      key={day}
-                      whileHover={!isDisabled ? { scale: 1.1 } : {}}
-                      whileTap={!isDisabled ? { scale: 0.9 } : {}}
-                      onClick={() => !isDisabled && handleDateSelect(day)}
-                      type="button"
-                      disabled={isDisabled}
-                      className={`h-8 w-8 rounded-md text-sm font-medium transition-all duration-150 flex items-center justify-center ${
-                        isDisabled
-                          ? 'text-gray-300 cursor-not-allowed bg-gray-50'
-                          : isSelected
-                          ? 'text-white shadow-md'
-                          : isToday
-                          ? 'text-white'
-                          : 'text-gray-700 hover:bg-gray-100'
-                      }`}
-                      style={{
-                        backgroundColor: isDisabled ? '#f9fafb' : isSelected ? '#243F7B' : isToday ? '#D2BC99' : 'transparent'
-                      }}
-                    >
-                      {day}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+              return (
+                <motion.button
+                  key={day}
+                  whileHover={!isDisabled ? { scale: 1.1 } : {}}
+                  whileTap={!isDisabled ? { scale: 0.9 } : {}}
+                  onClick={() => !isDisabled && handleDateSelect(day)}
+                  type="button"
+                  disabled={isDisabled}
+                  className={`h-10 w-10 rounded-lg text-sm font-medium transition-all duration-150 flex items-center justify-center ${
+                    isDisabled
+                      ? 'text-gray-300 cursor-not-allowed bg-gray-50'
+                      : isSelected
+                      ? 'text-white shadow-md'
+                      : isToday
+                      ? 'text-white border-2'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                  style={{
+                    backgroundColor: isDisabled ? '#f9fafb' : isSelected ? '#243F7B' : isToday ? '#D2BC99' : 'transparent',
+                    borderColor: isToday ? '#243F7B' : 'transparent'
+                  }}
+                >
+                  {day}
+                </motion.button>
+              );
+            })}
+          </div>
           
           {/* Calendar Footer */}
           <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-200">
@@ -332,9 +229,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
               whileTap={{ scale: 0.98 }}
               onClick={() => {
                 onChange('');
-                setSelectionStep('year');
-                setSelectedYear(null);
-                setSelectedMonth(null);
+                setIsOpen(false);
               }}
               type="button"
               className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors duration-150"
@@ -349,9 +244,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 const today = new Date();
                 setCurrentMonth(today.getMonth());
                 setCurrentYear(today.getFullYear());
-                setSelectionStep('year');
-                setSelectedYear(null);
-                setSelectedMonth(null);
+                handleDateSelect(today.getDate());
               }}
               type="button"
               className="px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-150"

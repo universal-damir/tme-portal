@@ -53,9 +53,10 @@ export const ConfAccDocsPage: React.FC<ConfAccDocsPageProps> = ({ data }) => {
     return '30.09.2025'; // Default fallback
   };
 
-  // Format the current date as dd.mm.yyyy
-  const formatCurrentDate = () => {
-    const date = new Date(data.clientDetails.date);
+  // Format the letter date as dd.mm.yyyy
+  const formatLetterDate = () => {
+    const letterDateToUse = citReturnLettersData.letterDate || new Date().toISOString().split('T')[0];
+    const date = new Date(letterDateToUse);
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
@@ -116,7 +117,7 @@ export const ConfAccDocsPage: React.FC<ConfAccDocsPageProps> = ({ data }) => {
           {/* Location and Date */}
           <View style={{ marginBottom: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ fontSize: 10, color: '#374151' }}>{selectedClient?.city || 'Dubai'}, {selectedClient?.country || 'UAE'}</Text>
-            <Text style={{ fontSize: 10, color: '#374151' }}>{formatCurrentDate()}</Text>
+            <Text style={{ fontSize: 10, color: '#374151' }}>{formatLetterDate()}</Text>
           </View>
 
           {/* Document Title/Headline */}

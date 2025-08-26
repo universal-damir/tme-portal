@@ -36,6 +36,9 @@ export interface CITReturnLettersData {
   selectedClient: Client | null;
   clientSearchTerm: string;
   
+  // Letter Date
+  letterDate: string;
+  
   // Tax Period
   taxPeriodStart: string;
   taxPeriodEnd: string;
@@ -50,6 +53,7 @@ export interface CITReturnLettersData {
 export const CIT_RETURN_LETTERS_DEFAULTS = {
   selectedClient: null,
   clientSearchTerm: '',
+  letterDate: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
   taxPeriodStart: '',
   taxPeriodEnd: '',
   letterType: '' as LetterType | '',

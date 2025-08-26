@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections } from '@/types/cit-return-letters';
-import { ClientDetailsSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection } from '@/components/cit-return-letters';
+import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection } from '@/components/cit-return-letters';
 import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
 
 const CITReturnLettersTab: React.FC = () => {
@@ -45,6 +45,10 @@ const CITReturnLettersTab: React.FC = () => {
 
   const handleLetterTypeChange = (letterType: LetterType | '') => {
     setValue('letterType', letterType);
+  };
+
+  const handleLetterDateChange = (date: string) => {
+    setValue('letterDate', date);
   };
 
   const handleConfAccDocsSelectionsChange = (selections: ConfAccDocsSelections) => {
@@ -173,6 +177,12 @@ const CITReturnLettersTab: React.FC = () => {
         onClientSelect={handleClientSelect}
         searchTerm={watchedData.clientSearchTerm}
         onSearchTermChange={handleSearchTermChange}
+      />
+
+      {/* Letter Date Section */}
+      <LetterDateSection
+        letterDate={watchedData.letterDate}
+        onLetterDateChange={handleLetterDateChange}
       />
 
       {/* Tax Period Section */}
