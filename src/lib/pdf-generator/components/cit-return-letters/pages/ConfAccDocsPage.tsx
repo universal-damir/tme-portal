@@ -225,7 +225,7 @@ export const ConfAccDocsPage: React.FC<ConfAccDocsPageProps> = ({ data }) => {
               </View>
               
               {/* Right Column - Acknowledged */}
-              <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 20 }}>
+              <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
                 <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
                 
                 <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>

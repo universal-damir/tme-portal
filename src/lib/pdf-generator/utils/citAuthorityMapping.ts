@@ -67,8 +67,8 @@ export const COMPANY_DETAILS: Record<CompanyDetails['type'], CompanyDetails> = {
     poBox: '487770',
     city: 'Dubai',
     country: 'UAE',
-    phone: '+971 55 551 10 18',
-    email: 'info@TME-Services.com',
+    phone: '',
+    email: 'CIT@TME-Services.com',
     website: 'www.TME-Services.com',
     stampPath: '/stamps/cit-letters/FZCO.jpeg'
   },
@@ -80,8 +80,8 @@ export const COMPANY_DETAILS: Record<CompanyDetails['type'], CompanyDetails> = {
     poBox: '487770',
     city: 'Dubai',
     country: 'UAE',
-    phone: '+971 55 551 10 18',
-    email: 'info@TME-Services.com',
+    phone: '',
+    email: 'CIT@TME-Services.com',
     website: 'www.TME-Services.com',
     stampPath: '/stamps/cit-letters/MGT.jpeg'
   },
@@ -93,8 +93,8 @@ export const COMPANY_DETAILS: Record<CompanyDetails['type'], CompanyDetails> = {
     poBox: '487770',
     city: 'Dubai',
     country: 'UAE',
-    phone: '+971 55 551 10 18',
-    email: 'info@TME-Services.com',
+    phone: '',
+    email: 'CIT@TME-Services.com',
     website: 'www.TME-Services.com',
     stampPath: '/stamps/cit-letters/TME.jpeg'
   }

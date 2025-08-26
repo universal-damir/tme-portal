@@ -30,13 +30,13 @@ export const CITLetterHeaderComponent: React.FC<CITLetterHeaderComponentProps> =
               {companyDetails.name}
             </Text>
             <Text style={{ fontSize: 8, color: '#6b7280', marginBottom: 1 }}>
-              (CIT TRN {companyDetails.citTrn} | VAT TRN {companyDetails.vatTrn})
+              CIT TRN {companyDetails.citTrn} | VAT TRN {companyDetails.vatTrn}
             </Text>
             <Text style={{ fontSize: 8, color: '#6b7280', marginBottom: 1 }}>
               PO Box {companyDetails.poBox} | {companyDetails.city} | {companyDetails.country}
             </Text>
             <Text style={{ fontSize: 8, color: '#6b7280' }}>
-              T {companyDetails.phone} | {companyDetails.email} | {companyDetails.website}
+              {companyDetails.email} | {companyDetails.website}
             </Text>
           </View>
         </View>
