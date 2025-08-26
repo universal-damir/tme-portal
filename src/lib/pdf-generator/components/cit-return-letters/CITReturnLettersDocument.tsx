@@ -1,6 +1,6 @@
 import React from 'react';
 import { Document, Page, View, Text } from '@react-pdf/renderer';
-import { CITTransferPricingPage, ConfAccDocsPage } from './pages';
+import { CITTransferPricingPage, ConfAccDocsPage, CITAssessmentConclusionPage } from './pages';
 import { styles } from '../../styles';
 import type { PDFComponentProps } from '../../types';
 import type { CITReturnLettersData } from '@/types/cit-return-letters';
@@ -33,7 +33,7 @@ export const CITReturnLettersDocument: React.FC<CITReturnLettersDocumentProps> =
     <Document>
       {letterType === 'CIT TP' && <CITTransferPricingPage data={data} />}
       {letterType === 'Conf acc docs + FS' && <ConfAccDocsPage data={data} />}
-      {letterType === 'CIT assess+concl, non deduct, elect' && <NotImplementedPage letterType="CIT assess+concl, non deduct, elect" />}
+      {letterType === 'CIT assess+concl, non deduct, elect' && <CITAssessmentConclusionPage data={data} />}
     </Document>
   );
 };

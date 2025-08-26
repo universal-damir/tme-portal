@@ -254,9 +254,37 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
             transition={{ duration: 0.3 }}
             className="border-t pt-6"
           >
-            <h4 className="text-md font-semibold mb-4" style={{ color: '#243F7B' }}>
-              QFZP (Qualifying Free Zone Person) benefit
-            </h4>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+              <div className="lg:col-span-2">
+                <h4 className="text-md font-semibold" style={{ color: '#243F7B' }}>
+                  QFZP (Qualifying Free Zone Person) benefit
+                </h4>
+              </div>
+              <div className="flex justify-start">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    const allSelected = Object.values(data.qfzpBenefitSelections).every(value => value === true);
+                    const newSelections = Object.keys(data.qfzpBenefitSelections).reduce((acc, key) => {
+                      acc[key as keyof QFZPBenefitSelections] = !allSelected;
+                      return acc;
+                    }, {} as QFZPBenefitSelections);
+                    onDataChange({
+                      ...data,
+                      qfzpBenefitSelections: newSelections,
+                    });
+                  }}
+                  className="px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md h-[42px]"
+                  style={{ 
+                    backgroundColor: Object.values(data.qfzpBenefitSelections).every(value => value === true) ? '#D2BC99' : '#243F7B',
+                    color: Object.values(data.qfzpBenefitSelections).every(value => value === true) ? '#243F7B' : 'white'
+                  }}
+                >
+                  {Object.values(data.qfzpBenefitSelections).every(value => value === true) ? 'Uncheck All' : 'Check All'}
+                </motion.button>
+              </div>
+            </div>
             
             <div className="space-y-3">
               {[
