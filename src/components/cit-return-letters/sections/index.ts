@@ -4,3 +4,4 @@ export { default as LetterDateSection } from './LetterDateSection';
 export { default as TaxPeriodSection } from './TaxPeriodSection';
 export { default as LetterTypeSection } from './LetterTypeSection';
 export { default as ConfAccDocsSelectionSection } from './ConfAccDocsSelectionSection';
+export { default as CITAssessmentConclusionSection } from './CITAssessmentConclusionSection';

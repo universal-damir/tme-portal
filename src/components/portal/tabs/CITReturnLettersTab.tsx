@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections } from '@/types/cit-return-letters';
-import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection } from '@/components/cit-return-letters';
+import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections, CITAssessmentConclusionData } from '@/types/cit-return-letters';
+import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection, CITAssessmentConclusionSection } from '@/components/cit-return-letters';
 import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
 
 const CITReturnLettersTab: React.FC = () => {
@@ -53,6 +53,10 @@ const CITReturnLettersTab: React.FC = () => {
 
   const handleConfAccDocsSelectionsChange = (selections: ConfAccDocsSelections) => {
     setValue('confAccDocsSelections', selections);
+  };
+
+  const handleCITAssessmentConclusionChange = (data: CITAssessmentConclusionData) => {
+    setValue('citAssessmentConclusion', data);
   };
 
   // PDF generation handlers
@@ -204,6 +208,15 @@ const CITReturnLettersTab: React.FC = () => {
         <ConfAccDocsSelectionSection
           selections={watchedData.confAccDocsSelections}
           onSelectionsChange={handleConfAccDocsSelectionsChange}
+        />
+      )}
+
+      {/* CIT Assessment Conclusion Section - Only show when 'CIT assess+concl, non deduct, elect' is selected */}
+      {watchedData.letterType === 'CIT assess+concl, non deduct, elect' && (
+        <CITAssessmentConclusionSection
+          data={watchedData.citAssessmentConclusion}
+          onDataChange={handleCITAssessmentConclusionChange}
+          selectedClient={watchedData.selectedClient}
         />
       )}
 

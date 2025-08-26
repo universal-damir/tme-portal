@@ -31,6 +31,28 @@ export interface ConfAccDocsSelections {
   otherPointText: string;
 }
 
+export interface QFZPBenefitSelections {
+  adequateSubstance: boolean;
+  derivesQualifyingIncome: boolean;
+  withinDeMinimis: boolean;
+  preparesTPDocumentation: boolean;
+  performsAuditFinancialStatements: boolean;
+  doesNotElectStandardRules: boolean;
+}
+
+export interface NonDeductibleExpense {
+  particulars: string;
+  nonDeductiblePercentage: number;
+}
+
+export interface CITAssessmentConclusionData {
+  citImpactAssessmentPerformed: boolean;
+  citImpactAssessmentDate: string;
+  qfzpBenefitSelections: QFZPBenefitSelections;
+  smallBusinessReliefAmount: number;
+  nonDeductibleExpenses: NonDeductibleExpense[];
+}
+
 export interface CITReturnLettersData {
   // Client Details (from database)
   selectedClient: Client | null;
@@ -48,6 +70,9 @@ export interface CITReturnLettersData {
   
   // Conf acc docs + FS specific selections
   confAccDocsSelections: ConfAccDocsSelections;
+  
+  // CIT assess+concl, non deduct, elect specific selections
+  citAssessmentConclusion: CITAssessmentConclusionData;
 }
 
 export const CIT_RETURN_LETTERS_DEFAULTS = {
@@ -67,6 +92,23 @@ export const CIT_RETURN_LETTERS_DEFAULTS = {
     otherPointSelected: false,
     otherPointName: '',
     otherPointText: '',
+  },
+  citAssessmentConclusion: {
+    citImpactAssessmentPerformed: false,
+    citImpactAssessmentDate: '',
+    qfzpBenefitSelections: {
+      adequateSubstance: false,
+      derivesQualifyingIncome: false,
+      withinDeMinimis: false,
+      preparesTPDocumentation: false,
+      performsAuditFinancialStatements: false,
+      doesNotElectStandardRules: false,
+    },
+    smallBusinessReliefAmount: 0,
+    nonDeductibleExpenses: [{
+      particulars: '',
+      nonDeductiblePercentage: 0,
+    }],
   },
 };
 
