@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
-import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType } from '@/types/cit-return-letters';
-import { ClientDetailsSection, TaxPeriodSection, LetterTypeSection } from '@/components/cit-return-letters';
+import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections } from '@/types/cit-return-letters';
+import { ClientDetailsSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection } from '@/components/cit-return-letters';
 import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
 
 const CITReturnLettersTab: React.FC = () => {
@@ -45,6 +45,10 @@ const CITReturnLettersTab: React.FC = () => {
 
   const handleLetterTypeChange = (letterType: LetterType | '') => {
     setValue('letterType', letterType);
+  };
+
+  const handleConfAccDocsSelectionsChange = (selections: ConfAccDocsSelections) => {
+    setValue('confAccDocsSelections', selections);
   };
 
   // PDF generation handlers
@@ -184,6 +188,14 @@ const CITReturnLettersTab: React.FC = () => {
         selectedLetterType={watchedData.letterType}
         onLetterTypeChange={handleLetterTypeChange}
       />
+
+      {/* Conf Acc Docs Selection Section - Only show when 'Conf acc docs + FS' is selected */}
+      {watchedData.letterType === 'Conf acc docs + FS' && (
+        <ConfAccDocsSelectionSection
+          selections={watchedData.confAccDocsSelections}
+          onSelectionsChange={handleConfAccDocsSelectionsChange}
+        />
+      )}
 
       {/* Action Buttons */}
       <div className="text-center" style={{ fontFamily: 'Inter, sans-serif' }}>

@@ -19,6 +19,18 @@ export interface Client {
 
 export type LetterType = 'CIT TP' | 'Conf acc docs + FS' | 'CIT assess+concl, non deduct, elect';
 
+export interface ConfAccDocsSelections {
+  revenuesAndExpenses: boolean;
+  nonDeductibleExpenses: boolean;
+  waiverSalaryGratuity: boolean;
+  assetsAndLiabilities: boolean;
+  ifrs9FinancialInstruments: boolean;
+  ifrs16Leases: boolean;
+  otherPointSelected: boolean;
+  otherPointName: string;
+  otherPointText: string;
+}
+
 export interface CITReturnLettersData {
   // Client Details (from database)
   selectedClient: Client | null;
@@ -30,6 +42,9 @@ export interface CITReturnLettersData {
   
   // Letter Selection
   letterType: LetterType | '';
+  
+  // Conf acc docs + FS specific selections
+  confAccDocsSelections: ConfAccDocsSelections;
 }
 
 export const CIT_RETURN_LETTERS_DEFAULTS = {
@@ -38,6 +53,17 @@ export const CIT_RETURN_LETTERS_DEFAULTS = {
   taxPeriodStart: '',
   taxPeriodEnd: '',
   letterType: '' as LetterType | '',
+  confAccDocsSelections: {
+    revenuesAndExpenses: false,
+    nonDeductibleExpenses: false,
+    waiverSalaryGratuity: false,
+    assetsAndLiabilities: false,
+    ifrs9FinancialInstruments: false,
+    ifrs16Leases: false,
+    otherPointSelected: false,
+    otherPointName: '',
+    otherPointText: '',
+  },
 };
 
 export const LETTER_TYPE_OPTIONS: { value: LetterType; label: string }[] = [

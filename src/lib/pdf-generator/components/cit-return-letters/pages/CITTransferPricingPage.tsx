@@ -152,7 +152,7 @@ export const CITTransferPricingPage: React.FC<CITTransferPricingPageProps> = ({ 
         </View>
       </View>
       
-      <FooterComponent data={data} />
+      <FooterComponent />
     </Page>
   );
 };

@@ -73,58 +73,6 @@ const LetterTypeSection: React.FC<LetterTypeSectionProps> = ({
           </div>
         </div>
 
-        {/* Letter Type Description */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className={`p-4 rounded-lg border transition-all duration-200 ${
-            selectedLetterType 
-              ? 'bg-blue-50 border-blue-200' 
-              : 'bg-gray-50 border-gray-200'
-          }`}
-        >
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0 mt-1">
-              <div 
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium ${
-                  selectedLetterType ? 'bg-blue-600' : 'bg-gray-400'
-                }`}
-              >
-                <FileText className="h-3 w-3" />
-              </div>
-            </div>
-            <div className="flex-1">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">
-                {selectedLetterType ? `${selectedLetterType} Letter` : 'Letter Type Description'}
-              </h4>
-              <p className="text-sm text-gray-600">
-                {getLetterTypeDescription(selectedLetterType)}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Selected Letter Summary */}
-        {selectedLetterType && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-green-50 p-3 rounded-lg border border-green-200"
-          >
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-600 rounded-full flex items-center justify-center">
-                <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 8 8">
-                  <path d="M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z"/>
-                </svg>
-              </div>
-              <div>
-                <span className="text-sm font-medium text-green-800">
-                  Selected: {selectedLetterType}
-                </span>
-              </div>
-            </div>
-          </motion.div>
-        )}
       </div>
     </motion.div>
   );
