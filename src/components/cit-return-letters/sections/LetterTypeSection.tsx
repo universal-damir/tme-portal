@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, ChevronDown } from 'lucide-react';
 import { LetterType, LETTER_TYPE_OPTIONS } from '@/types/cit-return-letters';
@@ -14,9 +14,11 @@ const LetterTypeSection: React.FC<LetterTypeSectionProps> = ({
   selectedLetterType,
   onLetterTypeChange,
 }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleLetterTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onLetterTypeChange(e.target.value as LetterType | '');
+  const handleLetterTypeSelect = (letterType: LetterType | '') => {
+    onLetterTypeChange(letterType);
+    setIsDropdownOpen(false);
   };
 
   const getLetterTypeDescription = (letterType: LetterType | '') => {
@@ -37,39 +39,69 @@ const LetterTypeSection: React.FC<LetterTypeSectionProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      <h3 className="text-lg font-semibold mb-4" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
+      <h3 className="text-lg font-semibold mb-4" style={{ color: '#243F7B' }}>
         Select Letter
       </h3>
 
       <div className="space-y-4">
         {/* Letter Type Dropdown */}
         <div>
-          <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+          <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
             Letter Type
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FileText className="h-5 w-5 text-gray-400" />
-            </div>
-            <select
-              value={selectedLetterType}
-              onChange={handleLetterTypeChange}
-              className="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] appearance-none bg-white"
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 bg-white text-left flex items-center justify-between focus:outline-none transition-all duration-200 h-[42px]"
               style={{ fontFamily: 'Inter, sans-serif' }}
               onFocus={(e) => e.target.style.borderColor = '#243F7B'}
               onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
             >
-              <option value="">Select a letter type...</option>
-              {LETTER_TYPE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <ChevronDown className="h-5 w-5 text-gray-400" />
-            </div>
+              <div className="flex items-center">
+                <FileText className="h-4 w-4 text-gray-400 mr-2" />
+                <span className={selectedLetterType ? 'text-gray-900' : 'text-gray-500'}>
+                  {selectedLetterType 
+                    ? LETTER_TYPE_OPTIONS.find(option => option.value === selectedLetterType)?.label 
+                    : 'Select a letter type...'
+                  }
+                </span>
+              </div>
+              <motion.div
+                animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </motion.div>
+            </motion.button>
+            
+            {isDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg"
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                {LETTER_TYPE_OPTIONS.map((option, index) => (
+                  <motion.button
+                    key={option.value}
+                    whileHover={{ backgroundColor: '#f3f4f6' }}
+                    onClick={() => handleLetterTypeSelect(option.value)}
+                    className={`w-full px-3 py-2 text-left hover:bg-gray-100 transition-colors duration-150 text-gray-900 ${
+                      index === 0 ? 'rounded-t-lg' : ''
+                    } ${
+                      index === LETTER_TYPE_OPTIONS.length - 1 ? 'rounded-b-lg' : ''
+                    }`}
+                  >
+                    {option.label}
+                  </motion.button>
+                ))}
+              </motion.div>
+            )}
           </div>
         </div>
 

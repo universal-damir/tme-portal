@@ -131,7 +131,7 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
                 handleCheckboxChange('otherPointSelected', true);
               }
             }}
-            label="Other point (custom)"
+            label="Other point"
           />
           
           {selections.otherPointSelected && (
@@ -190,7 +190,7 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
               selections.assetsAndLiabilities && 'Assets and liabilities',
               selections.ifrs9FinancialInstruments && 'IFRS 9 Financial instruments',
               selections.ifrs16Leases && 'IFRS 16 Leases',
-              selections.otherPointSelected && `Custom: ${selections.otherPointName || 'Other point'}`
+              selections.otherPointSelected && `${selections.otherPointName || 'Other point'}`
             ].filter(Boolean).join(', ') || 'No points selected'}
           </div>
         </motion.div>

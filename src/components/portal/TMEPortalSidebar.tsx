@@ -64,7 +64,7 @@ const baseNavItems = [
     feature: 'taxation',
   },
   {
-    title: 'CIT Return Letters',
+    title: 'Acc CIT letters',
     url: '#cit-return-letters',
     icon: FileText,
     feature: 'cit_return_letters',

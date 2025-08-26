@@ -65,7 +65,7 @@ export function transformCITReturnLettersData(
 
 /**
  * Generate CIT return letters PDF filename following TME naming conventions
- * Format: {YYMMDD} {company short name} {letter type} {tax period dd.mm.yyyy}
+ * Format: {YYMMDD} {company short name} {letter type} {tax period end year}
  */
 export function generateCITReturnLettersFilename(
   citReturnLettersData: CITReturnLettersData,
@@ -82,21 +82,18 @@ export function generateCITReturnLettersFilename(
   const companyShortName = citReturnLettersData.selectedClient?.company_name_short || 
                           clientInfo?.shortCompanyName || 'Company';
   
-  // Format letter type for filename
-  const letterTypeForFilename = citReturnLettersData.letterType.replace(/\s+/g, '_');
+  // Use letter type as-is without underscores (original form)
+  const letterTypeForFilename = citReturnLettersData.letterType;
   
-  // Format tax period end date as dd.mm.yyyy
-  const formatTaxEndDate = () => {
+  // Get tax period end year as 4-digit number
+  const getTaxEndYear = () => {
     if (citReturnLettersData.taxPeriodEnd) {
       const endDate = new Date(citReturnLettersData.taxPeriodEnd);
-      const day = endDate.getDate().toString().padStart(2, '0');
-      const month = (endDate.getMonth() + 1).toString().padStart(2, '0');
-      const year = endDate.getFullYear();
-      return `${day}.${month}.${year}`;
+      return endDate.getFullYear().toString();
     }
-    return '31.12.2024'; // Default fallback
+    return '2024'; // Default fallback
   };
   
-  // Build filename: {YYMMDD} {company short name} {letter type} {tax end period}
-  return `${formattedDate} ${companyShortName} ${letterTypeForFilename} ${formatTaxEndDate()}.pdf`;
+  // Build filename: {YYMMDD} {company short name} {letter type} {tax end year}
+  return `${formattedDate} ${companyShortName} ${letterTypeForFilename} ${getTaxEndYear()}.pdf`;
 }

@@ -25,7 +25,7 @@ interface NavMainProps {
 export function NavMain({ items, activeTab, onItemClick }: NavMainProps) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Services</SidebarGroupLabel>
+      <SidebarGroupLabel>Documents</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
@@ -40,7 +40,6 @@ export function NavMain({ items, activeTab, onItemClick }: NavMainProps) {
                   onClick={() => onItemClick(item.url)}
                   className="w-full justify-start"
                 >
-                  <item.icon className="h-4 w-4" />
                   <span>{item.title}</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>

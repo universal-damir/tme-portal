@@ -98,7 +98,7 @@ export const ConfAccDocsPage: React.FC<ConfAccDocsPageProps> = ({ data }) => {
       title: selections.otherPointName || 'Open point',
       content: selections.otherPointText || 'Individual text'
     }
-  ].filter(Boolean); // Remove false entries
+  ].filter(Boolean) as Array<{ title: string; content: string }>; // Remove false entries
 
   return (
     <>
@@ -196,37 +196,39 @@ export const ConfAccDocsPage: React.FC<ConfAccDocsPageProps> = ({ data }) => {
             </Text>
           </View>
 
-          {/* Closing */}
-          <View style={{ marginBottom: 15 }}>
-            <Text style={styles.value}>Regards,</Text>
-          </View>
-          
           {/* Signature Section */}
           <View style={{ marginTop: 15 }}>
             <View style={{ 
               flexDirection: 'row', 
               justifyContent: 'space-between'
             }}>
+              {/* Left Column - Regards */}
               <View style={{ width: '45%' }}>
-                <Text style={[styles.value, { marginBottom: 5 }]}>
-                  Uwe Hohmann
-                </Text>
+                <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
                 
                 {/* Stamp Image */}
                 <View style={{ marginBottom: 5 }}>
                   <Image 
                     src={companyDetails.stampPath} 
                     style={{ 
-                      width: 130, 
-                      height: 87, 
+                      width: 156, 
+                      height: 104, 
                       objectFit: 'contain',
                       marginLeft: -10
                     }} 
                   />
                 </View>
+                
+                <Text style={[styles.value, { marginTop: 0 }]}>
+                  Uwe Hohmann
+                </Text>
               </View>
-              <View style={{ width: '45%', textAlign: 'right' }}>
-                <Text style={[styles.value, { marginBottom: 20, textAlign: 'right' }]}>
+              
+              {/* Right Column - Acknowledged */}
+              <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 20 }}>
+                <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
+                
+                <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
                   {managerFullName}
                 </Text>
               </View>
