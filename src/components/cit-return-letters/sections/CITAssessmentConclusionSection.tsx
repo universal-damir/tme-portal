@@ -246,7 +246,7 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
           )}
         </div>
 
-        {/* QFZP Benefit Section - Only show if FZCO manages the client */}
+        {/* Option 1: QFZP Section - Only show if FZCO manages the client */}
         {isFZCOManaged && (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
@@ -257,7 +257,7 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
               <div className="lg:col-span-2">
                 <h4 className="text-md font-semibold" style={{ color: '#243F7B' }}>
-                  QFZP (Qualifying Free Zone Person) benefit
+                  Option 1: QFZP (Qualified Free Zone Person) benefit
                 </h4>
               </div>
               <div className="flex justify-start">
