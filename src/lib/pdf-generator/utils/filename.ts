@@ -45,8 +45,8 @@ export const generateDynamicFilename = (data: OfferData): string => {
   }
   
   if (isDET) {
-    // DET format: YYMMDD MGT {LastName} {FirstName} {CompanyShortName} Setup DET {INDIV/CORP} AED {CURRENCY}
-    const setupType = data.clientDetails.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDIV';
+    // DET format: YYMMDD MGT {LastName} {FirstName} {CompanyShortName} Setup DET {INDI/CORP} AED {CURRENCY}
+    const setupType = data.clientDetails.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDI';
     const secondaryCurrency = data.clientDetails.secondaryCurrency || 'EUR';
     
     const components = [formattedDate, companyPrefix, ...nameComponents, 'Setup', 'DET', setupType, 'AED', secondaryCurrency];
@@ -91,8 +91,8 @@ export const generateFamilyVisaFilename = (data: OfferData): string => {
   const isDET = authority === 'DET (Dubai Department of Economy and Tourism)';
   
   if (isDET) {
-    // For DET: YYMMDD <n> DET CORP/INDIV Dependent Visa AED <SECONDARY_CURRENCY>
-    const setupType = data.clientDetails.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDIV';
+    // For DET: YYMMDD <n> DET CORP/INDI Dependent Visa AED <SECONDARY_CURRENCY>
+    const setupType = data.clientDetails.companySetupType === 'Corporate Setup' ? 'CORP' : 'INDI';
     const secondaryCurrency = data.clientDetails.secondaryCurrency;
     
     return `${formattedDate} ${nameForFilename} DET ${setupType} Dependent Visa AED ${secondaryCurrency}.pdf`;

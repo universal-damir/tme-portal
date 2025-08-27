@@ -25,7 +25,7 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = ({ data }) => {
               <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#243F7B', marginBottom: 2 }}>TME Services FZCO</Text>
               <Text style={{ fontSize: 8, color: '#6b7280' }}>(CIT TRN 10020 08363 00001 | VAT TRN 10020 08363 00003)</Text>
               <Text style={{ fontSize: 8, color: '#6b7280' }}>PO Box 487770 | Dubai | UAE</Text>
-              <Text style={{ fontSize: 8, color: '#6b7280' }}>T +971 4 8 84 13 29 | info@TME-Services.com | www.TME-Services.com</Text>
+              <Text style={{ fontSize: 8, color: '#6b7280' }}>T +971 4 8 84 13 29 | setup@TME-Services.com | www.TME-Services.com</Text>
             </View>
           </View>
         </View>

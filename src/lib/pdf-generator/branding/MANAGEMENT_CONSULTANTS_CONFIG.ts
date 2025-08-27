@@ -14,7 +14,7 @@ export const MANAGEMENT_CONSULTANTS_CONFIG: BrandingConfig = {
     poBox: 'PO Box 487770',
     location: 'Dubai | UAE',
     phone: '+971 55 400 94 09',
-    email: 'info@TME-Services.com',
+    email: 'setup@TME-Services.com',
     website: 'www.TME-Services.com',
     citTrn: 'CIT TRN 10407 45547 00001',
     vatTrn: 'VAT TRN 10407 45547 00003'
