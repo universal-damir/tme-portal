@@ -272,9 +272,15 @@ export const useEmailDraftGenerator = () => {
     }
   };
 
-  const handleSendEmail = async (emailData: EmailPreviewData) => {
+  const handleSendEmail = async (emailData: EmailPreviewData, additionalAttachments?: Array<{ blob: Blob; filename: string; contentType: string }>) => {
     try {
-      await sendEmail(emailData, currentAttachments);
+      // Combine original attachments with additional ones
+      const allAttachments = [
+        ...currentAttachments,
+        ...(additionalAttachments || [])
+      ];
+      
+      await sendEmail(emailData, allAttachments);
       // Call success callback if provided
       if (onSuccessRef.current) {
         onSuccessRef.current('email-sent');

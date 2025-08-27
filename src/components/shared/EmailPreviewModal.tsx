@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Edit2, Paperclip, Download, Languages } from 'lucide-react';
+import { X, Send, Edit2, Paperclip, Download, Languages, Upload, Trash2 } from 'lucide-react';
 import { EMAIL_TEMPLATES, EMAIL_TEMPLATES_DE, EmailTemplate, EmailRecipientData, processEmailTemplate, createFormattedEmailHTML } from './EmailDraftGenerator';
 
 export interface EmailPreviewData {
@@ -24,7 +24,7 @@ export interface EmailPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   emailData: EmailPreviewData;
-  onSend: (emailData: EmailPreviewData) => Promise<void>;
+  onSend: (emailData: EmailPreviewData, additionalAttachments?: Array<{ blob: Blob; filename: string; contentType: string }>) => Promise<void>;
   loading?: boolean;
   pdfBlob?: Blob;
   pdfFilename?: string;
@@ -76,6 +76,8 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   const [currentPdfBlob, setCurrentPdfBlob] = useState<Blob | undefined>(pdfBlob);
   const [currentPdfFilename, setCurrentPdfFilename] = useState<string | undefined>(pdfFilename);
   const [isRegeneratingPdf, setIsRegeneratingPdf] = useState(false);
+  const [additionalAttachments, setAdditionalAttachments] = useState<Array<{ blob: Blob; filename: string; contentType: string }>>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const tempContentRef = useRef<string>(emailData.htmlContent);
 
@@ -271,16 +273,29 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
     const currentPreviewText = currentTemplate?.previewText || extractPreviewTextFromHTML(emailData.htmlContent);
     const editedContentWithOriginalPreview = preserveOriginalPreviewText(editableContent, currentPreviewText);
     
+    // Create updated attachments list including additional files
+    const allAttachments = [
+      ...(emailData.attachments || []),
+      ...additionalAttachments.map(att => ({
+        filename: att.filename,
+        contentType: att.contentType,
+        size: att.blob.size
+      }))
+    ];
+    
     const updatedEmailData: EmailPreviewData = {
       ...emailData,
       to: editableRecipients.split(',').map(email => email.trim()),
       cc: editableCc ? editableCc.split(',').map(email => email.trim()) : undefined,
       subject: editableSubject,
-      htmlContent: editedContentWithOriginalPreview
+      htmlContent: editedContentWithOriginalPreview,
+      attachments: allAttachments
     };
 
     try {
-      await onSend(updatedEmailData);
+      // If onSend expects additional attachments, we need to modify the interface
+      // For now, we'll pass the additional attachments through a different mechanism
+      await onSend(updatedEmailData, additionalAttachments);
       onClose();
     } catch (error) {
       console.error('Failed to send email:', error);
@@ -332,6 +347,60 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
       await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to prevent browser blocking
       await handleDownload(pdf.blob, pdf.filename);
     }
+  };
+
+  // Handle file upload
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach(file => {
+      // Check file size (limit to 25MB per file)
+      if (file.size > 25 * 1024 * 1024) {
+        alert(`File "${file.name}" is too large. Maximum file size is 25MB.`);
+        return;
+      }
+
+      // Check file type (allow PDFs and common document types)
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/plain',
+        'image/jpeg',
+        'image/png'
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
+        alert(`File type "${file.type}" is not allowed. Please upload PDF, Word, Excel, text, or image files.`);
+        return;
+      }
+
+      const newAttachment = {
+        blob: file,
+        filename: file.name,
+        contentType: file.type
+      };
+
+      setAdditionalAttachments(prev => [...prev, newAttachment]);
+    });
+
+    // Clear the input so the same file can be selected again
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  // Remove additional attachment
+  const removeAdditionalAttachment = (index: number) => {
+    setAdditionalAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Trigger file input
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   if (!isOpen) return null;
@@ -477,29 +546,86 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
             </div>
 
             {/* Attachments */}
-            {emailData.attachments && emailData.attachments.length > 0 && (
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium" style={{ color: '#243F7B' }}>
                   Attachments:
                 </label>
+                <motion.button
+                  type="button"
+                  onClick={triggerFileUpload}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-3 py-1 text-xs rounded-lg font-medium transition-all duration-200 hover:shadow-sm inline-flex items-center gap-1"
+                  style={{ backgroundColor: '#D2BC99', color: '#243F7B' }}
+                >
+                  <Upload size={12} />
+                  Add File
+                </motion.button>
+              </div>
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              
+              {((emailData.attachments && emailData.attachments.length > 0) || additionalAttachments.length > 0) ? (
                 <div className="space-y-2">
-                  {emailData.attachments.map((attachment, index) => (
+                  {/* Original attachments (generated PDFs) */}
+                  {emailData.attachments && emailData.attachments.map((attachment, index) => (
                     <div
-                      key={index}
-                      className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border"
+                      key={`original-${index}`}
+                      className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg border"
+                      style={{ borderColor: '#243F7B' }}
                     >
-                      <Paperclip size={16} className="text-gray-500" />
-                      <span className="text-sm text-gray-700">{attachment.filename}</span>
+                      <Paperclip size={16} style={{ color: '#243F7B' }} />
+                      <span className="text-sm font-medium" style={{ color: '#243F7B' }}>{attachment.filename}</span>
                       {attachment.size && (
                         <span className="text-xs text-gray-500">
                           ({Math.round(attachment.size / 1024)} KB)
                         </span>
                       )}
+                      <span className="text-xs px-2 py-1 rounded-full text-white ml-auto" style={{ backgroundColor: '#243F7B' }}>
+                        Generated
+                      </span>
+                    </div>
+                  ))}
+                  
+                  {/* Additional uploaded attachments */}
+                  {additionalAttachments.map((attachment, index) => (
+                    <div
+                      key={`additional-${index}`}
+                      className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border"
+                    >
+                      <Paperclip size={16} className="text-gray-500" />
+                      <span className="text-sm text-gray-700">{attachment.filename}</span>
+                      <span className="text-xs text-gray-500">
+                        ({Math.round(attachment.blob.size / 1024)} KB)
+                      </span>
+                      <motion.button
+                        type="button"
+                        onClick={() => removeAdditionalAttachment(index)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="ml-auto p-1 hover:bg-red-100 rounded transition-colors"
+                        title="Remove attachment"
+                      >
+                        <Trash2 size={14} className="text-red-500" />
+                      </motion.button>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-sm text-gray-500 italic py-2">
+                  No attachments yet. Click "Add File" to upload additional documents.
+                </div>
+              )}
+            </div>
 
             {/* Email Content Preview/Editor */}
             <div>

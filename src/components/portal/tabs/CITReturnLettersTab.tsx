@@ -6,11 +6,16 @@ import { motion } from 'framer-motion';
 import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections, CITAssessmentConclusionData } from '@/types/cit-return-letters';
-import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection, CITAssessmentConclusionSection } from '@/components/cit-return-letters';
+import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection, CITAssessmentConclusionSection, CITEmailDraftGenerator, createCITEmailDataFromFormData } from '@/components/cit-return-letters';
 import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CITReturnLettersTab: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [currentPDFData, setCurrentPDFData] = useState<{ blob: Blob; filename: string } | null>(null);
+  const [emailProps, setEmailProps] = useState<any>(null);
+  const { user } = useAuth();
 
   // Form state management
   const {
@@ -149,21 +154,40 @@ const CITReturnLettersTab: React.FC = () => {
       // Generate the PDF using our new CIT return letters generator
       const { blob, filename } = await generateCITReturnLettersPDFWithFilename(data);
       
-      // Create a download link and trigger the download
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Prepare email props
+      const emailPropsData = await createCITEmailDataFromFormData(
+        data.selectedClient,
+        data.letterType as LetterType,
+        blob,
+        filename,
+        user ? {
+          full_name: user.full_name,
+          designation: user.designation,
+          employee_code: user.employee_code,
+          phone: user.phone,
+          department: user.department
+        } : undefined
+      );
+
+      // Add activity logging
+      const finalEmailProps = {
+        ...emailPropsData,
+        onSuccess: handleEmailSuccess,
+        onError: handleEmailError,
+        onClose: handleEmailClose,
+        activityLogging: {
+          resource: 'cit_return_letters',
+          client_name: `${data.selectedClient.company_code} ${data.selectedClient.company_name}`,
+          document_type: `CIT Return Letter - ${data.letterType}`,
+          filename: filename
+        }
+      };
+
+      setEmailProps(finalEmailProps);
+      setCurrentPDFData({ blob, filename });
+      setShowEmailModal(true);
       
-      // Clean up the URL to free memory
-      URL.revokeObjectURL(url);
-      
-      toast.success(`Downloaded: ${filename}`);
-      
-      // Note: Email sending functionality would be implemented separately
+      toast.success(`PDF generated: ${filename}`);
       
     } catch (error) {
       console.error('PDF Generation Error:', error);
@@ -171,6 +195,26 @@ const CITReturnLettersTab: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Handle email modal success
+  const handleEmailSuccess = (draftId: string) => {
+    toast.success('Email sent successfully!');
+    setShowEmailModal(false);
+    setCurrentPDFData(null);
+    setEmailProps(null);
+  };
+
+  // Handle email modal error
+  const handleEmailError = (error: string) => {
+    toast.error(`Failed to send email: ${error}`);
+  };
+
+  // Handle email modal close
+  const handleEmailClose = () => {
+    setShowEmailModal(false);
+    setCurrentPDFData(null);
+    setEmailProps(null);
   };
 
   return (
@@ -302,6 +346,13 @@ const CITReturnLettersTab: React.FC = () => {
           </motion.button>
         </div>
       </div>
+
+      {/* CIT Email Draft Generator Modal */}
+      {showEmailModal && emailProps && (
+        <CITEmailDraftGenerator
+          {...emailProps}
+        />
+      )}
     </div>
   );
 };
