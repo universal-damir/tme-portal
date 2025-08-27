@@ -453,7 +453,7 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
 
               {assessmentData.smallBusinessReliefAmount && assessmentData.smallBusinessReliefAmount > 0 && (
                 <Text style={[styles.introText, { lineHeight: 1.4 }]}>
-                  Amount: AED {assessmentData.smallBusinessReliefAmount.toLocaleString('en-US')}
+                  Company Revenue: AED {assessmentData.smallBusinessReliefAmount.toLocaleString('en-US')}
                 </Text>
               )}
             </View>
@@ -477,21 +477,76 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
                 </Text>
               </View>
             </View>
-
-            <SelectionSection />
-
           </View>
-
-          <SectionB />
           
           <FooterComponent />
         </Page>
 
-        {/* Second Page - Signature section */}
+        {/* Second Page - Selection Options */}
         <Page size="A4" style={styles.page}>
           <CITLetterHeaderComponent data={data} />
           
           <View style={{ flex: 1, flexDirection: 'column' }}>
+            <SelectionSection />
+          </View>
+
+          <FooterComponent />
+        </Page>
+
+        {/* Third Page - Section B */}
+        <Page size="A4" style={styles.page}>
+          <CITLetterHeaderComponent data={data} />
+          
+          <View style={{ flex: 1, flexDirection: 'column' }}>
+            <SectionB />
+          </View>
+          
+          <FooterComponent />
+        </Page>
+
+        {/* Second Page - Elections and Signature section */}
+        <Page size="A4" style={styles.page}>
+          <CITLetterHeaderComponent data={data} />
+          
+          <View style={{ flex: 1, flexDirection: 'column' }}>
+
+            {/* Elections Section */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 12, fontWeight: 'bold', marginBottom: 15 }]}>
+                C. Elections
+              </Text>
+              
+              <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15 }]}>
+                The Decree Law provides for certain elections that could apply to you. We have opted to make the following elections as explained below. The details on such elections are available as seen in the tax computation workings:
+              </Text>
+
+              <View style={{ paddingLeft: 20, marginBottom: 15 }}>
+                <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                  1. Realization basis of accounting:
+                </Text>
+                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                  The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
+                </Text>
+
+                <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                  2. Transitional rules:
+                </Text>
+                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                  The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
+                </Text>
+
+                <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                  3. Carry forward of losses:
+                </Text>
+                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                  The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
+                </Text>
+              </View>
+
+              <Text style={[styles.introText, { lineHeight: 1.4 }]}>
+                We look forward to receiving the signed acknowledgment.
+              </Text>
+            </View>
 
             {/* Signature Section */}
             <View style={{ marginTop: 15 }}>
@@ -632,8 +687,66 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
         </View>
 
         <SelectionSection />
+      </View>
+      
+      <FooterComponent />
+    </Page>
 
+    {/* Second Page - Section B */}
+    <Page size="A4" style={styles.page}>
+      <CITLetterHeaderComponent data={data} />
+      
+      {/* Main content area */}
+      <View style={{ flex: 1, flexDirection: 'column' }}>
         <SectionB />
+      </View>
+      
+      <FooterComponent />
+    </Page>
+
+    {/* Second Page - Elections and Signature section */}
+    <Page size="A4" style={styles.page}>
+      <CITLetterHeaderComponent data={data} />
+      
+      {/* Main content area */}
+      <View style={{ flex: 1, flexDirection: 'column' }}>
+        {/* Elections Section */}
+        <View style={{ marginBottom: 20 }}>
+          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 12, fontWeight: 'bold', marginBottom: 15 }]}>
+            C. Elections
+          </Text>
+          
+          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15 }]}>
+            The Decree Law provides for certain elections that could apply to you. We have opted to make the following elections as explained below. The details on such elections are available as seen in the tax computation workings:
+          </Text>
+
+          <View style={{ paddingLeft: 20, marginBottom: 15 }}>
+            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+              1. Realization basis of accounting:
+            </Text>
+            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+              The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
+            </Text>
+
+            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+              2. Transitional rules:
+            </Text>
+            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+              The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
+            </Text>
+
+            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+              3. Carry forward of losses:
+            </Text>
+            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+              The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
+            </Text>
+          </View>
+
+          <Text style={[styles.introText, { lineHeight: 1.4 }]}>
+            We look forward to receiving the signed acknowledgment.
+          </Text>
+        </View>
 
         {/* Signature Section */}
         <View style={{ marginTop: 15 }}>
