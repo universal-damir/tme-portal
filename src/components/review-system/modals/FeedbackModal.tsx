@@ -9,10 +9,12 @@ import { X, MessageSquare, FileText, User, Calendar, AlertCircle, CheckCircle, E
 import { toast } from 'sonner';
 import { Application } from '@/types/review-system';
 import { EmailDraftGenerator, EmailDraftGeneratorProps, createEmailDataFromFormData } from '@/components/shared/EmailDraftGenerator';
+import { CITEmailDraftGenerator, CITEmailDraftGeneratorProps } from '@/components/cit-return-letters/CITEmailDraftGenerator';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { OfferData } from '@/types/offer';
 import { CompanyServicesData } from '@/types/company-services';
+import { CITReturnLettersData } from '@/types/cit-return-letters';
 import { SharedClientInfo } from '@/types/portal';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -37,6 +39,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [isPreviewLoadingSecondary, setIsPreviewLoadingSecondary] = useState(false);
   const [isSendLoading, setIsSendLoading] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
+  const [citEmailDraftProps, setCitEmailDraftProps] = useState<CITEmailDraftGeneratorProps | null>(null);
 
   // Don't render if feature is disabled
   if (!config.canShowReviewComponents) {
@@ -200,6 +203,19 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         };
         
         return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
+      } else if (application.type === 'cit-return-letters') {
+        const formData = application.form_data as CITReturnLettersData;
+        const date = new Date(formData.letterDate || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        const companyShortName = formData.selectedClient?.company_name_short || 'Company';
+        const letterType = formData.letterType || 'Letter';
+        
+        // Format: YYMMDD CompanyShort CIT Letter Type
+        return `${formattedDate} ${companyShortName} CIT ${letterType}`;
       }
       
       return application?.title || 'Application';
@@ -300,6 +316,28 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 1000);
+      } else if (application.type === 'cit-return-letters') {
+        const { generateCITReturnLettersPDFWithFilename } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
+        const formData = application.form_data as CITReturnLettersData;
+        
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.selectedClient?.management_name?.split(' ')[0] || '',
+          lastName: formData.selectedClient?.management_name?.split(' ').slice(1).join(' ') || '',
+          companyName: formData.selectedClient?.company_name || '',
+          shortCompanyName: formData.selectedClient?.company_name_short || '',
+          date: formData.letterDate || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateCITReturnLettersPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
       } else {
         setError('PDF preview not supported for this application type.');
         return;
@@ -372,6 +410,40 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     console.log('📧 GENERATING ACTUAL PDF for application:', application.id);
     console.log('🔧 FORM DATA:', application.form_data);
     
+    // Helper functions for activity logging data
+    const getClientName = (formData: any, appType: string): string => {
+      // Normalize type to handle both hyphen and underscore formats
+      const normalizedType = appType.replace('-', '_');
+      
+      if (normalizedType === 'cost_overview') {
+        const costData = formData as any;
+        return costData.clientDetails?.companyName || 
+               `${costData.clientDetails?.firstName || ''} ${costData.clientDetails?.lastName || ''}`.trim();
+      } else if (normalizedType === 'golden_visa') {
+        return formData.companyName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+      } else if (normalizedType === 'company_services' || normalizedType === 'taxation') {
+        return formData.companyName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
+      } else if (normalizedType === 'cit_return_letters') {
+        const citData = formData as CITReturnLettersData;
+        return citData.selectedClient?.company_name || 'Unknown Client';
+      }
+      return 'Unknown Client';
+    };
+
+    const getDocumentType = (appType: string): string => {
+      // Normalize type to handle both hyphen and underscore formats
+      const normalizedType = appType.replace('-', '_');
+      
+      const typeMapping = {
+        'cost_overview': 'Cost Overview',
+        'golden_visa': 'Golden Visa',
+        'company_services': 'Company Services',
+        'taxation': 'Taxation',
+        'cit_return_letters': 'CIT Return Letters'
+      } as const;
+      return typeMapping[normalizedType as keyof typeof typeMapping] || 'Document';
+    };
+    
     setIsSendLoading(true);
     
     try {
@@ -379,12 +451,12 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       let filename: string;
       
       // Generate actual PDF based on application type (handle both underscore and hyphen formats)
-      const appType = application.type === 'golden_visa' ? 'golden-visa' : 
-                     application.type === 'cost_overview' ? 'cost-overview' :
-                     application.type === 'company_services' ? 'company-services' :
+      const appType = application.type === 'golden-visa' ? 'golden-visa' : 
+                     application.type === 'cost-overview' ? 'cost-overview' :
+                     application.type === 'company-services' ? 'company-services' :
                      application.type;
       
-      if (appType === 'golden-visa' || application.type === 'golden_visa') {
+      if (appType === 'golden-visa' || application.type === 'golden-visa') {
         const { generateGoldenVisaPDFWithFilename } = await import('@/lib/pdf-generator');
         const formData = application.form_data as GoldenVisaData;
         
@@ -400,7 +472,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         pdfBlob = result.blob;
         filename = result.filename;
         
-      } else if (appType === 'cost-overview' || application.type === 'cost_overview') {
+      } else if (appType === 'cost-overview' || application.type === 'cost-overview') {
         const { generatePDFWithFilename } = await import('@/lib/pdf-generator');
         const formData = application.form_data as OfferData;
         
@@ -408,7 +480,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         pdfBlob = result.blob;
         filename = result.filename;
         
-      } else if (appType === 'company-services' || application.type === 'company_services') {
+      } else if (appType === 'company-services' || application.type === 'company-services') {
         const { generateCompanyServicesPDFWithFilename } = await import('@/lib/pdf-generator');
         const formData = application.form_data as CompanyServicesData;
         
@@ -442,6 +514,23 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         pdfBlob = result.blob;
         filename = result.filename;
         
+      } else if (appType === 'cit-return-letters' || application.type === 'cit-return-letters') {
+        const { generateCITReturnLettersPDFWithFilename } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
+        const formData = application.form_data as CITReturnLettersData;
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.selectedClient?.management_name?.split(' ')[0] || '',
+          lastName: formData.selectedClient?.management_name?.split(' ').slice(1).join(' ') || '',
+          companyName: formData.selectedClient?.company_name || '',
+          shortCompanyName: formData.selectedClient?.company_name_short || '',
+          date: formData.letterDate || new Date().toISOString().split('T')[0],
+        };
+        
+        const result = await generateCITReturnLettersPDFWithFilename(formData, clientInfo);
+        pdfBlob = result.blob;
+        filename = result.filename;
+        
       } else {
         throw new Error(`PDF generation not supported for application type: ${application.type}`);
       }
@@ -458,7 +547,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           'golden_visa': 'GOLDEN_VISA', 
           'company_services': 'COMPANY_SERVICES',
           'company_incorporation': 'COMPANY_SERVICES',
-          'taxation': 'TAXATION'
+          'taxation': 'TAXATION',
+          'cit_return_letters': 'CIT_RETURN_LETTERS'
         } as const;
         
         return templateMapping[normalizedType as keyof typeof templateMapping] || 'COST_OVERVIEW';
@@ -466,40 +556,64 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       
       const templateType = getTemplateType(application.type);
       
-      // Use the EXISTING working function to create email props with user authentication
-      const emailProps = await createEmailDataFromFormData(
-        application.form_data,
-        pdfBlob,
-        filename,
-        templateType,
-        user || undefined
-      );
+      // Use different email creation based on application type
+      let emailProps: any;
+      
+      if (application.type === 'cit-return-letters') {
+        // Use specialized CIT email generator
+        const { createCITEmailDataFromFormData } = await import('@/components/cit-return-letters/CITEmailDraftGenerator');
+        const formData = application.form_data as CITReturnLettersData;
+        
+        const citEmailProps = await createCITEmailDataFromFormData(
+          formData.selectedClient!,
+          formData.letterType as any,
+          pdfBlob,
+          filename,
+          user || undefined
+        );
+        
+        // Set CIT email props to trigger the CITEmailDraftGenerator component
+        setCitEmailDraftProps({
+          ...citEmailProps,
+          onSuccess: () => {
+            console.log('📧 CIT EMAIL SENT SUCCESSFULLY!');
+            setCitEmailDraftProps(null);
+            setIsSendLoading(false);
+            onClose();
+          },
+          onError: (error) => {
+            console.error('📧 CIT EMAIL SEND ERROR:', error);
+            toast.error('Failed to send email: ' + error);
+            setCitEmailDraftProps(null);
+            setIsSendLoading(false);
+          },
+          onClose: () => {
+            console.log('📧 CIT EMAIL MODAL CLOSED');
+            setCitEmailDraftProps(null);
+            setIsSendLoading(false);
+            onClose(); // Also close the feedback modal
+          },
+          activityLogging: {
+            resource: 'cit-return-letters',
+            client_name: getClientName(application.form_data, 'cit_return_letters'),
+            document_type: getDocumentType('cit_return_letters'),
+            filename: filename
+          }
+        });
+        
+        return; // Don't continue with regular email flow
+      } else {
+        // Use the EXISTING working function to create email props with user authentication
+        emailProps = await createEmailDataFromFormData(
+          application.form_data,
+          pdfBlob,
+          filename,
+          templateType,
+          user || undefined
+        );
+      }
       
       console.log('📧 CREATED EMAIL PROPS USING EXISTING SYSTEM:', emailProps);
-      
-      // Prepare activity logging data
-      const getClientName = (formData: any, appType: string): string => {
-        if (appType === 'cost_overview') {
-          const costData = formData as any;
-          return costData.clientDetails?.companyName || 
-                 `${costData.clientDetails?.firstName || ''} ${costData.clientDetails?.lastName || ''}`.trim();
-        } else if (appType === 'golden_visa') {
-          return formData.companyName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
-        } else if (appType === 'company_services' || appType === 'taxation') {
-          return formData.companyName || `${formData.firstName || ''} ${formData.lastName || ''}`.trim();
-        }
-        return 'Unknown Client';
-      };
-
-      const getDocumentType = (appType: string): string => {
-        const typeMapping = {
-          'cost_overview': 'Cost Overview',
-          'golden_visa': 'Golden Visa',
-          'company_services': 'Company Services',
-          'taxation': 'Taxation'
-        } as const;
-        return typeMapping[appType as keyof typeof typeMapping] || 'Document';
-      };
 
       // Set email props to trigger the EmailDraftGenerator component (EXISTING WORKING WAY)
       setEmailDraftProps({
@@ -546,6 +660,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     setIsPreviewLoading(false);
     setIsPreviewLoadingSecondary(false);
     setIsSendLoading(false);
+    setEmailDraftProps(null);
+    setCitEmailDraftProps(null);
   };
 
   useEffect(() => {
@@ -819,6 +935,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
       {/* Email Draft Generator - EXISTING WORKING SYSTEM */}
       {emailDraftProps && (
         <EmailDraftGenerator {...emailDraftProps} />
+      )}
+      
+      {/* CIT Email Draft Generator - FOR CIT RETURN LETTERS */}
+      {citEmailDraftProps && (
+        <CITEmailDraftGenerator {...citEmailDraftProps} />
       )}
     </AnimatePresence>
   );

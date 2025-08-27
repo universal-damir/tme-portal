@@ -23,7 +23,7 @@ export const generateDynamicFilename = (data: OfferData): string => {
   const companyName = data.clientDetails.companyName || '';
   const addressToCompany = data.clientDetails.addressToCompany || false;
   
-  let nameComponents = [];
+  const nameComponents = [];
   
   if (addressToCompany && companyName) {
     // Use only CompanyShortName when "Address to company" is selected

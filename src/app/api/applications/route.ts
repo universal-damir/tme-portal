@@ -108,6 +108,16 @@ export async function POST(request: NextRequest) {
       form_data
     }, userId);
 
+    if (!application) {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Failed to create application - service returned null'
+        }, 
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ 
       success: true, 
       application 

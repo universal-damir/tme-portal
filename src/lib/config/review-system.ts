@@ -32,6 +32,12 @@ export interface ReviewSystemConfig {
   showTaxationStatus: boolean;
   enableTaxationAutoSave: boolean;
   
+  // Phase 7 - CIT Return Letters integration feature flags
+  enableCITReturnLettersReview: boolean;
+  showCITReturnLettersSubmitButton: boolean;
+  showCITReturnLettersStatus: boolean;
+  enableCITReturnLettersAutoSave: boolean;
+  
   // Polling configuration
   notificationPollingInterval: number; // milliseconds
   maxNotificationsToFetch: number;
@@ -79,6 +85,12 @@ const DEFAULT_CONFIG: ReviewSystemConfig = {
   showTaxationSubmitButton: false,
   showTaxationStatus: false,
   enableTaxationAutoSave: false,
+  
+  // Phase 7 features - all disabled by default for ultra safety
+  enableCITReturnLettersReview: false,
+  showCITReturnLettersSubmitButton: false,
+  showCITReturnLettersStatus: false,
+  enableCITReturnLettersAutoSave: false,
   
   notificationPollingInterval: 30000, // 30 seconds - conservative
   maxNotificationsToFetch: 50,
@@ -147,6 +159,12 @@ export function getReviewSystemConfig(): ReviewSystemConfig {
     showTaxationStatus: true, // getEnvVar('SHOW_TAXATION_STATUS') === 'true',
     enableTaxationAutoSave: true, // getEnvVar('ENABLE_TAXATION_AUTO_SAVE') === 'true',
     
+    // Phase 7 - CIT Return Letters integration feature flags
+    enableCITReturnLettersReview: true, // getEnvVar('ENABLE_CIT_RETURN_LETTERS_REVIEW') === 'true',
+    showCITReturnLettersSubmitButton: true, // getEnvVar('SHOW_CIT_RETURN_LETTERS_SUBMIT_BUTTON') === 'true',
+    showCITReturnLettersStatus: true, // getEnvVar('SHOW_CIT_RETURN_LETTERS_STATUS') === 'true',
+    enableCITReturnLettersAutoSave: false, // getEnvVar('ENABLE_CIT_RETURN_LETTERS_AUTO_SAVE') === 'true', // Disabled for now
+    
     // Polling configuration
     notificationPollingInterval: parseInt(
       getEnvVar('NOTIFICATION_POLLING_INTERVAL') || '60000'
@@ -195,6 +213,10 @@ export function useReviewSystemConfig(): ReviewSystemConfig & {
   canShowTaxationSubmit: boolean;
   canShowTaxationStatus: boolean;
   canAutoSaveTaxation: boolean;
+  canUseCITReturnLettersReview: boolean;
+  canShowCITReturnLettersSubmit: boolean;
+  canShowCITReturnLettersStatus: boolean;
+  canAutoSaveCITReturnLetters: boolean;
 } {
   const config = getReviewSystemConfig();
   
@@ -220,7 +242,12 @@ export function useReviewSystemConfig(): ReviewSystemConfig & {
     canUseTaxationReview: config.enabled && config.enableTaxationReview,
     canShowTaxationSubmit: config.enabled && config.enableTaxationReview && config.showTaxationSubmitButton,
     canShowTaxationStatus: config.enabled && config.enableTaxationReview && config.showTaxationStatus,
-    canAutoSaveTaxation: config.enabled && config.enableTaxationReview && config.enableTaxationAutoSave
+    canAutoSaveTaxation: config.enabled && config.enableTaxationReview && config.enableTaxationAutoSave,
+    // Phase 7 - CIT Return Letters specific helpers
+    canUseCITReturnLettersReview: config.enabled && config.enableCITReturnLettersReview,
+    canShowCITReturnLettersSubmit: config.enabled && config.enableCITReturnLettersReview && config.showCITReturnLettersSubmitButton,
+    canShowCITReturnLettersStatus: config.enabled && config.enableCITReturnLettersReview && config.showCITReturnLettersStatus,
+    canAutoSaveCITReturnLetters: config.enabled && config.enableCITReturnLettersReview && config.enableCITReturnLettersAutoSave
   };
 }
 

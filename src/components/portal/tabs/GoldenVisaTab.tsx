@@ -187,7 +187,7 @@ const GoldenVisaTab: React.FC = () => {
       return null;
     };
     
-    let fieldElement = getFieldElement(fieldPath);
+    const fieldElement = getFieldElement(fieldPath);
     
     if (fieldElement) {
       // Scroll to the field with smooth animation

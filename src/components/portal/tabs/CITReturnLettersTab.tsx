@@ -1,21 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections, CITAssessmentConclusionData } from '@/types/cit-return-letters';
 import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection, CITAssessmentConclusionSection, CITEmailDraftGenerator, createCITEmailDataFromFormData } from '@/components/cit-return-letters';
+import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
+import { useReviewSystemConfig } from '@/lib/config/review-system';
+import { useCITReturnLettersApplication } from '@/hooks/useCITReturnLettersApplication';
 import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CITReturnLettersTab: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const [currentPDFData, setCurrentPDFData] = useState<{ blob: Blob; filename: string } | null>(null);
   const [emailProps, setEmailProps] = useState<any>(null);
   const { user } = useAuth();
+  const config = useReviewSystemConfig();
 
   // Form state management
   const {
@@ -30,6 +35,12 @@ const CITReturnLettersTab: React.FC = () => {
   });
 
   const watchedData = watch();
+
+  // Review system integration
+  const reviewApp = useCITReturnLettersApplication({
+    formData: watchedData,
+    clientName: watchedData.selectedClient?.company_name || 'Unknown Client'
+  });
 
   // Handler functions for child components
   const handleClientSelect = (client: Client | null) => {
@@ -110,8 +121,8 @@ const CITReturnLettersTab: React.FC = () => {
     }
   };
 
-  const handleSubmitForReview = async (): Promise<void> => {
-    // Validate required data before submitting for review
+  const handleSubmitForReview = (): void => {
+    // Validate required data before opening review modal
     if (!watchedData.selectedClient) {
       toast.error('Please select a client before submitting for review.');
       return;
@@ -127,8 +138,13 @@ const CITReturnLettersTab: React.FC = () => {
       return;
     }
 
-    console.log('Submit for review:', watchedData);
-    toast.info('Review submission functionality will be implemented');
+    if (!watchedData.letterDate) {
+      toast.error('Please select a letter date before submitting for review.');
+      return;
+    }
+
+    // Open review submission modal
+    setShowReviewModal(true);
   };
 
   const handleDownloadAndSend = async (data: CITReturnLettersData): Promise<void> => {
@@ -217,6 +233,88 @@ const CITReturnLettersTab: React.FC = () => {
     setEmailProps(null);
   };
 
+  // Reset form function
+  const resetForm = useCallback(() => {
+    reset(CIT_RETURN_LETTERS_DEFAULTS);
+    console.log('🔧 [CITReturnLettersTab] Form reset to defaults');
+  }, [reset]);
+
+  // Function to load form data from application (for edit scenarios)
+  const loadFromApplication = useCallback((applicationData: any) => {
+    if (applicationData && typeof applicationData === 'object') {
+      console.log('🟡 [CITReturnLettersTab] Loading form data from application:', applicationData);
+      reset({
+        ...CIT_RETURN_LETTERS_DEFAULTS,
+        ...applicationData
+      });
+    }
+  }, [reset]);
+
+  // Listen for edit application events from review modal or notifications
+  useEffect(() => {
+    const handleEditApplication = (event: any) => {
+      const { applicationId, formData } = event.detail;
+      console.log('🟡 [CITReturnLettersTab] Received edit-cit-return-letters-application event', event.detail);
+      
+      if (formData) {
+        loadFromApplication(formData);
+        console.log('🟢 [CITReturnLettersTab] Form data loaded from rejected/returned application');
+        
+        // Show a toast to inform the user
+        toast.info('Application loaded for editing', {
+          description: 'Your previous form data has been restored. You can make changes and resubmit.'
+        });
+      }
+    };
+
+    const handleSendApprovedApplication = (event: any) => {
+      const { applicationType, applicationData } = event.detail;
+      console.log('🟡 [CITReturnLettersTab] Received send-approved-application event', event.detail);
+      
+      if (applicationType === 'cit-return-letters' && applicationData) {
+        loadFromApplication(applicationData);
+        
+        toast.success('Approved application loaded', {
+          description: 'The approved CIT return letters data has been loaded. You can generate the PDF or email draft.'
+        });
+      }
+    };
+
+    const handleTabReadinessCheck = (event: any) => {
+      console.log('🟡 [CITReturnLettersTab] Received tab-readiness-check event');
+      // Respond that this tab is ready
+      // Get current form data dynamically when the event occurs
+      const currentFormData = watchedData;
+      const hasData = currentFormData.selectedClient !== null || 
+                      currentFormData.letterDate !== '' ||
+                      currentFormData.letterType !== '' ||
+                      currentFormData.taxPeriodStart !== '' ||
+                      currentFormData.taxPeriodEnd !== '';
+      
+      const readinessEvent = new CustomEvent('tab-readiness-response', {
+        detail: { 
+          tab: 'cit-return-letters',
+          ready: true,
+          hasData
+        }
+      });
+      window.dispatchEvent(readinessEvent);
+    };
+
+    window.addEventListener('edit-cit-return-letters-application', handleEditApplication);
+    window.addEventListener('send-approved-application', handleSendApprovedApplication);
+    window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
+
+    console.log('🔧 CIT-RETURN-LETTERS-TAB: Event listeners registered');
+
+    return () => {
+      window.removeEventListener('edit-cit-return-letters-application', handleEditApplication);
+      window.removeEventListener('send-approved-application', handleSendApprovedApplication);
+      window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
+      console.log('🔧 CIT-RETURN-LETTERS-TAB: Event listeners removed');
+    };
+  }, [loadFromApplication]);
+
   return (
     <div className="space-y-8">
       {/* Client Details Section */}
@@ -295,30 +393,32 @@ const CITReturnLettersTab: React.FC = () => {
           </motion.button>
 
           {/* Submit for Review Button */}
-          <motion.button
-            type="button"
-            onClick={handleSubmitForReview}
-            disabled={isGenerating}
-            whileHover={!isGenerating ? { scale: 1.02 } : {}}
-            whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
-            style={{ 
-              backgroundColor: isGenerating ? '#9CA3AF' : '#D2BC99', 
-              color: '#243F7B' 
-            }}
-          >
-            {isGenerating ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <UserCheck className="h-5 w-5" />
-                <span>Submit for Review</span>
-              </>
-            )}
-          </motion.button>
+          {config.canShowReviewComponents && (
+            <motion.button
+              type="button"
+              onClick={handleSubmitForReview}
+              disabled={reviewApp.isLoading}
+              whileHover={!reviewApp.isLoading ? { scale: 1.02 } : {}}
+              whileTap={!reviewApp.isLoading ? { scale: 0.98 } : {}}
+              className="px-8 py-3 rounded-lg font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center space-x-3"
+              style={{ 
+                backgroundColor: reviewApp.isLoading ? '#9CA3AF' : '#D2BC99', 
+                color: '#243F7B' 
+              }}
+            >
+              {reviewApp.isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2" style={{ borderColor: '#243F7B' }}></div>
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <UserCheck className="h-5 w-5" />
+                  <span>Submit for Review</span>
+                </>
+              )}
+            </motion.button>
+          )}
           
           {/* Download and Send Button */}
           <motion.button
@@ -351,6 +451,44 @@ const CITReturnLettersTab: React.FC = () => {
       {showEmailModal && emailProps && (
         <CITEmailDraftGenerator
           {...emailProps}
+        />
+      )}
+
+      {/* Review Submission Modal */}
+      {config.canShowReviewComponents && (
+        <ReviewSubmissionModal
+          isOpen={showReviewModal}
+          onClose={() => setShowReviewModal(false)}
+          applicationId={reviewApp.application?.id?.toString() || 'new'}
+          applicationTitle={(() => {
+            if (!watchedData.selectedClient || !watchedData.letterType) return 'CIT Return Letters';
+            
+            const date = new Date(watchedData.letterDate || new Date());
+            const yy = date.getFullYear().toString().slice(-2);
+            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+            const dd = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${yy}${mm}${dd}`;
+            
+            const companyShortName = watchedData.selectedClient?.company_name_short || 'Company';
+            const letterType = watchedData.letterType || 'Letter';
+            
+            return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+          })()}
+          documentType="cit-return-letters"
+          onSubmit={async (submission) => {
+            const success = await reviewApp.submitForReview(submission);
+            if (success) {
+              // Clear form after successful submission but preserve data for review workflow
+              resetForm();
+              setShowReviewModal(false);
+              console.log('🟢 [CITReturnLettersTab] Successfully submitted for review');
+              
+              toast.success('Application submitted for review', {
+                description: 'The form has been cleared for the next application. Data is saved for the review process.'
+              });
+            }
+            return success;
+          }}
         />
       )}
     </div>

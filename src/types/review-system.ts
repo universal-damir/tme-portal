@@ -5,7 +5,7 @@
 export type ApplicationStatus = 'draft' | 'pending_review' | 'under_review' | 'approved' | 'rejected';
 
 // Application types enum  
-export type ApplicationType = 'golden-visa' | 'cost-overview' | 'company-services' | 'taxation' | 'corporate-changes';
+export type ApplicationType = 'golden-visa' | 'cost-overview' | 'company-services' | 'taxation' | 'corporate-changes' | 'cit-return-letters';
 
 // Urgency levels
 export type UrgencyLevel = 'standard' | 'urgent';
@@ -99,6 +99,7 @@ export interface ApplicationFormData {
   'company-services': any; // Will be defined when implementing company services
   'taxation': any; // Will be defined when implementing taxation
   'corporate-changes': any; // Will be defined when implementing corporate changes
+  'cit-return-letters': import('./cit-return-letters').CITReturnLettersData;
 }
 
 // Generic application interface with typed form data

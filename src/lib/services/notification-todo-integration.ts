@@ -38,7 +38,7 @@ export class NotificationTodoIntegration {
     const { auto_generate_todos, auto_complete_related, debug_mode } = options;
 
     try {
-      let result = {
+      const result = {
         todo_generated: false,
         auto_completed_count: 0,
         message: 'No actions taken'

@@ -66,6 +66,11 @@ async function generateApplicationTitle(applicationType: string, formData: any):
     const title = generateTaxationTitle(formData);
     console.log('🔧 Generated Taxation title:', title);
     return title;
+  } else if (applicationType === 'cit-return-letters') {
+    console.log('🔧 Calling generateCITReturnLettersTitle...');
+    const title = generateCITReturnLettersTitle(formData);
+    console.log('🔧 Generated CIT Return Letters title:', title);
+    return title;
   }
   
   console.log('🔧 No matching type, using fallback. Type was:', applicationType);
@@ -249,11 +254,33 @@ function generateTaxationTitle(formData: any): string {
   }
 }
 
+function generateCITReturnLettersTitle(formData: any): string {
+  try {
+    // Use the same title generation logic as the hook
+    if (!formData.selectedClient || !formData.letterType) return 'CIT Return Letters';
+    
+    const date = new Date(formData.letterDate || new Date());
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    const companyShortName = formData.selectedClient?.company_name_short || 'Company';
+    const letterType = formData.letterType || 'Letter';
+    
+    return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+  } catch (error) {
+    console.warn('Failed to generate CIT return letters title, using fallback:', error);
+    return 'CIT Return Letters Application';
+  }
+}
+
 // Safe database operation wrapper
 async function safeDbOperation<T>(
   operation: () => Promise<T>,
   fallback: T,
-  operationName: string
+  operationName: string,
+  rethrowErrors: boolean = false
 ): Promise<T> {
   const config = getReviewSystemConfig();
   
@@ -274,6 +301,11 @@ async function safeDbOperation<T>(
       await logError(operationName, error);
     } catch (logError) {
       console.error('Failed to log review system error:', logError);
+    }
+    
+    // For critical operations like create, re-throw the error instead of returning fallback
+    if (rethrowErrors) {
+      throw error;
     }
     
     return fallback;
@@ -311,8 +343,13 @@ export class ApplicationsService {
       hasFormData: !!data.form_data 
     });
     
+    const config = getReviewSystemConfig();
+    console.log('🔧 BACKEND: Config check:', { 
+      enabled: config.enabled,
+      canUseCITReturnLettersReview: config.canUseCITReturnLettersReview 
+    });
+    
     return safeDbOperation(async () => {
-      const config = getReviewSystemConfig();
       const pool = getPool();
       
       // Safety check: Limit applications per user
@@ -323,6 +360,7 @@ export class ApplicationsService {
       `, [userId]);
       
       if (parseInt(countResult.rows[0].count) >= config.maxApplicationsPerUser) {
+        console.error('🔧 BACKEND: Maximum applications limit reached for user:', userId);
         throw new Error('Maximum applications limit reached');
       }
       
@@ -339,14 +377,26 @@ export class ApplicationsService {
         RETURNING *
       `, [data.type, data.title, data.form_data, userId]);
       
-      console.log('🔧 BACKEND: Application created:', {
-        id: result.rows[0]?.id,
-        type: result.rows[0]?.type,
-        title: result.rows[0]?.title
+      console.log('🔧 BACKEND: SQL result:', {
+        rowCount: result.rowCount,
+        hasRows: result.rows.length > 0,
+        firstRow: result.rows[0] || null
       });
       
-      return result.rows[0] as Application;
-    }, null, 'create_application');
+      if (!result.rows[0]) {
+        console.error('🔧 BACKEND: No rows returned from INSERT');
+        throw new Error('Database INSERT returned no rows');
+      }
+      
+      const application = result.rows[0] as Application;
+      console.log('🔧 BACKEND: Application created successfully:', {
+        id: application.id,
+        type: application.type,
+        title: application.title
+      });
+      
+      return application;
+    }, null, 'create_application', true);
   }
   
   static async update(id: string, data: UpdateApplicationRequest, userId: number): Promise<Application | null> {
@@ -905,7 +955,7 @@ export class ReviewersService {
         
         // Check if this is a document type that should use specific reviewers
         const specificReviewerDocTypes = ['cost-overview', 'golden-visa', 'company-services'];
-        const taxationDocType = ['taxation'];
+        const taxationDocType = ['taxation', 'cit-return-letters'];
         const useSpecificReviewers = documentType && specificReviewerDocTypes.includes(documentType);
         const useTaxationReviewers = documentType && taxationDocType.includes(documentType);
         
@@ -925,13 +975,13 @@ export class ReviewersService {
             LIMIT $2
           `, [currentUserId, config.maxReviewersToFetch]);
         } else if (useTaxationReviewers) {
-          // For taxation documents: show Tax and Compliance department + Uwe
-          console.log(`🔧 ReviewersService: Using Tax and Compliance department + Uwe for ${documentType}`);
+          // For taxation documents: show Tax and Compliance department + Admin + Accounting + Uwe
+          console.log(`🔧 ReviewersService: Using Tax and Compliance + Admin + Accounting departments + Uwe for ${documentType}`);
           reviewersResult = await pool.query(`
             SELECT id, full_name, email, department, role, employee_code
             FROM users 
             WHERE id != $1 
-            AND (department = 'Tax and Compliance' OR email = 'uwe@TME-Services.com')
+            AND (department IN ('Tax and Compliance', 'Admin', 'Accounting') OR email = 'uwe@TME-Services.com')
             ORDER BY 
               CASE WHEN email = 'uwe@TME-Services.com' THEN 0 ELSE 1 END,
               full_name ASC
@@ -1009,7 +1059,7 @@ export class ReviewersService {
               }
             ];
           } else if (useTaxationReviewers) {
-            // For taxation documents, return Tax and Compliance + Uwe fallback
+            // For taxation documents, return Tax and Compliance + Admin + Accounting + Uwe fallback
             return [
               {
                 id: 999,
@@ -1025,6 +1075,22 @@ export class ReviewersService {
                 email: 'tax@TME-Services.com',
                 department: 'Tax and Compliance',
                 employee_code: 'TAX',
+                is_universal: false
+              },
+              {
+                id: 995,
+                full_name: 'Admin Reviewer',
+                email: 'admin@TME-Services.com',
+                department: 'Admin',
+                employee_code: 'ADM',
+                is_universal: false
+              },
+              {
+                id: 994,
+                full_name: 'Accounting Reviewer',
+                email: 'accounting@TME-Services.com',
+                department: 'Accounting',
+                employee_code: 'ACC',
                 is_universal: false
               }
             ];

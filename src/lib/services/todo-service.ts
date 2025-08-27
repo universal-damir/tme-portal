@@ -158,8 +158,8 @@ export class TodoService {
     } = filters;
 
     try {
-      let whereConditions = ['user_id = $1'];
-      let params: any[] = [user_id];
+      const whereConditions = ['user_id = $1'];
+      const params: any[] = [user_id];
       let paramIndex = 2;
 
       // Status filter
@@ -372,8 +372,8 @@ export class TodoService {
     const { user_id, action_type, application_id, client_name, document_type } = criteria;
 
     try {
-      let whereConditions = ['user_id = $1', 'status IN (\'pending\', \'in_progress\')'];
-      let params: any[] = [user_id];
+      const whereConditions = ['user_id = $1', 'status IN (\'pending\', \'in_progress\')'];
+      const params: any[] = [user_id];
       let paramIndex = 2;
 
       if (action_type) {

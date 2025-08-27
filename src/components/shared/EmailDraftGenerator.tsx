@@ -127,6 +127,21 @@ export const EMAIL_TEMPLATES = {
     includeColoredText: true,
     fontFamily: 'Arial, sans-serif',
     fontSize: '10pt'
+  },
+  CIT_RETURN_LETTERS: {
+    subject: '', // Will be set from PDF filename
+    greeting: 'Dear {firstName},',
+    bodyContent: [
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #cc0000; font-weight: bold;">📄 CIT Return Letters</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached your Corporate Income Tax return letters as requested.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">These documents have been prepared in accordance with UAE tax regulations and requirements.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc;">Should you have any questions regarding these documents, please do not hesitate to contact us.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Best regards,</span>',
+      '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
+    ],
+    includeColoredText: true,
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '10pt'
   }
 } as const;
 
@@ -187,6 +202,21 @@ export const EMAIL_TEMPLATES_DE = {
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie unser Angebot für Steuerberatungsleistungen.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Bitte prüfen Sie das beigefügte Angebot.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Unser Team steht Ihnen für Fragen gerne zur Verfügung.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
+      '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
+    ],
+    includeColoredText: true,
+    fontFamily: 'Arial, sans-serif',
+    fontSize: '10pt'
+  },
+  CIT_RETURN_LETTERS: {
+    subject: '', // Will be set from PDF filename
+    greeting: 'Liebe/r {firstName},',
+    bodyContent: [
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #cc0000; font-weight: bold;">📄 CIT Rückgabebrief</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">anbei finden Sie Ihre Körperschaftsteuer-Rückgabebriefe wie angefordert.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Diese Dokumente wurden in Übereinstimmung mit den VAE-Steuervorschriften und -anforderungen erstellt.</span>',
+      '<span style="font-family: Arial, sans-serif; font-size: 10pt; color: #0066cc;">Sollten Sie Fragen zu diesen Dokumenten haben, zögern Sie bitte nicht, uns zu kontaktieren.</span>',
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Mit freundlichen Grüßen</span>',
       '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
     ],
@@ -467,7 +497,7 @@ export const createEmailDataFromFormData = async (
   // No photo needed anymore - removed for simplicity and CSP compliance
 
   // Add CC email for specific templates
-  const ccEmailsForTemplate = ['COST_OVERVIEW', 'GOLDEN_VISA', 'COMPANY_SERVICES'].includes(templateType) 
+  const ccEmailsForTemplate = ['COST_OVERVIEW', 'GOLDEN_VISA', 'COMPANY_SERVICES', 'CIT_RETURN_LETTERS'].includes(templateType) 
     ? ['setup@TME-Services.com'] 
     : undefined;
 

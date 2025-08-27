@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
         // The attachments come from the FeedbackModal which has access to form data
         let clientFirstName = '';
         let clientLastName = '';
-        let formName = primaryFilename.replace('.pdf', '');
+        const formName = primaryFilename.replace('.pdf', '');
         
         // Try to parse additional form context from the PDF filename
         // Format is typically: YYMMDD ClientName offer/service type

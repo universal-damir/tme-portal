@@ -11,6 +11,7 @@ import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { GoldenVisaData } from '@/types/golden-visa';
 import { OfferData } from '@/types/offer';
 import { CompanyServicesData } from '@/types/company-services';
+import { CITReturnLettersData } from '@/types/cit-return-letters';
 import { SharedClientInfo } from '@/types/portal';
 import { toast } from 'sonner';
 
@@ -214,6 +215,19 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         };
         
         return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
+      } else if (application.type === 'cit-return-letters') {
+        const formData = application.form_data as CITReturnLettersData;
+        const date = new Date(formData.letterDate || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        const companyShortName = formData.selectedClient?.company_name_short || 'Company';
+        const letterType = formData.letterType || 'Letter';
+        
+        // Format: YYMMDD CompanyShort CIT Letter Type
+        return `${formattedDate} ${companyShortName} CIT ${letterType}`;
       }
       
       return application?.title || 'Application';
@@ -311,6 +325,30 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         };
         
         const { blob } = await generateTaxationPDFWithFilename(formData, clientInfo);
+        
+        // Open PDF in new tab for preview
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+        
+        // Clean up the URL after a delay
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 1000);
+      } else if (application.type === 'cit-return-letters') {
+        // Generate CIT Return Letters PDF for review
+        const { generateCITReturnLettersPDFWithFilename } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
+        const formData = application.form_data as CITReturnLettersData;
+        
+        // Extract client info from form data
+        const clientInfo: SharedClientInfo = {
+          firstName: formData.selectedClient?.management_name?.split(' ')[0] || '',
+          lastName: formData.selectedClient?.management_name?.split(' ').slice(1).join(' ') || '',
+          companyName: formData.selectedClient?.company_name || '',
+          shortCompanyName: formData.selectedClient?.company_name_short || '',
+          date: formData.letterDate || new Date().toISOString().split('T')[0],
+        };
+        
+        const { blob } = await generateCITReturnLettersPDFWithFilename(formData, clientInfo);
         
         // Open PDF in new tab for preview
         const url = URL.createObjectURL(blob);
@@ -434,7 +472,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       'cost-overview': 'cost-overview', 
       'company-services': 'company-services',
       'taxation': 'taxation',
-      'corporate-changes': 'corporate-changes'
+      'corporate-changes': 'corporate-changes',
+      'cit-return-letters': 'cit-return-letters'
     };
     
     const targetTab = tabMapping[application.type];
@@ -503,7 +542,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
                     <h2 className="text-xl font-semibold" style={{ color: '#243F7B' }}>
-                      Review {application.type === 'golden-visa' ? 'Golden Visa' : application.type === 'cost-overview' ? 'Cost Overview' : 'Application'}
+                      Review {application.type === 'golden-visa' ? 'Golden Visa' : 
+                              application.type === 'cost-overview' ? 'Cost Overview' : 
+                              application.type === 'cit-return-letters' ? 'CIT Return Letters' :
+                              'Application'}
                     </h2>
                     <p className="text-sm font-medium text-gray-800 mt-1">
                       {getFormTitle()}
