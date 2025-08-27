@@ -637,10 +637,21 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
           </Text>
         </View>
 
+        {/* QFZP Section - Non-freezone companies */}
+        <View style={{ marginBottom: 15 }}>
+          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5 }]}>
+            1. QFZP (Qualifying Free Zone Person) benefit
+          </Text>
+          
+          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
+            This option is not applicable for non-Freezone companies.
+          </Text>
+        </View>
+
         {/* Small Business Relief (SBR) Section */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 10 }]}>
-            1. Small Business Relief (SBR)
+        <View style={{ marginBottom: 15 }}>
+          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5 }]}>
+            2. Small Business Relief (SBR)
           </Text>
           
           <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
@@ -661,15 +672,15 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
 
           {assessmentData.smallBusinessReliefAmount && assessmentData.smallBusinessReliefAmount > 0 && (
             <Text style={[styles.introText, { lineHeight: 1.4 }]}>
-              Amount: AED {assessmentData.smallBusinessReliefAmount.toLocaleString('en-US')}
+              Company Revenue: AED {assessmentData.smallBusinessReliefAmount.toLocaleString('en-US')}
             </Text>
           )}
         </View>
 
         {/* Standard rules Section */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 10 }]}>
-            2. Standard rules
+        <View style={{ marginBottom: 15 }}>
+          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5 }]}>
+            3. Standard rules
           </Text>
           
           <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
