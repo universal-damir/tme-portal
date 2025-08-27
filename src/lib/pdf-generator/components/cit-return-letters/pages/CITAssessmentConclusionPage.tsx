@@ -347,82 +347,82 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
             </View>
 
             {/* QFZP Benefit Section */}
-            <View style={{ marginBottom: 20 }}>
-              <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 10 }]}>
+            <View style={{ marginBottom: 20, opacity: !isFZCOManaged || qfzpNotQualified ? 0.5 : 1 }}>
+              <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 10, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
                 1. QFZP (Qualifying Free Zone Person) benefit
               </Text>
               
               {allQFZPFulfilled ? (
                 <View>
-                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
+                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
                     The company is entitled to a tax rate of 0% on the Total Qualifying Revenues and a tax rate of 9% on the non-qualifying revenues. The following is the conclusion on the conditions for the QFZP benefit:
                   </Text>
                   
                   <View style={{ marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>a.     Adequate substance</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>Fulfilled</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>a.     Adequate substance</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>Fulfilled</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>b.     Derives qualifying income</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>Fulfilled</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>b.     Derives qualifying income</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>Fulfilled</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>c.     Within de minimis</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>Fulfilled</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>c.     Within de minimis</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>Fulfilled</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>d.     Prepares and maintains TP documentation</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>Fulfilled</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>d.     Prepares and maintains TP documentation</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>Fulfilled</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>e.     Performs an audit of financial statements</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>Fulfilled</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>e.     Performs an audit of financial statements</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>Fulfilled</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>f.      Does not elect standard rules</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>Fulfilled</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>f.      Does not elect standard rules</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>Fulfilled</Text>
                     </View>
                   </View>
                   
-                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4 }]}>
+                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
                     If you prefer not to opt for the QFZP benefit in this tax period, the company will be disqualified automatically from opting for this benefit for the next 4 years until {calculateDisqualificationDate()}.
                   </Text>
                 </View>
               ) : (
                 <View>
-                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
+                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
                     The company does not fulfill all the conditions of a QFZP benefit as seen below. The company is further disqualified from availing of this benefit for the next 4 years until {calculateDisqualificationDate()}.
                   </Text>
                   
                   <View style={{ marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>a.     Adequate substance</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>{qfzpSelections.adequateSubstance ? 'Fulfilled' : 'Not fulfilled'}</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>a.     Adequate substance</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>{qfzpSelections.adequateSubstance ? 'Fulfilled' : 'Not fulfilled'}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>b.     Derives qualifying income</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>{qfzpSelections.derivesQualifyingIncome ? 'Fulfilled' : 'Not fulfilled'}</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>b.     Derives qualifying income</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>{qfzpSelections.derivesQualifyingIncome ? 'Fulfilled' : 'Not fulfilled'}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>c.     Within de minimis</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>{qfzpSelections.withinDeMinimis ? 'Fulfilled' : 'Not fulfilled'}</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>c.     Within de minimis</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>{qfzpSelections.withinDeMinimis ? 'Fulfilled' : 'Not fulfilled'}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>d.     Prepares and maintains TP documentation</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>{qfzpSelections.preparesTPDocumentation ? 'Fulfilled' : 'Not fulfilled'}</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>d.     Prepares and maintains TP documentation</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>{qfzpSelections.preparesTPDocumentation ? 'Fulfilled' : 'Not fulfilled'}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>e.     Performs an audit of financial statements</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>{qfzpSelections.performsAuditFinancialStatements ? 'Fulfilled' : 'Not fulfilled'}</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>e.     Performs an audit of financial statements</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>{qfzpSelections.performsAuditFinancialStatements ? 'Fulfilled' : 'Not fulfilled'}</Text>
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 2 }}>
-                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400 }]}>f.      Does not elect standard rules</Text>
-                      <Text style={[styles.introText, { lineHeight: 1.4 }]}>{qfzpSelections.doesNotElectStandardRules ? 'Fulfilled' : 'Not fulfilled'}</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, width: 400, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>f.      Does not elect standard rules</Text>
+                      <Text style={[styles.introText, { lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>{qfzpSelections.doesNotElectStandardRules ? 'Fulfilled' : 'Not fulfilled'}</Text>
                     </View>
                   </View>
                   
-                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4 }]}>
+                  <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
                     The company will be disqualified automatically from opting for this benefit for the next 4 years until {calculateDisqualificationDate()}.
                   </Text>
                 </View>
@@ -430,29 +430,29 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
             </View>
 
             {/* Small Business Relief (SBR) Section */}
-            <View style={{ marginBottom: 20 }}>
-              <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 10 }]}>
+            <View style={{ marginBottom: 20, opacity: sbrAmountExceedsThreshold ? 0.5 : 1 }}>
+              <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 10, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
                 2. Small Business Relief (SBR)
               </Text>
               
-              <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
+              <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
                 A company having an annual turnover of less than AED 3,000,000 may opt for this relief. The implications of this relief are as follows:
               </Text>
               
               <View style={{ marginBottom: 10, paddingLeft: 20 }}>
-                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3 }]}>
+                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
                   a. Simplified filing obligations (declaring only revenues to FTA)
                 </Text>
-                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3 }]}>
+                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
                   b. No other reliefs / benefits / carry forward of losses as per the UAE CIT law are available
                 </Text>
-                <Text style={[styles.introText, { lineHeight: 1.4 }]}>
+                <Text style={[styles.introText, { lineHeight: 1.4, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
                   c. SBR is currently available only until 31.12.2026
                 </Text>
               </View>
 
               {assessmentData.smallBusinessReliefAmount && assessmentData.smallBusinessReliefAmount > 0 && (
-                <Text style={[styles.introText, { lineHeight: 1.4 }]}>
+                <Text style={[styles.introText, { lineHeight: 1.4, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
                   Company Revenue: AED {assessmentData.smallBusinessReliefAmount.toLocaleString('en-US')}
                 </Text>
               )}
@@ -499,97 +499,164 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
           
           <View style={{ flex: 1, flexDirection: 'column' }}>
             <SectionB />
-          </View>
-          
-          <FooterComponent />
-        </Page>
-
-        {/* Second Page - Elections and Signature section */}
-        <Page size="A4" style={styles.page}>
-          <CITLetterHeaderComponent data={data} />
-          
-          <View style={{ flex: 1, flexDirection: 'column' }}>
-
-            {/* Elections Section */}
-            <View style={{ marginBottom: 20 }}>
-              <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 12, fontWeight: 'bold', marginBottom: 15 }]}>
-                C. Elections
-              </Text>
-              
-              <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15 }]}>
-                The Decree Law provides for certain elections that could apply to you. We have opted to make the following elections as explained below. The details on such elections are available as seen in the tax computation workings:
-              </Text>
-
-              <View style={{ paddingLeft: 20, marginBottom: 15 }}>
-                <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                  1. Realization basis of accounting:
+            
+            {/* Add Signature Section here if no Elections are selected */}
+            {!assessmentData.elections.electionsSelected && (
+              <View style={{ marginTop: 30 }}>
+                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 20 }]}>
+                  We look forward to receiving the signed acknowledgment.
                 </Text>
-                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
-                  The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
-                </Text>
-
-                <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                  2. Transitional rules:
-                </Text>
-                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
-                  The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
-                </Text>
-
-                <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                  3. Carry forward of losses:
-                </Text>
-                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
-                  The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
-                </Text>
-              </View>
-
-              <Text style={[styles.introText, { lineHeight: 1.4 }]}>
-                We look forward to receiving the signed acknowledgment.
-              </Text>
-            </View>
-
-            {/* Signature Section */}
-            <View style={{ marginTop: 15 }}>
-              <View style={{ 
-                flexDirection: 'row', 
-                justifyContent: 'space-between'
-              }}>
-                {/* Left Column - Regards */}
-                <View style={{ width: '45%' }}>
-                  <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
-                  
-                  {/* Stamp Image */}
-                  <View style={{ marginBottom: 5 }}>
-                    <Image 
-                      src={companyDetails.stampPath} 
-                      style={{ 
-                        width: 156, 
-                        height: 104, 
-                        objectFit: 'contain',
-                        marginLeft: -10
-                      }} 
-                    />
+                
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between'
+                }}>
+                  {/* Left Column - Regards */}
+                  <View style={{ width: '45%' }}>
+                    <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
+                    
+                    {/* Stamp Image */}
+                    <View style={{ marginBottom: 5 }}>
+                      <Image 
+                        src={companyDetails.stampPath} 
+                        style={{ 
+                          width: 156, 
+                          height: 104, 
+                          objectFit: 'contain',
+                          marginLeft: -10
+                        }} 
+                      />
+                    </View>
+                    
+                    <Text style={[styles.value, { marginTop: 0 }]}>
+                      Uwe Hohmann
+                    </Text>
                   </View>
                   
-                  <Text style={[styles.value, { marginTop: 0 }]}>
-                    Uwe Hohmann
-                  </Text>
-                </View>
-                
-                {/* Right Column - Acknowledged */}
-                <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
-                  <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
-                  
-                  <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
-                    {managerFullName}
-                  </Text>
+                  {/* Right Column - Acknowledged */}
+                  <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
+                    <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
+                    
+                    <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
+                      {managerFullName}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
+            )}
           </View>
           
           <FooterComponent />
         </Page>
+
+        {/* Conditional Fourth Page - Elections and Signature section (only if elections are selected) */}
+        {assessmentData.elections.electionsSelected && (
+          <Page size="A4" style={styles.page}>
+            <CITLetterHeaderComponent data={data} />
+            
+            <View style={{ flex: 1, flexDirection: 'column' }}>
+
+              {/* Elections Section - Dynamic rendering with dynamic numbering */}
+              <View style={{ marginBottom: 20 }}>
+                <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 12, fontWeight: 'bold', marginBottom: 15 }]}>
+                  C. Elections
+                </Text>
+                
+                <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15 }]}>
+                  The Decree Law provides for certain elections that could apply to you. We have opted to make the following elections as explained below. The details on such elections are available as seen in the tax computation workings:
+                </Text>
+
+                <View style={{ paddingLeft: 20, marginBottom: 15 }}>
+                  {(() => {
+                    let electionNumber = 1;
+                    return (
+                      <>
+                        {assessmentData.elections.realizationBasisOfAccounting && (
+                          <>
+                            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                              {electionNumber++}. Realization basis of accounting:
+                            </Text>
+                            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                              The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
+                            </Text>
+                          </>
+                        )}
+
+                        {assessmentData.elections.transitionalRules && (
+                          <>
+                            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                              {electionNumber++}. Transitional rules:
+                            </Text>
+                            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                              The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
+                            </Text>
+                          </>
+                        )}
+
+                        {assessmentData.elections.carryForwardOfLosses && (
+                          <>
+                            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                              {electionNumber++}. Carry forward of losses:
+                            </Text>
+                            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                              The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
+                            </Text>
+                          </>
+                        )}
+                      </>
+                    );
+                  })()}
+                </View>
+
+              </View>
+
+              {/* Signature Section */}
+              <View style={{ marginTop: 15 }}>
+                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 20 }]}>
+                  We look forward to receiving the signed acknowledgment.
+                </Text>
+                
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between'
+                }}>
+                  {/* Left Column - Regards */}
+                  <View style={{ width: '45%' }}>
+                    <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
+                    
+                    {/* Stamp Image */}
+                    <View style={{ marginBottom: 5 }}>
+                      <Image 
+                        src={companyDetails.stampPath} 
+                        style={{ 
+                          width: 156, 
+                          height: 104, 
+                          objectFit: 'contain',
+                          marginLeft: -10
+                        }} 
+                      />
+                    </View>
+                    
+                    <Text style={[styles.value, { marginTop: 0 }]}>
+                      Uwe Hohmann
+                    </Text>
+                  </View>
+                  
+                  {/* Right Column - Acknowledged */}
+                  <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
+                    <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
+                    
+                    <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
+                      {managerFullName}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+            
+            <FooterComponent />
+          </Page>
+        )}
 
       </>
     );
@@ -638,40 +705,40 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
         </View>
 
         {/* QFZP Section - Non-freezone companies */}
-        <View style={{ marginBottom: 15 }}>
-          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5 }]}>
+        <View style={{ marginBottom: 15, opacity: !isFZCOManaged || qfzpNotQualified ? 0.5 : 1 }}>
+          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
             1. QFZP (Qualifying Free Zone Person) benefit
           </Text>
           
-          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
+          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10, color: !isFZCOManaged || qfzpNotQualified ? '#9CA3AF' : undefined }]}>
             This option is not applicable for non-Freezone companies.
           </Text>
         </View>
 
         {/* Small Business Relief (SBR) Section */}
-        <View style={{ marginBottom: 15 }}>
-          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5 }]}>
+        <View style={{ marginBottom: 15, opacity: sbrAmountExceedsThreshold ? 0.5 : 1 }}>
+          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 11, fontWeight: 'bold', marginBottom: 8.5, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
             2. Small Business Relief (SBR)
           </Text>
           
-          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10 }]}>
+          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 10, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
             A company having an annual turnover of less than AED 3,000,000 may opt for this relief. The implications of this relief are as follows:
           </Text>
           
           <View style={{ marginBottom: 10, paddingLeft: 20 }}>
-            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3 }]}>
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
               a. Simplified filing obligations (declaring only revenues to FTA)
             </Text>
-            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3 }]}>
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 3, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
               b. No other reliefs / benefits / carry forward of losses as per the UAE CIT law are available
             </Text>
-            <Text style={[styles.introText, { lineHeight: 1.4 }]}>
+            <Text style={[styles.introText, { lineHeight: 1.4, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
               c. SBR is currently available only until 31.12.2026
             </Text>
           </View>
 
           {assessmentData.smallBusinessReliefAmount && assessmentData.smallBusinessReliefAmount > 0 && (
-            <Text style={[styles.introText, { lineHeight: 1.4 }]}>
+            <Text style={[styles.introText, { lineHeight: 1.4, color: sbrAmountExceedsThreshold ? '#9CA3AF' : undefined }]}>
               Company Revenue: AED {assessmentData.smallBusinessReliefAmount.toLocaleString('en-US')}
             </Text>
           )}
@@ -696,111 +763,187 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
             </Text>
           </View>
         </View>
-
-        <SelectionSection />
       </View>
       
       <FooterComponent />
     </Page>
 
-    {/* Second Page - Section B */}
+    {/* Second Page - Selection Options */}
+    <Page size="A4" style={styles.page}>
+      <CITLetterHeaderComponent data={data} />
+      
+      <View style={{ flex: 1, flexDirection: 'column' }}>
+        <SelectionSection />
+      </View>
+
+      <FooterComponent />
+    </Page>
+
+    {/* Third Page - Section B */}
     <Page size="A4" style={styles.page}>
       <CITLetterHeaderComponent data={data} />
       
       {/* Main content area */}
       <View style={{ flex: 1, flexDirection: 'column' }}>
         <SectionB />
-      </View>
-      
-      <FooterComponent />
-    </Page>
-
-    {/* Second Page - Elections and Signature section */}
-    <Page size="A4" style={styles.page}>
-      <CITLetterHeaderComponent data={data} />
-      
-      {/* Main content area */}
-      <View style={{ flex: 1, flexDirection: 'column' }}>
-        {/* Elections Section */}
-        <View style={{ marginBottom: 20 }}>
-          <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 12, fontWeight: 'bold', marginBottom: 15 }]}>
-            C. Elections
-          </Text>
-          
-          <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15 }]}>
-            The Decree Law provides for certain elections that could apply to you. We have opted to make the following elections as explained below. The details on such elections are available as seen in the tax computation workings:
-          </Text>
-
-          <View style={{ paddingLeft: 20, marginBottom: 15 }}>
-            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-              1. Realization basis of accounting:
+        
+        {/* Add Signature Section here if no Elections are selected */}
+        {!assessmentData.elections.electionsSelected && (
+          <View style={{ marginTop: 30 }}>
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 20 }]}>
+              We look forward to receiving the signed acknowledgment.
             </Text>
-            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
-              The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
-            </Text>
-
-            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-              2. Transitional rules:
-            </Text>
-            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
-              The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
-            </Text>
-
-            <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-              3. Carry forward of losses:
-            </Text>
-            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
-              The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
-            </Text>
-          </View>
-
-          <Text style={[styles.introText, { lineHeight: 1.4 }]}>
-            We look forward to receiving the signed acknowledgment.
-          </Text>
-        </View>
-
-        {/* Signature Section */}
-        <View style={{ marginTop: 15 }}>
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-between'
-          }}>
-            {/* Left Column - Regards */}
-            <View style={{ width: '45%' }}>
-              <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
-              
-              {/* Stamp Image */}
-              <View style={{ marginBottom: 5 }}>
-                <Image 
-                  src={companyDetails.stampPath} 
-                  style={{ 
-                    width: 156, 
-                    height: 104, 
-                    objectFit: 'contain',
-                    marginLeft: -10
-                  }} 
-                />
+            
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between'
+            }}>
+              {/* Left Column - Regards */}
+              <View style={{ width: '45%' }}>
+                <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
+                
+                {/* Stamp Image */}
+                <View style={{ marginBottom: 5 }}>
+                  <Image 
+                    src={companyDetails.stampPath} 
+                    style={{ 
+                      width: 156, 
+                      height: 104, 
+                      objectFit: 'contain',
+                      marginLeft: -10
+                    }} 
+                  />
+                </View>
+                
+                <Text style={[styles.value, { marginTop: 0 }]}>
+                  Uwe Hohmann
+                </Text>
               </View>
               
-              <Text style={[styles.value, { marginTop: 0 }]}>
-                Uwe Hohmann
-              </Text>
-            </View>
-            
-            {/* Right Column - Acknowledged */}
-            <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
-              <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
-              
-              <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
-                {managerFullName}
-              </Text>
+              {/* Right Column - Acknowledged */}
+              <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
+                <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
+                
+                <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
+                  {managerFullName}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
+        )}
       </View>
       
       <FooterComponent />
     </Page>
+
+    {/* Conditional Fourth Page - Elections and Signature section (only if elections are selected) */}
+    {assessmentData.elections.electionsSelected && (
+      <Page size="A4" style={styles.page}>
+        <CITLetterHeaderComponent data={data} />
+        
+        {/* Main content area */}
+        <View style={{ flex: 1, flexDirection: 'column' }}>
+          {/* Elections Section - Dynamic rendering with dynamic numbering */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={[styles.sectionTitle, { borderLeft: 'none', paddingLeft: 0, fontSize: 12, fontWeight: 'bold', marginBottom: 15 }]}>
+              C. Elections
+            </Text>
+            
+            <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15 }]}>
+              The Decree Law provides for certain elections that could apply to you. We have opted to make the following elections as explained below. The details on such elections are available as seen in the tax computation workings:
+            </Text>
+
+            <View style={{ paddingLeft: 20, marginBottom: 15 }}>
+              {(() => {
+                let electionNumber = 1;
+                return (
+                  <>
+                    {assessmentData.elections.realizationBasisOfAccounting && (
+                      <>
+                        <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                          {electionNumber++}. Realization basis of accounting:
+                        </Text>
+                        <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                          The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
+                        </Text>
+                      </>
+                    )}
+
+                    {assessmentData.elections.transitionalRules && (
+                      <>
+                        <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                          {electionNumber++}. Transitional rules:
+                        </Text>
+                        <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                          The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
+                        </Text>
+                      </>
+                    )}
+
+                    {assessmentData.elections.carryForwardOfLosses && (
+                      <>
+                        <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
+                          {electionNumber++}. Carry forward of losses:
+                        </Text>
+                        <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
+                          The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
+                        </Text>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
+            </View>
+
+          </View>
+
+          {/* Signature Section */}
+          <View style={{ marginTop: 15 }}>
+            <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 20 }]}>
+              We look forward to receiving the signed acknowledgment.
+            </Text>
+            
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between'
+            }}>
+              {/* Left Column - Regards */}
+              <View style={{ width: '45%' }}>
+                <Text style={[styles.value, { marginBottom: 5 }]}>Regards,</Text>
+                
+                {/* Stamp Image */}
+                <View style={{ marginBottom: 5 }}>
+                  <Image 
+                    src={companyDetails.stampPath} 
+                    style={{ 
+                      width: 156, 
+                      height: 104, 
+                      objectFit: 'contain',
+                      marginLeft: -10
+                    }} 
+                  />
+                </View>
+                
+                <Text style={[styles.value, { marginTop: 0 }]}>
+                  Uwe Hohmann
+                </Text>
+              </View>
+              
+              {/* Right Column - Acknowledged */}
+              <View style={{ width: '45%', alignItems: 'flex-end', marginRight: 220 }}>
+                <Text style={[styles.value, { marginBottom: 5, textAlign: 'right' }]}>Acknowledged,</Text>
+                
+                <Text style={[styles.value, { marginTop: 109, textAlign: 'right' }]}>
+                  {managerFullName}
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        <FooterComponent />
+      </Page>
+    )}
 
     </>
   );

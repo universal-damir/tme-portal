@@ -45,12 +45,20 @@ export interface NonDeductibleExpense {
   nonDeductiblePercentage: number;
 }
 
+export interface ElectionsSelections {
+  electionsSelected: boolean;
+  realizationBasisOfAccounting: boolean;
+  transitionalRules: boolean;
+  carryForwardOfLosses: boolean;
+}
+
 export interface CITAssessmentConclusionData {
   citImpactAssessmentPerformed: boolean;
   citImpactAssessmentDate: string;
   qfzpBenefitSelections: QFZPBenefitSelections;
   smallBusinessReliefAmount: number;
   nonDeductibleExpenses: NonDeductibleExpense[];
+  elections: ElectionsSelections;
 }
 
 export interface CITReturnLettersData {
@@ -83,12 +91,12 @@ export const CIT_RETURN_LETTERS_DEFAULTS = {
   taxPeriodEnd: '',
   letterType: '' as LetterType | '',
   confAccDocsSelections: {
-    revenuesAndExpenses: false,
-    nonDeductibleExpenses: false,
-    waiverSalaryGratuity: false,
-    assetsAndLiabilities: false,
-    ifrs9FinancialInstruments: false,
-    ifrs16Leases: false,
+    revenuesAndExpenses: true,
+    nonDeductibleExpenses: true,
+    waiverSalaryGratuity: true,
+    assetsAndLiabilities: true,
+    ifrs9FinancialInstruments: true,
+    ifrs16Leases: true,
     otherPointSelected: false,
     otherPointName: '',
     otherPointText: '',
@@ -109,6 +117,12 @@ export const CIT_RETURN_LETTERS_DEFAULTS = {
       particulars: '',
       nonDeductiblePercentage: 0,
     }],
+    elections: {
+      electionsSelected: false,
+      realizationBasisOfAccounting: true,
+      transitionalRules: true,
+      carryForwardOfLosses: true,
+    },
   },
 };
 

@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
-import { CheckSquare, Square } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import { ConfAccDocsSelections } from '@/types/cit-return-letters';
 
 interface ConfAccDocsSelectionSectionProps {
@@ -31,10 +30,8 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
     onChange: (checked: boolean) => void; 
     label: string; 
   }) => (
-    <motion.div
+    <div
       className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200"
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
     >
       <button
         type="button"
@@ -62,13 +59,11 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
       >
         {label}
       </label>
-    </motion.div>
+    </div>
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
     >
       <h3 className="text-lg font-semibold mb-4" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
@@ -135,10 +130,7 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
           />
           
           {selections.otherPointSelected && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+            <div
               className="mt-3 space-y-3 pl-8"
             >
               <div>
@@ -171,14 +163,12 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
                   placeholder="Enter point description..."
                 />
               </div>
-            </motion.div>
+            </div>
           )}
         </div>
 
         {/* Summary */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+        <div
           className="bg-blue-50 p-4 rounded-lg border border-blue-200 mt-6"
         >
           <h4 className="text-sm font-medium text-blue-900 mb-2">Selection Summary</h4>
@@ -193,9 +183,9 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
               selections.otherPointSelected && `${selections.otherPointName || 'Other point'}`
             ].filter(Boolean).join(', ') || 'No points selected'}
           </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

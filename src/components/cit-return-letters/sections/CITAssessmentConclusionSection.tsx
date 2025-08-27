@@ -4,7 +4,7 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { FileCheck, Plus, Trash2, X } from 'lucide-react';
 import CustomDatePicker from '../ui/CustomDatePicker';
-import { CITAssessmentConclusionData, QFZPBenefitSelections, NonDeductibleExpense, Client } from '@/types/cit-return-letters';
+import { CITAssessmentConclusionData, QFZPBenefitSelections, NonDeductibleExpense, Client, ElectionsSelections } from '@/types/cit-return-letters';
 import { getCompanyTypeByAuthority } from '@/lib/pdf-generator/utils/citAuthorityMapping';
 
 interface CITAssessmentConclusionSectionProps {
@@ -168,6 +168,29 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
       onDataChange({
         ...data,
         nonDeductibleExpenses: updatedExpenses,
+      });
+    }
+  }, [data, onDataChange]);
+
+  const handleElectionsChange = useCallback((key: keyof ElectionsSelections, value: boolean) => {
+    if (key === 'electionsSelected' && !value) {
+      // When unchecking the main checkbox, reset all sub-selections to default
+      onDataChange({
+        ...data,
+        elections: {
+          electionsSelected: false,
+          realizationBasisOfAccounting: true,
+          transitionalRules: true,
+          carryForwardOfLosses: true,
+        },
+      });
+    } else {
+      onDataChange({
+        ...data,
+        elections: {
+          ...data.elections,
+          [key]: value,
+        },
       });
     }
   }, [data, onDataChange]);
@@ -530,6 +553,98 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
               );
             })()}
           </div>
+        </div>
+
+        {/* Elections Section */}
+        <div className="border-t pt-6">
+          <motion.label 
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
+          >
+            <div className="relative">
+              <input
+                type="checkbox"
+                checked={data.elections.electionsSelected}
+                onChange={(e) => handleElectionsChange('electionsSelected', e.target.checked)}
+                className="sr-only"
+              />
+              <div 
+                className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                style={{ 
+                  borderColor: data.elections.electionsSelected ? '#243F7B' : '#d1d5db',
+                  backgroundColor: data.elections.electionsSelected ? '#243F7B' : 'white'
+                }}
+              >
+                {data.elections.electionsSelected && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </motion.div>
+                )}
+              </div>
+            </div>
+            <span className="ml-3 text-md font-semibold" style={{ color: '#243F7B' }}>
+              Elections
+            </span>
+          </motion.label>
+          
+          {/* Elections Options - Show only if Elections is checked */}
+          {data.elections.electionsSelected && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-4 ml-8 space-y-3"
+            >
+              {[
+                { key: 'realizationBasisOfAccounting' as keyof ElectionsSelections, label: 'Realization basis of accounting' },
+                { key: 'transitionalRules' as keyof ElectionsSelections, label: 'Transitional rules' },
+                { key: 'carryForwardOfLosses' as keyof ElectionsSelections, label: 'Carry forward of losses' },
+              ].map(({ key, label }) => (
+                <div key={key} className="flex items-center p-3 border border-gray-200 rounded-lg bg-gray-50">
+                  <motion.label 
+                    whileHover={{ scale: 1.01 }}
+                    className="flex items-center cursor-pointer flex-1"
+                  >
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={data.elections[key]}
+                        onChange={(e) => handleElectionsChange(key, e.target.checked)}
+                        className="sr-only"
+                      />
+                      <div 
+                        className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
+                        style={{ 
+                          borderColor: data.elections[key] ? '#243F7B' : '#d1d5db',
+                          backgroundColor: data.elections[key] ? '#243F7B' : 'white'
+                        }}
+                      >
+                        {data.elections[key] && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                          >
+                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="ml-3 text-sm font-medium" style={{ color: '#243F7B' }}>
+                      {label}
+                    </span>
+                  </motion.label>
+                </div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </div>
     </motion.div>
