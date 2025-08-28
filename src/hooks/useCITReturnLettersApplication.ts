@@ -53,7 +53,15 @@ export const useCITReturnLettersApplication = ({
 
   // Generate application title
   const generateApplicationTitle = useCallback((): string => {
-    if (!formData.selectedClient || !formData.letterType) return 'CIT Return Letters';
+    if (!formData.selectedClient) return 'CIT Return Letters';
+    
+    // Check for selectedLetterTypes (new format) or fallback to letterType (legacy)
+    const hasLetterTypes = formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0;
+    const hasLegacyLetterType = formData.letterType && formData.letterType !== '';
+    
+    if (!hasLetterTypes && !hasLegacyLetterType) {
+      return 'CIT Return Letters';
+    }
     
     const date = new Date(formData.letterDate || new Date());
     const yy = date.getFullYear().toString().slice(-2);
@@ -62,9 +70,18 @@ export const useCITReturnLettersApplication = ({
     const formattedDate = `${yy}${mm}${dd}`;
     
     const companyShortName = formData.selectedClient?.company_name_short || 'Company';
-    const letterType = formData.letterType || 'Letter';
     
-    return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+    // Use selectedLetterTypes if available, otherwise fallback to letterType
+    let letterTypes: string;
+    if (hasLetterTypes) {
+      letterTypes = formData.selectedLetterTypes.length === 1 
+        ? formData.selectedLetterTypes[0] 
+        : `${formData.selectedLetterTypes.length} Letters`;
+    } else {
+      letterTypes = formData.letterType || 'Letter';
+    }
+    
+    return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
   }, [formData]);
 
   // Check if form data has changed
@@ -107,8 +124,12 @@ export const useCITReturnLettersApplication = ({
       return false;
     }
     
-    if (!formData.letterType) {
-      setError('Letter type is required');
+    // Check for selectedLetterTypes (new format) or fallback to letterType (legacy)
+    const hasLetterTypes = formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0;
+    const hasLegacyLetterType = formData.letterType && formData.letterType !== '';
+    
+    if (!hasLetterTypes && !hasLegacyLetterType) {
+      setError('At least one letter type is required');
       return false;
     }
 

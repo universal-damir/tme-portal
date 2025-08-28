@@ -117,6 +117,7 @@ export {
 export { 
   generateCITReturnLettersPDF, 
   generateCITReturnLettersPDFWithFilename,
+  generateCITReturnLettersCombinedPreviewPDF,
   generateCITTransferPricingPDF,
   generateCITTransferPricingPDFWithFilename
 } from './citReturnLettersGenerator';
@@ -124,7 +125,8 @@ export {
 // CIT Return Letters data transformer utilities
 export { 
   transformCITReturnLettersData,
-  generateCITReturnLettersFilename
+  generateCITReturnLettersFilename,
+  generateCITReturnLettersMultiFilename
 } from './citReturnLettersDataTransformer';
 
 // CIT Return Letters authority mapping utilities

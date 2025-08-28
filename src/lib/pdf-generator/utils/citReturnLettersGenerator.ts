@@ -1,6 +1,6 @@
 import React from 'react';
 import { pdf } from '@react-pdf/renderer';
-import { CITReturnLettersDocument } from '../components/cit-return-letters/CITReturnLettersDocument';
+import { CITReturnLettersDocument, CITReturnLettersCombinedDocument } from '../components/cit-return-letters/CITReturnLettersDocument';
 import { CITReturnLettersData, LetterType } from '@/types/cit-return-letters';
 import { SharedClientInfo } from '@/types/portal';
 import { transformCITReturnLettersData, generateCITReturnLettersFilename } from './citReturnLettersDataTransformer';
@@ -76,4 +76,31 @@ export const generateCITTransferPricingPDFWithFilename = async (
   };
   
   return generateCITReturnLettersPDFWithFilename(tpData, clientInfo);
+};
+
+// Generate combined preview PDF with all selected letters in one document
+export const generateCITReturnLettersCombinedPreviewPDF = async (
+  citReturnLettersData: CITReturnLettersData,
+  clientInfo?: SharedClientInfo
+): Promise<Blob> => {
+  // Validate that letter types are selected
+  if (!citReturnLettersData.selectedLetterTypes || citReturnLettersData.selectedLetterTypes.length === 0) {
+    throw new Error('At least one letter type is required for CIT return letters preview generation');
+  }
+  
+  // Validate that a client is selected
+  if (!citReturnLettersData.selectedClient) {
+    throw new Error('Client selection is required for CIT return letters preview generation');
+  }
+
+  // Transform CIT return letters data to standard PDF component format
+  const transformedData = {
+    ...transformCITReturnLettersData(citReturnLettersData, clientInfo),
+    selectedLetterTypes: citReturnLettersData.selectedLetterTypes
+  };
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const doc = React.createElement(CITReturnLettersCombinedDocument, { data: transformedData as any }) as any;
+  const asPdf = pdf(doc);
+  return await asPdf.toBlob();
 };

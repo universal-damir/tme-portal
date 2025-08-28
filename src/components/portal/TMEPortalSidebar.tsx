@@ -51,20 +51,20 @@ const baseNavItems = [
     icon: Building2,
     feature: 'company_services',
   },
+  // {
+  //   title: 'Corporate Changes',
+  //   url: '#corporate-changes',
+  //   icon: Briefcase,
+  //   feature: 'corporate_changes',
+  // },
+  // {
+  //   title: 'Taxation',
+  //   url: '#taxation',
+  //   icon: Receipt,
+  //   feature: 'taxation',
+  // },
   {
-    title: 'Corporate Changes',
-    url: '#corporate-changes',
-    icon: Briefcase,
-    feature: 'corporate_changes',
-  },
-  {
-    title: 'Taxation',
-    url: '#taxation',
-    icon: Receipt,
-    feature: 'taxation',
-  },
-  {
-    title: 'Acc CIT letters',
+    title: 'Acc + CIT letters',
     url: '#cit-return-letters',
     icon: FileText,
     feature: 'cit_return_letters',

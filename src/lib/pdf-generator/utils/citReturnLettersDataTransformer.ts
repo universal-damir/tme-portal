@@ -97,3 +97,62 @@ export function generateCITReturnLettersFilename(
   // Build filename: {YYMMDD} {company short name} {letter type} {tax end year}
   return `${formattedDate} ${companyShortName} ${letterTypeForFilename} ${getTaxEndYear()}.pdf`;
 }
+
+// Generate filename for multiple CIT return letters (new format)
+export function generateCITReturnLettersMultiFilename(
+  citReturnLettersData: CITReturnLettersData,
+  clientInfo?: SharedClientInfo
+): string {
+  // Format document date (today's date) as YYMMDD  
+  const date = new Date();
+  const yy = date.getFullYear().toString().slice(-2);
+  const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dd = date.getDate().toString().padStart(2, '0');
+  const formattedDate = `${yy}${mm}${dd}`;
+  
+  // Get company short name
+  const companyShortName = citReturnLettersData.selectedClient?.company_name_short || 
+                          clientInfo?.shortCompanyName || 'Company';
+  
+  // Get selected letter types and clean them for filename
+  const selectedTypes = citReturnLettersData.selectedLetterTypes || [];
+  
+  // Clean letter type names for filename (remove commas, pluses, numbers)
+  const cleanLetterType = (type: string): string => {
+    return type
+      .replace(/\+/g, '') // Remove plus signs
+      .replace(/,/g, '') // Remove commas
+      .replace(/\s+/g, ' ') // Normalize spaces
+      .trim();
+  };
+  
+  // Create filename parts for each letter type
+  const letterTypeParts = selectedTypes.map(type => {
+    switch (type) {
+      case 'CIT TP':
+        return 'CIT TP';
+      case 'Conf acc docs + FS':
+        return 'Conf acc docs FS';
+      case 'CIT assess+concl, non deduct, elect':
+        return 'CIT assess concl non deduct elect';
+      default:
+        return cleanLetterType(type);
+    }
+  });
+  
+  // Join letter types with " - "
+  const letterTypeString = letterTypeParts.join(' - ');
+  
+  // Get tax period end year as 4-digit number
+  const getTaxEndYear = () => {
+    if (citReturnLettersData.taxPeriodEnd) {
+      const endDate = new Date(citReturnLettersData.taxPeriodEnd);
+      return endDate.getFullYear().toString();
+    }
+    return '2024'; // Default fallback
+  };
+  
+  // Build filename: {YYMMDD} {company short name} {letter types separated by -} {tax end year}
+  // Example: 250828 TME FZCO CIT TP - Conf acc docs FS - CIT assess concl non deduct elect 2024
+  return `${formattedDate} ${companyShortName} ${letterTypeString} ${getTaxEndYear()}.pdf`;
+}

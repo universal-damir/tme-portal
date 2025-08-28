@@ -33,7 +33,23 @@ export const CITReturnLettersReviewIntegration: React.FC<CITReturnLettersReviewI
   }
 
   const getApplicationTitle = (): string => {
-    if (!citData.selectedClient || !citData.letterType) return 'CIT Return Letters';
+    if (!citData.selectedClient || !citData.selectedLetterTypes || citData.selectedLetterTypes.length === 0) {
+      // Fallback to legacy letterType if exists
+      if (citData.letterType) {
+        const date = new Date(citData.letterDate || new Date());
+        const yy = date.getFullYear().toString().slice(-2);
+        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+        const dd = date.getDate().toString().padStart(2, '0');
+        const formattedDate = `${yy}${mm}${dd}`;
+        
+        const companyShortName = citData.selectedClient?.company_name_short || 'Company';
+        const letterType = citData.letterType;
+        
+        return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+      }
+      
+      return 'CIT Return Letters';
+    }
     
     const date = new Date(citData.letterDate || new Date());
     const yy = date.getFullYear().toString().slice(-2);
@@ -42,9 +58,11 @@ export const CITReturnLettersReviewIntegration: React.FC<CITReturnLettersReviewI
     const formattedDate = `${yy}${mm}${dd}`;
     
     const companyShortName = citData.selectedClient?.company_name_short || 'Company';
-    const letterType = citData.letterType || 'Letter';
+    const letterTypes = citData.selectedLetterTypes.length === 1 
+      ? citData.selectedLetterTypes[0] 
+      : `${citData.selectedLetterTypes.length} Letters`;
     
-    return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+    return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
   };
 
   const handleSubmitForReview = async (submission: ReviewSubmission): Promise<boolean> => {
@@ -55,8 +73,12 @@ export const CITReturnLettersReviewIntegration: React.FC<CITReturnLettersReviewI
         return false;
       }
 
-      if (!citData.letterType) {
-        toast.error('Please select a letter type before submitting for review');
+      // Check for selectedLetterTypes (new format) or fallback to letterType (legacy)
+      const hasLetterTypes = citData.selectedLetterTypes && citData.selectedLetterTypes.length > 0;
+      const hasLegacyLetterType = citData.letterType && citData.letterType !== '';
+      
+      if (!hasLetterTypes && !hasLegacyLetterType) {
+        toast.error('Please select at least one letter type before submitting for review');
         return false;
       }
 

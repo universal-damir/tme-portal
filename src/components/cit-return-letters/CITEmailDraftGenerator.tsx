@@ -30,6 +30,7 @@ export interface CITEmailRecipientData {
   firstName?: string;
   lastName?: string;
   companyName?: string;
+  companyShortName?: string;
   companyCode?: string;
   senderName?: string;
   senderDesignation?: string;
@@ -63,10 +64,28 @@ export interface CITEmailDraftGeneratorProps {
   };
 }
 
-// CIT Return Letters email templates
+// New CIT Return Filing email template
+export const CIT_RETURN_FILING_EMAIL_TEMPLATE = {
+  subject: '{dynamicSubject}',
+  greeting: 'Dear {firstName},',
+  bodyContent: [
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">With reference to the subject matter, the first CIT return filing for your company is due for submission by {dueDate}.</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">In this regard, we have prepared the following for your review and signature. Kindly sign & stamp ALL the pages of the attached letter.</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">1. Draft of the CIT return {taxYear}, as attached<br>{dynamicLetterList}</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">As soon as we receive the signed and stamped documents, we will proceed to file the CIT returns and will share with you the acknowledgement issued from the FTA.</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please let us know if you have any questions in the meantime.</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Best regards,</span>',
+    '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
+  ],
+  includeColoredText: false,
+  fontFamily: 'Arial, sans-serif',
+  fontSize: '10pt'
+} as const;
+
+// Legacy templates - maintained for backward compatibility
 export const CIT_EMAIL_TEMPLATES = {
   'CIT TP': {
-    subject: 'CIT Transfer Pricing Documentation', // Will be overridden by PDF filename
+    subject: 'CIT Transfer Pricing Documentation',
     greeting: 'Dear {firstName},',
     bodyContent: [
       '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please find attached the Corporate Income Tax Transfer Pricing documentation for {companyName} (Client Code: {companyCode}).</span>',
@@ -337,14 +356,143 @@ export const CITEmailDraftGenerator: React.FC<CITEmailDraftGeneratorProps> = (pr
   );
 };
 
-// Helper function to create email data from CIT form data and client info
+// Helper function to calculate CIT return due date (9 months from tax period end - 1 day)
+const calculateCITDueDate = (taxPeriodEnd: string): string => {
+  const endDate = new Date(taxPeriodEnd);
+  
+  // Add 9 months to the tax period end date, then subtract 1 day
+  const dueDate = new Date(endDate);
+  dueDate.setMonth(dueDate.getMonth() + 9);
+  dueDate.setDate(dueDate.getDate() - 1);
+  
+  // Format as dd.mm.yyyy
+  const day = dueDate.getDate().toString().padStart(2, '0');
+  const month = (dueDate.getMonth() + 1).toString().padStart(2, '0');
+  const year = dueDate.getFullYear();
+  
+  return `${day}.${month}.${year}`;
+};
+
+// Helper function to extract tax year from tax period end date
+const getTaxYear = (taxPeriodEnd: string): string => {
+  const endDate = new Date(taxPeriodEnd);
+  return endDate.getFullYear().toString();
+};
+
+// Process the new CIT Return Filing email template
+export const processCITReturnFilingEmailTemplate = (
+  template: CITEmailTemplate,
+  recipients: CITEmailRecipientData,
+  letterTypes: LetterType[],
+  taxPeriodEnd: string
+): CITEmailTemplate => {
+  const firstName = recipients.firstName || 'Client';
+  const companyName = recipients.companyName || 'Company';
+  const companyShortName = recipients.companyShortName || companyName || 'Company';
+  const companyCode = recipients.companyCode || '';
+  const senderName = recipients.senderName || 'TME Services Team';
+  const senderDesignation = recipients.senderDesignation || '';
+  
+  // Calculate dynamic values from tax period end date
+  const taxYear = getTaxYear(taxPeriodEnd);
+  const dueDate = calculateCITDueDate(taxPeriodEnd);
+  
+  // Generate dynamic subject line using the same format as multi-filename
+  const generateDynamicSubject = (): string => {
+    const date = new Date();
+    const yy = date.getFullYear().toString().slice(-2);
+    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dd = date.getDate().toString().padStart(2, '0');
+    const formattedDate = `${yy}${mm}${dd}`;
+    
+    const companyShort = companyShortName; // Use company SHORT name for subject
+    
+    // Clean letter type names for subject
+    const letterTypeParts = letterTypes.map(type => {
+      switch (type) {
+        case 'CIT TP':
+          return 'CIT TP';
+        case 'Conf acc docs + FS':
+          return 'Conf acc docs FS';
+        case 'CIT assess+concl, non deduct, elect':
+          return 'CIT assess concl non deduct elect';
+        default:
+          return type.replace(/[+,]/g, '').replace(/\s+/g, ' ').trim();
+      }
+    });
+    
+    const letterTypeString = letterTypeParts.join(' - ');
+    
+    return `${formattedDate} ${companyShort} ${letterTypeString} ${taxYear}`;
+  };
+  
+  const dynamicSubject = generateDynamicSubject();
+  
+  // Build phone numbers string
+  let phoneNumbers = '';
+  if (recipients.senderPhone) {
+    phoneNumbers += `<br><span style="font-family: Arial, sans-serif; font-size: 10pt;"><span style="color: #243F7B;">M UAE:</span> <span style="color: #666;">${recipients.senderPhone}</span></span>`;
+  }
+  
+  const departmentPhone = getDepartmentPhone(recipients.senderDepartment, recipients.senderEmployeeCode);
+  if (departmentPhone) {
+    phoneNumbers += `<br><span style="font-family: Arial, sans-serif; font-size: 10pt;"><span style="color: #243F7B;">T GER:</span> <span style="color: #666;">${departmentPhone}</span></span>`;
+  }
+  
+  const senderPhone = phoneNumbers;
+
+  // Generate dynamic letter list based on selected types with proper numbering (no (1), (2), (3))
+  const letterList = letterTypes.map((type, index) => {
+    const itemNumber = index + 2; // Start from 2 since "Draft of the CIT return" is item 1
+    switch (type) {
+      case 'CIT TP':
+        return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. CIT TP</span>`;
+      case 'Conf acc docs + FS':
+        return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. Conf acc docs + FS</span>`;
+      case 'CIT assess+concl, non deduct, elect':
+        return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. CIT assess+concl, non deduct, elect</span>`;
+      default:
+        return '';
+    }
+  }).filter(Boolean).join('<br>');
+
+  // Replace template variables
+  const processText = (text: string): string => {
+    return text
+      .replace(/{firstName}/g, firstName)
+      .replace(/{companyName}/g, companyName)
+      .replace(/{clientCode}/g, companyCode)
+      .replace(/{clientName}/g, companyName)
+      .replace(/{taxYear}/g, taxYear)
+      .replace(/{dueDate}/g, dueDate)
+      .replace(/{senderName}/g, senderName)
+      .replace(/{senderDesignation}/g, senderDesignation)
+      .replace(/{senderPhone}/g, senderPhone)
+      .replace(/{dynamicLetterList}/g, letterList)
+      .replace(/{dynamicSubject}/g, dynamicSubject);
+  };
+
+  return {
+    ...template,
+    subject: processText(template.subject),
+    greeting: processText(template.greeting),
+    bodyContent: template.bodyContent.map(processText),
+    signature: template.signature ? processText(template.signature) : undefined
+  };
+};
+
+// Helper function to create email data from CIT form data and client info - Updated for multiple letters
 export const createCITEmailDataFromFormData = async (
   client: Client,
-  letterType: LetterType,
-  pdfBlob: Blob,
-  pdfFilename: string,
-  userInfo?: { full_name?: string; designation?: string; employee_code?: string; phone?: string; department?: string }
+  letterTypes: LetterType | LetterType[], // Support both single and multiple
+  pdfResults: { blob: Blob; filename: string } | { blob: Blob; filename: string }[], // Support both single and multiple PDFs
+  userInfo?: { full_name?: string; designation?: string; employee_code?: string; phone?: string; department?: string },
+  taxPeriodEnd?: string // Add tax period end parameter
 ): Promise<CITEmailDraftGeneratorProps> => {
+  
+  // Normalize inputs to arrays
+  const normalizedLetterTypes = Array.isArray(letterTypes) ? letterTypes : [letterTypes];
+  const normalizedPdfResults = Array.isArray(pdfResults) ? pdfResults : [pdfResults];
   
   // Add CC email for CIT return letters
   const ccEmails = ['CIT@TME-Services.com'];
@@ -355,6 +503,57 @@ export const createCITEmailDataFromFormData = async (
     firstName: client.management_name?.split(' ')[0] || 'Client',
     lastName: client.management_name?.split(' ').slice(1).join(' ') || '',
     companyName: client.company_name,
+    companyShortName: client.company_name_short, // Add the company short name
+    companyCode: client.company_code,
+    senderName: userInfo?.full_name || 'TME Services Team',
+    senderDesignation: userInfo?.designation || '',
+    senderPhone: userInfo?.phone || '',
+    senderDepartment: userInfo?.department || '',
+    senderEmployeeCode: userInfo?.employee_code || ''
+  };
+
+  // Use the tax period end date provided, or fallback to current year end
+  const effectiveTaxPeriodEnd = taxPeriodEnd || `${new Date().getFullYear()}-12-31`;
+
+  // Use new template for multiple letters or single letter
+  const template: CITEmailTemplate = processCITReturnFilingEmailTemplate(
+    CIT_RETURN_FILING_EMAIL_TEMPLATE,
+    recipients,
+    normalizedLetterTypes,
+    effectiveTaxPeriodEnd
+  );
+
+  const attachments: CITEmailAttachment[] = normalizedPdfResults.map(result => ({
+    blob: result.blob,
+    filename: result.filename,
+    contentType: 'application/pdf'
+  }));
+
+  return {
+    recipients,
+    template,
+    attachments
+  };
+};
+
+// Legacy function - maintained for backward compatibility
+export const createCITEmailDataFromFormDataLegacy = async (
+  client: Client,
+  letterType: LetterType,
+  pdfBlob: Blob,
+  pdfFilename: string,
+  userInfo?: { full_name?: string; designation?: string; employee_code?: string; phone?: string; department?: string }
+): Promise<CITEmailDraftGeneratorProps> => {
+  
+  const ccEmails = ['CIT@TME-Services.com'];
+
+  const recipients: CITEmailRecipientData = {
+    emails: [client.management_email],
+    ccEmails: ccEmails,
+    firstName: client.management_name?.split(' ')[0] || 'Client',
+    lastName: client.management_name?.split(' ').slice(1).join(' ') || '',
+    companyName: client.company_name,
+    companyShortName: client.company_name_short, // Add the company short name
     companyCode: client.company_code,
     senderName: userInfo?.full_name || 'TME Services Team',
     senderDesignation: userInfo?.designation || '',

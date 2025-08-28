@@ -10,7 +10,7 @@ import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSe
 import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { useCITReturnLettersApplication } from '@/hooks/useCITReturnLettersApplication';
-import { generateCITReturnLettersPDFWithFilename } from '@/lib/pdf-generator/utils';
+import { generateCITReturnLettersPDFWithFilename, generateCITReturnLettersCombinedPreviewPDF, generateCITReturnLettersMultiFilename } from '@/lib/pdf-generator/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CITReturnLettersTab: React.FC = () => {
@@ -59,8 +59,10 @@ const CITReturnLettersTab: React.FC = () => {
     setValue('taxPeriodEnd', date);
   };
 
-  const handleLetterTypeChange = (letterType: LetterType | '') => {
-    setValue('letterType', letterType);
+  const handleLetterTypesChange = (letterTypes: LetterType[]) => {
+    setValue('selectedLetterTypes', letterTypes);
+    // Maintain backward compatibility
+    setValue('letterType', letterTypes.length === 1 ? letterTypes[0] : '');
   };
 
   const handleLetterDateChange = (date: string) => {
@@ -88,24 +90,24 @@ const CITReturnLettersTab: React.FC = () => {
       return;
     }
 
-    if (!data.letterType) {
-      toast.error('Please select a letter type before generating the PDF.');
+    if (!data.selectedLetterTypes || data.selectedLetterTypes.length === 0) {
+      toast.error('Please select at least one letter type before generating the PDF.');
       return;
     }
 
     setIsGenerating(true);
 
     try {
-      // Generate the PDF using our new CIT return letters generator
-      const { blob, filename } = await generateCITReturnLettersPDFWithFilename(data);
+      // Generate combined preview PDF with all selected letters in one document
+      const combinedBlob = await generateCITReturnLettersCombinedPreviewPDF(data);
       
-      // Create a URL for the blob and open it in a new tab for preview
-      const url = URL.createObjectURL(blob);
+      // Create a URL for the combined blob and open it in a single tab for preview
+      const url = URL.createObjectURL(combinedBlob);
       const newWindow = window.open(url, '_blank');
       
       if (newWindow) {
         newWindow.focus();
-        toast.success(`Preview generated: ${filename}`);
+        toast.success(`Combined preview generated with ${data.selectedLetterTypes.length} letter${data.selectedLetterTypes.length > 1 ? 's' : ''}`);
       } else {
         toast.error('Unable to open preview. Please check your popup blocker settings.');
       }
@@ -133,8 +135,8 @@ const CITReturnLettersTab: React.FC = () => {
       return;
     }
 
-    if (!watchedData.letterType) {
-      toast.error('Please select a letter type before submitting for review.');
+    if (!watchedData.selectedLetterTypes || watchedData.selectedLetterTypes.length === 0) {
+      toast.error('Please select at least one letter type before submitting for review.');
       return;
     }
 
@@ -159,32 +161,47 @@ const CITReturnLettersTab: React.FC = () => {
       return;
     }
 
-    if (!data.letterType) {
-      toast.error('Please select a letter type before downloading and sending.');
+    if (!data.selectedLetterTypes || data.selectedLetterTypes.length === 0) {
+      toast.error('Please select at least one letter type before downloading and sending.');
       return;
     }
 
     setIsGenerating(true);
 
     try {
-      // Generate the PDF using our new CIT return letters generator
-      const { blob, filename } = await generateCITReturnLettersPDFWithFilename(data);
+      // Generate separate PDFs for each selected letter type
+      const promises = data.selectedLetterTypes.map(async (letterType) => {
+        const letterData = { ...data, letterType };
+        return await generateCITReturnLettersPDFWithFilename(letterData);
+      });
       
-      // Prepare email props
+      const results = await Promise.all(promises);
+      
+      // Generate the new multi-filename format for email attachments
+      const multiFilename = generateCITReturnLettersMultiFilename(data);
+      
+      // For email: always use individual PDFs with proper naming
+      // For single selection, use the new multi-format name
+      // For multiple selections, keep individual files with legacy names
+      const emailResults = results.length === 1 
+        ? [{ blob: results[0].blob, filename: multiFilename }] // Single letter uses new format
+        : results; // Multiple letters keep individual legacy names
+      
+      // Prepare email props with renamed attachments
       const emailPropsData = await createCITEmailDataFromFormData(
         data.selectedClient,
-        data.letterType as LetterType,
-        blob,
-        filename,
+        data.selectedLetterTypes, // Pass array of letter types
+        emailResults, // Use consistently named attachments
         user ? {
           full_name: user.full_name,
           designation: user.designation,
           employee_code: user.employee_code,
           phone: user.phone,
           department: user.department
-        } : undefined
+        } : undefined,
+        data.taxPeriodEnd // Pass tax period end date for dynamic calculations
       );
-
+      
       // Add activity logging
       const finalEmailProps = {
         ...emailPropsData,
@@ -194,16 +211,16 @@ const CITReturnLettersTab: React.FC = () => {
         activityLogging: {
           resource: 'cit_return_letters',
           client_name: `${data.selectedClient.company_code} ${data.selectedClient.company_name}`,
-          document_type: `CIT Return Letter - ${data.letterType}`,
-          filename: filename
+          document_type: `CIT Return Letters - ${data.selectedLetterTypes.join(', ')}`,
+          filename: multiFilename
         }
       };
 
       setEmailProps(finalEmailProps);
-      setCurrentPDFData({ blob, filename });
+      setCurrentPDFData({ blob: results[0].blob, filename: results[0].filename }); // For backward compatibility
       setShowEmailModal(true);
       
-      toast.success(`PDF generated: ${filename}`);
+      toast.success(`${results.length} PDF${results.length > 1 ? 's' : ''} generated successfully`);
       
     } catch (error) {
       console.error('PDF Generation Error:', error);
@@ -287,7 +304,7 @@ const CITReturnLettersTab: React.FC = () => {
       const currentFormData = watchedData;
       const hasData = currentFormData.selectedClient !== null || 
                       currentFormData.letterDate !== '' ||
-                      currentFormData.letterType !== '' ||
+                      (currentFormData.selectedLetterTypes && currentFormData.selectedLetterTypes.length > 0) ||
                       currentFormData.taxPeriodStart !== '' ||
                       currentFormData.taxPeriodEnd !== '';
       
@@ -341,20 +358,20 @@ const CITReturnLettersTab: React.FC = () => {
 
       {/* Letter Type Section */}
       <LetterTypeSection
-        selectedLetterType={watchedData.letterType}
-        onLetterTypeChange={handleLetterTypeChange}
+        selectedLetterTypes={watchedData.selectedLetterTypes}
+        onLetterTypesChange={handleLetterTypesChange}
       />
 
-      {/* Conf Acc Docs Selection Section - Only show when 'Conf acc docs + FS' is selected */}
-      {watchedData.letterType === 'Conf acc docs + FS' && (
+      {/* Conf Acc Docs Selection Section - Show when 'Conf acc docs + FS' is selected */}
+      {watchedData.selectedLetterTypes.includes('Conf acc docs + FS') && (
         <ConfAccDocsSelectionSection
           selections={watchedData.confAccDocsSelections}
           onSelectionsChange={handleConfAccDocsSelectionsChange}
         />
       )}
 
-      {/* CIT Assessment Conclusion Section - Only show when 'CIT assess+concl, non deduct, elect' is selected */}
-      {watchedData.letterType === 'CIT assess+concl, non deduct, elect' && (
+      {/* CIT Assessment Conclusion Section - Show when 'CIT assess+concl, non deduct, elect' is selected */}
+      {watchedData.selectedLetterTypes.includes('CIT assess+concl, non deduct, elect') && (
         <CITAssessmentConclusionSection
           data={watchedData.citAssessmentConclusion}
           onDataChange={handleCITAssessmentConclusionChange}
@@ -461,7 +478,9 @@ const CITReturnLettersTab: React.FC = () => {
           onClose={() => setShowReviewModal(false)}
           applicationId={reviewApp.application?.id?.toString() || 'new'}
           applicationTitle={(() => {
-            if (!watchedData.selectedClient || !watchedData.letterType) return 'CIT Return Letters';
+            if (!watchedData.selectedClient || !watchedData.selectedLetterTypes || watchedData.selectedLetterTypes.length === 0) {
+              return 'CIT Return Letters';
+            }
             
             const date = new Date(watchedData.letterDate || new Date());
             const yy = date.getFullYear().toString().slice(-2);
@@ -470,9 +489,11 @@ const CITReturnLettersTab: React.FC = () => {
             const formattedDate = `${yy}${mm}${dd}`;
             
             const companyShortName = watchedData.selectedClient?.company_name_short || 'Company';
-            const letterType = watchedData.letterType || 'Letter';
+            const letterTypes = watchedData.selectedLetterTypes.length === 1 
+              ? watchedData.selectedLetterTypes[0] 
+              : `${watchedData.selectedLetterTypes.length} Letters`;
             
-            return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+            return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
           })()}
           documentType="cit-return-letters"
           onSubmit={async (submission) => {

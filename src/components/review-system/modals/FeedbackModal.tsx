@@ -212,10 +212,19 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         const formattedDate = `${yy}${mm}${dd}`;
         
         const companyShortName = formData.selectedClient?.company_name_short || 'Company';
-        const letterType = formData.letterType || 'Letter';
         
-        // Format: YYMMDD CompanyShort CIT Letter Type
-        return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+        // Handle both new multi-select and legacy single selection
+        let letterTypes: string;
+        if (formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0) {
+          letterTypes = formData.selectedLetterTypes.length === 1 
+            ? formData.selectedLetterTypes[0] 
+            : `${formData.selectedLetterTypes.length} Letters`;
+        } else {
+          letterTypes = formData.letterType || 'Letter';
+        }
+        
+        // Format: YYMMDD CompanyShort CIT Letter Type(s)
+        return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
       }
       
       return application?.title || 'Application';
@@ -317,7 +326,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           URL.revokeObjectURL(url);
         }, 1000);
       } else if (application.type === 'cit-return-letters') {
-        const { generateCITReturnLettersPDFWithFilename } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
+        const { generateCITReturnLettersCombinedPreviewPDF } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
         const formData = application.form_data as CITReturnLettersData;
         
         const clientInfo: SharedClientInfo = {
@@ -328,9 +337,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           date: formData.letterDate || new Date().toISOString().split('T')[0],
         };
         
-        const { blob } = await generateCITReturnLettersPDFWithFilename(formData, clientInfo);
+        // Use combined preview PDF generator for consistent experience
+        const blob = await generateCITReturnLettersCombinedPreviewPDF(formData, clientInfo);
         
-        // Open PDF in new tab for preview
+        // Open combined PDF in new tab for preview
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
         
@@ -527,7 +537,21 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           date: formData.letterDate || new Date().toISOString().split('T')[0],
         };
         
-        const result = await generateCITReturnLettersPDFWithFilename(formData, clientInfo);
+        // Handle both new multi-select and legacy single selection
+        const letterTypes = formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0 
+          ? formData.selectedLetterTypes 
+          : (formData.letterType ? [formData.letterType] : []);
+          
+        if (letterTypes.length === 0) {
+          throw new Error('No letter types found for CIT return letters application');
+        }
+        
+        // For simplicity, use the first letter type for PDF generation in feedback modal
+        // In practice, this could be expanded to handle multiple PDFs
+        const firstLetterType = letterTypes[0];
+        const letterData = { ...formData, letterType: firstLetterType };
+        
+        const result = await generateCITReturnLettersPDFWithFilename(letterData, clientInfo);
         pdfBlob = result.blob;
         filename = result.filename;
         
@@ -564,12 +588,17 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         const { createCITEmailDataFromFormData } = await import('@/components/cit-return-letters/CITEmailDraftGenerator');
         const formData = application.form_data as CITReturnLettersData;
         
+        // Handle both new multi-select and legacy single selection for email
+        const letterTypes = formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0 
+          ? formData.selectedLetterTypes 
+          : (formData.letterType ? [formData.letterType] : []);
+        
         const citEmailProps = await createCITEmailDataFromFormData(
           formData.selectedClient!,
-          formData.letterType as any,
-          pdfBlob,
-          filename,
-          user || undefined
+          letterTypes.length === 1 ? letterTypes[0] : letterTypes, // Pass single type or array
+          { blob: pdfBlob, filename }, // Convert to expected format
+          user || undefined,
+          formData.taxPeriodEnd // Pass tax period end date for dynamic calculations
         );
         
         // Set CIT email props to trigger the CITEmailDraftGenerator component

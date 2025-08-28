@@ -224,10 +224,19 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         const formattedDate = `${yy}${mm}${dd}`;
         
         const companyShortName = formData.selectedClient?.company_name_short || 'Company';
-        const letterType = formData.letterType || 'Letter';
         
-        // Format: YYMMDD CompanyShort CIT Letter Type
-        return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+        // Handle both new multi-select and legacy single selection
+        let letterTypes: string;
+        if (formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0) {
+          letterTypes = formData.selectedLetterTypes.length === 1 
+            ? formData.selectedLetterTypes[0] 
+            : `${formData.selectedLetterTypes.length} Letters`;
+        } else {
+          letterTypes = formData.letterType || 'Letter';
+        }
+        
+        // Format: YYMMDD CompanyShort CIT Letter Type(s)
+        return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
       }
       
       return application?.title || 'Application';
@@ -335,8 +344,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           URL.revokeObjectURL(url);
         }, 1000);
       } else if (application.type === 'cit-return-letters') {
-        // Generate CIT Return Letters PDF for review
-        const { generateCITReturnLettersPDFWithFilename } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
+        // Generate CIT Return Letters combined PDF for review
+        const { generateCITReturnLettersCombinedPreviewPDF } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
         const formData = application.form_data as CITReturnLettersData;
         
         // Extract client info from form data
@@ -348,9 +357,10 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
           date: formData.letterDate || new Date().toISOString().split('T')[0],
         };
         
-        const { blob } = await generateCITReturnLettersPDFWithFilename(formData, clientInfo);
+        // Use combined preview PDF generator for consistent experience
+        const blob = await generateCITReturnLettersCombinedPreviewPDF(formData, clientInfo);
         
-        // Open PDF in new tab for preview
+        // Open combined PDF in new tab for preview
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank');
         

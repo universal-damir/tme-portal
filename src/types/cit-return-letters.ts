@@ -73,8 +73,11 @@ export interface CITReturnLettersData {
   taxPeriodStart: string;
   taxPeriodEnd: string;
   
-  // Letter Selection
-  letterType: LetterType | '';
+  // Letter Selection - Support multiple selections
+  selectedLetterTypes: LetterType[];
+  
+  // Backward compatibility - deprecated, use selectedLetterTypes
+  letterType?: LetterType | '';
   
   // Conf acc docs + FS specific selections
   confAccDocsSelections: ConfAccDocsSelections;
@@ -89,7 +92,8 @@ export const CIT_RETURN_LETTERS_DEFAULTS = {
   letterDate: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
   taxPeriodStart: '',
   taxPeriodEnd: '',
-  letterType: '' as LetterType | '',
+  selectedLetterTypes: [] as LetterType[],
+  letterType: '' as LetterType | '', // Backward compatibility
   confAccDocsSelections: {
     revenuesAndExpenses: true,
     nonDeductibleExpenses: true,

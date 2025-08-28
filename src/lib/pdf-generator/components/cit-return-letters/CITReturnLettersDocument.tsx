@@ -3,15 +3,23 @@ import { Document, Page, View, Text } from '@react-pdf/renderer';
 import { CITTransferPricingPage, ConfAccDocsPage, CITAssessmentConclusionPage } from './pages';
 import { styles } from '../../styles';
 import type { PDFComponentProps } from '../../types';
-import type { CITReturnLettersData } from '@/types/cit-return-letters';
+import type { CITReturnLettersData, LetterType } from '@/types/cit-return-letters';
 
 interface CITReturnLettersDocumentProps {
   data: PDFComponentProps['data'] & { 
     citReturnLettersData: CITReturnLettersData;
-    letterType: 'CIT TP' | 'Conf acc docs + FS' | 'CIT assess+concl, non deduct, elect';
+    letterType: LetterType;
   };
 }
 
+interface CITReturnLettersCombinedDocumentProps {
+  data: PDFComponentProps['data'] & { 
+    citReturnLettersData: CITReturnLettersData;
+    selectedLetterTypes: LetterType[];
+  };
+}
+
+// Single letter document (existing functionality)
 export const CITReturnLettersDocument: React.FC<CITReturnLettersDocumentProps> = ({ data }) => {
   const { letterType } = data;
 
@@ -34,6 +42,19 @@ export const CITReturnLettersDocument: React.FC<CITReturnLettersDocumentProps> =
       {letterType === 'CIT TP' && <CITTransferPricingPage data={data} />}
       {letterType === 'Conf acc docs + FS' && <ConfAccDocsPage data={data} />}
       {letterType === 'CIT assess+concl, non deduct, elect' && <CITAssessmentConclusionPage data={data} />}
+    </Document>
+  );
+};
+
+// Combined document for preview (multiple letters in one document)
+export const CITReturnLettersCombinedDocument: React.FC<CITReturnLettersCombinedDocumentProps> = ({ data }) => {
+  const { selectedLetterTypes } = data;
+
+  return (
+    <Document>
+      {selectedLetterTypes.includes('CIT TP') && <CITTransferPricingPage data={data} />}
+      {selectedLetterTypes.includes('Conf acc docs + FS') && <ConfAccDocsPage data={data} />}
+      {selectedLetterTypes.includes('CIT assess+concl, non deduct, elect') && <CITAssessmentConclusionPage data={data} />}
     </Document>
   );
 };
