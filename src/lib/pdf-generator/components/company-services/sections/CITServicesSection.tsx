@@ -60,7 +60,7 @@ export const CITServicesSection: React.FC<PDFComponentProps> = ({ data }) => {
             {/* Conditional text based on CIT type */}
             {taxServices.citType === 'sbr-regular' && (
               <Text style={[styles.introText, { marginBottom: 8 }]}>
-                Our service fee for the yearly CIT return filing is AED 2,599 {formatSecondaryCurrency(2599, exchangeRate, secondaryCurrency)} if Small Business Relief applies, or AED 5,198 {formatSecondaryCurrency(5198, exchangeRate, secondaryCurrency)} if revenue exceeds AED 3,000,000.
+                Our service fee for the yearly CIT return filing is AED 2,599 {formatSecondaryCurrency(2599, exchangeRate, secondaryCurrency)} if Small Business Relief applies, or AED 5,198 {formatSecondaryCurrency(5198, exchangeRate, secondaryCurrency)} if standard rules apply (revenue exceeds AED 3,000,000).
               </Text>
             )}
             
