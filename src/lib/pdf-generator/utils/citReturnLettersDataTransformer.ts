@@ -82,7 +82,7 @@ export function generateCITReturnLettersFilename(
   const companyShortName = citReturnLettersData.selectedClient?.company_name_short || 
                           clientInfo?.shortCompanyName || 'Company';
   
-  // Use letter type as-is without underscores (original form)
+  // Use letter type as-is preserving + and , characters (original form)
   const letterTypeForFilename = citReturnLettersData.letterType;
   
   // Get tax period end year as 4-digit number

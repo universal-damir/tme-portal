@@ -187,6 +187,10 @@ export const useCITEmailDraftGenerator = () => {
       if (attachments.length > 0) {
         setPdfBlob(attachments[0].blob);
         setPdfFilename(attachments[0].filename);
+        // Store additional PDFs if there are more than one
+        if (attachments.length > 1) {
+          setCurrentAttachments(attachments);
+        }
       }
       
       setShowPreview(true);
@@ -239,6 +243,7 @@ export const useCITEmailDraftGenerator = () => {
     loading,
     pdfBlob,
     pdfFilename,
+    currentAttachments,
     // Setter functions for updating attachment state
     setPdfBlob,
     setPdfFilename,
@@ -328,6 +333,7 @@ export const CITEmailDraftGenerator: React.FC<CITEmailDraftGeneratorProps> = (pr
     loading,
     pdfBlob,
     pdfFilename,
+    currentAttachments,
     setPdfBlob,
     setPdfFilename,
     setCurrentAttachments
@@ -349,6 +355,7 @@ export const CITEmailDraftGenerator: React.FC<CITEmailDraftGeneratorProps> = (pr
           loading={loading}
           pdfBlob={pdfBlob || undefined}
           pdfFilename={pdfFilename || undefined}
+          additionalPdfs={currentAttachments.length > 1 ? currentAttachments.slice(1).map(att => ({ blob: att.blob, filename: att.filename })) : undefined}
           activityLogging={props.activityLogging}
         />
       )}
