@@ -212,40 +212,35 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
       <div className="space-y-6" style={{ fontFamily: 'Inter, sans-serif' }}>
         {/* CIT Impact Assessment Performed */}
         <div>
-          <motion.label 
-            whileHover={{ scale: 1.01 }}
-            className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
-          >
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={data.citImpactAssessmentPerformed}
-                onChange={(e) => handleCITImpactAssessmentChange(e.target.checked)}
-                className="sr-only"
-              />
-              <div 
-                className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                style={{ 
-                  borderColor: data.citImpactAssessmentPerformed ? '#243F7B' : '#d1d5db',
-                  backgroundColor: data.citImpactAssessmentPerformed ? '#243F7B' : 'white'
-                }}
-              >
-                {data.citImpactAssessmentPerformed && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                  >
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-            <span className="ml-3 text-sm font-medium" style={{ color: '#243F7B' }}>
+          <div className="flex items-center gap-2 py-1">
+            <button
+              type="button"
+              onClick={() => handleCITImpactAssessmentChange(!data.citImpactAssessmentPerformed)}
+              className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+              style={{ 
+                borderColor: data.citImpactAssessmentPerformed ? '#243F7B' : '#d1d5db',
+                backgroundColor: data.citImpactAssessmentPerformed ? '#243F7B' : 'white'
+              }}
+            >
+              {data.citImpactAssessmentPerformed && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </motion.div>
+              )}
+            </button>
+            <label 
+              className="text-sm font-medium cursor-pointer flex-1"
+              style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+              onClick={() => handleCITImpactAssessmentChange(!data.citImpactAssessmentPerformed)}
+            >
               CIT impact assessment performed
-            </span>
-          </motion.label>
+            </label>
+          </div>
           
           {/* Date Picker - Show only if CIT assessment is checked */}
           {data.citImpactAssessmentPerformed && (
@@ -277,39 +272,35 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
             transition={{ duration: 0.3 }}
             className="border-t pt-6"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-              <div className="lg:col-span-2">
-                <h4 className="text-md font-semibold" style={{ color: '#243F7B' }}>
-                  Option 1: QFZP (Qualified Free Zone Person) benefit
-                </h4>
-              </div>
-              <div className="flex justify-start">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    const allSelected = Object.values(data.qfzpBenefitSelections).every(value => value === true);
-                    const newSelections = Object.keys(data.qfzpBenefitSelections).reduce((acc, key) => {
-                      acc[key as keyof QFZPBenefitSelections] = !allSelected;
-                      return acc;
-                    }, {} as QFZPBenefitSelections);
-                    onDataChange({
-                      ...data,
-                      qfzpBenefitSelections: newSelections,
-                    });
-                  }}
-                  className="px-4 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md h-[42px]"
-                  style={{ 
-                    backgroundColor: Object.values(data.qfzpBenefitSelections).every(value => value === true) ? '#D2BC99' : '#243F7B',
-                    color: Object.values(data.qfzpBenefitSelections).every(value => value === true) ? '#243F7B' : 'white'
-                  }}
-                >
-                  {Object.values(data.qfzpBenefitSelections).every(value => value === true) ? 'Uncheck All' : 'Check All'}
-                </motion.button>
-              </div>
-            </div>
+            <h4 className="text-md font-semibold mb-3" style={{ color: '#243F7B' }}>
+              Option 1: QFZP (Qualified Free Zone Person) benefit
+            </h4>
             
-            <div className="space-y-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const allSelected = Object.values(data.qfzpBenefitSelections).every(value => value === true);
+                const newSelections = Object.keys(data.qfzpBenefitSelections).reduce((acc, key) => {
+                  acc[key as keyof QFZPBenefitSelections] = !allSelected;
+                  return acc;
+                }, {} as QFZPBenefitSelections);
+                onDataChange({
+                  ...data,
+                  qfzpBenefitSelections: newSelections,
+                });
+              }}
+              className="px-3 py-1 rounded-md text-xs font-medium transition-all duration-200 hover:shadow-sm mb-3"
+              style={{ 
+                backgroundColor: Object.values(data.qfzpBenefitSelections).every(value => value === true) ? '#D2BC99' : '#243F7B',
+                color: Object.values(data.qfzpBenefitSelections).every(value => value === true) ? '#243F7B' : 'white',
+                fontFamily: 'Inter, sans-serif'
+              }}
+            >
+              {Object.values(data.qfzpBenefitSelections).every(value => value === true) ? 'Uncheck all' : 'Check all'}
+            </motion.button>
+            
+            <div className="space-y-2">
               {[
                 { key: 'adequateSubstance' as keyof QFZPBenefitSelections, label: 'Adequate substance' },
                 { key: 'derivesQualifyingIncome' as keyof QFZPBenefitSelections, label: 'Derives qualifying income' },
@@ -318,50 +309,34 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
                 { key: 'performsAuditFinancialStatements' as keyof QFZPBenefitSelections, label: 'Performs audit of financial statements' },
                 { key: 'doesNotElectStandardRules' as keyof QFZPBenefitSelections, label: 'Does not elect standard rules' },
               ].map(({ key, label }) => (
-                <div key={key} className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-center p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <div className="lg:col-span-2">
-                    <span className="text-sm font-medium" style={{ color: '#243F7B' }}>
-                      {label}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    {/* Fulfilled */}
-                    <motion.label 
-                      whileHover={{ scale: 1.01 }}
-                      className="flex items-center cursor-pointer"
-                    >
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={data.qfzpBenefitSelections[key]}
-                          onChange={(e) => handleQFZPChange(key, e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div 
-                          className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                          style={{ 
-                            borderColor: data.qfzpBenefitSelections[key] ? '#243F7B' : '#d1d5db',
-                            backgroundColor: data.qfzpBenefitSelections[key] ? '#243F7B' : 'white'
-                          }}
-                        >
-                          {data.qfzpBenefitSelections[key] && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                            >
-                              <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </motion.div>
-                          )}
-                        </div>
-                      </div>
-                      <span className="ml-2 text-sm text-gray-700">
-                        {data.qfzpBenefitSelections[key] ? 'Fulfilled' : 'Not fulfilled'}
-                      </span>
-                    </motion.label>
-                  </div>
+                <div key={key} className="flex items-center gap-2 py-1">
+                  <button
+                    type="button"
+                    onClick={() => handleQFZPChange(key, !data.qfzpBenefitSelections[key])}
+                    className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      borderColor: data.qfzpBenefitSelections[key] ? '#243F7B' : '#d1d5db',
+                      backgroundColor: data.qfzpBenefitSelections[key] ? '#243F7B' : 'white'
+                    }}
+                  >
+                    {data.qfzpBenefitSelections[key] && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                      >
+                        <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </motion.div>
+                    )}
+                  </button>
+                  <label 
+                    className="text-sm font-medium cursor-pointer flex-1"
+                    style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+                    onClick={() => handleQFZPChange(key, !data.qfzpBenefitSelections[key])}
+                  >
+                    {label}
+                  </label>
                 </div>
               ))}
             </div>
@@ -557,40 +532,35 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
 
         {/* Elections Section */}
         <div className="border-t pt-6">
-          <motion.label 
-            whileHover={{ scale: 1.01 }}
-            className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-50 transition-colors duration-150"
-          >
-            <div className="relative">
-              <input
-                type="checkbox"
-                checked={data.elections.electionsSelected}
-                onChange={(e) => handleElectionsChange('electionsSelected', e.target.checked)}
-                className="sr-only"
-              />
-              <div 
-                className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                style={{ 
-                  borderColor: data.elections.electionsSelected ? '#243F7B' : '#d1d5db',
-                  backgroundColor: data.elections.electionsSelected ? '#243F7B' : 'white'
-                }}
-              >
-                {data.elections.electionsSelected && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                  >
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-            <span className="ml-3 text-md font-semibold" style={{ color: '#243F7B' }}>
+          <div className="flex items-center gap-2 py-1">
+            <button
+              type="button"
+              onClick={() => handleElectionsChange('electionsSelected', !data.elections.electionsSelected)}
+              className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+              style={{ 
+                borderColor: data.elections.electionsSelected ? '#243F7B' : '#d1d5db',
+                backgroundColor: data.elections.electionsSelected ? '#243F7B' : 'white'
+              }}
+            >
+              {data.elections.electionsSelected && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </motion.div>
+              )}
+            </button>
+            <label 
+              className="text-sm font-medium cursor-pointer flex-1"
+              style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+              onClick={() => handleElectionsChange('electionsSelected', !data.elections.electionsSelected)}
+            >
               Elections
-            </span>
-          </motion.label>
+            </label>
+          </div>
           
           {/* Elections Options - Show only if Elections is checked */}
           {data.elections.electionsSelected && (
@@ -599,48 +569,41 @@ const CITAssessmentConclusionSection: React.FC<CITAssessmentConclusionSectionPro
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="mt-4 ml-8 space-y-3"
+              className="mt-4 ml-4 space-y-2"
             >
               {[
                 { key: 'realizationBasisOfAccounting' as keyof ElectionsSelections, label: 'Realization basis of accounting' },
                 { key: 'transitionalRules' as keyof ElectionsSelections, label: 'Transitional rules' },
                 { key: 'carryForwardOfLosses' as keyof ElectionsSelections, label: 'Carry forward of losses' },
               ].map(({ key, label }) => (
-                <div key={key} className="flex items-center p-3 border border-gray-200 rounded-lg bg-gray-50">
-                  <motion.label 
-                    whileHover={{ scale: 1.01 }}
-                    className="flex items-center cursor-pointer flex-1"
+                <div key={key} className="flex items-center gap-2 py-1 ml-4">
+                  <button
+                    type="button"
+                    onClick={() => handleElectionsChange(key, !data.elections[key])}
+                    className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      borderColor: data.elections[key] ? '#243F7B' : '#d1d5db',
+                      backgroundColor: data.elections[key] ? '#243F7B' : 'white'
+                    }}
                   >
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={data.elections[key]}
-                        onChange={(e) => handleElectionsChange(key, e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div 
-                        className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                        style={{ 
-                          borderColor: data.elections[key] ? '#243F7B' : '#d1d5db',
-                          backgroundColor: data.elections[key] ? '#243F7B' : 'white'
-                        }}
+                    {data.elections[key] && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
                       >
-                        {data.elections[key] && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                          >
-                            <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </motion.div>
-                        )}
-                      </div>
-                    </div>
-                    <span className="ml-3 text-sm font-medium" style={{ color: '#243F7B' }}>
-                      {label}
-                    </span>
-                  </motion.label>
+                        <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </motion.div>
+                    )}
+                  </button>
+                  <label 
+                    className="text-sm font-medium cursor-pointer flex-1"
+                    style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+                    onClick={() => handleElectionsChange(key, !data.elections[key])}
+                  >
+                    {label}
+                  </label>
                 </div>
               ))}
             </motion.div>

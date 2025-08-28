@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Eye, Send, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections, CITAssessmentConclusionData } from '@/types/cit-return-letters';
-import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, ConfAccDocsSelectionSection, CITAssessmentConclusionSection, CITEmailDraftGenerator, createCITEmailDataFromFormData } from '@/components/cit-return-letters';
+import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, CITEmailDraftGenerator, createCITEmailDataFromFormData } from '@/components/cit-return-letters';
 import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
 import { useCITReturnLettersApplication } from '@/hooks/useCITReturnLettersApplication';
@@ -356,28 +356,16 @@ const CITReturnLettersTab: React.FC = () => {
         onEndDateChange={handleEndDateChange}
       />
 
-      {/* Letter Type Section */}
+      {/* Letter Type Section - Now includes dynamic content under each checkbox */}
       <LetterTypeSection
         selectedLetterTypes={watchedData.selectedLetterTypes}
         onLetterTypesChange={handleLetterTypesChange}
+        confAccDocsSelections={watchedData.confAccDocsSelections}
+        onConfAccDocsSelectionsChange={handleConfAccDocsSelectionsChange}
+        citAssessmentConclusion={watchedData.citAssessmentConclusion}
+        onCITAssessmentConclusionChange={handleCITAssessmentConclusionChange}
+        selectedClient={watchedData.selectedClient}
       />
-
-      {/* Conf Acc Docs Selection Section - Show when 'Conf acc docs + FS' is selected */}
-      {watchedData.selectedLetterTypes.includes('Conf acc docs + FS') && (
-        <ConfAccDocsSelectionSection
-          selections={watchedData.confAccDocsSelections}
-          onSelectionsChange={handleConfAccDocsSelectionsChange}
-        />
-      )}
-
-      {/* CIT Assessment Conclusion Section - Show when 'CIT assess+concl, non deduct, elect' is selected */}
-      {watchedData.selectedLetterTypes.includes('CIT assess+concl, non deduct, elect') && (
-        <CITAssessmentConclusionSection
-          data={watchedData.citAssessmentConclusion}
-          onDataChange={handleCITAssessmentConclusionChange}
-          selectedClient={watchedData.selectedClient}
-        />
-      )}
 
       {/* Action Buttons */}
       <div className="text-center" style={{ fontFamily: 'Inter, sans-serif' }}>

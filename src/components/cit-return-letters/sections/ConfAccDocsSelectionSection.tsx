@@ -30,9 +30,7 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
     onChange: (checked: boolean) => void; 
     label: string; 
   }) => (
-    <div
-      className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-200"
-    >
+    <div className="flex items-center gap-2 py-1">
       <button
         type="button"
         onClick={(e) => {
@@ -40,13 +38,13 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
           e.stopPropagation();
           onChange(!checked);
         }}
-        className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
+        className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0"
         style={{ 
           borderColor: checked ? '#243F7B' : '#d1d5db', 
           backgroundColor: checked ? '#243F7B' : 'white' 
         }}
       >
-        {checked && <CheckSquare className="w-3 h-3 text-white" />}
+        {checked && <CheckSquare className="w-2.5 h-2.5 text-white" />}
       </button>
       <label 
         className="text-sm font-medium cursor-pointer flex-1"
@@ -63,14 +61,7 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
   );
 
   return (
-    <div
-      className="bg-white p-6 rounded-lg shadow-sm border border-gray-200"
-    >
-      <h3 className="text-lg font-semibold mb-4" style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}>
-        Confirmation Points Selection
-      </h3>
-
-      <div className="space-y-4">
+    <div className="space-y-2" style={{ fontFamily: 'Inter, sans-serif' }}>
         <CheckboxItem
           checked={selections.revenuesAndExpenses}
           onChange={(checked) => handleCheckboxChange('revenuesAndExpenses', checked)}
@@ -184,7 +175,6 @@ const ConfAccDocsSelectionSection: React.FC<ConfAccDocsSelectionSectionProps> = 
             ].filter(Boolean).join(', ') || 'No points selected'}
           </div>
         </div>
-      </div>
     </div>
   );
 };
