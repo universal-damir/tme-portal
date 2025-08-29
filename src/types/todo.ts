@@ -47,8 +47,8 @@ export interface TodoStatsProps {
 
 // Frontend-specific types
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'dismissed' | 'expired';
-export type TodoCategory = 'review' | 'follow_up' | 'reminder' | 'action';
-export type TodoPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type TodoCategory = 'to_send' | 'to_check' | 'to_follow_up';
+export type TodoPriority = 'standard' | 'urgent';
 
 export interface TodoFilterState {
   status?: TodoStatus[];

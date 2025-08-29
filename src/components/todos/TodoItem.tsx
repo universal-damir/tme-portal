@@ -9,11 +9,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  CheckCircle, 
-  Clock, 
-  AlertTriangle, 
-  User, 
-  FileText, 
+  Send, 
+  Eye, 
+  Phone, 
   Calendar,
   MoreHorizontal,
   Play,
@@ -108,30 +106,24 @@ const TodoItem: React.FC<TodoItemProps> = ({
   const getPriorityConfig = () => {
     switch (todo.priority) {
       case 'urgent':
-        return { color: '#EF4444', bg: '#FEF2F2', label: 'URGENT' };
-      case 'high':
-        return { color: '#F59E0B', bg: '#FFFBEB', label: 'HIGH' };
-      case 'medium':
-        return { color: '#243F7B', bg: '#F1F5F9', label: 'MEDIUM' };
-      case 'low':
-        return { color: '#6B7280', bg: '#F9FAFB', label: 'LOW' };
+        return { color: '#374151', bg: '#F3F4F6', label: 'URGENT' };
+      case 'standard':
+        return { color: '#6B7280', bg: '#F9FAFB', label: '' };
       default:
-        return { color: '#6B7280', bg: '#F9FAFB', label: 'NORMAL' };
+        return { color: '#6B7280', bg: '#F9FAFB', label: '' };
     }
   };
 
   const getCategoryConfig = () => {
     switch (todo.category) {
-      case 'review':
-        return { icon: FileText, color: '#8B5CF6', bg: '#F3E8FF' };
-      case 'follow_up':
-        return { icon: User, color: '#06B6D4', bg: '#ECFEFF' };
-      case 'reminder':
-        return { icon: AlertTriangle, color: '#F59E0B', bg: '#FFFBEB' };
-      case 'action':
-        return { icon: Play, color: '#10B981', bg: '#ECFDF5' };
+      case 'to_send':
+        return { icon: Send, color: '#374151', bg: '#F3F4F6', actionLabel: 'Send' };
+      case 'to_check':
+        return { icon: Eye, color: '#374151', bg: '#F3F4F6', actionLabel: 'Check' };
+      case 'to_follow_up':
+        return { icon: Phone, color: '#374151', bg: '#F3F4F6', actionLabel: 'Follow Up' };
       default:
-        return { icon: FileText, color: '#6B7280', bg: '#F9FAFB' };
+        return { icon: Eye, color: '#374151', bg: '#F3F4F6', actionLabel: 'Check' };
     }
   };
 
@@ -196,23 +188,22 @@ const TodoItem: React.FC<TodoItemProps> = ({
           </div>
         </div>
         
-        {/* Checkbox */}
+        {/* Action Button - minimal variant */}
         {showActions && todo.status !== 'completed' && todo.status !== 'dismissed' && (
           <motion.button
-            className="w-4 h-4 rounded border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0 hover:border-blue-500"
-            style={{ 
-              borderColor: '#d1d5db',
-              backgroundColor: 'white'
-            }}
-            whileHover={{ scale: 1.1 }}
+            className="px-3 py-1 text-xs font-medium rounded border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors flex-shrink-0"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={(e) => {
               e.stopPropagation();
               handleStatusUpdate('completed');
             }}
             disabled={isUpdating}
-            title="Mark as completed"
+            title={`Click to ${categoryConfig.actionLabel.toLowerCase()}`}
           >
+            <categoryConfig.icon className="w-3 h-3 inline mr-1" />
+            {categoryConfig.actionLabel}
           </motion.button>
         )}
         
@@ -270,27 +261,22 @@ const TodoItem: React.FC<TodoItemProps> = ({
             {/* Title and priority */}
             <div className="flex items-start justify-between gap-2 mb-2">
               <h4 
-                className={`font-normal text-sm leading-tight ${
-                  todo.status === 'completed' ? 'line-through text-gray-500' : ''
+                className={`font-medium text-sm leading-tight ${
+                  todo.status === 'completed' ? 'line-through text-gray-500' : 'text-gray-900'
                 }`}
-                style={{ 
-                  color: todo.status === 'completed' ? '#6B7280' : '#1F2937',
-                  fontFamily: 'Inter, sans-serif' 
-                }}
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 {todo.title}
               </h4>
               
-              <span 
-                className="text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap"
-                style={{ 
-                  backgroundColor: priorityConfig.bg,
-                  color: priorityConfig.color,
-                  fontFamily: 'Inter, sans-serif'
-                }}
-              >
-                {priorityConfig.label}
-              </span>
+              {todo.priority === 'urgent' && (
+                <span 
+                  className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700 whitespace-nowrap"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  URGENT
+                </span>
+              )}
             </div>
 
             {/* Description */}
@@ -339,64 +325,49 @@ const TodoItem: React.FC<TodoItemProps> = ({
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Action Button */}
         {showActions && todo.status !== 'completed' && todo.status !== 'dismissed' && (
           <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Checkbox */}
+            {/* Primary Action Button */}
             <motion.button
-              className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center hover:border-blue-500"
-              style={{ 
-                borderColor: '#d1d5db',
-                backgroundColor: 'white'
-              }}
-              whileHover={{ scale: 1.1 }}
+              className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={(e) => {
                 e.stopPropagation();
+                // This will be the action to open document/form/contact client
                 handleStatusUpdate('completed');
               }}
               disabled={isUpdating}
-              title="Mark as completed"
+              title={`Click to ${categoryConfig.actionLabel.toLowerCase()}`}
             >
+              <categoryConfig.icon className="w-4 h-4 inline mr-2" />
+              {categoryConfig.actionLabel}
             </motion.button>
 
-            {/* More actions */}
+            {/* More actions dropdown */}
             <div className="relative">
               <motion.button
-                className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center transition-colors"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowMoreActions(!showMoreActions);
                 }}
-                title="More actions"
+                title="More options"
               >
                 <MoreHorizontal className="w-4 h-4" />
               </motion.button>
 
-              {/* Actions dropdown */}
               {showMoreActions && (
                 <motion.div
-                  className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-1 min-w-[160px]"
+                  className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-1 min-w-[120px]"
                   initial={{ opacity: 0, scale: 0.95, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -10 }}
                 >
-                  {todo.status === 'pending' && (
-                    <button
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStatusUpdate('in_progress');
-                      }}
-                      disabled={isUpdating}
-                    >
-                      <Play className="w-4 h-4 text-blue-500" />
-                      Start Task
-                    </button>
-                  )}
-
                   <button
                     className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
                     onClick={(e) => {
@@ -408,19 +379,6 @@ const TodoItem: React.FC<TodoItemProps> = ({
                     <Archive className="w-4 h-4 text-gray-500" />
                     Dismiss
                   </button>
-
-                  {todo.application_id && (
-                    <button
-                      className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Handle view application
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4 text-blue-500" />
-                      View Application
-                    </button>
-                  )}
                 </motion.div>
               )}
             </div>

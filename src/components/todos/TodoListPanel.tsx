@@ -8,7 +8,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, Filter, CheckSquare, Trash2, RefreshCw } from 'lucide-react';
+import { Target, Send, Eye, Phone, CheckSquare, Trash2, RefreshCw } from 'lucide-react';
 import { Todo, TodoFilterState, TodoStats as TodoStatsType, TodoStatus } from '@/types/todo';
 import { useTodos } from '@/hooks/useTodos';
 import TodoItem from './TodoItem';
@@ -28,7 +28,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
   autoRefresh = true
 }) => {
   const [selectedTodos, setSelectedTodos] = useState<Set<string>>(new Set());
-  const [activeTab, setActiveTab] = useState<'all' | 'completed'>('all');
+  const [activeTab, setActiveTab] = useState<'to_send' | 'to_check' | 'to_follow_up' | 'completed'>('to_send');
   
   const {
     todos,
@@ -54,10 +54,12 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
     return todos; // Show all todos, tabs will handle the filtering
   }, [todos]);
 
-  // Group todos by tab categories
+  // Group todos by action categories
   const tabGroups = useMemo(() => {
     const groups = {
-      all: [] as Todo[],
+      to_send: [] as Todo[],
+      to_check: [] as Todo[],
+      to_follow_up: [] as Todo[],
       completed: [] as Todo[]
     };
 
@@ -65,7 +67,8 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
       if (todo.status === 'completed' || todo.status === 'dismissed') {
         groups.completed.push(todo);
       } else {
-        groups.all.push(todo);
+        // Group by category for active todos
+        groups[todo.category]?.push(todo) || groups.to_check.push(todo);
       }
     });
 
@@ -208,28 +211,31 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
         {/* Tab Navigation */}
         <div className="mt-4 flex space-x-1 rounded-lg p-1">
           {[
-            { key: 'all', label: 'All', count: tabGroups.all.length },
-            { key: 'completed', label: 'Completed', count: tabGroups.completed.length }
-          ].map(({ key, label, count }) => {
+            { key: 'to_send', label: 'To Send', count: tabGroups.to_send.length, icon: Send },
+            { key: 'to_check', label: 'To Check', count: tabGroups.to_check.length, icon: Eye },
+            { key: 'to_follow_up', label: 'To Follow Up', count: tabGroups.to_follow_up.length, icon: Phone },
+            { key: 'completed', label: 'Completed', count: tabGroups.completed.length, icon: null }
+          ].map(({ key, label, count, icon: IconComponent }) => {
             const isActive = activeTab === key;
-            const showCount = key === 'all' || count > 0;
+            const showCount = count > 0;
             
             return (
               <motion.button
                 key={key}
-                className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 ${
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-1 ${
                   isActive 
                     ? 'text-white shadow-sm' 
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
                 style={{ 
                   fontFamily: 'Inter, sans-serif',
-                  backgroundColor: isActive ? '#243F7B' : 'transparent'
+                  backgroundColor: isActive ? '#374151' : 'transparent'
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setActiveTab(key as any)}
               >
+                {IconComponent && <IconComponent className="w-4 h-4" />}
                 {label} {showCount && `(${count})`}
               </motion.button>
             );
@@ -347,8 +353,10 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
               className="text-sm text-gray-500"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              {activeTab === 'all' && 'Click the refresh button to load your tasks'}
-              {activeTab === 'completed' && 'Completed tasks will appear here after you complete them'}
+              {activeTab === 'to_send' && 'Documents ready to send will appear here'}
+              {activeTab === 'to_check' && 'Items requiring review will appear here'}
+              {activeTab === 'to_follow_up' && 'Client follow-ups will appear here'}
+              {activeTab === 'completed' && 'Completed tasks appear here'}
             </p>
           </motion.div>
         )}
@@ -399,7 +407,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
               className="text-xs text-gray-500"
               style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              {tabGroups[activeTab].length} {activeTab} tasks
+              {tabGroups[activeTab].length} {activeTab.replace('_', ' ')} tasks
             </span>
             <div className="flex items-center gap-2">
               {activeTab !== 'completed' && (

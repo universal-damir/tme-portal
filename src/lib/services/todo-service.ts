@@ -14,8 +14,8 @@ export interface Todo {
   notification_id: string | null;
   title: string;
   description: string | null;
-  category: 'review' | 'follow_up' | 'reminder' | 'action';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  category: 'to_send' | 'to_check' | 'to_follow_up';
+  priority: 'standard' | 'urgent';
   status: 'pending' | 'in_progress' | 'completed' | 'dismissed' | 'expired';
   due_date: Date | null;
   auto_generated: boolean;
@@ -35,8 +35,8 @@ export interface CreateTodoInput {
   notification_id?: string;
   title: string;
   description?: string;
-  category: 'review' | 'follow_up' | 'reminder' | 'action';
-  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  category: 'to_send' | 'to_check' | 'to_follow_up';
+  priority?: 'standard' | 'urgent';
   status?: 'pending' | 'in_progress';
   due_date?: Date;
   auto_generated?: boolean;
@@ -94,7 +94,7 @@ export class TodoService {
       title,
       description = null,
       category,
-      priority = 'medium',
+      priority = 'standard',
       status = 'pending',
       due_date = null,
       auto_generated = false,
@@ -223,9 +223,7 @@ export class TodoService {
         ORDER BY 
           CASE priority
             WHEN 'urgent' THEN 1
-            WHEN 'high' THEN 2
-            WHEN 'medium' THEN 3
-            WHEN 'low' THEN 4
+            WHEN 'standard' THEN 2
           END,
           due_date ASC NULLS LAST,
           created_at DESC

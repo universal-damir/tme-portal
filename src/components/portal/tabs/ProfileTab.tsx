@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { LogIn, LogOut, UserPlus, FileText, Settings, Key, Shield, AlertTriangle, Building, Crown, Eye, Send, CheckCircle, XCircle, Download, Upload } from 'lucide-react'
-import { TodoListPanel } from '@/components/todos'
+// import { TodoListPanel } from '@/components/todos'
 
 interface ActivityLog {
   id: number
@@ -396,6 +396,8 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
           */}
 
             {/* Todo List Panel - Full Width */}
+            {/* TODO: Todo List Panel - Temporarily disabled while enhancing experience */}
+            {/* 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -408,6 +410,47 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                 autoRefresh={true}
                 className="h-full"
               />
+            </motion.div>
+            */}
+
+            {/* Welcome Message */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-full text-center py-12"
+            >
+              <div className="max-w-md mx-auto">
+                <div 
+                  className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                  style={{ backgroundColor: '#243F7B' }}
+                >
+                  <Settings className="w-8 h-8 text-white" />
+                </div>
+                
+                <h3 
+                  className="text-xl font-semibold mb-3"
+                  style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+                >
+                  Welcome to Your Dashboard
+                </h3>
+                
+                <p 
+                  className="text-gray-600 text-sm leading-relaxed mb-4"
+                  style={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  We're working hard to enhance your experience with personalized task management, 
+                  smart notifications, and streamlined workflows tailored just for you.
+                </p>
+                
+                <div 
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
+                  style={{ backgroundColor: '#F3F4F6', color: '#6B7280', fontFamily: 'Inter, sans-serif' }}
+                >
+                  <Eye className="w-4 h-4" />
+                  Coming Soon
+                </div>
+              </div>
             </motion.div>
         </CardContent>
       </Card>

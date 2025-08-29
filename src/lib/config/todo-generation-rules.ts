@@ -9,8 +9,8 @@ import { CreateTodoInput } from '@/lib/services/todo-service';
 export interface TodoGenerationRule {
   title: (data: any) => string;
   description?: (data: any) => string;
-  category: 'review' | 'follow_up' | 'reminder' | 'action';
-  priority: (data: any) => 'low' | 'medium' | 'high' | 'urgent';
+  category: 'to_send' | 'to_check' | 'to_follow_up';
+  priority: (data: any) => 'standard' | 'urgent';
   due_date: (data: any) => Date;
   action_type: string;
   action_data: (data: any) => any;
@@ -50,17 +50,16 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
   
   'review_requested': {
     title: (data: NotificationData) => 
-      `Review ${data.application_title || data.filename || 'application'}`,
+      `Check ${data.application_title || data.filename || 'application'}`,
     
     description: (data: NotificationData) => 
-      `Review submitted by ${data.submitter_name || 'user'} requires your attention. ` +
-      `${data.urgency === 'high' ? 'This is marked as high priority.' : ''}`,
+      `Review and approve/reject submission from ${data.submitter_name || 'user'}`,
     
-    category: 'review',
+    category: 'to_check',
     
     priority: (data: NotificationData) => {
       if (data.urgency === 'high') return 'urgent';
-      return 'high'; // Reviews are generally high priority
+      return 'standard';
     },
     
     due_date: (data: NotificationData) => {
@@ -123,11 +122,10 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
     },
     
     description: (data: NotificationData) => 
-      `Your application has been approved by ${data.reviewer_name || 'reviewer'}. ` +
-      `Send the approved document to the client promptly.`,
+      `Approved document ready to send to client`,
     
-    category: 'action',
-    priority: () => 'high',
+    category: 'to_send',
+    priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours
     
@@ -160,12 +158,11 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
     
     description: (data: NotificationData) => {
       const reviewerFeedback = data.message || 'No specific feedback provided';
-      return `Your application was rejected by ${data.reviewer_name || 'reviewer'}. ` +
-        `Reviewer feedback: "${reviewerFeedback}". Please address the issues and resubmit.`;
+      return `Address feedback: "${reviewerFeedback}" and resubmit`;
     },
     
-    category: 'action',
-    priority: () => 'high',
+    category: 'to_check',
+    priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     
@@ -198,8 +195,8 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
       return `Application has been ${statusText}. Send result to client and follow up if needed.`;
     },
     
-    category: 'follow_up',
-    priority: () => 'medium',
+    category: 'to_follow_up',
+    priority: () => 'standard',
     
     due_date: (data: NotificationData) => {
       // Approved items get 2 hours, rejected get 4 hours (more urgent to explain)
@@ -231,10 +228,10 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
       `Follow up with ${data.client_name || 'client'} on ${data.document_type || data.filename || 'document'}`,
     
     description: (data: NotificationData) => 
-      `Document sent to client. Check if they have questions or need assistance after 7 days.`,
+      `Check if client has questions about sent document`,
     
-    category: 'follow_up',
-    priority: () => 'medium',
+    category: 'to_follow_up',
+    priority: () => 'standard',
     
     due_date: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     
@@ -254,10 +251,10 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
       `Send ${data.document_type || data.filename || 'document'} to ${data.client_name || 'client'}`,
     
     description: (data: NotificationData) => 
-      `Document has been generated and is ready to be sent to the client.`,
+      `Generated document ready to send to client`,
     
-    category: 'action',
-    priority: () => 'high',
+    category: 'to_send',
+    priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours
     
@@ -283,13 +280,12 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
 
   'client_no_response': {
     title: (data: NotificationData) => 
-      `URGENT: Contact ${data.client_name || 'client'} - No response for ${data.days_ago || 7}+ days`,
+      `Follow up ${data.client_name || 'client'} - No response for ${data.days_ago || 7}+ days`,
     
     description: (data: NotificationData) => 
-      `Client hasn't responded to ${data.document_type || 'document'} sent ${data.days_ago || 7} days ago. ` +
-      `Immediate follow-up required.`,
+      `Client hasn't responded to ${data.document_type || 'document'} sent ${data.days_ago || 7} days ago`,
     
-    category: 'reminder',
+    category: 'to_follow_up',
     priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours
@@ -307,13 +303,13 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
 
   'payment_pending': {
     title: (data: NotificationData) => 
-      `Follow up on pending payment from ${data.client_name || 'client'}`,
+      `Follow up ${data.client_name || 'client'} on pending payment`,
     
     description: (data: NotificationData) => 
-      `Payment for services is pending. Contact client to check on payment status.`,
+      `Contact client to check payment status`,
     
-    category: 'follow_up',
-    priority: () => 'high',
+    category: 'to_follow_up',
+    priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     
@@ -329,13 +325,13 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
 
   'meeting_reminder': {
     title: (data: NotificationData) => 
-      `Prepare for meeting with ${data.client_name || 'client'}`,
+      `Check meeting prep for ${data.client_name || 'client'}`,
     
     description: (data: NotificationData) => 
-      `Upcoming meeting scheduled. Review client file and prepare necessary documents.`,
+      `Review client file and prepare meeting documents`,
     
-    category: 'action',
-    priority: () => 'high',
+    category: 'to_check',
+    priority: () => 'urgent',
     
     due_date: (data: NotificationData) => {
       // Meeting prep should be done 2 hours before meeting
@@ -359,13 +355,13 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
 
   'document_expiring': {
     title: (data: NotificationData) => 
-      `Renew expiring ${data.document_type || 'document'} for ${data.client_name || 'client'}`,
+      `Follow up ${data.client_name || 'client'} for ${data.document_type || 'document'} renewal`,
     
     description: (data: NotificationData) => 
-      `Document is expiring soon. Contact client to initiate renewal process.`,
+      `Contact client to initiate renewal process for expiring document`,
     
-    category: 'reminder',
-    priority: () => 'high',
+    category: 'to_follow_up',
+    priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
     
@@ -385,13 +381,13 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
 
   'golden_visa_submitted': {
     title: (data: NotificationData) => 
-      `Process Golden Visa application for ${data.client_name || 'client'}`,
+      `Check Golden Visa application for ${data.client_name || 'client'}`,
     
     description: (data: NotificationData) => 
-      `Golden Visa application submitted and requires processing. Review documents and initiate government submission.`,
+      `Review documents and initiate government submission`,
     
-    category: 'action',
-    priority: () => 'high',
+    category: 'to_check',
+    priority: () => 'urgent',
     
     due_date: () => new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours
     
@@ -411,13 +407,13 @@ export const TODO_GENERATION_RULES: Record<string, TodoGenerationRule> = {
 
   'default': {
     title: (data: NotificationData) => 
-      `Action required: ${data.title || 'Review notification'}`,
+      `Check ${data.title || 'notification'}`,
     
     description: (data: NotificationData) => 
-      data.message || 'Please review this notification and take appropriate action.',
+      data.message || 'Review notification and take action',
     
-    category: 'action',
-    priority: () => 'medium',
+    category: 'to_check',
+    priority: () => 'standard',
     
     due_date: () => new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     
