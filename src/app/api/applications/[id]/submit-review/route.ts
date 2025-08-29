@@ -15,6 +15,17 @@ export async function POST(
 ) {
   const { id } = await params;
   console.log('🔧 API ROUTE: submit-review called for application ID:', id);
+  console.log('🔧 API ROUTE: Application ID type:', typeof id, 'Length:', id?.length);
+  
+  // Validate application ID format (should be UUID)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!id || !uuidRegex.test(id)) {
+    console.log('🔧 API ROUTE: Invalid application ID format:', id);
+    return NextResponse.json(
+      { error: 'Invalid application ID format' }, 
+      { status: 400 }
+    );
+  }
   
   // Safety check: Feature flag
   const config = getReviewSystemConfig();
@@ -56,7 +67,15 @@ export async function POST(
       );
     }
 
-    console.log('🔧 API ROUTE: Calling ApplicationsService.submitForReview');
+    // Check if this is a resubmission BEFORE submitting (before status changes)
+    let isResubmission = false;
+    try {
+      const appDataBefore = await ApplicationsService.getByIdInternal(id);
+      isResubmission = appDataBefore && appDataBefore.status === 'rejected';
+    } catch (error) {
+      console.error('Failed to check application status for resubmission detection:', (error as Error).message);
+    }
+
     
     // Add timeout and retry logic
     const submitWithRetry = async (retries = 3): Promise<boolean> => {
@@ -238,17 +257,16 @@ export async function POST(
       // Save the submitter's message to message history
       if (comments && comments.trim()) {
         try {
+          const messageType = isResubmission ? 'resubmission' : 'submission';
           await ApplicationsService.addMessage(
             id,
             userId,
             'submitter',
             comments.trim(),
-            'submission'
+            messageType
           );
-          console.log('✅ Submitter message saved to history');
         } catch (error) {
-          console.error('❌ Failed to save submitter message to history:', error);
-          // Don't fail the main request if message history fails
+          console.error('Failed to save submitter message to history:', (error as Error).message);
         }
       }
 
@@ -264,13 +282,21 @@ export async function POST(
     }
 
   } catch (error) {
-    console.error('Submit review error:', error);
+    console.error('🔧 SUBMIT REVIEW ERROR: Full error details:', error);
+    console.error('🔧 SUBMIT REVIEW ERROR: Error message:', (error as Error).message);
+    console.error('🔧 SUBMIT REVIEW ERROR: Error stack:', (error as Error).stack);
+    
+    // Return detailed error information for debugging
     return NextResponse.json(
       { 
         success: false,
-        error: config.debugMode ? (error as Error).message : 'Failed to submit for review'
+        error: (error as Error).message,
+        details: config.debugMode ? {
+          stack: (error as Error).stack,
+          name: (error as Error).name
+        } : undefined
       }, 
-      { status: config.debugMode ? 500 : 200 }
+      { status: 400 }
     );
   }
 }

@@ -577,18 +577,71 @@ export class ApplicationsService {
         // Start transaction for atomic operation
         await client.query('BEGIN');
         
+        // Check if this is a resubmission (application was previously rejected)
+        let isResubmission = false;
+        let newRevision = 1;
+        
+        try {
+          const prevStatusResult = await client.query(`
+            SELECT status, revision_number FROM applications WHERE id = $1 AND submitted_by_id = $2
+          `, [submission.application_id, userId]);
+          
+          isResubmission = prevStatusResult.rows.length > 0 && prevStatusResult.rows[0].status === 'rejected';
+          const currentRevision = prevStatusResult.rows[0]?.revision_number || 1;
+          newRevision = isResubmission ? currentRevision + 1 : currentRevision;
+        } catch (error) {
+          // If revision_number column doesn't exist, rollback and restart transaction
+          console.warn('Revision tracking not available, using fallback logic');
+          
+          // Rollback the current transaction
+          await client.query('ROLLBACK');
+          
+          // Start a new transaction
+          await client.query('BEGIN');
+          
+          // Use fallback logic without revision_number
+          const prevStatusResult = await client.query(`
+            SELECT status FROM applications WHERE id = $1 AND submitted_by_id = $2
+          `, [submission.application_id, userId]);
+          
+          isResubmission = prevStatusResult.rows.length > 0 && prevStatusResult.rows[0].status === 'rejected';
+          newRevision = 1; // Default to 1 if no revision tracking available
+        }
+        
         // Update application status and store submitter message
-        // For now, store submitter message in a temporary way until schema is updated
         const submitterComments = submission.comments || null;
         
-        await client.query(`
-          UPDATE applications 
-          SET status = 'pending_review', 
-              reviewer_id = $1, 
-              urgency = $2,
-              submitted_at = CURRENT_TIMESTAMP
-          WHERE id = $3 AND submitted_by_id = $4
-        `, [submission.reviewer_id, submission.urgency, submission.application_id, userId]);
+        // Try to update with revision_number, fallback if column doesn't exist
+        try {
+          await client.query(`
+            UPDATE applications 
+            SET status = 'pending_review', 
+                reviewer_id = $1, 
+                urgency = $2,
+                revision_number = $3,
+                submitted_at = CURRENT_TIMESTAMP
+            WHERE id = $4 AND submitted_by_id = $5
+          `, [submission.reviewer_id, submission.urgency, newRevision, submission.application_id, userId]);
+        } catch (error) {
+          // If revision_number column doesn't exist, rollback and use simple update
+          console.warn('Revision tracking not available for UPDATE, using fallback');
+          
+          // Rollback the current transaction
+          await client.query('ROLLBACK');
+          
+          // Start a new transaction
+          await client.query('BEGIN');
+          
+          // Update without revision_number
+          await client.query(`
+            UPDATE applications 
+            SET status = 'pending_review', 
+                reviewer_id = $1, 
+                urgency = $2,
+                submitted_at = CURRENT_TIMESTAMP
+            WHERE id = $3 AND submitted_by_id = $4
+          `, [submission.reviewer_id, submission.urgency, submission.application_id, userId]);
+        }
         
         // Store submitter message in form_data temporarily
         if (submitterComments) {

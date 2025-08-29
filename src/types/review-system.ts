@@ -14,7 +14,7 @@ export type UrgencyLevel = 'standard' | 'urgent';
 export type NotificationType = 'review_requested' | 'review_completed' | 'application_approved' | 'application_rejected';
 
 // Review message types
-export type ReviewMessageType = 'comment' | 'submission' | 'approval' | 'rejection' | 'revision';
+export type ReviewMessageType = 'comment' | 'submission' | 'approval' | 'rejection' | 'revision' | 'resubmission';
 
 // User roles in review process
 export type ReviewUserRole = 'submitter' | 'reviewer';
@@ -35,6 +35,7 @@ export interface Application {
   submitter_message?: string; // Original message from submitter when submitting for review
   review_comments?: string; // Reviewer's feedback after review
   urgency: UrgencyLevel;
+  revision_number?: number; // Tracks the revision number for resubmissions
   
   // Timestamps
   submitted_at?: string;

@@ -807,6 +807,11 @@ const GoldenVisaTab: React.FC = () => {
       // Reset the initialization flag to prevent re-syncing
       initializedRef.current = true;
       
+      // Restore the application ID so the hook knows it's editing an existing application
+      if (applicationId) {
+        reviewApp.restoreApplication(applicationId, formData);
+      }
+      
       // Don't use reset() - manually set each field to ensure proper updates
       Object.keys(formData).forEach(key => {
         if (formData[key] !== undefined) {

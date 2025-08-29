@@ -545,6 +545,43 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   }, [isOpen, application?.id]);
 
 
+  // Helper function to group messages by review rounds
+  const groupMessagesByRounds = (messages: ReviewMessage[]) => {
+    const groups: { round: number; messages: ReviewMessage[]; status?: string }[] = [];
+    let currentRound = 1;
+    let currentGroup: ReviewMessage[] = [];
+    let lastGroupStatus = '';
+
+    for (const message of messages) {
+      // Start a new round when we see a resubmission or submission after rejection
+      if (message.message_type === 'resubmission' || 
+          (message.message_type === 'submission' && currentGroup.length > 0)) {
+        // Close previous round
+        if (currentGroup.length > 0) {
+          groups.push({ round: currentRound, messages: [...currentGroup], status: lastGroupStatus });
+          currentRound++;
+          currentGroup = [];
+        }
+      }
+      
+      currentGroup.push(message);
+      
+      // Track the status of this round
+      if (message.message_type === 'approval') {
+        lastGroupStatus = 'approved';
+      } else if (message.message_type === 'rejection') {
+        lastGroupStatus = 'rejected';
+      }
+    }
+    
+    // Add the final group
+    if (currentGroup.length > 0) {
+      groups.push({ round: currentRound, messages: [...currentGroup], status: lastGroupStatus });
+    }
+    
+    return groups;
+  };
+
   const renderMessageHistory = () => {
     if (messageHistory.length === 0) return (
       <div className="mb-6">
@@ -559,11 +596,18 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       </div>
     );
 
+    const roundGroups = groupMessagesByRounds(messageHistory);
+
     return (
       <div className="mb-6">
         <label className="block text-sm font-medium mb-3" style={{ color: '#243F7B' }}>
           <MessageSquare className="w-4 h-4 inline mr-2" />
-          Conversation
+          Conversation History
+          {roundGroups.length > 1 && (
+            <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+              {roundGroups.length} Round{roundGroups.length > 1 ? 's' : ''}
+            </span>
+          )}
         </label>
         <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg bg-white">
           {isLoadingHistory ? (
@@ -572,18 +616,46 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               Loading conversation...
             </div>
           ) : (
-            <div className="p-4 space-y-4">
-              {messageHistory.map((message, index) => {
-                const isChecker = message.user_role === 'reviewer';
-                
-                return (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    className={`flex gap-3 ${isChecker ? 'justify-end' : 'justify-start'}`}
-                  >
+            <div className="p-4 space-y-6">
+              {roundGroups.map((group, groupIndex) => (
+                <div key={`round-${group.round}`} className="space-y-4">
+                  {/* Round Header */}
+                  {roundGroups.length > 1 && (
+                    <div className="flex items-center gap-2 py-2">
+                      <div className="flex-1 h-px bg-gray-200"></div>
+                      <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full border">
+                        <span className="text-xs font-medium text-gray-600">
+                          Round {group.round}
+                        </span>
+                        {group.status && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            group.status === 'approved' 
+                              ? 'bg-green-100 text-green-700' 
+                              : group.status === 'rejected'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {group.status === 'approved' ? 'Approved' : group.status === 'rejected' ? 'Rejected' : 'In Progress'}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 h-px bg-gray-200"></div>
+                    </div>
+                  )}
+                  
+                  {/* Messages in this round */}
+                  <div className="space-y-3">
+                    {group.messages.map((message, messageIndex) => {
+                      const isChecker = message.user_role === 'reviewer';
+                      
+                      return (
+                        <motion.div
+                          key={message.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: (groupIndex * group.messages.length + messageIndex) * 0.05 }}
+                          className={`flex gap-3 ${isChecker ? 'justify-end' : 'justify-start'}`}
+                        >
                     {/* Sender Avatar (left side) */}
                     {!isChecker && (
                       <div className="flex-shrink-0">
@@ -623,6 +695,24 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                         }`}>
                           {isChecker ? 'Checker' : 'Sender'}
                         </span>
+                        {/* Message type indicator */}
+                        {message.message_type !== 'comment' && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${
+                            message.message_type === 'approval' 
+                              ? 'bg-green-50 text-green-700 border-green-200' 
+                              : message.message_type === 'rejection'
+                              ? 'bg-red-50 text-red-700 border-red-200'
+                              : message.message_type === 'resubmission'
+                              ? 'bg-orange-50 text-orange-700 border-orange-200'
+                              : 'bg-blue-50 text-blue-700 border-blue-200'
+                          }`}>
+                            {message.message_type === 'submission' ? 'Initial Submit' :
+                             message.message_type === 'resubmission' ? 'Resubmitted' :
+                             message.message_type === 'approval' ? 'Approved' :
+                             message.message_type === 'rejection' ? 'Rejected' :
+                             message.message_type}
+                          </span>
+                        )}
                       </div>
                       <div className={`p-3 rounded-lg ${
                         isChecker
@@ -661,8 +751,11 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                       </div>
                     )}
                   </motion.div>
-                );
-              })}
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

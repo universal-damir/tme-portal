@@ -364,14 +364,11 @@ export const useCostOverviewApplication = ({
       const result = await response.json();
       console.log('🔧 API success response:', result);
       
-      // Clear application state after successful submission
-      // The form will be reset and we start fresh
-      setApplication(null);
-      lastSavedDataRef.current = ''; // Reset the last saved data reference
-      
+      // Don't clear application state - keep it for potential resubmission after rejection
+      // The application ID is needed to continue the conversation history
       if (config.debugMode) {
         console.log('Submitted Cost Overview application for review:', result);
-        console.log('Cleared application state for fresh start');
+        console.log('Keeping application state for potential resubmission. Application ID:', appToSubmit.id);
       }
       
       return true;
