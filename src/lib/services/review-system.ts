@@ -761,7 +761,7 @@ export class ApplicationsService {
       
       try {
         const result = await pool.query(`
-          SELECT rm.*, u.full_name, u.email, u.department
+          SELECT rm.*, u.full_name, u.email, u.department, u.employee_code, u.role
           FROM review_messages rm
           LEFT JOIN users u ON rm.user_id = u.id
           WHERE rm.application_id = $1
@@ -780,7 +780,9 @@ export class ApplicationsService {
             id: row.user_id,
             full_name: row.full_name,
             email: row.email,
-            department: row.department
+            department: row.department,
+            employee_code: row.employee_code,
+            role: row.role
           } : undefined
         })) as ReviewMessage[];
       } catch (error: any) {

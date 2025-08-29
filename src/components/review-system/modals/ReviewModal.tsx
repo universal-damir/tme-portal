@@ -14,6 +14,7 @@ import { CompanyServicesData } from '@/types/company-services';
 import { CITReturnLettersData } from '@/types/cit-return-letters';
 import { SharedClientInfo } from '@/types/portal';
 import { toast } from 'sonner';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -572,51 +573,96 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
             </div>
           ) : (
             <div className="p-4 space-y-4">
-              {messageHistory.map((message, index) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="flex gap-3"
-                >
-                  {/* Avatar */}
-                  <div className="flex-shrink-0">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${
-                      message.user_role === 'reviewer'
-                        ? 'bg-blue-500'
-                        : 'bg-green-500'
-                    }`}>
-                      {(message.user?.full_name || 'U').charAt(0).toUpperCase()}
-                    </div>
-                  </div>
-                  
-                  {/* Message Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-semibold text-gray-900">
-                        {message.user?.full_name || 'User'}
-                      </span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        message.user_role === 'reviewer'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-green-100 text-green-700'
+              {messageHistory.map((message, index) => {
+                const isChecker = message.user_role === 'reviewer';
+                
+                return (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`flex gap-3 ${isChecker ? 'justify-end' : 'justify-start'}`}
+                  >
+                    {/* Sender Avatar (left side) */}
+                    {!isChecker && (
+                      <div className="flex-shrink-0">
+                        {message.user ? (
+                          <UserAvatar 
+                            user={{
+                              id: message.user.id,
+                              employee_code: message.user.employee_code,
+                              full_name: message.user.full_name,
+                              email: message.user.email,
+                              department: message.user.department,
+                              designation: '',
+                              status: 'active' as const,
+                              must_change_password: false,
+                              role: message.user.role
+                            }}
+                            size="sm"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center text-white text-sm font-semibold">
+                            S
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {/* Message Content */}
+                    <div className={`flex-1 min-w-0 max-w-xs ${isChecker ? 'text-right' : 'text-left'}`}>
+                      <div className={`flex items-center gap-2 mb-1 ${isChecker ? 'justify-end' : 'justify-start'}`}>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {message.user?.full_name || 'User'}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          isChecker
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {isChecker ? 'Checker' : 'Sender'}
+                        </span>
+                      </div>
+                      <div className={`p-3 rounded-lg ${
+                        isChecker
+                          ? 'bg-blue-50 border border-blue-100'
+                          : 'bg-gray-50 border border-gray-200'
                       }`}>
-                        {message.user_role === 'reviewer' ? 'Checker' : 'Sender'}
-                      </span>
+                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          {message.message}
+                        </p>
+                      </div>
                     </div>
-                    <div className={`p-3 rounded-lg ${
-                      message.user_role === 'reviewer'
-                        ? 'bg-blue-50 border border-blue-100'
-                        : 'bg-green-50 border border-green-100'
-                    }`}>
-                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                        {message.message}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+
+                    {/* Checker Avatar (right side) */}
+                    {isChecker && (
+                      <div className="flex-shrink-0">
+                        {message.user ? (
+                          <UserAvatar 
+                            user={{
+                              id: message.user.id,
+                              employee_code: message.user.employee_code,
+                              full_name: message.user.full_name,
+                              email: message.user.email,
+                              department: message.user.department,
+                              designation: '',
+                              status: 'active' as const,
+                              must_change_password: false,
+                              role: message.user.role
+                            }}
+                            size="sm"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold" style={{ backgroundColor: '#243F7B' }}>
+                            C
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -711,29 +757,6 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
                   </motion.div>
                 ) : (
                   <div className="space-y-6">
-                    {/* Submitter Message */}
-                    {(() => {
-                      // Get submitter message from temporary storage in form_data
-                      const submitterMessage = application.submitter_message || 
-                        (application.form_data as any)?._submitter_message;
-                      
-                      if (!submitterMessage) return null;
-                      
-                      return (
-                        <div>
-                          <label className="block text-sm font-medium mb-2" style={{ color: '#243F7B' }}>
-                            <MessageSquare className="w-4 h-4 inline mr-1" />
-                            Message
-                          </label>
-                          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                            <p className="text-sm text-gray-700 leading-relaxed">
-                              {submitterMessage}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
                     {/* Message History */}
                     {renderMessageHistory()}
 

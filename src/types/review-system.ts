@@ -76,6 +76,8 @@ export interface ReviewMessage {
     full_name: string;
     email: string;
     department: string;
+    employee_code: string;
+    role: 'admin' | 'manager' | 'employee';
   };
 }
 
