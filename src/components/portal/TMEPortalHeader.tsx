@@ -117,7 +117,8 @@ export function TMEPortalHeader({
       'cost_overview': 'cost-overview',
       'golden_visa': 'golden-visa', 
       'company_services': 'company-services',
-      'taxation': 'taxation'
+      'taxation': 'taxation',
+      'cit_return_letters': 'cit-return-letters'
     };
     
     // Get the frontend type (handles both formats for compatibility)
@@ -148,9 +149,12 @@ export function TMEPortalHeader({
     
     // Wait for tab to confirm it's ready, then dispatch edit event
     const waitForTabReadiness = () => {
+      let eventDispatched = false;
+      
       // Set up listener for tab readiness confirmation
       const handleTabReady = (event: any) => {
-        if (event.detail.tab === frontendType && event.detail.ready) {
+        if (event.detail.tab === frontendType && event.detail.ready && !eventDispatched) {
+          eventDispatched = true;
           window.removeEventListener('tab-readiness-response', handleTabReady);
           window.dispatchEvent(editEvent);
         }
@@ -168,7 +172,9 @@ export function TMEPortalHeader({
       // Fallback timeout in case tab doesn't respond
       setTimeout(() => {
         window.removeEventListener('tab-readiness-response', handleTabReady);
-        window.dispatchEvent(editEvent);
+        if (!eventDispatched) {
+          window.dispatchEvent(editEvent);
+        }
       }, 1000);
     };
     

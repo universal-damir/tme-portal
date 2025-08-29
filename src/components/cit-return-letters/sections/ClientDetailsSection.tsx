@@ -274,7 +274,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 </div>
                 {selectedClient.vat_trn && (
                   <span className="text-gray-500">
-                    VAT: {selectedClient.vat_trn}
+                    VAT TRN: {selectedClient.vat_trn}
                   </span>
                 )}
               </div>

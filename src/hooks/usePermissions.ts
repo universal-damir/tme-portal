@@ -65,6 +65,7 @@ export function usePermissions() {
       'company_services': ['IT', 'Management', 'Finance', 'Legal', 'Administration', 'HR', 'Company Setup'],
       'corporate_changes': ['IT', 'Management', 'Legal', 'Administration'],
       'taxation': ['IT', 'Management', 'Finance', 'Tax and Compliance'],
+      'cit_return_letters': ['IT', 'Management'], // Admin access + specific employee codes handled separately
       'user_management': ['IT', 'HR'],
       'system_admin': ['IT'],
       'audit_logs': ['IT', 'Management'],
@@ -74,6 +75,15 @@ export function usePermissions() {
     
     // Admin always has access
     if (user.role === 'admin') return true
+
+    // Special handling for CIT Return Letters - specific employee codes
+    if (feature === 'cit_return_letters') {
+      const allowedEmployeeCodes = ['19', '38', '33', '42', '58', '80', '86', '92', '112']
+      
+      // Check if user has department access OR is in the allowed employee codes list
+      return allowedDepartments.includes(user.department) || 
+             allowedEmployeeCodes.includes(user.employee_code)
+    }
 
     // Check department access
     return allowedDepartments.includes(user.department)

@@ -1203,16 +1203,17 @@ export class ReviewersService {
             LIMIT $2
           `, [currentUserId, config.maxReviewersToFetch]);
         } else if (useTaxationReviewers) {
-          // For taxation documents: show Tax and Compliance department + Admin + Accounting + Uwe
-          console.log(`🔧 ReviewersService: Using Tax and Compliance + Admin + Accounting departments + Uwe for ${documentType}`);
+          // For CIT Return Letters and taxation documents: only show admins + specific employee codes
+          console.log(`🔧 ReviewersService: Using admins + specific employee codes for ${documentType}`);
           reviewersResult = await pool.query(`
             SELECT id, full_name, email, department, role, employee_code
             FROM users 
             WHERE id != $1 
-            AND (department IN ('Tax and Compliance', 'Admin', 'Accounting') OR email = 'uwe@TME-Services.com')
+            AND status = 'active'
+            AND (role = 'admin' OR employee_code IN ('19 DS', '38 TZ', '33 MK', '42 RJ', '58 YF', '80 RoJ', '86 MA', '92 CM', '112 NM'))
             ORDER BY 
-              CASE WHEN email = 'uwe@TME-Services.com' THEN 0 ELSE 1 END,
-              full_name ASC
+              CASE WHEN role = 'admin' THEN 0 ELSE 1 END,
+              employee_code ASC
             LIMIT $2
           `, [currentUserId, config.maxReviewersToFetch]);
         } else {
