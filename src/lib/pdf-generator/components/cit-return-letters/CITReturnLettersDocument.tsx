@@ -39,9 +39,15 @@ export const CITReturnLettersDocument: React.FC<CITReturnLettersDocumentProps> =
 
   return (
     <Document>
-      {letterType === 'CIT TP' && <CITTransferPricingPage data={data} />}
-      {letterType === 'Conf acc docs + FS' && <ConfAccDocsPage data={data} />}
-      {letterType === 'CIT assess+concl, non deduct, elect' && <CITAssessmentConclusionPage data={data} />}
+      {letterType === 'CIT TP' ? (
+        <CITTransferPricingPage data={data} />
+      ) : letterType === 'Conf acc docs + FS' ? (
+        <ConfAccDocsPage data={data} />
+      ) : letterType === 'CIT assess+concl, non deduct, elect' ? (
+        <CITAssessmentConclusionPage data={data} />
+      ) : (
+        <NotImplementedPage letterType={letterType} />
+      )}
     </Document>
   );
 };
@@ -52,9 +58,9 @@ export const CITReturnLettersCombinedDocument: React.FC<CITReturnLettersCombined
 
   return (
     <Document>
-      {selectedLetterTypes.includes('CIT TP') && <CITTransferPricingPage data={data} />}
-      {selectedLetterTypes.includes('Conf acc docs + FS') && <ConfAccDocsPage data={data} />}
-      {selectedLetterTypes.includes('CIT assess+concl, non deduct, elect') && <CITAssessmentConclusionPage data={data} />}
+      {selectedLetterTypes.includes('CIT TP') ? <CITTransferPricingPage data={data} /> : null}
+      {selectedLetterTypes.includes('Conf acc docs + FS') ? <ConfAccDocsPage data={data} /> : null}
+      {selectedLetterTypes.includes('CIT assess+concl, non deduct, elect') ? <CITAssessmentConclusionPage data={data} /> : null}
     </Document>
   );
 };

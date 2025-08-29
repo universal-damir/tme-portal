@@ -16,7 +16,25 @@ interface CITAssessmentConclusionPageProps {
 export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPageProps> = ({ data }) => {
   const { clientDetails, citReturnLettersData } = data;
   const selectedClient = citReturnLettersData.selectedClient;
-  const assessmentData = citReturnLettersData.citAssessmentConclusion;
+  const assessmentData = citReturnLettersData.citAssessmentConclusion || {
+    nonDeductibleExpenses: [],
+    elections: {
+      electionsSelected: false,
+      realizationBasisOfAccounting: false,
+      transitionalRules: false,
+      carryForwardOfLosses: false
+    },
+    citImpactAssessmentPerformed: false,
+    smallBusinessReliefAmount: 0,
+    qfzpBenefitSelections: {
+      adequateSubstance: false,
+      derivesQualifyingIncome: false,
+      withinDeMinimis: false,
+      preparesTPDocumentation: false,
+      performsAudit: false,
+      doesNotElectStandardRules: false
+    }
+  };
   
   // Get manager name from client data or fallback to clientDetails
   const managerFirstName = selectedClient?.management_name?.split(' ')[0] || clientDetails.firstName || 'Manager';
@@ -144,7 +162,7 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
         ].map((item, index) => (
           <View key={index} style={{ flexDirection: 'row', marginBottom: 3, alignItems: 'flex-start' }}>
             <Text style={[styles.introText, { width: 50, textAlign: 'center', lineHeight: 1.4 }]}>
-              {index + 1}.
+              {`${index + 1}.`}
             </Text>
             <Text style={[styles.introText, { flex: 1, paddingLeft: 10, textAlign: 'justify', lineHeight: 1.4 }]}>
               {item.particulars}
@@ -156,18 +174,18 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
         ))}
 
         {/* Dynamic entries from UI form */}
-        {assessmentData.nonDeductibleExpenses
-          .filter(expense => expense.particulars.trim() || expense.nonDeductiblePercentage > 0)
+        {(assessmentData.nonDeductibleExpenses || [])
+          .filter(expense => expense.particulars?.trim() || expense.nonDeductiblePercentage > 0)
           .map((expense, index) => (
             <View key={`dynamic-${index}`} style={{ flexDirection: 'row', marginBottom: 3, alignItems: 'flex-start' }}>
               <Text style={[styles.introText, { width: 50, textAlign: 'center', lineHeight: 1.4 }]}>
-                {13 + index}.
+                {`${13 + index}.`}
               </Text>
               <Text style={[styles.introText, { flex: 1, paddingLeft: 10, textAlign: 'justify', lineHeight: 1.4 }]}>
                 {expense.particulars}
               </Text>
               <Text style={[styles.introText, { width: 120, textAlign: 'center', lineHeight: 1.4 }]}>
-                {expense.nonDeductiblePercentage}%
+                {`${expense.nonDeductiblePercentage ?? 0}%`}
               </Text>
             </View>
           ))
@@ -501,7 +519,7 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
             <SectionB />
             
             {/* Add Signature Section here if no Elections are selected */}
-            {!assessmentData.elections.electionsSelected && (
+            {!assessmentData.elections?.electionsSelected && (
               <View style={{ marginTop: 30 }}>
                 <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 20 }]}>
                   We look forward to receiving the signed acknowledgment.
@@ -550,7 +568,7 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
         </Page>
 
         {/* Conditional Fourth Page - Elections and Signature section (only if elections are selected) */}
-        {assessmentData.elections.electionsSelected && (
+        {assessmentData.elections?.electionsSelected && (
           <Page size="A4" style={styles.page}>
             <CITLetterHeaderComponent data={data} />
             
@@ -569,12 +587,13 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
                 <View style={{ paddingLeft: 20, marginBottom: 15 }}>
                   {(() => {
                     let electionNumber = 1;
+                    const getElectionNumber = () => electionNumber++;
                     return (
                       <>
-                        {assessmentData.elections.realizationBasisOfAccounting && (
+                        {assessmentData.elections?.realizationBasisOfAccounting && (
                           <>
                             <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                              {electionNumber++}. Realization basis of accounting:
+                              {`${getElectionNumber()}. Realization basis of accounting:`}
                             </Text>
                             <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
                               The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
@@ -582,10 +601,10 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
                           </>
                         )}
 
-                        {assessmentData.elections.transitionalRules && (
+                        {assessmentData.elections?.transitionalRules && (
                           <>
                             <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                              {electionNumber++}. Transitional rules:
+                              {`${getElectionNumber()}. Transitional rules:`}
                             </Text>
                             <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
                               The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
@@ -593,10 +612,10 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
                           </>
                         )}
 
-                        {assessmentData.elections.carryForwardOfLosses && (
+                        {assessmentData.elections?.carryForwardOfLosses && (
                           <>
                             <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                              {electionNumber++}. Carry forward of losses:
+                              {`${getElectionNumber()}. Carry forward of losses:`}
                             </Text>
                             <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
                               The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
@@ -788,7 +807,7 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
         <SectionB />
         
         {/* Add Signature Section here if no Elections are selected */}
-        {!assessmentData.elections.electionsSelected && (
+        {!assessmentData.elections?.electionsSelected && (
           <View style={{ marginTop: 30 }}>
             <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 20 }]}>
               We look forward to receiving the signed acknowledgment.
@@ -837,7 +856,7 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
     </Page>
 
     {/* Conditional Fourth Page - Elections and Signature section (only if elections are selected) */}
-    {assessmentData.elections.electionsSelected && (
+    {assessmentData.elections?.electionsSelected && (
       <Page size="A4" style={styles.page}>
         <CITLetterHeaderComponent data={data} />
         
@@ -856,12 +875,13 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
             <View style={{ paddingLeft: 20, marginBottom: 15 }}>
               {(() => {
                 let electionNumber = 1;
+                const getElectionNumber = () => electionNumber++;
                 return (
                   <>
-                    {assessmentData.elections.realizationBasisOfAccounting && (
+                    {assessmentData.elections?.realizationBasisOfAccounting && (
                       <>
                         <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                          {electionNumber++}. Realization basis of accounting:
+                          {`${getElectionNumber()}. Realization basis of accounting:`}
                         </Text>
                         <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
                           The company may adjust its taxable income for unrealized gains or losses on all assets and liabilities, which are recorded as per fair value or impairment accounting, or only capital assets and liabilities, and no adjustments to be made for unrealized gains or losses on revenue account.
@@ -869,10 +889,10 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
                       </>
                     )}
 
-                    {assessmentData.elections.transitionalRules && (
+                    {assessmentData.elections?.transitionalRules && (
                       <>
                         <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                          {electionNumber++}. Transitional rules:
+                          {`${getElectionNumber()}. Transitional rules:`}
                         </Text>
                         <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
                           The company is required to make adjustments to the opening balances of its first tax period for the arm's length principle for transactions with Related Parties or Connected Persons. Please refer to the TP disclaimer letter. Further, an election has been made on account of assets and liabilities to benefit from excluding any gain or loss, as applicable per law, on the realization of such assets / liabilities after the first tax period, which were owned prior to the first tax period.
@@ -880,10 +900,10 @@ export const CITAssessmentConclusionPage: React.FC<CITAssessmentConclusionPagePr
                       </>
                     )}
 
-                    {assessmentData.elections.carryForwardOfLosses && (
+                    {assessmentData.elections?.carryForwardOfLosses && (
                       <>
                         <Text style={[styles.introText, { fontWeight: 'bold', lineHeight: 1.4, marginBottom: 10 }]}>
-                          {electionNumber++}. Carry forward of losses:
+                          {`${getElectionNumber()}. Carry forward of losses:`}
                         </Text>
                         <Text style={[styles.introText, { textAlign: 'justify', lineHeight: 1.4, marginBottom: 15, paddingLeft: 10 }]}>
                           The company may carry forward the tax losses to the subsequent years to be set off against the taxable income of such subsequent years, where small business relief and QFZP benefit are not elected.
