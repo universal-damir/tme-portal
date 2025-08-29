@@ -28,6 +28,7 @@ interface UseCostOverviewApplicationReturn {
     urgency: UrgencyLevel;
     comments?: string;
   }) => Promise<boolean>;
+  restoreApplication: (applicationId: string, formData: any) => void;
   
   // Status helpers
   canDownloadPDF: boolean;
@@ -353,16 +354,12 @@ export const useCostOverviewApplication = ({
       
       clearTimeout(timeoutId);
       
-      console.log('🔧 API response status:', response.status, response.statusText);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🔧 API error response:', errorText);
         throw new Error(`Failed to submit for review: ${response.statusText} - ${errorText}`);
       }
       
       const result = await response.json();
-      console.log('🔧 API success response:', result);
       
       // Don't clear application state - keep it for potential resubmission after rejection
       // The application ID is needed to continue the conversation history
@@ -403,6 +400,24 @@ export const useCostOverviewApplication = ({
     }
   };
   
+  // Restore application for editing after rejection
+  const restoreApplication = (applicationId: string, formData: any) => {
+    // Create a minimal application object to maintain the ID and continue conversation history
+    const restoredApp: Application = {
+      id: applicationId,
+      type: 'cost-overview',
+      title: generateApplicationTitle(formData),
+      form_data: formData,
+      status: 'rejected', // We know it was rejected since we're editing
+      submitted_by_id: 0, // Will be set by backend
+      urgency: 'standard',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    setApplication(restoredApp);
+  };
+  
   // Computed values
   const applicationStatus: ApplicationStatus = application?.status || 'draft';
   
@@ -441,6 +456,7 @@ export const useCostOverviewApplication = ({
     // Actions
     saveApplication,
     submitForReview,
+    restoreApplication,
     
     // Status helpers
     canDownloadPDF,

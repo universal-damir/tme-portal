@@ -552,6 +552,10 @@ const GoldenVisaTab: React.FC = () => {
 
   // Submit for review validation handler
   const handleSubmitForReview = async () => {
+    console.log('🟢 GOLDEN: handleSubmitForReview called');
+    console.log('🟢 GOLDEN: reviewApp.application:', reviewApp.application);
+    console.log('🟢 GOLDEN: reviewApp.application?.id:', reviewApp.application?.id);
+    
     // Validate the entire form data using Zod schema
     try {
       await goldenVisaSchema.parseAsync(watchedData);
@@ -573,6 +577,7 @@ const GoldenVisaTab: React.FC = () => {
       return;
     }
 
+    console.log('🟢 GOLDEN: About to open review modal');
     // If validation passes, open review modal
     setIsReviewModalOpen(true);
   };

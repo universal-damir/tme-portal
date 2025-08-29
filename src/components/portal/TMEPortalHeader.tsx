@@ -146,13 +146,34 @@ export function TMEPortalHeader({
       }
     });
     
-    console.log(`📝 DISPATCHING EVENT: ${eventName} with data for application ${feedbackApplication.id}`);
+    // Wait for tab to confirm it's ready, then dispatch edit event
+    const waitForTabReadiness = () => {
+      // Set up listener for tab readiness confirmation
+      const handleTabReady = (event: any) => {
+        if (event.detail.tab === frontendType && event.detail.ready) {
+          window.removeEventListener('tab-readiness-response', handleTabReady);
+          window.dispatchEvent(editEvent);
+        }
+      };
+      
+      window.addEventListener('tab-readiness-response', handleTabReady);
+      
+      // Ask the tab if it's ready
+      const readinessCheckEvent = new CustomEvent('tab-readiness-check', {
+        detail: { targetTab: frontendType }
+      });
+      
+      window.dispatchEvent(readinessCheckEvent);
+      
+      // Fallback timeout in case tab doesn't respond
+      setTimeout(() => {
+        window.removeEventListener('tab-readiness-response', handleTabReady);
+        window.dispatchEvent(editEvent);
+      }, 1000);
+    };
     
-    // Wait for tab to render and mount, then dispatch edit event
-    setTimeout(() => {
-      window.dispatchEvent(editEvent);
-      console.log(`📝 Dispatched ${eventName} event successfully`);
-    }, 500); // Shorter delay since we're using direct tab switching
+    // Small delay to let the tab mount first, then check readiness
+    setTimeout(waitForTabReadiness, 200);
     
     // Toast notification is handled by the tab component
   };

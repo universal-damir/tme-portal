@@ -8,7 +8,9 @@ import { toast } from 'sonner';
 import { CITReturnLettersData, CIT_RETURN_LETTERS_DEFAULTS, Client, LetterType, ConfAccDocsSelections, CITAssessmentConclusionData } from '@/types/cit-return-letters';
 import { ClientDetailsSection, LetterDateSection, TaxPeriodSection, LetterTypeSection, CITEmailDraftGenerator, createCITEmailDataFromFormData } from '@/components/cit-return-letters';
 import { ReviewSubmissionModal } from '@/components/review-system/modals/ReviewSubmissionModal';
+import { ReviewModal } from '@/components/review-system/modals/ReviewModal';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
+import { Application } from '@/types/review-system';
 import { useCITReturnLettersApplication } from '@/hooks/useCITReturnLettersApplication';
 import { generateCITReturnLettersPDFWithFilename, generateCITReturnLettersCombinedPreviewPDF, generateCITReturnLettersMultiFilename } from '@/lib/pdf-generator/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +19,8 @@ const CITReturnLettersTab: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showConversationModal, setShowConversationModal] = useState(false);
+  const [conversationApplication, setConversationApplication] = useState<Application | null>(null);
   const [currentPDFData, setCurrentPDFData] = useState<{ blob: Blob; filename: string } | null>(null);
   const [emailProps, setEmailProps] = useState<any>(null);
   const { user } = useAuth();
@@ -250,6 +254,45 @@ const CITReturnLettersTab: React.FC = () => {
     setEmailProps(null);
   };
 
+  // Handle resubmission from conversation modal
+  const handleResubmitFromConversation = async (action: 'approve' | 'reject', comments: string): Promise<boolean> => {
+    if (!conversationApplication || action !== 'reject') {
+      // Only handle resubmissions (which come through as 'reject' from the user's perspective)
+      return false;
+    }
+
+    try {
+      // Submit the resubmission with updated form data
+      const success = await reviewApp.submitForReview({
+        reviewer_id: 1, // This will be updated by the backend
+        urgency: 'standard',
+        comments: comments.trim() || 'Resubmission with updates based on feedback'
+      });
+
+      if (success) {
+        // Clear form and close modal after successful resubmission
+        resetForm();
+        setShowConversationModal(false);
+        setConversationApplication(null);
+        
+        toast.success('Application resubmitted successfully', {
+          description: 'Your updated application has been submitted for review.'
+        });
+        
+        console.log('🟢 [CITReturnLettersTab] Successfully resubmitted application');
+      } else {
+        toast.error('Failed to resubmit application. Please try again.');
+      }
+
+      return success;
+    } catch (error) {
+      console.error('Error resubmitting application:', error);
+      toast.error(`Failed to resubmit application: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return false;
+    }
+  };
+
+
   // Reset form function
   const resetForm = useCallback(() => {
     reset(CIT_RETURN_LETTERS_DEFAULTS);
@@ -271,11 +314,15 @@ const CITReturnLettersTab: React.FC = () => {
   useEffect(() => {
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🟡 [CITReturnLettersTab] Received edit-cit-return-letters-application event', event.detail);
       
       if (formData) {
+        // Restore the application for conversation history
+        if (applicationId) {
+          reviewApp.restoreApplication(applicationId, formData);
+        }
+        
+        // Load form data
         loadFromApplication(formData);
-        console.log('🟢 [CITReturnLettersTab] Form data loaded from rejected/returned application');
         
         // Show a toast to inform the user
         toast.info('Application loaded for editing', {
@@ -286,7 +333,6 @@ const CITReturnLettersTab: React.FC = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationType, applicationData } = event.detail;
-      console.log('🟡 [CITReturnLettersTab] Received send-approved-application event', event.detail);
       
       if (applicationType === 'cit-return-letters' && applicationData) {
         loadFromApplication(applicationData);
@@ -298,37 +344,37 @@ const CITReturnLettersTab: React.FC = () => {
     };
 
     const handleTabReadinessCheck = (event: any) => {
-      console.log('🟡 [CITReturnLettersTab] Received tab-readiness-check event');
-      // Respond that this tab is ready
-      // Get current form data dynamically when the event occurs
-      const currentFormData = watchedData;
-      const hasData = currentFormData.selectedClient !== null || 
-                      currentFormData.letterDate !== '' ||
-                      (currentFormData.selectedLetterTypes && currentFormData.selectedLetterTypes.length > 0) ||
-                      currentFormData.taxPeriodStart !== '' ||
-                      currentFormData.taxPeriodEnd !== '';
+      const { targetTab } = event.detail || {};
       
-      const readinessEvent = new CustomEvent('tab-readiness-response', {
-        detail: { 
-          tab: 'cit-return-letters',
-          ready: true,
-          hasData
-        }
-      });
-      window.dispatchEvent(readinessEvent);
+      // Only respond if this readiness check is for our tab
+      if (targetTab === 'cit-return-letters') {
+        const currentFormData = watchedData;
+        const hasData = currentFormData.selectedClient !== null || 
+                        currentFormData.letterDate !== '' ||
+                        (currentFormData.selectedLetterTypes && currentFormData.selectedLetterTypes.length > 0) ||
+                        currentFormData.taxPeriodStart !== '' ||
+                        currentFormData.taxPeriodEnd !== '';
+        
+        const readinessEvent = new CustomEvent('tab-readiness-response', {
+          detail: { 
+            tab: 'cit-return-letters',
+            ready: true,
+            hasData
+          }
+        });
+        
+        window.dispatchEvent(readinessEvent);
+      }
     };
 
     window.addEventListener('edit-cit-return-letters-application', handleEditApplication);
     window.addEventListener('send-approved-application', handleSendApprovedApplication);
     window.addEventListener('tab-readiness-check', handleTabReadinessCheck);
 
-    console.log('🔧 CIT-RETURN-LETTERS-TAB: Event listeners registered');
-
     return () => {
       window.removeEventListener('edit-cit-return-letters-application', handleEditApplication);
       window.removeEventListener('send-approved-application', handleSendApprovedApplication);
       window.removeEventListener('tab-readiness-check', handleTabReadinessCheck);
-      console.log('🔧 CIT-RETURN-LETTERS-TAB: Event listeners removed');
     };
   }, [loadFromApplication]);
 
@@ -486,11 +532,11 @@ const CITReturnLettersTab: React.FC = () => {
           documentType="cit-return-letters"
           onSubmit={async (submission) => {
             const success = await reviewApp.submitForReview(submission);
+            
             if (success) {
-              // Clear form after successful submission but preserve data for review workflow
+              // Clear form after successful submission for fresh start
               resetForm();
               setShowReviewModal(false);
-              console.log('🟢 [CITReturnLettersTab] Successfully submitted for review');
               
               toast.success('Application submitted for review', {
                 description: 'The form has been cleared for the next application. Data is saved for the review process.'
@@ -498,6 +544,19 @@ const CITReturnLettersTab: React.FC = () => {
             }
             return success;
           }}
+        />
+      )}
+
+      {/* Conversation Review Modal - Shows conversation history for resubmissions */}
+      {config.canShowReviewComponents && (
+        <ReviewModal
+          isOpen={showConversationModal}
+          onClose={() => {
+            setShowConversationModal(false);
+            setConversationApplication(null);
+          }}
+          application={conversationApplication}
+          onReviewAction={handleResubmitFromConversation}
         />
       )}
     </div>

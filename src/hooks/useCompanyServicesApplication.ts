@@ -28,6 +28,7 @@ interface UseCompanyServicesApplicationReturn {
     urgency: UrgencyLevel;
     comments?: string;
   }) => Promise<boolean>;
+  restoreApplication: (applicationId: string, formData: any) => void;
   
   // Status helpers
   canDownloadPDF: boolean;
@@ -329,14 +330,11 @@ export const useCompanyServicesApplication = ({
       
       const result = await response.json();
       
-      // Clear application state after successful submission
-      // The form will be reset and we start fresh
-      setApplication(null);
-      lastSavedDataRef.current = ''; // Reset the last saved data reference
-      
+      // Don't clear application state - keep it for potential resubmission after rejection
+      // The application ID is needed to continue the conversation history
       if (config.debugMode) {
         console.log('Submitted Company Services application for review:', result);
-        console.log('Cleared application state for fresh start');
+        console.log('Keeping application state for potential resubmission. Application ID:', appToSubmit.id);
       }
       
       return true;
@@ -382,6 +380,24 @@ export const useCompanyServicesApplication = ({
     }
   };
   
+  // Restore application for editing after rejection
+  const restoreApplication = (applicationId: string, formData: any) => {
+    // Create a minimal application object to maintain the ID and continue conversation history
+    const restoredApp: Application = {
+      id: applicationId,
+      type: 'company-services',
+      title: generateApplicationTitle(formData),
+      form_data: formData,
+      status: 'rejected', // We know it was rejected since we're editing
+      submitted_by_id: 0, // Will be set by backend
+      urgency: 'standard',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    setApplication(restoredApp);
+  };
+  
   return {
     // Application state
     application,
@@ -392,6 +408,7 @@ export const useCompanyServicesApplication = ({
     // Actions
     saveApplication,
     submitForReview,
+    restoreApplication,
     
     // Status helpers
     canDownloadPDF,

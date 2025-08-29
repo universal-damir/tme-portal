@@ -573,6 +573,11 @@ const CompanyServicesTab: React.FC = () => {
       // Reset the initialization flag to prevent re-syncing
       initializedRef.current = true;
       
+      // Restore the application ID so the hook knows it's editing an existing application
+      if (applicationId) {
+        reviewApp.restoreApplication(applicationId, formData);
+      }
+      
       // Don't use reset() - manually set each field to ensure proper updates
       Object.keys(formData).forEach(key => {
         if (formData[key] !== undefined) {
@@ -820,7 +825,7 @@ const CompanyServicesTab: React.FC = () => {
           // Use the same filename generation as PDF export for consistency
           try {
             // Ensure watchedData has required fields before calling
-            if (!watchedData || !watchedData.date) {
+            if (!watchedData || !watchedData.date || (!watchedData.firstName && !watchedData.lastName && !watchedData.companyName && !clientInfo.firstName && !clientInfo.lastName && !clientInfo.companyName)) {
               const date = new Date();
               const yy = date.getFullYear().toString().slice(-2);
               const mm = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -828,8 +833,16 @@ const CompanyServicesTab: React.FC = () => {
               return `${yy}${mm}${dd} TME Services Application`;
             }
             
+            // Create a complete data object for filename generation
+            const completeData = {
+              ...watchedData,
+              firstName: watchedData.firstName || clientInfo.firstName || '',
+              lastName: watchedData.lastName || clientInfo.lastName || '',
+              companyName: watchedData.companyName || clientInfo.companyName || ''
+            };
+            
             const { generateCompanyServicesFilename } = require('@/lib/pdf-generator/integrations/FilenameIntegrations');
-            const filename = generateCompanyServicesFilename(watchedData, clientInfo);
+            const filename = generateCompanyServicesFilename(completeData, clientInfo);
             return filename.replace('.pdf', '');
           } catch (error) {
             // Fallback to basic format if generation fails
@@ -860,14 +873,11 @@ const CompanyServicesTab: React.FC = () => {
           if (success) {
             console.log('🟢 [CompanyServicesTab] Successfully submitted for review');
             
-            // Clear form completely - data is now in DB
-            reset();
-            clearClientInfo({ 
-              source: 'review-submit'
-            });
-            setWorkflowState('fresh');
+            // DON'T clear form data - keep it for potential edits after rejection
+            // The data is safely stored in the database
+            setWorkflowState('review-submitted');
             toast.success('Application submitted for review', {
-              description: 'The form has been cleared for the next application.'
+              description: 'Your application has been saved and submitted for review.'
             });
             
             console.log('🟢 [CompanyServicesTab] Form cleared after review submission');

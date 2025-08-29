@@ -76,12 +76,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   const [emailDraftProps, setEmailDraftProps] = React.useState<EmailDraftGeneratorProps | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = React.useState(false);
   
-  // Debug logging for workflow state
-  React.useEffect(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
-      console.log('[CostOverviewTab] Current workflow state:', workflowState);
-    }
-  }, [workflowState]);
 
   // Form state management
   const {
@@ -312,21 +306,9 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   const initializedRef = useRef(false);
   const isLoadingRejectedRef = useRef(false); // Track if we're loading a rejected application
   useEffect(() => {
-    console.log('🔵 [CostOverview Sync Effect] Running with:', {
-      workflowState,
-      isLoadingRejected: isLoadingRejectedRef.current,
-      initialized: initializedRef.current,
-      clientInfo: {
-        firstName: clientInfo.firstName,
-        lastName: clientInfo.lastName,
-        companyName: clientInfo.companyName
-      }
-    });
-    
     // NEVER sync/clear when in review-rejected or review-approved state or when loading
     if (workflowState === 'review-rejected' || workflowState === 'review-approved' || isLoadingRejectedRef.current) {
-      console.log('🔵 [CostOverview Sync Effect] SKIPPING - in review state or loading');
-      return; // Don't touch the form data when loading from review
+        return; // Don't touch the form data when loading from review
     }
     
     // Check if context is cleared (all fields empty) and we're in fresh state
@@ -334,14 +316,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
     const shouldSyncWhenCleared = isContextCleared && workflowState === 'fresh' && initializedRef.current && !isLoadingRejectedRef.current;
     
     if (!initializedRef.current && (clientInfo.firstName || clientInfo.lastName || clientInfo.companyName)) {
-      console.log('🔵 [CostOverview Sync Effect] Initial sync from context to form');
       setValue('clientDetails.firstName', clientInfo.firstName || '');
       setValue('clientDetails.lastName', clientInfo.lastName || '');
       setValue('clientDetails.companyName', clientInfo.companyName || '');
       setValue('clientDetails.date', clientInfo.date);
       initializedRef.current = true;
     } else if (shouldSyncWhenCleared) {
-      console.log('🆘 [CostOverview Sync Effect] CLEARING FIELDS - context cleared and fresh state');
       // Also sync when context is cleared (all fields empty) and we're in fresh state
       setValue('clientDetails.firstName', '');
       setValue('clientDetails.lastName', '');
@@ -899,30 +879,21 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   // Listen for edit application events from review modal or notifications
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
-      console.log('🟡 [CostOverviewTab] Received edit-cost-overview-application event', event.detail);
       const { applicationId, formData } = event.detail;
-      
-      // DEBUG: Check what's in formData
-      console.log('🔍 [CostOverviewTab] FormData received:', {
-        hasClientDetails: !!formData.clientDetails,
-        firstName: formData.clientDetails?.firstName,
-        lastName: formData.clientDetails?.lastName,
-        companyName: formData.clientDetails?.companyName,
-        fullFormData: formData
-      });
       
       // Set loading flag FIRST to prevent any clearing
       isLoadingRejectedRef.current = true;
       
-      // Reset the initialization flag to prevent re-syncing
+      // COMPLETELY BYPASS SharedClient context sync by setting initialization flag
       initializedRef.current = true;
       
-      // Pre-fill the form with the application data BEFORE setting workflow state
-      console.log('🟡 [CostOverviewTab] About to set form data:', {
-        firstName: formData.clientDetails?.firstName,
-        lastName: formData.clientDetails?.lastName,
-        companyName: formData.clientDetails?.companyName
-      });
+      // Set workflow state BEFORE clearing context to prevent race condition
+      setWorkflowState('review-rejected');
+      
+      // Restore the application ID so the hook knows it's editing an existing application
+      if (applicationId) {
+        reviewApp.restoreApplication(applicationId, formData);
+      }
       
       // Don't use reset() - manually set each field to ensure proper updates
       // Set all clientDetails fields
@@ -952,7 +923,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       
       // Double-check critical fields with a delay
       setTimeout(() => {
-        console.log('🟡 [CostOverviewTab] Double-checking critical fields');
         if (formData.clientDetails?.firstName) {
           setValue('clientDetails.firstName', formData.clientDetails.firstName, { 
             shouldValidate: true, 
@@ -979,53 +949,10 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         trigger(['clientDetails.firstName', 'clientDetails.lastName', 'clientDetails.companyName']);
       }, 100);
       
-      // NOW set workflow state after data is loaded
-      // This prevents any race conditions with effects that check workflow state
-      setWorkflowState('review-rejected');
-      
-      // Clear loading flag after a short delay to ensure all effects have run
+      // Clear loading flag after delay to ensure all effects have run
       setTimeout(() => {
         isLoadingRejectedRef.current = false;
       }, 500);
-      
-      // DEBUG: Check what was set after reset at multiple intervals
-      setTimeout(() => {
-        const currentValues = getValues();
-        console.log('🔍 [CostOverviewTab] After 100ms, form values:', {
-          firstName: currentValues.clientDetails?.firstName,
-          lastName: currentValues.clientDetails?.lastName,
-          companyName: currentValues.clientDetails?.companyName
-        });
-      }, 100);
-      
-      setTimeout(() => {
-        const currentValues = getValues();
-        console.log('🔍 [CostOverviewTab] After 300ms, form values:', {
-          firstName: currentValues.clientDetails?.firstName,
-          lastName: currentValues.clientDetails?.lastName,
-          companyName: currentValues.clientDetails?.companyName
-        });
-      }, 300);
-      
-      setTimeout(() => {
-        const currentValues = getValues();
-        console.log('🔍 [CostOverviewTab] After 600ms (FINAL CHECK), form values:', {
-          firstName: currentValues.clientDetails?.firstName,
-          lastName: currentValues.clientDetails?.lastName,
-          companyName: currentValues.clientDetails?.companyName,
-          isLoadingRejected: isLoadingRejectedRef.current
-        });
-        
-        // Also check the actual DOM input values
-        const firstNameInput = document.querySelector('input[name="clientDetails.firstName"]') as HTMLInputElement;
-        const lastNameInput = document.querySelector('input[name="clientDetails.lastName"]') as HTMLInputElement;
-        console.log('🔍 [CostOverviewTab] DOM Input values:', {
-          firstNameDOM: firstNameInput?.value,
-          lastNameDOM: lastNameInput?.value,
-          firstNameExists: !!firstNameInput,
-          lastNameExists: !!lastNameInput
-        });
-      }, 600);
       
       // Special handling for client emails to update the component's local state
       if (formData.clientDetails?.clientEmails) {
@@ -1035,7 +962,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         window.dispatchEvent(emailUpdateEvent);
       }
       
-      console.log('🟡 [CostOverviewTab] Form loaded with rejected application data (NOT in SharedClient)');
       
       // Show a toast notification to inform the user
       toast.success('Form loaded with your previous data. You can now make changes and resubmit.', {
@@ -1046,32 +972,26 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
 
     const handleSendApprovedApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🟢 [CostOverviewTab] Received send-approved-application event', { applicationId, hasFormData: !!formData });
       
       // DON'T load into SharedClientContext - just use the formData directly
       setWorkflowState('review-approved');
       
-      console.log('🟢 [CostOverviewTab] Processing approved application data');
       
       // Send confirmation that the event was received
       const confirmationEvent = new CustomEvent('send-approved-application-confirmed', {
         detail: { applicationId, formType: 'cost-overview' }
       });
       window.dispatchEvent(confirmationEvent);
-      console.log('🟢 [CostOverviewTab] Sent confirmation event');
       
       // Send PDF to client using the saved form data
-      console.log('🟢 [CostOverviewTab] Sending PDF with approved form data');
       handleSendPDF(formData);
     };
 
     const handleTabReadinessCheck = (event: any) => {
       const { targetTab } = event.detail;
-      console.log(`🔧 COST-OVERVIEW-TAB: Received tab-readiness-check for targetTab: ${targetTab}`);
       
       // Only respond if this is our tab
       if (targetTab === 'cost-overview') {
-        console.log(`🔧 COST-OVERVIEW-TAB: This is our tab, sending confirmation`);
         const readinessEvent = new CustomEvent('tab-readiness-confirmed', {
           detail: { 
             tab: 'cost-overview', 
@@ -1080,8 +1000,6 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
           }
         });
         window.dispatchEvent(readinessEvent);
-      } else {
-        console.log(`🔧 COST-OVERVIEW-TAB: Not our tab (${targetTab} !== cost-overview)`);
       }
     };
 
@@ -1512,19 +1430,14 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onSubmit={async (submission) => {
           const success = await reviewApp.submitForReview(submission);
           if (success) {
-            console.log('🟢 [CostOverviewTab] Successfully submitted for review');
             
-            // Clear form completely - data is now in DB
-            reset();
-            clearClientInfo({ 
-              source: 'review-submit'
-            });
-            setWorkflowState('fresh');
+            // DON'T clear form data - keep it for potential edits after rejection
+            // The data is safely stored in the database
+            setWorkflowState('review-submitted');
             toast.success('Application submitted for review', {
-              description: 'The form has been cleared for the next application.'
+              description: 'Your application has been saved and submitted for review.'
             });
             
-            console.log('🟢 [CostOverviewTab] Form cleared after review submission');
           }
           return success;
         }}
