@@ -19,6 +19,7 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   const companyServicesData = (data as any).companyServicesData;
   const accountingServices = companyServicesData?.accountingServices;
   const isLastService = (data as any).lastServiceName === 'accounting';
+  const isFirstService = (data as any).firstServiceName === 'accounting';
 
   // Don't render if accounting services are not enabled
   if (!accountingServices?.enabled) {
@@ -33,7 +34,7 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
     <>
       {/* Main Accounting Services Page */}
       <Page size="A4" style={styles.page}>
-        <HeaderComponent data={data} />
+        <HeaderComponent data={data} showClientInfo={isFirstService} />
 
         {/* Main content area that will flex to fill available space */}
         <View style={{ flex: 1, flexDirection: 'column' }}>

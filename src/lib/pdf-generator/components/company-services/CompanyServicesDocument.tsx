@@ -45,32 +45,34 @@ export const CompanyServicesDocument: React.FC<CompanyServicesDocumentProps> = (
     { name: 'compliance', enabled: companyServicesData.complianceServices?.enabled }
   ].filter(service => service.enabled);
 
-  // Find the last enabled service
+  // Find the first and last enabled services
+  const firstServiceName = enabledServices.length > 0 ? enabledServices[0].name : null;
   const lastServiceName = enabledServices.length > 0 ? enabledServices[enabledServices.length - 1].name : null;
 
-  // Add isLastService flag to transformedData
-  const dataWithLastService = {
+  // Add service position flags to transformedData
+  const dataWithServiceFlags = {
     ...transformedData,
+    firstServiceName,
     lastServiceName
   };
 
   return (
     <Document>
       {/* Cover Page - Always shown */}
-      <CompanyServicesCoverPage data={dataWithLastService} />
+      <CompanyServicesCoverPage data={dataWithServiceFlags} />
 
       {/* Service Pages - Only shown when services are enabled */}
-      <TaxConsultingServicesPage data={dataWithLastService} />
-      <AccountingServicesPage data={dataWithLastService} />
-      <CommercialServicesPage data={dataWithLastService} />
-      <BackOfficeServicesPage data={dataWithLastService} />
-      <ComplianceServicesPage data={dataWithLastService} />
+      <TaxConsultingServicesPage data={dataWithServiceFlags} />
+      <AccountingServicesPage data={dataWithServiceFlags} />
+      <CommercialServicesPage data={dataWithServiceFlags} />
+      <BackOfficeServicesPage data={dataWithServiceFlags} />
+      <ComplianceServicesPage data={dataWithServiceFlags} />
 
       {/* Meet The Team Page - Always shown */}
-      <MeetTheTeamPage data={dataWithLastService} />
+      <MeetTheTeamPage data={dataWithServiceFlags} />
 
       {/* Service Portfolio Page - Always shown */}
-      <ServicePortfolioPage data={dataWithLastService} />
+      <ServicePortfolioPage data={dataWithServiceFlags} />
     </Document>
   );
 }; 

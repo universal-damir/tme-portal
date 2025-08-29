@@ -7,11 +7,12 @@ import type { PDFComponentProps } from '../../types';
 interface HeaderComponentProps extends Pick<PDFComponentProps, 'data'> {
   // Header now includes company information that varies by authority
   // Enhanced with full branding system
+  showClientInfo?: boolean; // New prop to control client info display
 }
 
 // HeaderComponent - Enhanced with branding system
 // Uses the new branding configurations for consistent company information
-export const HeaderComponent: React.FC<HeaderComponentProps> = ({ data }) => {
+export const HeaderComponent: React.FC<HeaderComponentProps> = ({ data, showClientInfo = false }) => {
   // Defensive check to prevent crashes when data is malformed
   if (!data || !data.authorityInformation || !data.authorityInformation.responsibleAuthority) {
     console.error('HeaderComponent: Invalid data provided', data);
@@ -35,6 +36,13 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = ({ data }) => {
 
   // Get branding configuration based on authority
   const branding = getBrandingByAuthority(data.authorityInformation.responsibleAuthority);
+  
+  // Extract client info for display when showClientInfo is true
+  const companyServicesData = (data as any).companyServicesData;
+  const clientDetails = data.clientDetails;
+  const clientCompanyName = clientDetails?.companyName || companyServicesData?.companyName;
+  const clientFirstName = clientDetails?.firstName || companyServicesData?.firstName;
+  const clientLastName = clientDetails?.lastName || companyServicesData?.lastName;
 
   return (
     <View style={styles.header}>
@@ -56,6 +64,22 @@ export const HeaderComponent: React.FC<HeaderComponentProps> = ({ data }) => {
             </Text>
           </View>
         </View>
+        
+        {/* Client info section - only shown when showClientInfo is true */}
+        {showClientInfo && (clientCompanyName || (clientFirstName && clientLastName)) && (
+          <View style={{ alignItems: 'flex-end' }}>
+            {clientCompanyName && (
+              <Text style={{ fontSize: 10, color: '#9ca3af', marginBottom: 1 }}>
+                {clientCompanyName}
+              </Text>
+            )}
+            {clientFirstName && clientLastName && (
+              <Text style={{ fontSize: 10, color: '#9ca3af' }}>
+                {clientFirstName} {clientLastName}
+              </Text>
+            )}
+          </View>
+        )}
       </View>
     </View>
   );

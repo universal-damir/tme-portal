@@ -45,6 +45,13 @@ export function transformCompanyServicesData(
     
     // Add company services data as a nested object for easy access in PDF components
     companyServicesData: {
+      // Client info for header display
+      firstName: mergedClientDetails.firstName,
+      lastName: mergedClientDetails.lastName,
+      companyName: mergedClientDetails.companyName,
+      shortCompanyName: mergedClientDetails.shortCompanyName,
+      
+      // Other company services fields
       date: companyServicesData.date || new Date().toISOString().split('T')[0],
       secondaryCurrency: companyServicesData.secondaryCurrency || 'EUR',
       exchangeRate: companyServicesData.exchangeRate || 3.67,

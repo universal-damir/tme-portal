@@ -18,6 +18,7 @@ export const ComplianceServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   const companyServicesData = (data as any).companyServicesData;
   const complianceServices = companyServicesData?.complianceServices;
   const isLastService = (data as any).lastServiceName === 'compliance';
+  const isFirstService = (data as any).firstServiceName === 'compliance';
 
   // Don't render if compliance services are not enabled
   if (!complianceServices?.enabled) {
@@ -26,7 +27,7 @@ export const ComplianceServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
 
   return (
     <Page size="A4" style={styles.page}>
-      <HeaderComponent data={data} />
+      <HeaderComponent data={data} showClientInfo={isFirstService} />
 
       {/* Main content area that will flex to fill available space */}
       <View style={{ flex: 1, flexDirection: 'column' }}>

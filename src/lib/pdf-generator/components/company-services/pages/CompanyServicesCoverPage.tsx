@@ -59,9 +59,9 @@ export const CompanyServicesCoverPage: React.FC<PDFComponentProps> = ({ data }) 
   // Access company services data from transformed data
   const companyServicesData = (data as any).companyServicesData;
 
-  // Generate intro content based on company type
+  // Generate intro content - always use the same content without Dear greeting
   const getIntroContent = () => {
-    const content = (
+    return (
       <>
         Once your company is established, staying compliant and running smoothly in the UAE requires consistent attention to key operational areas - from accounting and taxation to banking, payroll, and government-related processes.
         {'\n\n'}
@@ -70,15 +70,6 @@ export const CompanyServicesCoverPage: React.FC<PDFComponentProps> = ({ data }) 
         
       </>
     );
-    
-    return data.clientDetails.addressToCompany ? 
-      content :
-      (
-        <>
-          Dear {data.clientDetails.firstName},{'\n\n'}
-          {content}
-        </>
-      );
   };
 
   // Generate headline - fixed headline

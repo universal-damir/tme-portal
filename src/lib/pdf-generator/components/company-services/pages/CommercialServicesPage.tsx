@@ -29,6 +29,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   const exchangeRate = data.clientDetails.exchangeRate;
   const secondaryCurrency = data.clientDetails.secondaryCurrency;
   const isLastService = (data as any).lastServiceName === 'commercial';
+  const isFirstService = (data as any).firstServiceName === 'commercial';
 
   // Check if we have any commercial services to display
   const hasCommercialServices = accountingServices?.commercialServices && accountingServices.commercialServicesFee && accountingServices.commercialServicesFee > 0;
@@ -43,7 +44,7 @@ export const CommercialServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
 
   return (
     <Page size="A4" style={styles.page}>
-      <HeaderComponent data={data} />
+      <HeaderComponent data={data} showClientInfo={isFirstService} />
 
       {/* Main content area that will flex to fill available space */}
       <View style={{ flex: 1, flexDirection: 'column' }}>

@@ -18,6 +18,7 @@ export const BackOfficeServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   const companyServicesData = (data as any).companyServicesData;
   const backOfficeServices = companyServicesData?.backOfficeServices;
   const isLastService = (data as any).lastServiceName === 'backOffice';
+  const isFirstService = (data as any).firstServiceName === 'backOffice';
 
   // Don't render if back-office services are not enabled
   if (!backOfficeServices?.enabled) {
@@ -26,7 +27,7 @@ export const BackOfficeServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
 
   return (
     <Page size="A4" style={styles.page}>
-      <HeaderComponent data={data} />
+      <HeaderComponent data={data} showClientInfo={isFirstService} />
 
       {/* Main content area that will flex to fill available space */}
       <View style={{ flex: 1, flexDirection: 'column' }}>
