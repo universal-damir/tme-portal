@@ -10,12 +10,14 @@ interface User {
   id?: number;
   employee_code: string;
   email: string;
+  first_name: string;
+  last_name: string;
   full_name: string;
   phone?: string;
   department: string;
   designation: string;
-  role: 'admin' | 'manager' | 'staff';
-  status: 'active' | 'inactive' | 'locked';
+  role: 'admin' | 'manager' | 'employee' | 'staff';
+  status: 'active' | 'inactive' | 'suspended' | 'pending';
 }
 
 interface UserModalProps {
@@ -28,6 +30,7 @@ interface UserModalProps {
 
 const ROLES = [
   { value: 'staff', label: 'Staff' },
+  { value: 'employee', label: 'Employee' },
   { value: 'manager', label: 'Manager' },
   { value: 'admin', label: 'Administrator' },
 ];
@@ -35,12 +38,16 @@ const ROLES = [
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'pending', label: 'Pending' },
 ];
 
 export default function UserModal({ isOpen, onClose, user, onSave, departments }: UserModalProps) {
   const [formData, setFormData] = useState({
     employee_code: '',
     email: '',
+    first_name: '',
+    last_name: '',
     full_name: '',
     phone: '',
     department: '',
@@ -56,9 +63,16 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
 
   useEffect(() => {
     if (user) {
+      // Split full name into first and last name if needed
+      const nameParts = user.full_name.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
       setFormData({
         employee_code: user.employee_code,
         email: user.email,
+        first_name: user.first_name || firstName,
+        last_name: user.last_name || lastName,
         full_name: user.full_name,
         phone: getPhoneDisplayFormat(user.phone || ''),
         department: user.department,
@@ -73,6 +87,8 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
       setFormData({
         employee_code: '',
         email: '',
+        first_name: '',
+        last_name: '',
         full_name: '',
         phone: '',
         department: departments[0] || '',
@@ -100,8 +116,12 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
       newErrors.email = 'Please enter a valid email address';
     }
 
-    if (!formData.full_name.trim()) {
-      newErrors.full_name = 'Full name is required';
+    if (!formData.first_name.trim()) {
+      newErrors.first_name = 'First name is required';
+    }
+    
+    if (!formData.last_name.trim()) {
+      newErrors.last_name = 'Last name is required';
     }
 
     // Phone validation (optional field)
@@ -151,6 +171,7 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
         },
         body: JSON.stringify({
           ...formData,
+          full_name: `${formData.first_name} ${formData.last_name}`.trim(),
           phone: normalizePhoneForStorage(formData.phone),
           ...(formData.password ? { password: formData.password } : {}),
         }),
@@ -172,10 +193,20 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }));
+    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
+    
+    setFormData(prev => {
+      const updated = { ...prev, [name]: newValue };
+      
+      // Auto-update full name when first or last name changes
+      if (name === 'first_name' || name === 'last_name') {
+        const firstName = name === 'first_name' ? newValue : prev.first_name;
+        const lastName = name === 'last_name' ? newValue : prev.last_name;
+        updated.full_name = `${firstName} ${lastName}`.trim();
+      }
+      
+      return updated;
+    });
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -236,226 +267,261 @@ export default function UserModal({ isOpen, onClose, user, onSave, departments }
                       {user ? 'Edit User' : 'Add New User'}
                     </Dialog.Title>
 
-                    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+                    <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                       {errors.submit && (
                         <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
                           {errors.submit}
                         </div>
                       )}
 
-                      <div className="grid grid-cols-2 gap-4">
+                      {/* Basic Information Section */}
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Basic Information</h4>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              Employee Code *
+                            </label>
+                            <input
+                              type="text"
+                              name="employee_code"
+                              value={formData.employee_code}
+                              onChange={handleInputChange}
+                              className={`mt-1 block w-full rounded-md border ${
+                                errors.employee_code ? 'border-red-300' : 'border-gray-300'
+                              } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                            />
+                            {errors.employee_code && (
+                              <p className="mt-1 text-sm text-red-600">{errors.employee_code}</p>
+                            )}
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              Email *
+                            </label>
+                            <input
+                              type="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              className={`mt-1 block w-full rounded-md border ${
+                                errors.email ? 'border-red-300' : 'border-gray-300'
+                              } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                            />
+                            {errors.email && (
+                              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              First Name *
+                            </label>
+                            <input
+                              type="text"
+                              name="first_name"
+                              value={formData.first_name}
+                              onChange={handleInputChange}
+                              className={`mt-1 block w-full rounded-md border ${
+                                errors.first_name ? 'border-red-300' : 'border-gray-300'
+                              } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                            />
+                            {errors.first_name && (
+                              <p className="mt-1 text-sm text-red-600">{errors.first_name}</p>
+                            )}
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              Last Name *
+                            </label>
+                            <input
+                              type="text"
+                              name="last_name"
+                              value={formData.last_name}
+                              onChange={handleInputChange}
+                              className={`mt-1 block w-full rounded-md border ${
+                                errors.last_name ? 'border-red-300' : 'border-gray-300'
+                              } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                            />
+                            {errors.last_name && (
+                              <p className="mt-1 text-sm text-red-600">{errors.last_name}</p>
+                            )}
+                          </div>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-gray-700">
-                            Employee Code *
+                            Phone Number
+                          </label>
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handlePhoneChange}
+                            placeholder="+971 55 123 45 67"
+                            className={`mt-1 block w-full rounded-md border ${
+                              errors.phone ? 'border-red-300' : 'border-gray-300'
+                            } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                          />
+                          {errors.phone && (
+                            <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                          )}
+                          <p className="mt-1 text-xs text-gray-500">
+                            UAE format: +971 XX X XX XX XX (optional)
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Work Information Section */}
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Work Information</h4>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Department *
+                          </label>
+                          {!customDepartment ? (
+                            <div className="flex space-x-2">
+                              <select
+                                name="department"
+                                value={formData.department}
+                                onChange={handleInputChange}
+                                className="mt-1 block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                              >
+                                {departments.map(dept => (
+                                  <option key={dept} value={dept}>{dept}</option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                onClick={() => setCustomDepartment(true)}
+                                className="mt-1 px-3 py-2 text-sm text-blue-600 hover:text-blue-500"
+                              >
+                                Custom
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="flex space-x-2">
+                              <input
+                                type="text"
+                                name="department"
+                                value={formData.department}
+                                onChange={handleInputChange}
+                                placeholder="Enter custom department"
+                                className="mt-1 block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCustomDepartment(false);
+                                  setFormData(prev => ({ ...prev, department: departments[0] || '' }));
+                                }}
+                                className="mt-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-500"
+                              >
+                                Select
+                              </button>
+                            </div>
+                          )}
+                          {errors.department && (
+                            <p className="mt-1 text-sm text-red-600">{errors.department}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            Designation *
                           </label>
                           <input
                             type="text"
-                            name="employee_code"
-                            value={formData.employee_code}
+                            name="designation"
+                            value={formData.designation}
                             onChange={handleInputChange}
                             className={`mt-1 block w-full rounded-md border ${
-                              errors.employee_code ? 'border-red-300' : 'border-gray-300'
+                              errors.designation ? 'border-red-300' : 'border-gray-300'
                             } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
                           />
-                          {errors.employee_code && (
-                            <p className="mt-1 text-sm text-red-600">{errors.employee_code}</p>
+                          {errors.designation && (
+                            <p className="mt-1 text-sm text-red-600">{errors.designation}</p>
                           )}
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Email *
-                          </label>
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            className={`mt-1 block w-full rounded-md border ${
-                              errors.email ? 'border-red-300' : 'border-gray-300'
-                            } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
-                          />
-                          {errors.email && (
-                            <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          name="full_name"
-                          value={formData.full_name}
-                          onChange={handleInputChange}
-                          className={`mt-1 block w-full rounded-md border ${
-                            errors.full_name ? 'border-red-300' : 'border-gray-300'
-                          } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
-                        />
-                        {errors.full_name && (
-                          <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Phone Number
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handlePhoneChange}
-                          placeholder="+971 55 123 45 67"
-                          className={`mt-1 block w-full rounded-md border ${
-                            errors.phone ? 'border-red-300' : 'border-gray-300'
-                          } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
-                        />
-                        {errors.phone && (
-                          <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-                        )}
-                        <p className="mt-1 text-xs text-gray-500">
-                          UAE format: +971 XX X XX XX XX (optional)
-                        </p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Department *
-                        </label>
-                        {!customDepartment ? (
-                          <div className="flex space-x-2">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              Role *
+                            </label>
                             <select
-                              name="department"
-                              value={formData.department}
+                              name="role"
+                              value={formData.role}
                               onChange={handleInputChange}
-                              className="mt-1 block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+                              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                             >
-                              {departments.map(dept => (
-                                <option key={dept} value={dept}>{dept}</option>
+                              {ROLES.map(role => (
+                                <option key={role.value} value={role.value}>{role.label}</option>
                               ))}
                             </select>
-                            <button
-                              type="button"
-                              onClick={() => setCustomDepartment(true)}
-                              className="mt-1 px-3 py-2 text-sm text-blue-600 hover:text-blue-500"
-                            >
-                              Custom
-                            </button>
                           </div>
-                        ) : (
-                          <div className="flex space-x-2">
-                            <input
-                              type="text"
-                              name="department"
-                              value={formData.department}
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                              Status *
+                            </label>
+                            <select
+                              name="status"
+                              value={formData.status}
                               onChange={handleInputChange}
-                              placeholder="Enter custom department"
-                              className="mt-1 block flex-1 rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCustomDepartment(false);
-                                setFormData(prev => ({ ...prev, department: departments[0] || '' }));
-                              }}
-                              className="mt-1 px-3 py-2 text-sm text-gray-600 hover:text-gray-500"
+                              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
                             >
-                              Select
-                            </button>
+                              {STATUS_OPTIONS.map(status => (
+                                <option key={status.value} value={status.value}>{status.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Security Section */}
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Security</h4>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">
+                            {user ? 'New Password (leave blank to keep current)' : 'Password *'}
+                          </label>
+                          <input
+                            type="password"
+                            name="password"
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            className={`mt-1 block w-full rounded-md border ${
+                              errors.password ? 'border-red-300' : 'border-gray-300'
+                            } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
+                          />
+                          {errors.password && (
+                            <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                          )}
+                        </div>
+
+                        {!user && (
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              name="must_change_password"
+                              checked={formData.must_change_password}
+                              onChange={handleInputChange}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label className="ml-2 block text-sm text-gray-700">
+                              Require password change on first login
+                            </label>
                           </div>
                         )}
-                        {errors.department && (
-                          <p className="mt-1 text-sm text-red-600">{errors.department}</p>
-                        )}
                       </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Designation *
-                        </label>
-                        <input
-                          type="text"
-                          name="designation"
-                          value={formData.designation}
-                          onChange={handleInputChange}
-                          className={`mt-1 block w-full rounded-md border ${
-                            errors.designation ? 'border-red-300' : 'border-gray-300'
-                          } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
-                        />
-                        {errors.designation && (
-                          <p className="mt-1 text-sm text-red-600">{errors.designation}</p>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Role *
-                          </label>
-                          <select
-                            name="role"
-                            value={formData.role}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                          >
-                            {ROLES.map(role => (
-                              <option key={role.value} value={role.value}>{role.label}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Status *
-                          </label>
-                          <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
-                          >
-                            {STATUS_OPTIONS.map(status => (
-                              <option key={status.value} value={status.value}>{status.label}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          {user ? 'New Password (leave blank to keep current)' : 'Password *'}
-                        </label>
-                        <input
-                          type="password"
-                          name="password"
-                          value={formData.password}
-                          onChange={handleInputChange}
-                          className={`mt-1 block w-full rounded-md border ${
-                            errors.password ? 'border-red-300' : 'border-gray-300'
-                          } px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500`}
-                        />
-                        {errors.password && (
-                          <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                        )}
-                      </div>
-
-                      {!user && (
-                        <div className="flex items-center">
-                          <input
-                            type="checkbox"
-                            name="must_change_password"
-                            checked={formData.must_change_password}
-                            onChange={handleInputChange}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <label className="ml-2 block text-sm text-gray-700">
-                            Require password change on first login
-                          </label>
-                        </div>
-                      )}
 
                       <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                         <button

@@ -45,7 +45,7 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
     setFilters
   } = useTodos({
     autoRefresh: false,
-    initialLoad: false
+    initialLoad: true
   });
 
   // Show all todos (filtering is now handled by tabs)
@@ -174,26 +174,34 @@ const TodoListPanel: React.FC<TodoListPanelProps> = ({
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
-      <div className="px-4 py-4 border-b border-gray-200">
+      <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h3 
-              className="text-lg font-semibold"
-              style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
-            >
-              Here is your TO DO list
-            </h3>
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: '#243F7B' }}>
+              <Target className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 
+                className="text-xl font-bold"
+                style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+              >
+                My Tasks
+              </h3>
+              <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Stay organized and track your progress
+              </p>
+            </div>
           </div>
           
           <motion.button
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-white/50 transition-colors border border-gray-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={refetch}
             disabled={loading}
-            title="Refresh"
+            title="Refresh tasks"
           >
-            <RefreshCw className={`w-4 h-4 text-gray-600 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 text-gray-700 ${loading ? 'animate-spin' : ''}`} />
           </motion.button>
         </div>
 

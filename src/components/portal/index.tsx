@@ -7,6 +7,7 @@ import { useChatPanel } from '@/hooks/useChatPanel'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/navigation'
+import { TabId } from '@/types/portal'
 
 // Lazy load tab components for performance
 const ProfileTab = React.lazy(() => import('./tabs/ProfileTab'))

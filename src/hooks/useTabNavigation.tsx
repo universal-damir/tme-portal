@@ -20,7 +20,8 @@ export const useTabNavigation = () => {
       'golden-visa', 
       'company-services',
       'corporate-changes',
-      'taxation'
+      'taxation',
+      'cit-return-letters'
     ];
     
     return validTabs.includes(tabFromUrl) ? tabFromUrl : DEFAULT_TAB;
@@ -40,7 +41,8 @@ export const useTabNavigation = () => {
 
   // Set active tab with URL update
   const setActiveTab = useCallback((tabId: TabId) => {
-    setActiveTabState(tabId);
+    // Only update URL, let the useEffect handle state changes
+    // This prevents double rendering
     setVisitedTabs(prev => new Set([...prev, tabId]));
     updateUrlWithTab(tabId);
   }, [updateUrlWithTab]);
@@ -54,7 +56,8 @@ export const useTabNavigation = () => {
       'golden-visa',
       'company-services', 
       'corporate-changes',
-      'taxation'
+      'taxation',
+      'cit-return-letters'
     ];
     
     if (validTabs.includes(tabFromUrl) && tabFromUrl !== activeTab) {
@@ -71,7 +74,8 @@ export const useTabNavigation = () => {
       'golden-visa',
       'company-services',
       'corporate-changes',
-      'taxation'
+      'taxation',
+      'cit-return-letters'
     ];
     
     const currentIndex = tabs.indexOf(activeTab);
@@ -89,7 +93,8 @@ export const useTabNavigation = () => {
       'golden-visa',
       'company-services',
       'corporate-changes',
-      'taxation'
+      'taxation',
+      'cit-return-letters'
     ];
     
     const currentIndex = tabs.indexOf(activeTab);

@@ -116,9 +116,10 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
             </h1>
           </div>
 
-          {/* Main Content: Recent Activity + Todo List Side by Side */}
+          {/* Main Content: Todo List Full Width */}
+          {/* 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {/* Left Column: Recent Activity Panel */}
+            Left Column: Recent Activity Panel - COMMENTED OUT FOR NOW
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -368,7 +369,7 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
                   })}
                 </div>
                 
-                {/* Activity Feed Footer */}
+                {Activity Feed Footer}
                 {activities.length > 4 && (
                   <div className="px-3 py-2 border-t border-gray-200 bg-gray-50">
                     <motion.button
@@ -392,22 +393,22 @@ export default function ProfileTab({ refreshTrigger }: ProfileTabProps = {}) {
               </div>
             )}
             </motion.div>
+          */}
 
-            {/* Right Column: Todo List Panel */}
+            {/* Todo List Panel - Full Width */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="xl:max-h-[600px]"
+              transition={{ duration: 0.5 }}
+              className="w-full"
             >
               <TodoListPanel 
-                maxHeight="540px"
+                maxHeight="600px"
                 showFilters={true}
                 autoRefresh={true}
                 className="h-full"
               />
             </motion.div>
-          </div>
         </CardContent>
       </Card>
     </div>

@@ -306,9 +306,35 @@ export function useTodos(options: UseTodosOptions = {}): UseTodosReturn {
     setOffset(0);
   }, []);
 
-  // No automatic initial load - only manual refresh
+  // Initial load on mount
+  useEffect(() => {
+    if (initialLoad) {
+      refetch();
+    }
+  }, [initialLoad, refetch]);
 
-  // No auto-refresh - only manual refresh
+  // Auto-refresh effect
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const scheduleRefresh = () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+      
+      refreshTimeoutRef.current = setTimeout(() => {
+        refetch().finally(() => scheduleRefresh());
+      }, refreshInterval);
+    };
+
+    scheduleRefresh();
+
+    return () => {
+      if (refreshTimeoutRef.current) {
+        clearTimeout(refreshTimeoutRef.current);
+      }
+    };
+  }, [autoRefresh, refreshInterval, refetch]);
 
   // Cleanup on unmount
   useEffect(() => {
