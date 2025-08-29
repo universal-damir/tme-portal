@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, MessageSquare, FileText, User, Calendar, AlertCircle, CheckCircle, Edit3, Send } from 'lucide-react';
 import { toast } from 'sonner';
-import { Application } from '@/types/review-system';
+import { Application, ReviewMessage } from '@/types/review-system';
 import { EmailDraftGenerator, EmailDraftGeneratorProps, createEmailDataFromFormData } from '@/components/shared/EmailDraftGenerator';
 import { CITEmailDraftGenerator, CITEmailDraftGeneratorProps } from '@/components/cit-return-letters/CITEmailDraftGenerator';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
@@ -40,6 +40,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   const [isSendLoading, setIsSendLoading] = useState(false);
   const [emailDraftProps, setEmailDraftProps] = useState<EmailDraftGeneratorProps | null>(null);
   const [citEmailDraftProps, setCitEmailDraftProps] = useState<CITEmailDraftGeneratorProps | null>(null);
+  const [messageHistory, setMessageHistory] = useState<ReviewMessage[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Don't render if feature is disabled
   if (!config.canShowReviewComponents) {
@@ -691,11 +693,113 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     setIsSendLoading(false);
     setEmailDraftProps(null);
     setCitEmailDraftProps(null);
+    setMessageHistory([]);
+  };
+
+  const fetchMessageHistory = async () => {
+    if (!application?.id) return;
+    
+    setIsLoadingHistory(true);
+    try {
+      const response = await fetch(`/api/applications/${application.id}/messages`);
+      if (response.ok) {
+        const messages = await response.json();
+        setMessageHistory(messages);
+      } else {
+        console.error('Failed to fetch message history');
+      }
+    } catch (error) {
+      console.error('Error fetching message history:', error);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+
+  const renderMessageHistory = () => {
+    if (messageHistory.length === 0) return (
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-3" style={{ color: '#243F7B' }}>
+          <MessageSquare className="w-4 h-4 inline mr-2" />
+          Conversation
+        </label>
+        <div className="p-8 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
+          <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <p className="text-sm">No conversation yet</p>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-3" style={{ color: '#243F7B' }}>
+          <MessageSquare className="w-4 h-4 inline mr-2" />
+          Conversation
+        </label>
+        <div className="max-h-80 overflow-y-auto border border-gray-200 rounded-lg bg-white">
+          {isLoadingHistory ? (
+            <div className="p-6 text-center text-gray-500 text-sm">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400 mx-auto mb-3"></div>
+              Loading conversation...
+            </div>
+          ) : (
+            <div className="p-4 space-y-4">
+              {messageHistory.map((message, index) => (
+                <motion.div
+                  key={message.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="flex gap-3"
+                >
+                  {/* Avatar */}
+                  <div className="flex-shrink-0">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold ${
+                      message.user_role === 'reviewer'
+                        ? 'bg-blue-500'
+                        : 'bg-green-500'
+                    }`}>
+                      {(message.user?.full_name || 'U').charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  
+                  {/* Message Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-semibold text-gray-900">
+                        {message.user?.full_name || 'User'}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        message.user_role === 'reviewer'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-green-100 text-green-700'
+                      }`}>
+                        {message.user_role === 'reviewer' ? 'Checker' : 'Sender'}
+                      </span>
+                    </div>
+                    <div className={`p-3 rounded-lg ${
+                      message.user_role === 'reviewer'
+                        ? 'bg-blue-50 border border-blue-100'
+                        : 'bg-green-50 border border-green-100'
+                    }`}>
+                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {message.message}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   useEffect(() => {
     if (isOpen) {
       resetState();
+      fetchMessageHistory();
     }
   }, [isOpen, application?.id]);
 
@@ -794,18 +898,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                       </p>
                     </div>
 
-                    {/* Reviewer Feedback */}
-                    <div>
-                      <label className="block text-sm font-medium mb-3" style={{ color: '#243F7B' }}>
-                        <MessageSquare className="w-4 h-4 inline mr-2" />
-                        Checker Comments
-                      </label>
-                      <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                          {application.review_comments || (isApproved ? 'Application approved' : 'No specific feedback provided.')}
-                        </p>
-                      </div>
-                    </div>
+                    {/* Message History - Enhanced UI */}
+                    {renderMessageHistory()}
 
                     {/* Error Message */}
                     {error && (

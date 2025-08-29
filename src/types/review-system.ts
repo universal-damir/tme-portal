@@ -13,6 +13,12 @@ export type UrgencyLevel = 'standard' | 'urgent';
 // Notification types
 export type NotificationType = 'review_requested' | 'review_completed' | 'application_approved' | 'application_rejected';
 
+// Review message types
+export type ReviewMessageType = 'comment' | 'submission' | 'approval' | 'rejection' | 'revision';
+
+// User roles in review process
+export type ReviewUserRole = 'submitter' | 'reviewer';
+
 // Core Application interface
 export interface Application {
   id: string;
@@ -44,6 +50,28 @@ export interface Application {
     department: string;
   };
   reviewer?: {
+    id: number;
+    full_name: string;
+    email: string;
+    department: string;
+  };
+  
+  // Message history (optional, populated when needed)
+  messages?: ReviewMessage[];
+}
+
+// Review Message interface
+export interface ReviewMessage {
+  id: string;
+  application_id: string;
+  user_id: number;
+  user_role: ReviewUserRole;
+  message: string;
+  message_type: ReviewMessageType;
+  created_at: string;
+  
+  // Populated user information
+  user?: {
     id: number;
     full_name: string;
     email: string;

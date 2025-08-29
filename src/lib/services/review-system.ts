@@ -11,7 +11,10 @@ import {
   UpdateApplicationRequest,
   ReviewSubmission,
   ReviewAction,
-  Reviewer
+  Reviewer,
+  ReviewMessage,
+  ReviewMessageType,
+  ReviewUserRole
 } from '@/types/review-system';
 import { getReviewSystemConfig, withReviewSystemEnabled } from '@/lib/config/review-system';
 
@@ -750,6 +753,176 @@ export class ApplicationsService {
         client.release();
       }
     }, false, 'perform_review_action');
+  }
+  // Message History methods
+  static async getMessageHistory(applicationId: string): Promise<ReviewMessage[]> {
+    return safeDbOperation(async () => {
+      const pool = getPool();
+      
+      try {
+        const result = await pool.query(`
+          SELECT rm.*, u.full_name, u.email, u.department
+          FROM review_messages rm
+          LEFT JOIN users u ON rm.user_id = u.id
+          WHERE rm.application_id = $1
+          ORDER BY rm.created_at ASC
+        `, [applicationId]);
+        
+        return result.rows.map(row => ({
+          id: row.id,
+          application_id: row.application_id,
+          user_id: row.user_id,
+          user_role: row.user_role as ReviewUserRole,
+          message: row.message,
+          message_type: row.message_type as ReviewMessageType,
+          created_at: row.created_at,
+          user: row.full_name ? {
+            id: row.user_id,
+            full_name: row.full_name,
+            email: row.email,
+            department: row.department
+          } : undefined
+        })) as ReviewMessage[];
+      } catch (error: any) {
+        // If table doesn't exist yet, return empty array
+        if (error.message && (error.message.includes('review_messages') || error.message.includes('relation') || error.message.includes('does not exist'))) {
+          console.log('🔧 MESSAGE HISTORY: review_messages table does not exist yet, returning empty array');
+          return [];
+        }
+        throw error;
+      }
+    }, [], 'get_message_history');
+  }
+  
+  static async addMessage(
+    applicationId: string, 
+    userId: number, 
+    userRole: ReviewUserRole, 
+    message: string, 
+    messageType: ReviewMessageType = 'comment'
+  ): Promise<ReviewMessage | null> {
+    return safeDbOperation(async () => {
+      const pool = getPool();
+      
+      try {
+        const result = await pool.query(`
+          INSERT INTO review_messages (application_id, user_id, user_role, message, message_type)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING *
+        `, [applicationId, userId, userRole, message, messageType]);
+        
+        if (result.rows.length === 0) return null;
+        
+        const row = result.rows[0];
+        
+        // Get user information
+        const userResult = await pool.query(`
+          SELECT full_name, email, department
+          FROM users 
+          WHERE id = $1
+        `, [userId]);
+        
+        return {
+          id: row.id,
+          application_id: row.application_id,
+          user_id: row.user_id,
+          user_role: row.user_role as ReviewUserRole,
+          message: row.message,
+          message_type: row.message_type as ReviewMessageType,
+          created_at: row.created_at,
+          user: userResult.rows.length > 0 ? {
+            id: row.user_id,
+            full_name: userResult.rows[0].full_name,
+            email: userResult.rows[0].email,
+            department: userResult.rows[0].department
+          } : undefined
+        } as ReviewMessage;
+      } catch (error: any) {
+        // If table doesn't exist yet, log and return null (graceful degradation)
+        if (error.message && (error.message.includes('review_messages') || error.message.includes('relation') || error.message.includes('does not exist'))) {
+          console.log('🔧 MESSAGE HISTORY: review_messages table does not exist yet, skipping message save');
+          return null;
+        }
+        throw error;
+      }
+    }, null, 'add_review_message');
+  }
+  
+  static async getByIdInternal(applicationId: string): Promise<Application | null> {
+    return safeDbOperation(async () => {
+      const pool = getPool();
+      
+      const result = await pool.query(`
+        SELECT a.*, 
+               sb.id as submitted_by_id_ref, sb.full_name as submitted_by_name, sb.email as submitted_by_email, sb.department as submitted_by_department,
+               r.id as reviewer_id_ref, r.full_name as reviewer_name, r.email as reviewer_email, r.department as reviewer_department
+        FROM applications a
+        LEFT JOIN users sb ON a.submitted_by_id = sb.id
+        LEFT JOIN users r ON a.reviewer_id = r.id
+        WHERE a.id = $1
+        ORDER BY a.created_at DESC
+      `, [applicationId]);
+      
+      const row = result.rows[0];
+      if (!row) return null;
+      
+      // Transform the flat result into the expected Application structure
+      const application: Application = {
+        id: row.id,
+        type: row.type as any,
+        title: row.title,
+        form_data: row.form_data,
+        status: row.status as any,
+        submitted_by_id: row.submitted_by_id,
+        reviewer_id: row.reviewer_id,
+        submitter_message: row.submitter_message,
+        review_comments: row.review_comments,
+        urgency: row.urgency as any,
+        submitted_at: row.submitted_at,
+        reviewed_at: row.reviewed_at,
+        created_at: row.created_at,
+        updated_at: row.updated_at,
+      };
+      
+      // Add populated user relations if they exist
+      if (row.submitted_by_id_ref) {
+        application.submitted_by = {
+          id: row.submitted_by_id_ref,
+          full_name: row.submitted_by_name,
+          email: row.submitted_by_email,
+          department: row.submitted_by_department
+        };
+      }
+      
+      if (row.reviewer_id_ref) {
+        application.reviewer = {
+          id: row.reviewer_id_ref,
+          full_name: row.reviewer_name,
+          email: row.reviewer_email,
+          department: row.reviewer_department
+        };
+      }
+      
+      return application;
+    }, null, 'get_application_by_id_internal');
+  }
+
+  static async getApplicationWithHistory(applicationId: string): Promise<Application | null> {
+    return safeDbOperation(async () => {
+      const pool = getPool();
+      
+      // Get application
+      const application = await ApplicationsService.getByIdInternal(applicationId);
+      if (!application) return null;
+      
+      // Get message history
+      const messages = await ApplicationsService.getMessageHistory(applicationId);
+      
+      return {
+        ...application,
+        messages
+      };
+    }, null, 'get_application_with_history');
   }
 }
 

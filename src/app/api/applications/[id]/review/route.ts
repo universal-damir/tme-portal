@@ -61,6 +61,17 @@ export async function POST(
       action,
       comments: comments ? comments.trim() : ''
     }, userId);
+    
+    // Save the reviewer's message to message history
+    if (success && comments && comments.trim()) {
+      await ApplicationsService.addMessage(
+        id,
+        userId,
+        'reviewer',
+        comments.trim(),
+        action === 'approve' ? 'approval' : 'rejection'
+      );
+    }
 
     if (success) {
       // Get application title and form data for the audit log

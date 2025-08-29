@@ -235,6 +235,23 @@ export async function POST(
         // Don't fail the main request if todo generation fails
       }
 
+      // Save the submitter's message to message history
+      if (comments && comments.trim()) {
+        try {
+          await ApplicationsService.addMessage(
+            id,
+            userId,
+            'submitter',
+            comments.trim(),
+            'submission'
+          );
+          console.log('✅ Submitter message saved to history');
+        } catch (error) {
+          console.error('❌ Failed to save submitter message to history:', error);
+          // Don't fail the main request if message history fails
+        }
+      }
+
       return NextResponse.json({ 
         success: true,
         message: 'Application submitted for review successfully'
