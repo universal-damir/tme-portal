@@ -98,38 +98,6 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
             />
           )}
 
-          {/* Additional services as sentences */}
-          {(accountingServices.vatBooking || accountingServices.costCenterBooking || accountingServices.monthlyGroupReporting) ? (
-            <View style={{ marginTop: 8 }}>
-              {accountingServices.vatBooking && (
-                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                  For VAT booking, our fee is 20% of the monthly financial accounting fee.
-                </Text>
-              )}
-              
-              {accountingServices.costCenterBooking && (
-                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                  For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.
-                </Text>
-              )}
-              
-              {accountingServices.monthlyGroupReporting && (
-                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                  For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, exchangeRate, secondaryCurrency)}.
-                </Text>
-              )}
-              
-              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-                To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
-              </Text>
-            </View>
-          ) : (
-            <View style={{ marginTop: 8 }}>
-              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 6 }]}>
-              To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
-              </Text>
-            </View>
-          )}
         </>
       )}
 

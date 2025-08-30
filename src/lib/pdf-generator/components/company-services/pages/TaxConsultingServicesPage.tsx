@@ -1,6 +1,7 @@
 import React from 'react';
 import { Page, View, Text } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
+import { formatDateDDMMYYYY } from '../../../utils';
 import { 
   HeaderComponent, 
   FooterComponent,
@@ -65,22 +66,59 @@ export const TaxConsultingServicesPage: React.FC<PDFComponentProps> = ({ data })
     // Render single page with combined content (original behavior)
     return (
       <Page size="A4" style={styles.page}>
-        <HeaderComponent data={data} showClientInfo={isFirstService} />
+        <HeaderComponent data={data} showClientInfo={false} />
 
         {/* Main content area that will flex to fill available space */}
         <View style={{ flex: 1, flexDirection: 'column' }}>
+          {/* Client Details Section - only on first service page */}
+          {isFirstService && (
+            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+              <View style={{ width: '50%', paddingRight: 8 }}>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Client Details</Text>
+                  <View style={styles.contentArea}>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Client Name:</Text>
+                      <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                        {`${data.clientDetails?.firstName || companyServicesData?.firstName || ''} ${data.clientDetails?.lastName || companyServicesData?.lastName || ''}`.trim() || 'Not provided'}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Company Name:</Text>
+                      <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                        {data.clientDetails?.companyName || companyServicesData?.companyName || '-'}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Date:</Text>
+                      <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                        {formatDateDDMMYYYY(data.clientDetails?.date || companyServicesData?.date)}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Exchange Rate:</Text>
+                      <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                        {(data.clientDetails?.exchangeRate || companyServicesData?.exchangeRate || 3.67).toFixed(2)} AED = 1 {data.clientDetails?.secondaryCurrency || companyServicesData?.secondaryCurrency || 'EUR'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View style={{ width: '50%', paddingLeft: 8 }}>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Signature</Text>
+                  <View style={{ ...styles.contentArea, minHeight: 100, justifyContent: 'flex-start' }}>
+                    <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                      Agreed to service charges listed below.{'\n'}They will apply when the individual service is performed.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+          
           <TaxConsultingServicesSection data={data} />
 
-          {/* Add signature section if this is the last service page */}
-          {isLastService && (
-            <>
-              {/* Spacer to push signature to bottom */}
-              <View style={{ flex: 1 }} />
-              
-              {/* Fixed signature section at bottom */}
-              <SignatureSection data={data} />
-            </>
-          )}
         </View>
 
         <FooterComponent />
@@ -103,10 +141,57 @@ export const TaxConsultingServicesPage: React.FC<PDFComponentProps> = ({ data })
       {/* CIT Services Page - First page */}
       {shouldRenderCIT && (
         <Page size="A4" style={styles.page}>
-          <HeaderComponent data={data} showClientInfo={shouldShowClientInfoOnCIT} />
+          <HeaderComponent data={data} showClientInfo={false} />
 
           {/* Main content area that will flex to fill available space */}
           <View style={{ flex: 1, flexDirection: 'column' }}>
+            {/* Client Details Section - only on first service page */}
+            {shouldShowClientInfoOnCIT && (
+              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+                <View style={{ width: '50%', paddingRight: 8 }}>
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Client Details</Text>
+                    <View style={styles.contentArea}>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Client Name:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {`${data.clientDetails?.firstName || companyServicesData?.firstName || ''} ${data.clientDetails?.lastName || companyServicesData?.lastName || ''}`.trim() || 'Not provided'}
+                        </Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Company Name:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {data.clientDetails?.companyName || companyServicesData?.companyName || '-'}
+                        </Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Date:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {formatDateDDMMYYYY(data.clientDetails?.date || companyServicesData?.date)}
+                        </Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Exchange Rate:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {(data.clientDetails?.exchangeRate || companyServicesData?.exchangeRate || 3.67).toFixed(2)} AED = 1 {data.clientDetails?.secondaryCurrency || companyServicesData?.secondaryCurrency || 'EUR'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+                <View style={{ width: '50%', paddingLeft: 8 }}>
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Signature</Text>
+                    <View style={{ ...styles.contentArea, minHeight: 100, justifyContent: 'flex-start' }}>
+                      <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                        Agreed to service charges listed below.{'\n'}They will apply when the individual service is performed.
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
+            
             <CITServicesSection data={data} />
 
             {/* Add Tax Consulting Support section if VAT is not rendered (CIT is the last tax service) */}
@@ -114,16 +199,6 @@ export const TaxConsultingServicesPage: React.FC<PDFComponentProps> = ({ data })
               <TaxConsultingSupportSection data={data} />
             )}
 
-            {/* Add signature section if this is the last service page and only CIT is rendered */}
-            {shouldSignatureCIT && (
-              <>
-                {/* Spacer to push signature to bottom */}
-                <View style={{ flex: 1 }} />
-                
-                {/* Fixed signature section at bottom */}
-                <SignatureSection data={data} />
-              </>
-            )}
           </View>
 
           <FooterComponent />
@@ -133,22 +208,59 @@ export const TaxConsultingServicesPage: React.FC<PDFComponentProps> = ({ data })
       {/* VAT Services Page - Second page */}
       {shouldRenderVAT && (
         <Page size="A4" style={styles.page}>
-          <HeaderComponent data={data} showClientInfo={shouldShowClientInfoOnVAT} />
+          <HeaderComponent data={data} showClientInfo={false} />
 
           {/* Main content area that will flex to fill available space */}
           <View style={{ flex: 1, flexDirection: 'column' }}>
+            {/* Client Details Section - only on first service page */}
+            {shouldShowClientInfoOnVAT && (
+              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+                <View style={{ width: '50%', paddingRight: 8 }}>
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Client Details</Text>
+                    <View style={styles.contentArea}>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Client Name:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {`${data.clientDetails?.firstName || companyServicesData?.firstName || ''} ${data.clientDetails?.lastName || companyServicesData?.lastName || ''}`.trim() || 'Not provided'}
+                        </Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Company Name:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {data.clientDetails?.companyName || companyServicesData?.companyName || '-'}
+                        </Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Date:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {formatDateDDMMYYYY(data.clientDetails?.date || companyServicesData?.date)}
+                        </Text>
+                      </View>
+                      <View style={styles.row}>
+                        <Text style={styles.label}>Exchange Rate:</Text>
+                        <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                          {(data.clientDetails?.exchangeRate || companyServicesData?.exchangeRate || 3.67).toFixed(2)} AED = 1 {data.clientDetails?.secondaryCurrency || companyServicesData?.secondaryCurrency || 'EUR'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+                <View style={{ width: '50%', paddingLeft: 8 }}>
+                  <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Signature</Text>
+                    <View style={{ ...styles.contentArea, minHeight: 100, justifyContent: 'flex-start' }}>
+                      <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                        Agreed to service charges listed below.{'\n'}They will apply when the individual service is performed.
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            )}
+            
             <VATServicesSection data={data} />
 
-            {/* Add signature section if this is the last service page */}
-            {shouldSignatureVAT && (
-              <>
-                {/* Spacer to push signature to bottom */}
-                <View style={{ flex: 1 }} />
-                
-                {/* Fixed signature section at bottom */}
-                <SignatureSection data={data} />
-              </>
-            )}
           </View>
 
           <FooterComponent />

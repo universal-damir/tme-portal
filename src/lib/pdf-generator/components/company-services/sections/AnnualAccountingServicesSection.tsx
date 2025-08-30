@@ -37,12 +37,14 @@ export const AnnualAccountingServicesSection: React.FC<PDFComponentProps> = ({ d
   }
 
   return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Annual Accounting Services</Text>
-      
-      <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 16 }]}>
-        In addition to our regular accounting services, we provide comprehensive annual accounting services to ensure your business meets all regulatory requirements and maintains accurate financial records for compliance and decision-making purposes.
-      </Text>
+    <>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Annual Accounting Services</Text>
+        
+        <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 16 }]}>
+          In addition to our regular accounting services, we provide comprehensive annual accounting services to ensure your business meets all regulatory requirements and maintains accurate financial records for compliance and decision-making purposes.
+        </Text>
 
       {accountingServices.plStatementFee && accountingServices.plStatementFee > 0 && (
         <>
@@ -102,6 +104,7 @@ export const AnnualAccountingServicesSection: React.FC<PDFComponentProps> = ({ d
           )}
         </View>
       )}
-    </View>
+      </View>
+    </>
   );
 }; 

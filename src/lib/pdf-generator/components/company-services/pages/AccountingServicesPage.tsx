@@ -1,16 +1,22 @@
 import React from 'react';
-import { Page, View } from '@react-pdf/renderer';
+import { Page, View, Text } from '@react-pdf/renderer';
 import { styles } from '../../../styles';
+import { formatDateDDMMYYYY } from '../../../utils';
 import { 
   HeaderComponent, 
-  FooterComponent,
-  SignatureSection
+  FooterComponent
 } from '../../shared';
 import { 
   AccountingServicesSection,
   AnnualAccountingServicesSection
 } from '../sections';
 import type { PDFComponentProps } from '../../../types';
+
+// Helper function to format secondary currency amount in brackets
+const formatSecondaryCurrency = (amount: number, exchangeRate: number, currency: string): string => {
+  const converted = Math.round(amount / exchangeRate);
+  return `(~ ${currency} ${converted.toLocaleString()})`;
+};
 
 // AccountingServicesPage - Dedicated page for accounting services
 // Following the established pattern from cost-overview pages
@@ -28,27 +34,76 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
 
   // Check if we need to render annual services on a separate page
   const shouldShowAnnualServicesPage = accountingServices.serviceType !== 'monthly' && 
-    (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee);
+    (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee) && 
+    isFirstService; // Only create separate page if accounting is first service
 
   return (
     <>
       {/* Main Accounting Services Page */}
       <Page size="A4" style={styles.page}>
-        <HeaderComponent data={data} showClientInfo={isFirstService} />
+        <HeaderComponent data={data} showClientInfo={false} />
 
         {/* Main content area that will flex to fill available space */}
         <View style={{ flex: 1, flexDirection: 'column' }}>
+          {/* Client Details Section - only on first service page */}
+          {isFirstService && (
+            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+              <View style={{ width: '50%', paddingRight: 8 }}>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Client Details</Text>
+                  <View style={styles.contentArea}>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Client Name:</Text>
+                      <Text style={styles.value}>
+                        {`${data.clientDetails?.firstName || companyServicesData?.firstName || ''} ${data.clientDetails?.lastName || companyServicesData?.lastName || ''}`.trim() || 'Not provided'}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Company Name:</Text>
+                      <Text style={styles.value}>
+                        {data.clientDetails?.companyName || companyServicesData?.companyName || '-'}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Date:</Text>
+                      <Text style={styles.value}>
+                        {formatDateDDMMYYYY(data.clientDetails?.date || companyServicesData?.date)}
+                      </Text>
+                    </View>
+                    <View style={styles.row}>
+                      <Text style={styles.label}>Exchange Rate:</Text>
+                      <Text style={styles.value}>
+                        {(data.clientDetails?.exchangeRate || companyServicesData?.exchangeRate || 3.67).toFixed(2)} AED = 1 {data.clientDetails?.secondaryCurrency || companyServicesData?.secondaryCurrency || 'EUR'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View style={{ width: '50%', paddingLeft: 8 }}>
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>Signature</Text>
+                  <View style={{ ...styles.contentArea, minHeight: 100, justifyContent: 'flex-start' }}>
+                    <Text style={{ fontSize: 10, lineHeight: 1.4, color: '#1f2937' }}>
+                      Agreed to service charges listed below.{'\n'}They will apply when the individual service is performed.
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+          
           <AccountingServicesSection data={data} />
 
-          {/* Add signature section if this is the last service page and no annual services page */}
-          {isLastService && !shouldShowAnnualServicesPage && (
-            <>
-              {/* Spacer to push signature to bottom */}
-              <View style={{ flex: 1 }} />
-              
-              {/* Fixed signature section at bottom */}
-              <SignatureSection data={data} />
-            </>
+          {/* Additional Services Text - Only when NOT first service and quarterly/yearly */}
+          {!isFirstService && accountingServices.serviceType !== 'monthly' && (
+            <View style={{ marginTop: 20 }}>
+              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
+                For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
+                For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}
+                For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}
+                To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
+              </Text>
+            </View>
           )}
         </View>
 
@@ -58,22 +113,21 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
       {/* Annual Accounting Services Page - Only for quarterly/yearly services */}
       {shouldShowAnnualServicesPage && (
         <Page size="A4" style={styles.page}>
-          <HeaderComponent data={data} />
+          <HeaderComponent data={data} showClientInfo={false} />
 
           {/* Main content area that will flex to fill available space */}
           <View style={{ flex: 1, flexDirection: 'column' }}>
+            {/* Additional Services Information - Only on separate annual page */}
+            <View style={{ marginBottom: 20 }}>
+              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
+                For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
+                For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}
+                For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}
+                To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
+              </Text>
+            </View>
+            
             <AnnualAccountingServicesSection data={data} />
-
-            {/* Add signature section if this is the last service page */}
-            {isLastService && (
-              <>
-                {/* Spacer to push signature to bottom */}
-                <View style={{ flex: 1 }} />
-                
-                {/* Fixed signature section at bottom */}
-                <SignatureSection data={data} />
-              </>
-            )}
           </View>
 
           <FooterComponent />
