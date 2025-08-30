@@ -67,6 +67,12 @@ export async function POST(
       );
     }
 
+    // Map frontend urgency values to database values
+    // Frontend sends: 'standard' or 'urgent'
+    // Database expects: 'low', 'medium', or 'high'
+    const dbUrgency = urgency === 'urgent' ? 'high' : 'medium';
+    console.log('🔧 API ROUTE: Mapping urgency for database:', urgency, '->', dbUrgency);
+
     // Check if this is a resubmission BEFORE submitting (before status changes)
     let isResubmission = false;
     try {
@@ -90,7 +96,7 @@ export async function POST(
           const submitPromise = ApplicationsService.submitForReview({
             application_id: id,
             reviewer_id: parseInt(reviewer_id),
-            urgency,
+            urgency: dbUrgency,
             comments
           }, userId);
           
@@ -236,7 +242,7 @@ export async function POST(
             reviewer_id: parseInt(reviewer_id),
             reviewer_name: reviewerName,
             submitter_name: session.user.full_name, // Rule expects this field
-            urgency: urgency === 'urgent' ? 'high' : 'standard', // Map urgency values
+            urgency: dbUrgency, // Use the already mapped urgency value
             comments: comments || null,
             form_name: filename ? filename.replace('.pdf', '') : formName, // Use fresh filename
             filename: filename,
