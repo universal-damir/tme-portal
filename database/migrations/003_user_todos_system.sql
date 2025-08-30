@@ -1,6 +1,6 @@
 -- User Todos System Migration
 -- Phase 1: Database Foundation for Notification-to-Todo Integration
--- TME Portal v5.2
+-- TME Portal
 
 -- Add todo tracking columns to existing notifications table
 ALTER TABLE notifications ADD COLUMN IF NOT EXISTS todo_generated BOOLEAN DEFAULT FALSE;

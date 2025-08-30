@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a Next.js 15 application built for TME Portal v5.2 - a comprehensive UAE business setup services portal. The application provides cost calculation, document generation, and management tools for business services.
+This is a Next.js 15 application built for TME Portal - a comprehensive UAE business setup services portal. The application provides cost calculation, document generation, and management tools for business services.
 
 ### Key Architecture Components
 

@@ -8,7 +8,7 @@ import { ClientProvider } from '@/components/providers/ClientProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TME Portal v5.1',
+  title: 'TME Portal',
   description: 'Professional UAE Business Setup Services Portal',
   icons: {
     icon: '/favicon.ico',

@@ -77,7 +77,7 @@ const AIResponseSchema = z.object({
 });
 
 // System prompt for structured form filling
-const SYSTEM_PROMPT = `You are an AI assistant for TME Portal v5.2, a UAE Business Setup Services Portal. Your role is to help users quickly fill out cost calculation forms by parsing their natural language requests and calculating accurate costs.
+const SYSTEM_PROMPT = `You are an AI assistant for TME Portal, a UAE Business Setup Services Portal. Your role is to help users quickly fill out cost calculation forms by parsing their natural language requests and calculating accurate costs.
 
 ## Available Authorities:
 - **IFZA (International Free Zone Authority)** - Free zone, most common for business setup
