@@ -229,7 +229,6 @@ export const CompanyServicesCoverPage: React.FC<PDFComponentProps> = ({ data }) 
           </View>
         </View>
 
-        <CompanyServicesInfoSection data={data} />
       </View>
 
       <FooterComponent />

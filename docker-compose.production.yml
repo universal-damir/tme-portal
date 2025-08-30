@@ -45,7 +45,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
-      - postgres_logs:/var/log/postgresql
     restart: unless-stopped
     networks:
       - tme_network
@@ -58,13 +57,6 @@ services:
       postgres 
       -c shared_buffers=256MB
       -c max_connections=100
-      -c log_statement=mod
-      -c log_destination=stderr
-      -c logging_collector=on
-      -c log_directory=/var/log/postgresql
-      -c log_filename='postgresql-%Y-%m-%d.log'
-      -c log_rotation_age=1d
-      -c log_rotation_size=100MB
 
   # Redis Cache - NO EXTERNAL PORTS IN PRODUCTION
   redis:
@@ -118,8 +110,6 @@ volumes:
   app_uploads:
     driver: local
   app_logs:
-    driver: local
-  postgres_logs:
     driver: local
   redis_logs:
     driver: local

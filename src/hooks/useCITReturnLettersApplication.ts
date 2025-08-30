@@ -345,7 +345,7 @@ export const useCITReturnLettersApplication = ({
       form_data: applicationFormData,
       status: 'rejected', // We know it was rejected since we're editing
       submitted_by_id: 0, // Will be set by backend
-      urgency: 'standard',
+      urgency: 'medium',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
