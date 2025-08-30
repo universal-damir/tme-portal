@@ -70,9 +70,10 @@ export const CIT_RETURN_FILING_EMAIL_TEMPLATE = {
   greeting: 'Dear {firstName},',
   bodyContent: [
     '<span style="font-family: Arial, sans-serif; font-size: 10pt;">With reference to the subject matter, the first CIT return filing for your company is due for submission by {dueDate}.</span>',
-    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">In this regard, we have prepared the following for your review and signature. Kindly sign & stamp ALL the pages of the attached letter.</span>',
-    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">1. Draft of the CIT return {taxYear}, as attached<br>{dynamicLetterList}</span>',
-    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">As soon as we receive the signed and stamped documents, we will proceed to file the CIT returns and will share with you the acknowledgement issued from the FTA.</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">In this regard, we have prepared the following documents for your review and signature. Kindly sign and stamp ALL the pages of the attached {letterWord}:</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">{dynamicLetterList}</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">As soon as we receive the signed and stamped documents, we will proceed to file the CIT returns and share the acknowledgement issued by the FTA with you.</span>',
+    '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Additionally, please find attached the relevant documents prepared for your review.</span>',
     '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Please let us know if you have any questions in the meantime.</span>',
     '<span style="font-family: Arial, sans-serif; font-size: 10pt;">Best regards,</span>',
     '<br><br><span style="font-family: Arial, sans-serif; font-size: 12pt; font-weight: bold; color: #243F7B;">{senderName}</span><br><span style="font-family: Arial, sans-serif; font-size: 11pt; font-weight: bold; color: #666;">{senderDesignation}</span><br>{senderPhone}'
@@ -415,7 +416,7 @@ export const processCITReturnFilingEmailTemplate = (
     const companyShort = companyShortName; // Use company SHORT name for subject
     
     // Clean letter type names for subject
-    const letterTypeParts = letterTypes.map(type => {
+    const letterTypeParts = letterTypes.map((type: string) => {
       switch (type) {
         case 'CIT TP':
           return 'CIT TP';
@@ -448,16 +449,19 @@ export const processCITReturnFilingEmailTemplate = (
   
   const senderPhone = phoneNumbers;
 
-  // Generate dynamic letter list based on selected types with proper numbering (no (1), (2), (3))
+  // Determine singular/plural for letter word
+  const letterWord = letterTypes.length === 1 ? 'letter' : 'letters';
+
+  // Generate dynamic letter list based on selected types with proper numbering
   const letterList = letterTypes.map((type, index) => {
-    const itemNumber = index + 2; // Start from 2 since "Draft of the CIT return" is item 1
+    const itemNumber = index + 1; // Start from 1
     switch (type) {
       case 'CIT TP':
         return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. CIT TP</span>`;
       case 'Conf acc docs + FS':
         return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. Conf acc docs + FS</span>`;
       case 'CIT assess+concl, non deduct, elect':
-        return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. CIT assess+concl, non deduct, elect</span>`;
+        return `<span style="font-family: Arial, sans-serif; font-size: 10pt;">${itemNumber}. CIT assess + concl, non-deduct, elect</span>`;
       default:
         return '';
     }
@@ -476,7 +480,8 @@ export const processCITReturnFilingEmailTemplate = (
       .replace(/{senderDesignation}/g, senderDesignation)
       .replace(/{senderPhone}/g, senderPhone)
       .replace(/{dynamicLetterList}/g, letterList)
-      .replace(/{dynamicSubject}/g, dynamicSubject);
+      .replace(/{dynamicSubject}/g, dynamicSubject)
+      .replace(/{letterWord}/g, letterWord);
   };
 
   return {
