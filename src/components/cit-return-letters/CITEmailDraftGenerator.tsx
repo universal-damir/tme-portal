@@ -204,13 +204,23 @@ export const useCITEmailDraftGenerator = () => {
 
   const handleSendEmail = async (emailData: EmailPreviewData, additionalAttachments?: Array<{ blob: Blob; filename: string; contentType: string }>) => {
     try {
-      // Combine original attachments with additional ones
-      const allAttachments = [
-        ...currentAttachments,
-        ...(additionalAttachments || [])
-      ];
+      // Rebuild the attachment list with blobs
+      // emailData.attachments contains metadata for all files (original PDFs + user uploads)
+      // We need to map them back to blob format for sending
       
-      await sendEmail(emailData, allAttachments);
+      // Start with original PDF attachments (they have blobs in currentAttachments)
+      const attachmentsWithBlobs: EmailAttachment[] = currentAttachments.map(att => ({
+        blob: att.blob,
+        filename: att.filename,
+        contentType: att.contentType || 'application/pdf'
+      }));
+      
+      // Add any additional user-uploaded attachments from the modal
+      if (additionalAttachments) {
+        attachmentsWithBlobs.push(...additionalAttachments);
+      }
+      
+      await sendEmail(emailData, attachmentsWithBlobs);
       // Call success callback if provided
       if (onSuccessRef.current) {
         onSuccessRef.current('email-sent');

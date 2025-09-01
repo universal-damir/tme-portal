@@ -462,6 +462,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
     try {
       let pdfBlob: Blob;
       let filename: string;
+      let allPdfResults: Array<{ blob: Blob; filename: string }> = []; // Store all PDFs for CIT letters
       
       // Generate actual PDF based on application type (handle both underscore and hyphen formats)
       const appType = application.type === 'golden-visa' ? 'golden-visa' : 
@@ -528,7 +529,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         filename = result.filename;
         
       } else if (appType === 'cit-return-letters' || application.type === 'cit-return-letters') {
-        const { generateCITReturnLettersPDFWithFilename } = await import('@/lib/pdf-generator/utils/citReturnLettersGenerator');
+        const { generateCITReturnLettersPDFWithFilename, generateCITReturnLettersMultiFilename } = await import('@/lib/pdf-generator/utils');
         const formData = application.form_data as CITReturnLettersData;
         
         // Extract client info from form data
@@ -549,14 +550,28 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           throw new Error('No letter types found for CIT return letters application');
         }
         
-        // For simplicity, use the first letter type for PDF generation in feedback modal
-        // In practice, this could be expanded to handle multiple PDFs
-        const firstLetterType = letterTypes[0];
-        const letterData = { ...formData, letterType: firstLetterType };
+        // Generate PDFs for all selected letter types (same as CITReturnLettersTab)
+        const promises = letterTypes.map(async (letterType) => {
+          const letterData = { ...formData, letterType };
+          return await generateCITReturnLettersPDFWithFilename(letterData, clientInfo);
+        });
         
-        const result = await generateCITReturnLettersPDFWithFilename(letterData, clientInfo);
-        pdfBlob = result.blob;
-        filename = result.filename;
+        const results = await Promise.all(promises);
+        
+        // Generate the new multi-filename format for email attachments
+        const multiFilename = generateCITReturnLettersMultiFilename(formData, clientInfo);
+        
+        // For email: always use individual PDFs with proper naming
+        // For single selection, use the new multi-format name
+        // For multiple selections, keep individual files with legacy names
+        allPdfResults = results.length === 1 
+          ? [{ blob: results[0].blob, filename: multiFilename }] // Single letter uses new format
+          : results; // Multiple letters keep individual legacy names
+        
+        // Store all PDFs for email attachment
+        // For backward compatibility, use the first PDF as the main one
+        pdfBlob = allPdfResults[0].blob;
+        filename = allPdfResults[0].filename;
         
       } else {
         throw new Error(`PDF generation not supported for application type: ${application.type}`);
@@ -596,10 +611,11 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           ? formData.selectedLetterTypes 
           : (formData.letterType ? [formData.letterType] : []);
         
+        // Use the PDFs we already generated above (allPdfResults)
         const citEmailProps = await createCITEmailDataFromFormData(
           formData.selectedClient!,
           letterTypes.length === 1 ? letterTypes[0] : letterTypes, // Pass single type or array
-          { blob: pdfBlob, filename }, // Convert to expected format
+          allPdfResults.length > 0 ? allPdfResults : { blob: pdfBlob, filename }, // Pass ALL PDFs if available
           user || undefined,
           formData.taxPeriodEnd // Pass tax period end date for dynamic calculations
         );

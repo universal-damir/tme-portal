@@ -6,6 +6,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { Notification } from '@/types/review-system';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -32,6 +33,7 @@ let globalPollingInstance: string | null = null;
 
 export function NotificationProvider({ children }: NotificationProviderProps) {
   const config = useReviewSystemConfig();
+  const { user } = useAuth();
   const instanceId = React.useRef(Math.random().toString(36).substring(7));
   
   const [state, setState] = useState({
@@ -236,18 +238,25 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     if (config.debugMode) {
       console.log(`🔧 Scheduled next poll in ${currentIntervalRef.current}ms`);
     }
-  }, [config.debugMode]); // Removed fetchNotifications dependency to prevent infinite loop
+  }, [config.debugMode, fetchNotifications]);
 
   // Start/stop polling functions
   const startPolling = useCallback(() => {
-    if (!config.canShowNotifications || isPolling) return;
+    if (!config.canShowNotifications) return;
+
+    // If already polling, stop first to restart with fresh state
+    if (isPolling) {
+      if (config.debugMode) {
+        console.log(`🔧 Restarting notification polling (instance: ${instanceId.current})`);
+      }
+      stopPolling();
+    }
 
     // Check if another instance is already polling
     if (globalPollingInstance && globalPollingInstance !== instanceId.current) {
       if (config.debugMode) {
-        console.log(`🔧 Another notification polling instance is active (${globalPollingInstance}), skipping`);
+        console.log(`🔧 Another notification polling instance is active (${globalPollingInstance}), taking over`);
       }
-      return;
     }
 
     globalPollingInstance = instanceId.current;
@@ -258,7 +267,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     rateLimitBackoffRef.current = 1;
     consecutiveErrorsRef.current = 0;
     
-    // Initial fetch
+    // Initial fetch - immediate for fresh login
     fetchNotifications();
     
     // Set up smart polling
@@ -267,7 +276,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     if (config.debugMode) {
       console.log(`🔧 Started centralized notification polling every ${currentIntervalRef.current}ms (instance: ${instanceId.current})`);
     }
-  }, [config.canShowNotifications, config.debugMode, isPolling, scheduleNextPoll]); // Removed fetchNotifications
+  }, [config.canShowNotifications, config.debugMode, fetchNotifications, scheduleNextPoll]); // Added fetchNotifications back
 
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
@@ -291,16 +300,37 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     }
   }, [config.debugMode]);
 
-  // Auto-start polling (only once)
+  // Store functions in refs to avoid dependency issues
+  const startPollingRef = useRef(startPolling);
+  const stopPollingRef = useRef(stopPolling);
+  
   useEffect(() => {
-    if (config.canShowNotifications) {
-      startPolling();
+    startPollingRef.current = startPolling;
+    stopPollingRef.current = stopPolling;
+  });
+
+  // Auto-start polling when user logs in or config changes
+  useEffect(() => {
+    // Only start polling if we have a user and notifications are enabled
+    if (config.canShowNotifications && user) {
+      // Small delay to ensure auth state is fully propagated
+      const startTimer = setTimeout(() => {
+        startPollingRef.current();
+      }, 500);
+      
+      return () => {
+        clearTimeout(startTimer);
+        stopPollingRef.current();
+      };
+    } else {
+      // Stop polling if user logs out or notifications are disabled
+      stopPollingRef.current();
     }
 
     return () => {
-      stopPolling();
+      stopPollingRef.current();
     };
-  }, [config.canShowNotifications]); // Removed startPolling, stopPolling to prevent infinite loop
+  }, [config.canShowNotifications, user?.id]); // React to user ID changes
 
   // Manual refetch
   const refetch = useCallback(async (): Promise<void> => {
