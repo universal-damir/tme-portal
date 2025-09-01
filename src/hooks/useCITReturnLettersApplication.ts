@@ -157,6 +157,7 @@ export const useCITReturnLettersApplication = ({
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'same-origin', // Include cookies
           body: JSON.stringify({
             type: 'cit-return-letters', // CRITICAL: Always include type in updates
             title,
@@ -179,6 +180,7 @@ export const useCITReturnLettersApplication = ({
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'same-origin', // Include cookies
           body: JSON.stringify({
             type: 'cit-return-letters',  // CRITICAL: Must be cit-return-letters
             title,
@@ -187,14 +189,21 @@ export const useCITReturnLettersApplication = ({
           }),
         });
         
-        const result = await response.json();
-        
         if (!response.ok) {
+          const result = await response.json().catch(() => ({ error: 'Failed to parse response' }));
+          console.error('🔧 Failed to create application:', {
+            status: response.status,
+            statusText: response.statusText,
+            result: result
+          });
           throw new Error(result.error || `HTTP ${response.status}: ${response.statusText}`);
         }
         
+        const result = await response.json();
+        
         // The API returns { success: true, application: {...} }
         if (!result.success) {
+          console.error('🔧 Application creation returned failure:', result);
           throw new Error(result.error || 'Server returned failure status');
         }
         
@@ -270,16 +279,36 @@ export const useCITReturnLettersApplication = ({
       }
       
       // Submit for review
+      console.log('🔧 Submitting for review:', {
+        applicationId: appToSubmit.id,
+        submission: submission,
+        url: `/api/applications/${appToSubmit.id}/submit-review`
+      });
+      
       const response = await fetch(`/api/applications/${appToSubmit.id}/submit-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin', // Include cookies
         body: JSON.stringify(submission),
       });
       
       if (!response.ok) {
-        throw new Error(`Failed to submit for review: ${response.statusText}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { error: `Failed to parse error response: ${response.statusText}` };
+        }
+        
+        console.error('🔧 Submit for review failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          url: `/api/applications/${appToSubmit.id}/submit-review`
+        });
+        throw new Error(errorData.error || errorData.message || `Failed to submit for review: ${response.status}`);
       }
       
       const result = await response.json();

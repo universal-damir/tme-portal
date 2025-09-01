@@ -78,7 +78,8 @@ export function usePermissions() {
 
     // Special handling for CIT Return Letters - specific employee codes
     if (feature === 'cit_return_letters') {
-      const allowedEmployeeCodes = ['19', '38', '33', '42', '58', '80', '86', '92', '112']
+      // Match the exact employee codes used in review system
+      const allowedEmployeeCodes = ['19 DS', '38 TZ', '33 MK', '42 RJ', '58 YF', '80 RoJ', '86 MA', '92 CM', '112 NM']
       
       // Check if user has department access OR is in the allowed employee codes list
       return allowedDepartments.includes(user.department) || 

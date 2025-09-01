@@ -30,12 +30,19 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
     setIsLoading(true);
     try {
       const url = query 
-        ? `/api/admin/clients?search=${encodeURIComponent(query)}&status=active&limit=20`
-        : '/api/admin/clients?status=active&limit=100';
+        ? `/api/clients?search=${encodeURIComponent(query)}&status=active&limit=20`
+        : '/api/clients?status=active&limit=100';
       
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error('Failed to fetch clients');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Client fetch failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+          url: url
+        });
+        throw new Error(errorData.error || `Failed to fetch clients: ${response.status}`);
       }
       
       const data = await response.json();
