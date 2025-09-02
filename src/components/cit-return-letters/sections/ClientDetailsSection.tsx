@@ -10,6 +10,14 @@ interface ClientDetailsSectionProps {
   onClientSelect: (client: Client | null) => void;
   searchTerm: string;
   onSearchTermChange: (term: string) => void;
+  useCustomReceiverDetails: boolean;
+  onUseCustomReceiverDetailsChange: (value: boolean) => void;
+  customReceiverFirstName: string;
+  onCustomReceiverFirstNameChange: (value: string) => void;
+  customReceiverLastName: string;
+  onCustomReceiverLastNameChange: (value: string) => void;
+  customReceiverEmail: string;
+  onCustomReceiverEmailChange: (value: string) => void;
 }
 
 const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
@@ -17,6 +25,14 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   onClientSelect,
   searchTerm,
   onSearchTermChange,
+  useCustomReceiverDetails,
+  onUseCustomReceiverDetailsChange,
+  customReceiverFirstName,
+  onCustomReceiverFirstNameChange,
+  customReceiverLastName,
+  onCustomReceiverLastNameChange,
+  customReceiverEmail,
+  onCustomReceiverEmailChange,
 }) => {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -286,6 +302,98 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 )}
               </div>
             </div>
+          </motion.div>
+        )}
+
+        {/* Custom Receiver Details */}
+        {selectedClient && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4"
+          >
+            {/* Checkbox to enable custom receiver details */}
+            <div className="flex items-center mb-3">
+              <input
+                type="checkbox"
+                id="useCustomReceiver"
+                checked={useCustomReceiverDetails}
+                onChange={(e) => onUseCustomReceiverDetailsChange(e.target.checked)}
+                className="mr-2 w-4 h-4 rounded border-2 transition-all duration-200 cursor-pointer"
+                style={{ 
+                  borderColor: useCustomReceiverDetails ? '#243F7B' : '#d1d5db',
+                  accentColor: '#243F7B'
+                }}
+              />
+              <label 
+                htmlFor="useCustomReceiver" 
+                className="text-sm font-medium cursor-pointer"
+                style={{ color: '#243F7B', fontFamily: 'Inter, sans-serif' }}
+              >
+                Change receiver details
+              </label>
+            </div>
+
+            {/* Custom receiver input fields - shown only when checkbox is checked */}
+            {useCustomReceiverDetails && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+              >
+                {/* First Name */}
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={customReceiverFirstName}
+                    onChange={(e) => onCustomReceiverFirstNameChange(e.target.value)}
+                    placeholder="Enter first name"
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+
+                {/* Last Name */}
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={customReceiverLastName}
+                    onChange={(e) => onCustomReceiverLastNameChange(e.target.value)}
+                    placeholder="Enter last name"
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={customReceiverEmail}
+                    onChange={(e) => onCustomReceiverEmailChange(e.target.value)}
+                    placeholder="Enter email address"
+                    className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
+                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                </div>
+              </motion.div>
+            )}
           </motion.div>
         )}
       </div>

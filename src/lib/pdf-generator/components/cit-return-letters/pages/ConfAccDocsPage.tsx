@@ -18,9 +18,14 @@ export const ConfAccDocsPage: React.FC<ConfAccDocsPageProps> = ({ data }) => {
   const selectedClient = citReturnLettersData.selectedClient;
   const selections = citReturnLettersData.confAccDocsSelections;
   
-  // Get manager name from client data or fallback to clientDetails
-  const managerFirstName = selectedClient?.management_name?.split(' ')[0] || clientDetails.firstName || 'Manager';
-  const managerFullName = selectedClient?.management_name || `${clientDetails.firstName} ${clientDetails.lastName}` || 'Manager';
+  // Get manager name - use custom receiver details if provided, otherwise use client data
+  const managerFirstName = citReturnLettersData.useCustomReceiverDetails && citReturnLettersData.customReceiverFirstName
+    ? citReturnLettersData.customReceiverFirstName
+    : selectedClient?.management_name?.split(' ')[0] || clientDetails.firstName || 'Manager';
+  
+  const managerFullName = citReturnLettersData.useCustomReceiverDetails && citReturnLettersData.customReceiverFirstName
+    ? `${citReturnLettersData.customReceiverFirstName} ${citReturnLettersData.customReceiverLastName || ''}`.trim()
+    : selectedClient?.management_name || `${clientDetails.firstName} ${clientDetails.lastName}` || 'Manager';
   
   // Get tax period formatted as dd.mm.yyyy
   const { taxPeriodStart, taxPeriodEnd } = citReturnLettersData;

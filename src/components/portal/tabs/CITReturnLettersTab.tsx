@@ -81,6 +81,29 @@ const CITReturnLettersTab: React.FC = () => {
     setValue('citAssessmentConclusion', data);
   };
 
+  // Custom receiver details handlers
+  const handleUseCustomReceiverDetailsChange = (value: boolean) => {
+    setValue('useCustomReceiverDetails', value);
+    // Clear custom details when unchecked
+    if (!value) {
+      setValue('customReceiverFirstName', '');
+      setValue('customReceiverLastName', '');
+      setValue('customReceiverEmail', '');
+    }
+  };
+
+  const handleCustomReceiverFirstNameChange = (value: string) => {
+    setValue('customReceiverFirstName', value);
+  };
+
+  const handleCustomReceiverLastNameChange = (value: string) => {
+    setValue('customReceiverLastName', value);
+  };
+
+  const handleCustomReceiverEmailChange = (value: string) => {
+    setValue('customReceiverEmail', value);
+  };
+
   // PDF generation handlers
   const handlePreviewPDF = async (data: CITReturnLettersData): Promise<void> => {
     // Validate required data before generating PDF
@@ -203,7 +226,8 @@ const CITReturnLettersTab: React.FC = () => {
           phone: user.phone,
           department: user.department
         } : undefined,
-        data.taxPeriodEnd // Pass tax period end date for dynamic calculations
+        data.taxPeriodEnd, // Pass tax period end date for dynamic calculations
+        data // Pass full CIT data for custom receiver details
       );
       
       // Add activity logging
@@ -386,6 +410,14 @@ const CITReturnLettersTab: React.FC = () => {
         onClientSelect={handleClientSelect}
         searchTerm={watchedData.clientSearchTerm}
         onSearchTermChange={handleSearchTermChange}
+        useCustomReceiverDetails={watchedData.useCustomReceiverDetails}
+        onUseCustomReceiverDetailsChange={handleUseCustomReceiverDetailsChange}
+        customReceiverFirstName={watchedData.customReceiverFirstName}
+        onCustomReceiverFirstNameChange={handleCustomReceiverFirstNameChange}
+        customReceiverLastName={watchedData.customReceiverLastName}
+        onCustomReceiverLastNameChange={handleCustomReceiverLastNameChange}
+        customReceiverEmail={watchedData.customReceiverEmail}
+        onCustomReceiverEmailChange={handleCustomReceiverEmailChange}
       />
 
       {/* Letter Date Section */}

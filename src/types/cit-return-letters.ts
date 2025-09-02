@@ -66,6 +66,12 @@ export interface CITReturnLettersData {
   selectedClient: Client | null;
   clientSearchTerm: string;
   
+  // Custom Receiver Details (optional override)
+  useCustomReceiverDetails: boolean;
+  customReceiverFirstName: string;
+  customReceiverLastName: string;
+  customReceiverEmail: string;
+  
   // Letter Date
   letterDate: string;
   
@@ -89,6 +95,10 @@ export interface CITReturnLettersData {
 export const CIT_RETURN_LETTERS_DEFAULTS = {
   selectedClient: null,
   clientSearchTerm: '',
+  useCustomReceiverDetails: false,
+  customReceiverFirstName: '',
+  customReceiverLastName: '',
+  customReceiverEmail: '',
   letterDate: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
   taxPeriodStart: '',
   taxPeriodEnd: '',

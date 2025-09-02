@@ -415,7 +415,7 @@ export const processCITReturnFilingEmailTemplate = (
   const taxYear = getTaxYear(taxPeriodEnd);
   const dueDate = calculateCITDueDate(taxPeriodEnd);
   
-  // Generate dynamic subject line using the same format as multi-filename
+  // Generate dynamic subject line with client code at the beginning
   const generateDynamicSubject = (): string => {
     const date = new Date();
     const yy = date.getFullYear().toString().slice(-2);
@@ -441,7 +441,8 @@ export const processCITReturnFilingEmailTemplate = (
     
     const letterTypeString = letterTypeParts.join(' - ');
     
-    return `${formattedDate} ${companyShort} ${letterTypeString} ${taxYear}`;
+    // Add client code at the beginning of the subject
+    return `${companyCode} ${formattedDate} ${companyShort} ${letterTypeString} ${taxYear}`;
   };
   
   const dynamicSubject = generateDynamicSubject();
@@ -509,7 +510,8 @@ export const createCITEmailDataFromFormData = async (
   letterTypes: LetterType | LetterType[], // Support both single and multiple
   pdfResults: { blob: Blob; filename: string } | { blob: Blob; filename: string }[], // Support both single and multiple PDFs
   userInfo?: { full_name?: string; designation?: string; employee_code?: string; phone?: string; department?: string },
-  taxPeriodEnd?: string // Add tax period end parameter
+  taxPeriodEnd?: string, // Add tax period end parameter
+  citReturnLettersData?: any // Add full CIT data to access custom receiver details
 ): Promise<CITEmailDraftGeneratorProps> => {
   
   // Normalize inputs to arrays
@@ -519,11 +521,22 @@ export const createCITEmailDataFromFormData = async (
   // Add CC email for CIT return letters
   const ccEmails = ['CIT@TME-Services.com'];
 
+  // Determine if we should use custom receiver details
+  const useCustomReceiver = citReturnLettersData?.useCustomReceiverDetails && 
+                           citReturnLettersData?.customReceiverFirstName &&
+                           citReturnLettersData?.customReceiverEmail;
+
   const recipients: CITEmailRecipientData = {
-    emails: [client.management_email],
+    emails: useCustomReceiver 
+      ? [citReturnLettersData.customReceiverEmail]
+      : [client.management_email],
     ccEmails: ccEmails,
-    firstName: client.management_name?.split(' ')[0] || 'Client',
-    lastName: client.management_name?.split(' ').slice(1).join(' ') || '',
+    firstName: useCustomReceiver 
+      ? citReturnLettersData.customReceiverFirstName
+      : client.management_name?.split(' ')[0] || 'Client',
+    lastName: useCustomReceiver
+      ? citReturnLettersData.customReceiverLastName || ''
+      : client.management_name?.split(' ').slice(1).join(' ') || '',
     companyName: client.company_name,
     companyShortName: client.company_name_short, // Add the company short name
     companyCode: client.company_code,

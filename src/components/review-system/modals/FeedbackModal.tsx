@@ -617,7 +617,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
           letterTypes.length === 1 ? letterTypes[0] : letterTypes, // Pass single type or array
           allPdfResults.length > 0 ? allPdfResults : { blob: pdfBlob, filename }, // Pass ALL PDFs if available
           user || undefined,
-          formData.taxPeriodEnd // Pass tax period end date for dynamic calculations
+          formData.taxPeriodEnd, // Pass tax period end date for dynamic calculations
+          formData // Pass full CIT data for custom receiver details
         );
         
         // Set CIT email props to trigger the CITEmailDraftGenerator component
