@@ -96,12 +96,19 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           <AccountingServicesSection data={data} />
 
           {/* Additional Services Text - For monthly OR when quarterly/yearly is NOT first service */}
-          {(accountingServices.serviceType === 'monthly' || (accountingServices.serviceType !== 'monthly' && !isFirstService)) && (
+          {(accountingServices.serviceType === 'monthly' || (accountingServices.serviceType !== 'monthly' && !isFirstService)) && 
+           (accountingServices.vatBooking || accountingServices.costCenterBooking || accountingServices.monthlyGroupReporting) && (
             <View style={{ marginTop: 20 }}>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
-                For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
-                For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}
-                For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}
+                {accountingServices.vatBooking && (
+                  <>For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}</>
+                )}
+                {accountingServices.costCenterBooking && (
+                  <>For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}</>
+                )}
+                {accountingServices.monthlyGroupReporting && (
+                  <>For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}</>
+                )}
                 To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
               </Text>
             </View>
@@ -131,12 +138,18 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
             )}
             
             {/* Additional Services Information - Only when accounting is first service */}
-            {isFirstService && (
+            {isFirstService && (accountingServices.vatBooking || accountingServices.costCenterBooking || accountingServices.monthlyGroupReporting) && (
               <View style={{ marginBottom: 20 }}>
                 <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
-                  For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
-                  For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}
-                  For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}
+                  {accountingServices.vatBooking && (
+                    <>For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}</>
+                  )}
+                  {accountingServices.costCenterBooking && (
+                    <>For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}</>
+                  )}
+                  {accountingServices.monthlyGroupReporting && (
+                    <>For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}</>
+                  )}
                   To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
                 </Text>
               </View>
