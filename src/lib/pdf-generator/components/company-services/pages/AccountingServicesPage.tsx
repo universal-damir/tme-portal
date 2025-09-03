@@ -33,9 +33,10 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   }
 
   // Check if we need to render annual services on a separate page
+  // For quarterly/yearly, we always show annual services on a separate page if they exist
   const shouldShowAnnualServicesPage = accountingServices.serviceType !== 'monthly' && 
-    (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee) && 
-    isFirstService; // Only create separate page if accounting is first service
+    (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee ||
+     accountingServices.payrollServices || accountingServices.payrollServicesEnabled);
 
   return (
     <>
@@ -94,8 +95,8 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
           
           <AccountingServicesSection data={data} />
 
-          {/* Additional Services Text - Only when NOT first service and quarterly/yearly */}
-          {!isFirstService && accountingServices.serviceType !== 'monthly' && (
+          {/* Additional Services Text - For monthly OR when quarterly/yearly is NOT first service */}
+          {(accountingServices.serviceType === 'monthly' || (accountingServices.serviceType !== 'monthly' && !isFirstService)) && (
             <View style={{ marginTop: 20 }}>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
                 For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
@@ -117,15 +118,29 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
 
           {/* Main content area that will flex to fill available space */}
           <View style={{ flex: 1, flexDirection: 'column' }}>
-            {/* Additional Services Information - Only on separate annual page */}
-            <View style={{ marginBottom: 20 }}>
-              <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
-                For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
-                For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}
-                For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}
-                To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
-              </Text>
-            </View>
+            {/* Client Details Section - only if accounting is first service and we're on the annual page */}
+            {isFirstService && (
+              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
+                <View style={{ width: '50%', paddingRight: 8 }}>
+                  {/* Empty space to maintain layout consistency */}
+                </View>
+                <View style={{ width: '50%', paddingLeft: 8 }}>
+                  {/* Empty space to maintain layout consistency */}
+                </View>
+              </View>
+            )}
+            
+            {/* Additional Services Information - Only when accounting is first service */}
+            {isFirstService && (
+              <View style={{ marginBottom: 20 }}>
+                <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 12 }]}>
+                  For VAT booking, our fee is 20% of the monthly financial accounting fee.{'\n'}
+                  For cost-center booking and reporting, our fee is 25% of the monthly financial accounting fee.{'\n'}
+                  For the preparation of monthly group reporting, our fee is AED 1,236 {formatSecondaryCurrency(1236, data.clientDetails.exchangeRate, data.clientDetails.secondaryCurrency)}.{'\n'}
+                  To ensure smooth processing, we recommend scanning and sending all relevant accounting documents, such as invoices, receipts, bank statements, and others, directly to us via Share Point.
+                </Text>
+              </View>
+            )}
             
             <AnnualAccountingServicesSection data={data} />
           </View>

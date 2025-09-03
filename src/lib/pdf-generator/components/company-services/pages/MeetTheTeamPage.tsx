@@ -27,25 +27,25 @@ const staffPhotoMapping = {
 const teamMembers = [
   {
     name: 'Uwe Hohmann',
-    title: 'CEO (Chief Executive Officer)',
+    title: 'Chief Executive Officer',
     email: 'uwe@TME-Services.com',
     initials: 'UH',
   },
   {
     name: 'Malavika Kolera',
-    title: 'CTCO (Chief Tax Compliance Officer)',
+    title: 'Chief Tax & Compliance Officer',
     email: 'malavika@TME-Services.com',
     initials: 'MK',
   },
   {
     name: 'Dijendra Hegde',
-    title: 'CFO (Chief Financial Officer)',
+    title: 'Chief Financial Officer',
     email: 'dijendra@TME-Services.com',
     initials: 'DH',
   },
   {
     name: 'Natali Fernando',
-    title: 'CCO (Chief Client Officer)',
+    title: 'Chief Client Officer',
     email: 'natali@TME-Services.com',
     initials: 'NF',
   },
@@ -69,7 +69,7 @@ const teamMembers = [
   },
   {
     name: 'Hafees Hameed',
-    title: 'CIO (Chief Information Officer)',
+    title: 'Chief Information Officer',
     email: 'hafees@TME-Services.com',
     initials: 'HH',
   },
@@ -93,7 +93,7 @@ const teamMembers = [
   },
   {
     name: 'Damir Novalic',
-    title: 'CDO (Chief Digital Officer)',
+    title: 'Chief Digital Officer',
     email: 'damir@TME-Services.com',
     initials: 'DN',
   },
