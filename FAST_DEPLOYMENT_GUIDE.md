@@ -49,24 +49,24 @@ tar -xzf update-20250813-212024.tar.gz
 
 ### 3. Copy Files into Docker Container
 ```bash
-# Copy the compiled application files (use correct container name for your deployment)
-docker cp .next/standalone/. tme-production-deploy-app-1:/app/
-docker cp .next/static tme-production-deploy-app-1:/app/.next/
-docker cp public/. tme-production-deploy-app-1:/app/public/
+# Copy the compiled application files
+docker cp .next/standalone/. tme-user-app-1:/app/
+docker cp .next/static tme-user-app-1:/app/.next/
+docker cp public/. tme-user-app-1:/app/public/
 ```
 
 ### 4. Restart the Container
 ```bash
-docker restart tme-production-deploy-app-1
+docker restart tme-user-app-1
 ```
 
 ### 5. Verify Deployment
 ```bash
 # Check container is running
-docker ps | grep tme-production-deploy-app-1
+docker ps | grep tme-user-app-1
 
 # Check logs if needed
-docker logs --tail 50 tme-production-deploy-app-1
+docker logs --tail 50 tme-user-app-1
 ```
 
 Your app should be live at http://192.168.97.149/ within 30 seconds!
@@ -92,10 +92,10 @@ fi
 
 echo "Applying update: $1"
 tar -xzf $1
-docker cp .next/standalone/. tme-production-deploy-app-1:/app/
-docker cp .next/static tme-production-deploy-app-1:/app/.next/
-docker cp public/. tme-production-deploy-app-1:/app/public/
-docker restart tme-production-deploy-app-1
+docker cp .next/standalone/. tme-user-app-1:/app/
+docker cp .next/static tme-user-app-1:/app/.next/
+docker cp public/. tme-user-app-1:/app/public/
+docker restart tme-user-app-1
 echo "✅ Update applied! Site restarting..."
 ```
 
@@ -127,13 +127,13 @@ echo "✅ Update applied! Site restarting..."
 ### If deployment fails:
 ```bash
 # Check container logs
-docker logs --tail 100 tme-production-deploy-app-1
+docker logs --tail 100 tme-user-app-1
 
 # Verify files were copied
-docker exec tme-production-deploy-app-1 ls -la /app/
+docker exec tme-user-app-1 ls -la /app/
 
 # Check container status
-docker ps -a | grep tme-production-deploy
+docker ps -a | grep tme-user
 ```
 
 ### Rollback if needed:
@@ -189,7 +189,7 @@ npm run build && tar -czf update.tar.gz .next/standalone/ .next/static/ public/
 
 Server:
 ```bash
-tar -xzf update.tar.gz && docker cp .next/standalone/. tme-portal-app-1:/app/ && docker cp .next/static tme-portal-app-1:/app/.next/ && docker cp public/. tme-portal-app-1:/app/public/ && docker restart tme-portal-app-1
+tar -xzf update.tar.gz && docker cp .next/standalone/. tme-user-app-1:/app/ && docker cp .next/static tme-user-app-1:/app/.next/ && docker cp public/. tme-user-app-1:/app/public/ && docker restart tme-user-app-1
 ```
 
 That's it! Your changes are live in under 2 minutes! 🚀

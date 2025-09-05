@@ -3,7 +3,8 @@ import { Document } from '@react-pdf/renderer';
 import { 
   GoldenVisaCoverPage,
   AuthorityCostsPage,
-  DependentVisasPage
+  DependentVisasPage,
+  GoldenVisaSummaryPage
 } from './pages';
 import { transformGoldenVisaData, hasDependentVisas } from '../../utils/goldenVisaDataTransformer';
 import { GoldenVisaData } from '@/types/golden-visa';
@@ -48,6 +49,9 @@ export const GoldenVisaDocument: React.FC<GoldenVisaDocumentProps> = ({
 
       {/* Dependent Visas Page - Only when dependents are selected */}
       {showDependentVisas && <DependentVisasPage data={transformedData} />}
+
+      {/* Summary Page - Always shown */}
+      <GoldenVisaSummaryPage data={transformedData} />
     </Document>
   );
 }; 

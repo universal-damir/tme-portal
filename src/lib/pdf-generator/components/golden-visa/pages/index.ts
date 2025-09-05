@@ -11,4 +11,5 @@
 // Page components
 export { GoldenVisaCoverPage } from './GoldenVisaCoverPage';
 export { AuthorityCostsPage } from './AuthorityCostsPage';
-export { DependentVisasPage } from './DependentVisasPage'; 
+export { DependentVisasPage } from './DependentVisasPage';
+export { GoldenVisaSummaryPage } from './SummaryPage'; 

@@ -7,7 +7,7 @@ import {
 } from '../../shared';
 import type { PDFComponentProps } from '../../../types';
 
-export const SummaryPage: React.FC<PDFComponentProps> = ({ data }) => {
+export const GoldenVisaSummaryPage: React.FC<PDFComponentProps> = ({ data }) => {
   return (
     <Page size="A4" style={styles.page}>
       <HeaderComponent data={data} />
