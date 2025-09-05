@@ -46,8 +46,8 @@ class FilenameUtils {
    * Build name component: LastName FirstName or just available name
    */
   static buildNameComponent(firstName?: string, lastName?: string): string {
-    const cleanFirst = firstName ? this.cleanText(firstName, 15) : '';
-    const cleanLast = lastName ? this.cleanText(lastName, 15) : '';
+    const cleanFirst = firstName ? this.cleanText(firstName, 25) : '';
+    const cleanLast = lastName ? this.cleanText(lastName, 25) : '';
     
     if (cleanLast && cleanFirst) {
       return `${cleanLast} ${cleanFirst}`;
