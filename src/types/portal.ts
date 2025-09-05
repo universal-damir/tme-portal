@@ -29,6 +29,10 @@ export interface SharedClientInfo {
   companyName?: string;
   shortCompanyName?: string;
   date: string;
+  clientEmails?: string[];
+  addressToCompany?: boolean;
+  secondaryCurrency?: 'EUR' | 'USD' | 'GBP';
+  exchangeRate?: number;
 }
 
 export interface SharedClientContextType {

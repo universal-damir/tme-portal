@@ -1,12 +1,18 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { User, Plus, X, Mail, Check } from 'lucide-react';
+import { User, Plus, X, Mail, Check, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FormSection } from '../../cost-overview/ui/FormSection';
 import { TaxationData } from '@/types/taxation';
 import { UseFormRegister, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { FormDatePicker } from '@/components/ui/form-date-picker';
+import { useSharedClient } from '@/contexts/SharedClientContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ClientDetailsSectionProps {
   /**
@@ -36,6 +42,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   data,
   setValue,
 }) => {
+  const { clearClientInfo } = useSharedClient();
   // Email management state - start with existing emails or just one empty field
   const [emailInputs, setEmailInputs] = useState<string[]>(() => {
     if (data?.clientEmails?.length) {
@@ -119,6 +126,33 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
         description="Basic client information for taxation services"
         icon={User}
         iconColor="text-blue-600"
+        actionButton={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  clearClientInfo({ source: 'manual-clear' });
+                  // Clear all form fields including emails
+                  setValue('firstName', '');
+                  setValue('lastName', '');
+                  setValue('companyName', '');
+                  setValue('shortCompanyName', '');
+                  setValue('clientEmails', ['']);
+                  setEmailInputs(['']); // Reset email inputs state
+                }}
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Clear client information</p>
+            </TooltipContent>
+          </Tooltip>
+        }
       >
         <div className="space-y-4" style={{ fontFamily: 'Inter, sans-serif' }}>
           {/* Line 1: First Name, Last Name, Date */}

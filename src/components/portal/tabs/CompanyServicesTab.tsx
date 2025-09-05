@@ -229,6 +229,9 @@ const CompanyServicesTab: React.FC = () => {
       setValue('companyName', clientInfo.companyName || '');
       setValue('shortCompanyName', clientInfo.shortCompanyName || '');
       setValue('date', clientInfo.date);
+      setValue('clientEmails', clientInfo.clientEmails || ['']);
+      setValue('secondaryCurrency', clientInfo.secondaryCurrency || 'EUR');
+      setValue('exchangeRate', clientInfo.exchangeRate || 3.67);
       initializedRef.current = true;
     } else if (shouldSyncWhenCleared) {
       // Also sync when context is cleared (all fields empty) and we're in fresh state
@@ -237,6 +240,9 @@ const CompanyServicesTab: React.FC = () => {
       setValue('companyName', '');
       setValue('shortCompanyName', '');
       setValue('date', new Date().toISOString().split('T')[0]);
+      setValue('clientEmails', ['']);
+      setValue('secondaryCurrency', 'EUR');
+      setValue('exchangeRate', 3.67);
       // Reset the flag so we can sync again if needed
       initializedRef.current = false;
     }
@@ -250,7 +256,7 @@ const CompanyServicesTab: React.FC = () => {
       return; // Don't sync to SharedClientContext when working with review data
     }
     
-    const { firstName, lastName, companyName, shortCompanyName, date } = watchedData;
+    const { firstName, lastName, companyName, shortCompanyName, date, clientEmails, secondaryCurrency, exchangeRate } = watchedData;
     
     // Clear previous timeout
     if (updateTimeoutRef.current) {
@@ -265,6 +271,9 @@ const CompanyServicesTab: React.FC = () => {
         companyName: companyName || '',
         shortCompanyName: shortCompanyName || '',
         date: date || new Date().toISOString().split('T')[0],
+        clientEmails: clientEmails || [''],
+        secondaryCurrency: secondaryCurrency || 'EUR',
+        exchangeRate: exchangeRate || 3.67,
       });
     }, 100);
     
@@ -279,6 +288,9 @@ const CompanyServicesTab: React.FC = () => {
     watchedData.companyName, 
     watchedData.shortCompanyName,
     watchedData.date,
+    watchedData.clientEmails,
+    watchedData.secondaryCurrency,
+    watchedData.exchangeRate,
     workflowState // Also watch workflowState to skip updates during review
     // updateClientInfo removed - it's stable from context and was causing infinite loop
   ]);
@@ -338,16 +350,30 @@ const CompanyServicesTab: React.FC = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          
+          // Store current client details before reset
+          const currentFirstName = getValues('firstName');
+          const currentLastName = getValues('lastName');
+          const currentCompanyName = getValues('companyName');
+          const currentShortCompanyName = getValues('shortCompanyName');
+          const currentDate = getValues('date');
+          const currentEmails = getValues('clientEmails');
+          
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info completely after email sent (final step)
-          clearClientInfo({ 
-            completeReset: true,
-            source: 'email-sent'
-          });
+          
+          // Restore client details after reset
+          setValue('firstName', currentFirstName || '');
+          setValue('lastName', currentLastName || '');
+          setValue('companyName', currentCompanyName || '');
+          setValue('shortCompanyName', currentShortCompanyName || '');
+          setValue('date', currentDate || new Date().toISOString().split('T')[0]);
+          setValue('clientEmails', currentEmails || ['']);
+          
+          // Don't clear SharedClientInfo - keep client details in context
           setWorkflowState('fresh');
           toast.success('Email sent successfully', {
-            description: 'The form has been cleared for the next application.'
+            description: 'The form has been reset (client details preserved).'
           });
         },
         onError: (error: string) => {

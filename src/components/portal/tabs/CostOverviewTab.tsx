@@ -319,14 +319,24 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       setValue('clientDetails.firstName', clientInfo.firstName || '');
       setValue('clientDetails.lastName', clientInfo.lastName || '');
       setValue('clientDetails.companyName', clientInfo.companyName || '');
+      setValue('clientDetails.shortCompanyName', clientInfo.shortCompanyName || '');
       setValue('clientDetails.date', clientInfo.date);
+      setValue('clientDetails.clientEmails', clientInfo.clientEmails || ['']);
+      setValue('clientDetails.addressToCompany', clientInfo.addressToCompany || false);
+      setValue('clientDetails.secondaryCurrency', clientInfo.secondaryCurrency || 'EUR');
+      setValue('clientDetails.exchangeRate', clientInfo.exchangeRate || 3.67);
       initializedRef.current = true;
     } else if (shouldSyncWhenCleared) {
       // Also sync when context is cleared (all fields empty) and we're in fresh state
       setValue('clientDetails.firstName', '');
       setValue('clientDetails.lastName', '');
       setValue('clientDetails.companyName', '');
+      setValue('clientDetails.shortCompanyName', '');
       setValue('clientDetails.date', new Date().toISOString().split('T')[0]);
+      setValue('clientDetails.clientEmails', ['']);
+      setValue('clientDetails.addressToCompany', false);
+      setValue('clientDetails.secondaryCurrency', 'EUR');
+      setValue('clientDetails.exchangeRate', 3.67);
       // Reset the flag so we can sync again if needed
       initializedRef.current = false;
     }
@@ -353,7 +363,12 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         firstName: firstName || '',
         lastName: lastName || '',
         companyName: companyName || '',
+        shortCompanyName: watchedData.clientDetails?.shortCompanyName || '',
         date: date || new Date().toISOString().split('T')[0],
+        clientEmails: watchedData.clientDetails?.clientEmails || [''],
+        addressToCompany: watchedData.clientDetails?.addressToCompany || false,
+        secondaryCurrency: watchedData.clientDetails?.secondaryCurrency || 'EUR',
+        exchangeRate: watchedData.clientDetails?.exchangeRate || 3.67,
       });
     }, 100); // Small delay to prevent loops
     
@@ -365,8 +380,13 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
   }, [
     watchedData.clientDetails?.firstName, 
     watchedData.clientDetails?.lastName, 
-    watchedData.clientDetails?.companyName, 
+    watchedData.clientDetails?.companyName,
+    watchedData.clientDetails?.shortCompanyName,
     watchedData.clientDetails?.date,
+    watchedData.clientDetails?.clientEmails,
+    watchedData.clientDetails?.addressToCompany,
+    watchedData.clientDetails?.secondaryCurrency,
+    watchedData.clientDetails?.exchangeRate,
     workflowState // Also watch workflowState to skip updates during review
     // updateClientInfo removed - it's stable from context and was causing infinite loop
   ]);
@@ -615,16 +635,25 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          
+          // Store current client details before reset
+          const currentClientDetails = getValues('clientDetails');
+          
           // Clear form after successfully sending the email
           reset();
-          // Complete reset - clear everything including preserved data
-          clearClientInfo({ 
-            completeReset: true,
-            source: 'email-sent'
-          });
+          
+          // Restore client details after reset
+          setValue('clientDetails.firstName', currentClientDetails.firstName || '');
+          setValue('clientDetails.lastName', currentClientDetails.lastName || '');
+          setValue('clientDetails.companyName', currentClientDetails.companyName || '');
+          setValue('clientDetails.shortCompanyName', currentClientDetails.shortCompanyName || '');
+          setValue('clientDetails.date', currentClientDetails.date || new Date().toISOString().split('T')[0]);
+          setValue('clientDetails.clientEmails', currentClientDetails.clientEmails || ['']);
+          
+          // Don't clear SharedClientInfo - keep client details in context
           setWorkflowState('fresh');
           toast.success('Email sent successfully', {
-            description: 'The form has been cleared for the next application.'
+            description: 'The form has been reset (client details preserved).'
           });
         },
         onError: (error: string) => {
@@ -814,16 +843,25 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          
+          // Store current client details before reset
+          const currentClientDetails = getValues('clientDetails');
+          
           // Clear form after successfully sending the email
           reset();
-          // Complete reset - clear everything including preserved data
-          clearClientInfo({ 
-            completeReset: true,
-            source: 'email-sent'
-          });
+          
+          // Restore client details after reset
+          setValue('clientDetails.firstName', currentClientDetails.firstName || '');
+          setValue('clientDetails.lastName', currentClientDetails.lastName || '');
+          setValue('clientDetails.companyName', currentClientDetails.companyName || '');
+          setValue('clientDetails.shortCompanyName', currentClientDetails.shortCompanyName || '');
+          setValue('clientDetails.date', currentClientDetails.date || new Date().toISOString().split('T')[0]);
+          setValue('clientDetails.clientEmails', currentClientDetails.clientEmails || ['']);
+          
+          // Don't clear SharedClientInfo - keep client details in context
           setWorkflowState('fresh');
           toast.success('Email sent successfully', {
-            description: 'The form has been cleared for the next application.'
+            description: 'The form has been reset (client details preserved).'
           });
         },
         onError: (error: string) => {

@@ -1,11 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { UseFormRegister, FieldErrors, UseFormSetValue } from 'react-hook-form';
-import { User, Check, Plus, X, Mail } from 'lucide-react';
+import { User, Check, Plus, X, Mail, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { OfferData } from '@/types/offer';
 import { FormSection } from '../ui/FormSection';
 import { FormattedInputHandlers } from '../hooks/useFormattedInputs';
 import { FormDatePicker } from '@/components/ui/form-date-picker';
+import { useSharedClient } from '@/contexts/SharedClientContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface ClientDetailsSectionProps {
   register: UseFormRegister<OfferData>;
@@ -23,6 +29,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   setValue
 }) => {
   const { clientDetails } = watchedData;
+  const { clearClientInfo, clientInfo } = useSharedClient();
   
   // Check if company name has any meaningful content
   const hasCompanyName = clientDetails?.companyName && clientDetails.companyName.trim().length > 0;
@@ -50,6 +57,24 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   // Use ref to track the latest emailInputs value without causing re-renders
   const emailInputsRef = useRef(emailInputs);
   emailInputsRef.current = emailInputs;
+
+  // Sync email inputs from SharedClientContext when switching tabs
+  useEffect(() => {
+    if (clientInfo?.clientEmails && Array.isArray(clientInfo.clientEmails) && clientInfo.clientEmails.length > 0) {
+      const contextEmails = clientInfo.clientEmails.filter(email => email && email.trim() !== '');
+      if (contextEmails.length > 0) {
+        // Only update if emails are different to avoid infinite loops
+        const currentEmails = emailInputsRef.current.filter(email => email.trim() !== '');
+        const emailsChanged = contextEmails.length !== currentEmails.length || 
+                            contextEmails.some((email, index) => email !== currentEmails[index]);
+        
+        if (emailsChanged) {
+          setEmailInputs(contextEmails);
+          setValue('clientDetails.clientEmails', contextEmails);
+        }
+      }
+    }
+  }, [clientInfo?.clientEmails, setValue]);
 
   // Sync local email state with form data changes (e.g., from AI assistant)
   useEffect(() => {
@@ -106,6 +131,33 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
         description="Basic client information"
         icon={User}
         iconColor="text-slate-600"
+        actionButton={
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  clearClientInfo({ source: 'manual-clear' });
+                  // Clear all form fields including emails
+                  setValue('clientDetails.firstName', '');
+                  setValue('clientDetails.lastName', '');
+                  setValue('clientDetails.companyName', '');
+                  setValue('clientDetails.shortCompanyName', '');
+                  setValue('clientDetails.clientEmails', ['']);
+                  setEmailInputs(['']); // Reset email inputs state
+                }}
+                className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Clear client information</p>
+            </TooltipContent>
+          </Tooltip>
+        }
       >
         <div className="space-y-4">
           {/* Personal Information */}

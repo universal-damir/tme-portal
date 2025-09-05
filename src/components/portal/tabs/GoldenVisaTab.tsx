@@ -255,8 +255,11 @@ const GoldenVisaTab: React.FC = () => {
     if (!initializedRef.current && (clientInfo.firstName || clientInfo.lastName)) {
       setValue('firstName', clientInfo.firstName || '');
       setValue('lastName', clientInfo.lastName || '');
-      setValue('companyName', ''); // Golden Visa doesn't use company name
+      // Don't set companyName - Golden Visa doesn't have this field
       setValue('date', clientInfo.date);
+      setValue('clientEmails', clientInfo.clientEmails || ['']);
+      setValue('secondaryCurrency', clientInfo.secondaryCurrency || 'EUR');
+      setValue('exchangeRate', clientInfo.exchangeRate || 3.67);
       initializedRef.current = true;
     }
     
@@ -265,8 +268,11 @@ const GoldenVisaTab: React.FC = () => {
         !clientInfo.firstName && !clientInfo.lastName && !clientInfo.companyName) {
       setValue('firstName', '');
       setValue('lastName', '');
-      setValue('companyName', '');
+      // Don't set companyName - Golden Visa doesn't have this field
       setValue('date', clientInfo.date || new Date().toISOString().split('T')[0]);
+      setValue('clientEmails', ['']);
+      setValue('secondaryCurrency', 'EUR');
+      setValue('exchangeRate', 3.67);
     }
   }, [clientInfo, setValue, workflowState]);
 
@@ -278,7 +284,7 @@ const GoldenVisaTab: React.FC = () => {
       return; // Don't sync to SharedClientContext when working with review data
     }
     
-    const { firstName, lastName, date } = watchedData;
+    const { firstName, lastName, date, clientEmails, secondaryCurrency, exchangeRate } = watchedData;
     
     // Clear previous timeout
     if (updateTimeoutRef.current) {
@@ -290,8 +296,12 @@ const GoldenVisaTab: React.FC = () => {
       updateClientInfo({
         firstName: firstName || '',
         lastName: lastName || '',
-        companyName: '', // Golden Visa doesn't use company name
+        // Don't update company fields - Golden Visa doesn't use them
+        // companyName and shortCompanyName will retain their values from other tabs
         date: date || new Date().toISOString().split('T')[0],
+        clientEmails: clientEmails || [''],
+        secondaryCurrency: secondaryCurrency || 'EUR',
+        exchangeRate: exchangeRate || 3.67,
       });
     }, 100); // Small delay to prevent loops
     
@@ -304,6 +314,9 @@ const GoldenVisaTab: React.FC = () => {
     watchedData.firstName, 
     watchedData.lastName, 
     watchedData.date,
+    watchedData.clientEmails,
+    watchedData.secondaryCurrency,
+    watchedData.exchangeRate,
     workflowState // Also watch workflowState to skip updates during review
     // updateClientInfo removed - it's stable from context and was causing infinite loop
   ]);
@@ -452,16 +465,26 @@ const GoldenVisaTab: React.FC = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          
+          // Store current client details before reset
+          const currentFirstName = getValues('firstName');
+          const currentLastName = getValues('lastName');
+          const currentDate = getValues('date');
+          const currentEmails = getValues('clientEmails');
+          
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info completely after email sent (final step)
-          clearClientInfo({ 
-            completeReset: true,
-            source: 'email-sent'
-          });
+          
+          // Restore client details after reset
+          setValue('firstName', currentFirstName || '');
+          setValue('lastName', currentLastName || '');
+          setValue('date', currentDate || new Date().toISOString().split('T')[0]);
+          setValue('clientEmails', currentEmails || ['']);
+          
+          // Don't clear SharedClientInfo - keep client details in context
           setWorkflowState('fresh');
           toast.success('Email sent successfully', {
-            description: 'The form has been cleared for the next application.'
+            description: 'The form has been reset (client details preserved).'
           });
         },
         onError: (error: string) => {
@@ -742,16 +765,26 @@ const GoldenVisaTab: React.FC = () => {
         onSuccess: () => {
           // Clean up when email is sent successfully
           setEmailDraftProps(null);
+          
+          // Store current client details before reset
+          const currentFirstName = getValues('firstName');
+          const currentLastName = getValues('lastName');
+          const currentDate = getValues('date');
+          const currentEmails = getValues('clientEmails');
+          
           // Clear form after successfully sending the email
           reset();
-          // Clear shared client info completely after email sent (final step)
-          clearClientInfo({ 
-            completeReset: true,
-            source: 'email-sent'
-          });
+          
+          // Restore client details after reset
+          setValue('firstName', currentFirstName || '');
+          setValue('lastName', currentLastName || '');
+          setValue('date', currentDate || new Date().toISOString().split('T')[0]);
+          setValue('clientEmails', currentEmails || ['']);
+          
+          // Don't clear SharedClientInfo - keep client details in context
           setWorkflowState('fresh');
           toast.success('Email sent successfully', {
-            description: 'The form has been cleared for the next application.'
+            description: 'The form has been reset (client details preserved).'
           });
         },
         onError: (error: string) => {
@@ -1187,18 +1220,28 @@ const GoldenVisaTab: React.FC = () => {
         onSubmit={async (submission) => {
           const success = await reviewApp.submitForReview(submission);
           if (success) {
-            // Clear form after successful submission but preserve data for review workflow
+            // Store client details before reset
+            const currentFirstName = getValues('firstName');
+            const currentLastName = getValues('lastName');
+            const currentDate = getValues('date');
+            const currentEmails = getValues('clientEmails');
+            
+            // Clear form after successful submission but preserve client details
             reset();
+            
+            // Restore client details after reset
+            setValue('firstName', currentFirstName || '');
+            setValue('lastName', currentLastName || '');
+            setValue('date', currentDate || new Date().toISOString().split('T')[0]);
+            setValue('clientEmails', currentEmails || ['']);
+            
             // Clear UI but preserve data for when it comes back from review
             console.log('🟢 [GoldenVisaTab] Successfully submitted for review');
             
-            // Clear form completely - data is now in DB
-            clearClientInfo({ 
-              source: 'review-submit'
-            });
+            // Don't clear client info - keep for next submission
             setWorkflowState('fresh');
             toast.success('Application submitted for review', {
-              description: 'The form has been cleared for the next application. Data is saved for the review process.'
+              description: 'Your application has been saved. Client details preserved for next submission.'
             });
             
             // Debug log

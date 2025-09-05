@@ -31,7 +31,7 @@ class FilenameUtils {
    */
   static cleanText(text: string, maxLength?: number): string {
     let cleaned = text
-      .replace(/[^a-zA-Z0-9\s]/g, '') // Remove special characters
+      .replace(/[^a-zA-Z0-9\s\-]/g, '') // Remove special characters but keep dashes
       .replace(/\s+/g, ' ') // Collapse multiple spaces
       .trim();
     
@@ -75,7 +75,7 @@ class FilenameUtils {
 class CompanyServicesFilenameGenerator {
   
   /**
-   * Format: YYMMDD {MGT/FZCO} {LastName} {FirstName} {CompanyShortName} TME Services {CIT VAT ACC PRO COMPL}.pdf
+   * Format: YYMMDD {MGT/FZCO} {CompanyShortName} {LastName} {FirstName} TME Services.pdf
    */
   static generate(data: {
     date: string;
@@ -107,23 +107,19 @@ class CompanyServicesFilenameGenerator {
     // Company type: MGT/FZCO
     components.push(FilenameUtils.getCompanyTypeAbbreviation(data.companyType));
     
-    // Name components: LastName FirstName
-    components.push(FilenameUtils.buildNameComponent(data.firstName, data.lastName));
-    
-    // Company short name (if provided)
+    // Company short name (if provided) - moved before name
     const shortName = FilenameUtils.buildCompanyShortName(data.shortCompanyName);
     if (shortName) {
       components.push(shortName);
     }
     
+    // Name components: LastName FirstName - now after company name
+    components.push(FilenameUtils.buildNameComponent(data.firstName, data.lastName));
+    
     // Static "TME Services" identifier
     components.push('TME Services');
     
-    // Services component: CIT VAT ACC PRO COMPL
-    const services = this.buildServicesComponent(data);
-    if (services) {
-      components.push(services);
-    }
+    // Note: Removed services component per new requirement
     
     return components.join(' ') + '.pdf';
   }
@@ -170,10 +166,10 @@ class CompanyServicesFilenameGenerator {
 class CostOverviewFilenameGenerator {
   
   /**
-   * IFZA Format: YYMMDD FZCO {LastName} {FirstName} {CompanyShortName} Setup IFZA {years} {visaQuota} {companyVisas} {spouseVisas} {childrenVisas} AED EUR
-   * DET Format: YYMMDD MGT {LastName} {FirstName} {CompanyShortName} Setup DET {INDIV/CORP} AED EUR
+   * IFZA Format: YYMMDD FZCO {CompanyShortName} {LastName} {FirstName} Setup IFZA {years} {visaQuota} {companyVisas} {spouseVisas} {childrenVisas} AED EUR
+   * DET Format: YYMMDD MGT {CompanyShortName} {LastName} {FirstName} Setup DET {INDIV/CORP} AED EUR
    * 
-   * Note: Use {LastName} {FirstName} as default unless "Address to company" is selected, 
+   * Note: Use {CompanyShortName} {LastName} {FirstName} as default unless "Address to company" is selected, 
    * in which case use only {CompanyShortName}. If no last name, use only {FirstName}
    */
   static generate(data: {
@@ -223,7 +219,13 @@ class CostOverviewFilenameGenerator {
       // Use only CompanyShortName when "Address to company" is selected
       components.push(FilenameUtils.cleanText(data.clientDetails.companyName, 30));
     } else {
-      // Use name logic: LastName FirstName as default, or only FirstName if no LastName
+      // Add CompanyShortName first (if available and not using "Address to company")
+      const shortName = data.clientDetails.companyName ? FilenameUtils.cleanText(data.clientDetails.companyName, 20) : '';
+      if (shortName) {
+        components.push(shortName);
+      }
+      
+      // Then add name logic: LastName FirstName as default, or only FirstName if no LastName
       const cleanFirst = data.clientDetails.firstName ? FilenameUtils.cleanText(data.clientDetails.firstName, 15) : '';
       const cleanLast = data.clientDetails.lastName ? FilenameUtils.cleanText(data.clientDetails.lastName, 15) : '';
       
@@ -231,14 +233,9 @@ class CostOverviewFilenameGenerator {
         components.push(cleanLast, cleanFirst);
       } else if (cleanFirst) {
         components.push(cleanFirst);
-      } else {
+      } else if (!shortName) {
+        // Only add 'Client' if there's no company name either
         components.push('Client');
-      }
-      
-      // Add CompanyShortName after the name (if available and not using "Address to company")
-      const shortName = data.clientDetails.companyName ? FilenameUtils.cleanText(data.clientDetails.companyName, 20) : '';
-      if (shortName) {
-        components.push(shortName);
       }
     }
     

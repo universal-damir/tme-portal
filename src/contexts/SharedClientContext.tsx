@@ -25,6 +25,10 @@ const initialClientInfo: SharedClientInfo = {
   companyName: '',
   shortCompanyName: '',
   date: new Date().toISOString().split('T')[0],
+  clientEmails: [''],
+  addressToCompany: false,
+  secondaryCurrency: 'EUR',
+  exchangeRate: 3.67,
 };
 
 // Simplified state - no more preserved data in client storage

@@ -15,6 +15,7 @@ interface FormSectionProps {
   children: React.ReactNode;
   className?: string;
   tooltipContent?: string;
+  actionButton?: React.ReactNode;
 }
 
 // Icon color to background color mapping
@@ -42,6 +43,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   children,
   className = '',
   tooltipContent,
+  actionButton,
 }) => {
   return (
     <div className={`bg-white rounded-xl shadow-lg border border-gray-200 p-6 ${className}`}>
@@ -59,21 +61,24 @@ export const FormSection: React.FC<FormSectionProps> = ({
             )}
           </div>
         </div>
-        {tooltipContent && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <HelpCircle className="w-5 h-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-sm">
-              <p>{tooltipContent}</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
+        <div className="flex items-center gap-2">
+          {actionButton}
+          {tooltipContent && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <HelpCircle className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-sm">
+                <p>{tooltipContent}</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </div>
       {children}
     </div>
