@@ -7,7 +7,7 @@ import {
   CommercialServicesPage,
   BackOfficeServicesPage,
   ComplianceServicesPage,
-  SummaryPage,
+  CompanyServicesSummaryPage,
   MeetTheTeamPage,
   ServicePortfolioPage
 } from './pages';
@@ -70,7 +70,7 @@ export const CompanyServicesDocument: React.FC<CompanyServicesDocumentProps> = (
       <ComplianceServicesPage data={dataWithServiceFlags} />
 
       {/* Summary Page - Always shown */}
-      <SummaryPage data={dataWithServiceFlags} />
+      <CompanyServicesSummaryPage data={dataWithServiceFlags} />
 
       {/* Meet The Team Page - Always shown */}
       <MeetTheTeamPage data={dataWithServiceFlags} />

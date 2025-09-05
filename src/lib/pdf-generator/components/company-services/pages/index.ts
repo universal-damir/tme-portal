@@ -10,6 +10,6 @@ export { AccountingServicesPage } from './AccountingServicesPage';
 export { CommercialServicesPage } from './CommercialServicesPage';
 export { BackOfficeServicesPage } from './BackOfficeServicesPage';
 export { ComplianceServicesPage } from './ComplianceServicesPage';
-export { SummaryPage } from './SummaryPage';
+export { CompanyServicesSummaryPage } from './SummaryPage';
 export { MeetTheTeamPage } from './MeetTheTeamPage';
 export { ServicePortfolioPage } from './ServicePortfolioPage'; 
