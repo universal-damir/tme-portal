@@ -9,4 +9,5 @@ export { CompanySelectionSection } from './CompanySelectionSection';
 export { TaxConsultingServicesSection } from './TaxConsultingServicesSection';
 export { AccountingServicesSection } from './AccountingServicesSection';
 export { BackOfficeServicesSection } from './BackOfficeServicesSection';
-export { ComplianceServicesSection } from './ComplianceServicesSection'; 
+export { ComplianceServicesSection } from './ComplianceServicesSection';
+export { CustomPageSection } from './CustomPageSection'; 

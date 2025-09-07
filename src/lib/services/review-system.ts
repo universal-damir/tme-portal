@@ -413,18 +413,52 @@ export class ApplicationsService {
     return safeDbOperation(async () => {
       const pool = getPool();
       
-      // Verify ownership
-      const ownerCheck = await pool.query(`
-        SELECT submitted_by_id, type FROM applications WHERE id = $1
+      // Verify ownership or reviewer access
+      const accessCheck = await pool.query(`
+        SELECT 
+          a.submitted_by_id, 
+          a.type,
+          a.status,
+          a.reviewer_id
+        FROM applications a
+        WHERE a.id = $1
       `, [id]);
       
-      console.log('🔧 BACKEND: Existing application check:', {
-        found: ownerCheck.rows.length > 0,
-        existingType: ownerCheck.rows[0]?.type,
-        isOwner: ownerCheck.rows[0]?.submitted_by_id === userId
+      if (accessCheck.rows.length === 0) {
+        throw new Error('Application not found');
+      }
+      
+      // Also check if user has reviewer role
+      const userRoleCheck = await pool.query(`
+        SELECT role FROM users WHERE id = $1
+      `, [userId]);
+      
+      const application = accessCheck.rows[0];
+      const userRole = userRoleCheck.rows[0]?.role;
+      const isOwner = application.submitted_by_id === userId;
+      const isAssignedReviewer = application.reviewer_id === userId;
+      const hasReviewerRole = userRole === 'admin' || userRole === 'reviewer' || userRole === 'super_admin';
+      const isUnderReview = ['under_review', 'rejected', 'pending_review'].includes(application.status);
+      
+      console.log('🔧 BACKEND: Application access check:', {
+        found: true,
+        existingType: application.type,
+        isOwner,
+        isAssignedReviewer,
+        hasReviewerRole,
+        userRole,
+        isUnderReview,
+        status: application.status,
+        userId,
+        submittedBy: application.submitted_by_id,
+        reviewerId: application.reviewer_id
       });
       
-      if (ownerCheck.rows.length === 0 || ownerCheck.rows[0].submitted_by_id !== userId) {
+      // Allow update if:
+      // 1. User is the owner (original submitter)
+      // 2. User has reviewer role and app is under review/rejected/pending
+      // 3. User is specifically assigned as reviewer
+      if (!isOwner && !(hasReviewerRole && isUnderReview) && !isAssignedReviewer) {
         throw new Error('Application not found or access denied');
       }
       

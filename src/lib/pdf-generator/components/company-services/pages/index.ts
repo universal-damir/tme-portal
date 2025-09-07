@@ -12,4 +12,5 @@ export { BackOfficeServicesPage } from './BackOfficeServicesPage';
 export { ComplianceServicesPage } from './ComplianceServicesPage';
 export { CompanyServicesSummaryPage } from './SummaryPage';
 export { MeetTheTeamPage } from './MeetTheTeamPage';
-export { ServicePortfolioPage } from './ServicePortfolioPage'; 
+export { ServicePortfolioPage } from './ServicePortfolioPage';
+export { CustomPageComponent } from './CustomPage'; 

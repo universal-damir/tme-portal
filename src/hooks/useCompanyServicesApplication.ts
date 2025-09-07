@@ -168,6 +168,7 @@ export const useCompanyServicesApplication = ({
       
       if (application && application.id) {
         // Update existing application only if it has a valid ID
+        console.log('🔧 Updating application with customPages:', formData.customPages?.length || 0);
         const response = await fetch(`/api/applications/${application.id}`, {
           method: 'PUT',
           headers: {
@@ -176,7 +177,7 @@ export const useCompanyServicesApplication = ({
           body: JSON.stringify({
             type: 'company-services', // CRITICAL: Always include type in updates
             title,
-            form_data: formData,
+            form_data: formData, // This includes customPages array
           }),
         });
         
@@ -381,12 +382,15 @@ export const useCompanyServicesApplication = ({
   };
   
   // Restore application for editing after rejection
-  const restoreApplication = (applicationId: string, formData: any) => {
+  const restoreApplication = async (applicationId: string, formData: any) => {
+    // Generate title asynchronously
+    const title = await generateApplicationTitle(formData);
+    
     // Create a minimal application object to maintain the ID and continue conversation history
     const restoredApp: Application = {
       id: applicationId,
       type: 'company-services',
-      title: generateApplicationTitle(formData),
+      title: title,
       form_data: formData,
       status: 'rejected', // We know it was rejected since we're editing
       submitted_by_id: 0, // Will be set by backend

@@ -12,8 +12,9 @@ Edit your files as needed (components, API routes, etc.)
 
 ### 2. Build the Application
 ```bash
-npm run build
+NODE_ENV=production npm run build
 ```
+**IMPORTANT:** Always use `NODE_ENV=production` to ensure proper production build without Turbopack dev files.
 This compiles your code into optimized production bundles.
 
 ### 3. Create Update Package
@@ -77,7 +78,7 @@ Your app should be live at http://192.168.97.149/ within 30 seconds!
 
 ### Create Alias for Local Build & Package (add to ~/.bashrc or ~/.zshrc)
 ```bash
-alias tme-deploy='npm run build && tar -czf update-$(date +%Y%m%d-%H%M%S).tar.gz .next/standalone/ .next/static/ public/ && echo "Package ready: $(ls -lh update-*.tar.gz | tail -1)"'
+alias tme-deploy='NODE_ENV=production npm run build && tar -czf update-$(date +%Y%m%d-%H%M%S).tar.gz .next/standalone/ .next/static/ public/ && echo "Package ready: $(ls -lh update-*.tar.gz | tail -1)"'
 ```
 
 ### Create Script on Server (save as apply-update.sh)
@@ -121,6 +122,13 @@ echo "✅ Update applied! Site restarting..."
 - Environment variable structure changes
 
 ---
+
+## ⚠️ Common Issues & Prevention
+
+### CRITICAL: Always use NODE_ENV=production
+**Problem:** Getting "Cannot find module '[turbopack]_runtime.js'" errors
+**Cause:** Building without NODE_ENV=production copies development files with Turbopack
+**Solution:** ALWAYS build with `NODE_ENV=production npm run build`
 
 ## 🔍 Troubleshooting
 
@@ -184,7 +192,7 @@ Keep previous update packages to quickly rollback:
 
 Local:
 ```bash
-npm run build && tar -czf update.tar.gz .next/standalone/ .next/static/ public/
+NODE_ENV=production npm run build && tar -czf update.tar.gz .next/standalone/ .next/static/ public/
 ```
 
 Server:

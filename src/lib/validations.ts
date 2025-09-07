@@ -264,11 +264,51 @@ export const backOfficeServicesSchema = z.object({
   }).optional(),
 }).optional();
 
+// Compliance services schema
+export const complianceServicesSchema = z.object({
+  enabled: z.boolean().optional(),
+  periodicBankReviewType: z.enum(['basic', 'standard', 'complex', '']).optional(),
+  periodicBankReviewFee: z.number().optional(),
+  uboRegisterUpdatesType: z.enum(['basic', 'standard', 'complex', '']).optional(),
+  uboRegisterUpdatesFee: z.number().optional(),
+}).optional();
+
+// Custom page schemas
+const tableCellSchema = z.object({
+  value: z.string(),
+  isHeader: z.boolean().optional(),
+  align: z.enum(['left', 'center', 'right']).optional(),
+});
+
+const tableDataSchema = z.object({
+  rows: z.array(z.array(tableCellSchema)),
+  columnWidths: z.array(z.number()).optional(),
+});
+
+const contentBlockSchema = z.object({
+  id: z.string(),
+  type: z.enum(['heading', 'paragraph', 'numberedList', 'table']),
+  order: z.number(),
+  content: z.object({
+    text: z.string().optional(),
+    items: z.array(z.string()).optional(),
+    table: tableDataSchema.optional(),
+  }),
+});
+
+const customPageSchema = z.object({
+  id: z.string(),
+  enabled: z.boolean(),
+  order: z.number(),
+  blocks: z.array(contentBlockSchema),
+});
+
 // Company Services validation schema
 export const companyServicesSchema = z.object({
   firstName: z.string().min(1, 'First name is required').max(50, 'First name must be less than 50 characters'),
   lastName: z.string().min(1, 'Last name is required').max(50, 'Last name must be less than 50 characters'),
   companyName: z.string().max(100, 'Company name must be less than 100 characters').optional(),
+  shortCompanyName: z.string().max(50, 'Short company name must be less than 50 characters').optional(),
   date: z.string().min(1, 'Date is required'),
   clientEmails: z.array(z.string().email('Please enter a valid email address')).min(1, 'At least one email address is required'),
   secondaryCurrency: z.enum(['EUR', 'USD', 'GBP'], {
@@ -281,6 +321,8 @@ export const companyServicesSchema = z.object({
   taxConsultingServices: taxConsultingServicesSchema,
   accountingServices: accountingServicesSchema,
   backOfficeServices: backOfficeServicesSchema,
+  complianceServices: complianceServicesSchema,
+  customPages: z.array(customPageSchema).optional(),
 });
 
 // Taxation schemas

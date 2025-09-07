@@ -20,7 +20,8 @@ import {
   TaxConsultingServicesSection,
   AccountingServicesSection,
   BackOfficeServicesSection,
-  ComplianceServicesSection
+  ComplianceServicesSection,
+  CustomPageSection
 } from '../../company-services';
 
 const CompanyServicesTab: React.FC = () => {
@@ -83,6 +84,9 @@ const CompanyServicesTab: React.FC = () => {
       
       // Compliance services
       complianceServices: COMPANY_SERVICES_DEFAULTS.form.complianceServices,
+      
+      // Custom pages
+      customPages: [],
     },
   });
 
@@ -591,7 +595,21 @@ const CompanyServicesTab: React.FC = () => {
   React.useEffect(() => {
     const handleEditApplication = (event: any) => {
       const { applicationId, formData } = event.detail;
-      console.log('🟡 [CompanyServicesTab] Received edit-company-services-application event', event.detail);
+      console.log('🟡 [CompanyServicesTab] Received edit-company-services-application event', {
+        applicationId,
+        hasFormData: !!formData,
+        formDataKeys: formData ? Object.keys(formData) : [],
+        clientDetails: {
+          firstName: formData?.firstName,
+          lastName: formData?.lastName,
+          companyName: formData?.companyName,
+          shortCompanyName: formData?.shortCompanyName,
+          date: formData?.date,
+          clientEmails: formData?.clientEmails,
+          secondaryCurrency: formData?.secondaryCurrency,
+          exchangeRate: formData?.exchangeRate
+        }
+      });
       
       // Set loading flag FIRST to prevent any clearing
       isLoadingRejectedRef.current = true;
@@ -601,23 +619,61 @@ const CompanyServicesTab: React.FC = () => {
       
       // Restore the application ID so the hook knows it's editing an existing application
       if (applicationId) {
-        reviewApp.restoreApplication(applicationId, formData);
+        reviewApp.restoreApplication(applicationId, formData).catch(err => {
+          console.error('Error restoring application:', err);
+        });
       }
       
       // Don't use reset() - manually set each field to ensure proper updates
+      // First, set all fields from formData
       Object.keys(formData).forEach(key => {
         if (formData[key] !== undefined) {
-          setValue(key as any, formData[key], {
-            shouldValidate: false,
-            shouldDirty: true,
-            shouldTouch: true
-          });
+          // Special handling for arrays
+          if (key === 'customPages' && Array.isArray(formData[key])) {
+            setValue('customPages', formData[key], {
+              shouldValidate: false,
+              shouldDirty: true,
+              shouldTouch: true
+            });
+          } else if (key === 'clientEmails' && Array.isArray(formData[key])) {
+            setValue('clientEmails', formData[key], {
+              shouldValidate: false,
+              shouldDirty: true,
+              shouldTouch: true
+            });
+          } else {
+            setValue(key as any, formData[key], {
+              shouldValidate: false,
+              shouldDirty: true,
+              shouldTouch: true
+            });
+          }
         }
       });
       
-      // Double-check critical fields with a delay
+      // Ensure client details are set if missing from formData (backward compatibility)
+      if (!formData.clientEmails || formData.clientEmails.length === 0) {
+        setValue('clientEmails', [''], {
+          shouldValidate: false,
+          shouldDirty: false,
+          shouldTouch: false
+        });
+      }
+      
+      // Double-check ALL critical fields with a delay
       setTimeout(() => {
-        console.log('🟡 [CompanyServicesTab] Double-checking critical fields');
+        console.log('🟡 [CompanyServicesTab] Double-checking all fields from formData:', {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          companyName: formData.companyName,
+          shortCompanyName: formData.shortCompanyName,
+          date: formData.date,
+          clientEmails: formData.clientEmails,
+          secondaryCurrency: formData.secondaryCurrency,
+          exchangeRate: formData.exchangeRate
+        });
+        
+        // Re-set all client details fields to ensure they're displayed
         if (formData.firstName) {
           setValue('firstName', formData.firstName, { 
             shouldValidate: true, 
@@ -639,9 +695,44 @@ const CompanyServicesTab: React.FC = () => {
             shouldTouch: true 
           });
         }
+        if (formData.shortCompanyName) {
+          setValue('shortCompanyName', formData.shortCompanyName, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.date) {
+          setValue('date', formData.date, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.clientEmails && formData.clientEmails.length > 0) {
+          setValue('clientEmails', formData.clientEmails, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.secondaryCurrency) {
+          setValue('secondaryCurrency', formData.secondaryCurrency, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
+        if (formData.exchangeRate) {
+          setValue('exchangeRate', formData.exchangeRate, { 
+            shouldValidate: true, 
+            shouldDirty: true,
+            shouldTouch: true 
+          });
+        }
         
-        // Force a re-render by triggering validation
-        trigger(['firstName', 'lastName', 'companyName']);
+        // Force a re-render by triggering validation on all client detail fields
+        trigger(['firstName', 'lastName', 'companyName', 'shortCompanyName', 'date', 'clientEmails', 'secondaryCurrency', 'exchangeRate']);
       }, 100);
       
       // NOW set workflow state after data is loaded
@@ -707,6 +798,37 @@ const CompanyServicesTab: React.FC = () => {
     };
   }, [handleSendPDF, loadFromApplication, setWorkflowState]); // Include dependencies for event handlers
 
+  // On component mount, check for preserved company services data
+  React.useEffect(() => {
+    const preservedData = getPreservedFormData('company-services');
+    if (preservedData && !initializedRef.current) {
+      console.log('🔄 [CompanyServicesTab] Loading preserved form data', preservedData);
+      
+      // Set each field individually to ensure proper updates
+      Object.keys(preservedData).forEach(key => {
+        if (preservedData[key] !== undefined) {
+          // Special handling for customPages array
+          if (key === 'customPages' && Array.isArray(preservedData[key])) {
+            setValue('customPages', preservedData[key], {
+              shouldValidate: false,
+              shouldDirty: false,
+              shouldTouch: false
+            });
+          } else {
+            setValue(key as any, preservedData[key], {
+              shouldValidate: false,
+              shouldDirty: false,
+              shouldTouch: false
+            });
+          }
+        }
+      });
+      
+      // Mark as initialized after loading preserved data
+      initializedRef.current = true;
+    }
+  }, []); // Run only on mount
+
   return (
     <div className="space-y-8">
       {/* Client Details Section */}
@@ -758,6 +880,12 @@ const CompanyServicesTab: React.FC = () => {
         data={watchedData}
         setValue={setValue}
         watchedData={watchedData}
+      />
+
+      {/* Custom Pages Section */}
+      <CustomPageSection
+        customPages={watchedData.customPages || []}
+        onChange={(pages) => setValue('customPages', pages)}
       />
 
       {/* Generate and Preview Buttons */}

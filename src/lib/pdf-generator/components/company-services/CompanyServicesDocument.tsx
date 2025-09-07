@@ -9,7 +9,8 @@ import {
   ComplianceServicesPage,
   CompanyServicesSummaryPage,
   MeetTheTeamPage,
-  ServicePortfolioPage
+  ServicePortfolioPage,
+  CustomPageComponent
 } from './pages';
 import { transformCompanyServicesData } from '../../utils';
 import { CompanyServicesData } from '@/types/company-services';
@@ -68,6 +69,19 @@ export const CompanyServicesDocument: React.FC<CompanyServicesDocumentProps> = (
       <CommercialServicesPage data={dataWithServiceFlags} />
       <BackOfficeServicesPage data={dataWithServiceFlags} />
       <ComplianceServicesPage data={dataWithServiceFlags} />
+
+      {/* Custom Pages - Rendered dynamically based on user input */}
+      {companyServicesData.customPages && companyServicesData.customPages
+        .filter(page => page.enabled)
+        .sort((a, b) => a.order - b.order)
+        .map(customPage => (
+          <CustomPageComponent 
+            key={customPage.id} 
+            data={dataWithServiceFlags} 
+            customPage={customPage}
+          />
+        ))
+      }
 
       {/* Summary Page - Always shown */}
       <CompanyServicesSummaryPage data={dataWithServiceFlags} />

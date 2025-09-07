@@ -81,6 +81,38 @@ export interface ComplianceServices {
   uboRegisterUpdatesFee?: number;
 }
 
+// Custom Page Content Types
+export type ContentBlockType = 'heading' | 'paragraph' | 'numberedList' | 'table';
+
+export interface TableCell {
+  value: string;
+  isHeader?: boolean;
+  align?: 'left' | 'center' | 'right';
+}
+
+export interface TableData {
+  rows: TableCell[][];
+  columnWidths?: number[]; // Percentage widths for each column
+}
+
+export interface ContentBlock {
+  id: string;
+  type: ContentBlockType;
+  order: number;
+  content: {
+    text?: string; // For heading, paragraph
+    items?: string[]; // For bulletList, numberedList
+    table?: TableData; // For table
+  };
+}
+
+export interface CustomPage {
+  id: string;
+  enabled: boolean;
+  order: number;
+  blocks: ContentBlock[];
+}
+
 // Company Services Data Interface
 export interface CompanyServicesData {
   // Client Details (shared across tabs)
@@ -109,6 +141,9 @@ export interface CompanyServicesData {
   
   // Compliance Services
   complianceServices?: ComplianceServices;
+  
+  // Custom Pages
+  customPages?: CustomPage[];
 }
 
 // Default values for Company Services
