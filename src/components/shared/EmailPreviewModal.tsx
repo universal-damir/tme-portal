@@ -7,6 +7,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Edit2, Paperclip, Download, Languages, Upload, Trash2 } from 'lucide-react';
 import { EMAIL_TEMPLATES, EMAIL_TEMPLATES_DE, EmailTemplate, EmailRecipientData, processEmailTemplate, createFormattedEmailHTML } from './EmailDraftGenerator';
+import { EmailChipInput } from './EmailChipInput';
 
 export interface EmailPreviewData {
   to: string[];
@@ -446,70 +447,26 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 To:
               </label>
-              <div className="flex items-center gap-2">
-                {isEditingRecipients ? (
-                  <input
-                    type="text"
-                    value={editableRecipients}
-                    onChange={(e) => setEditableRecipients(e.target.value)}
-                    onBlur={() => setIsEditingRecipients(false)}
-                    onKeyDown={(e) => e.key === 'Enter' && setIsEditingRecipients(false)}
-                    className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                    onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                    autoFocus
-                  />
-                ) : (
-                  <div
-                    className="flex-1 px-3 py-2 rounded-lg border border-gray-200 h-[42px] flex items-center cursor-pointer hover:bg-gray-50"
-                    onClick={() => setIsEditingRecipients(true)}
-                  >
-                    <span className="text-gray-900">{editableRecipients}</span>
-                  </div>
-                )}
-                <button
-                  onClick={() => setIsEditingRecipients(!isEditingRecipients)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <Edit2 size={16} />
-                </button>
-              </div>
+              <EmailChipInput
+                value={editableRecipients}
+                onChange={(value) => setEditableRecipients(value)}
+                placeholder="Type to add recipients..."
+                className="w-full"
+              />
             </div>
 
-            {/* CC Field - Show dynamically based on template type */}
-            {(emailData.cc && emailData.cc.length > 0) || editableCc ? (
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                  CC:
-                </label>
-                <div className="flex items-center gap-2">
-                  {isEditingCc ? (
-                    <input
-                      type="text"
-                      value={editableCc}
-                      onChange={(e) => setEditableCc(e.target.value)}
-                      onBlur={() => setIsEditingCc(false)}
-                      onKeyDown={(e) => e.key === 'Enter' && setIsEditingCc(false)}
-                      className="flex-1 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                      onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                      autoFocus
-                    />
-                  ) : (
-                    <div
-                      className="flex-1 px-3 py-2 rounded-lg border border-gray-200 h-[42px] flex items-center cursor-pointer hover:bg-gray-50"
-                      onClick={() => setIsEditingCc(true)}
-                    >
-                      <span className="text-gray-700">{editableCc || 'No CC recipients'}</span>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setIsEditingCc(!isEditingCc)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : null}
+            {/* CC Field - Always show for better UX */}
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                CC:
+              </label>
+              <EmailChipInput
+                value={editableCc}
+                onChange={(value) => setEditableCc(value)}
+                placeholder="Type to add CC recipients..."
+                className="w-full"
+              />
+            </div>
 
             {/* Subject Field */}
             <div>
