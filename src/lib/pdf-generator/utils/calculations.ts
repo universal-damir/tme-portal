@@ -150,7 +150,7 @@ export const calculateIndividualVisaCosts = (data: OfferData, authorityConfig: A
       visaCosts.vipStampingFee = authorityConfig.visaCosts.vipStampingFee;
     }
     
-    // Investor visa fee (check if this is an investor visa)
+    // Investor/Partner visa fee (check if this is an investor/partner visa)
     // Try new per-visa structure first, fallback to legacy counting (handle both string "true" and boolean true)
     const isInvestorVisa = visaDetail?.investorVisa === true || (visaDetail?.investorVisa as any) === "true" ||
                           (data.visaCosts.numberOfInvestorVisas && i < data.visaCosts.numberOfInvestorVisas);

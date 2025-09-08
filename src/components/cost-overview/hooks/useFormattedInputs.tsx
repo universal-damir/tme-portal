@@ -65,7 +65,7 @@ const validateShareCapital = (value: number, investorVisaCount = 0): string | nu
   
   if (value > 0 && value < minimumRequired) {
     if (investorVisaCount > 0) {
-      return `Minimum share capital requirement for ${investorVisaCount} investor visa${investorVisaCount > 1 ? 's' : ''} is AED ${minimumRequired.toLocaleString()}`;
+      return `Minimum share capital requirement for ${investorVisaCount} investor/partner visa${investorVisaCount > 1 ? 's' : ''} is AED ${minimumRequired.toLocaleString()}`;
     }
     return 'Minimum share capital requirement is AED 10,000';
   }
@@ -79,15 +79,15 @@ const validateValuePerShare = (value: number): string | null => {
   return null;
 };
 
-// Enhanced investor visa count detection for both IFZA and DET
+// Enhanced investor/partner visa count detection for both IFZA and DET
 export const getInvestorVisaCount = (watchedData?: OfferData): number => {
   if (!watchedData?.visaCosts?.visaDetails) {
     return 0;
   }
   
   // Count visas where investorVisa is true (boolean) or "true" (string)
-  // For IFZA: "true" = Enable Investor Visa
-  // For DET: "true" = Investor Visa (vs "employment" = Employment Visa)
+  // For IFZA: "true" = Enable Investor/Partner Visa
+  // For DET: "true" = Investor/Partner Visa (vs "employment" = Employment Visa)
   const visaDetails = watchedData.visaCosts.visaDetails || [];
   return visaDetails.filter(visa => 
     visa?.investorVisa === true || visa?.investorVisa === "true"
@@ -243,7 +243,7 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
     setValue(`clientDetails.${fieldName}` as any, value);
   }, [setValue]);
 
-  // Simple investor visa validation with manual trigger
+  // Simple investor/partner visa validation with manual trigger
   useEffect(() => {
     // Don't interfere if user is actively typing
     if (isUserTypingRef.current) {
@@ -253,16 +253,16 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
     const visaDetails = watchedData?.visaCosts?.visaDetails || [];
     const currentShareCapital = watchedData?.authorityInformation?.shareCapitalAED || 0;
     
-    // Count how many investor visas are selected
+    // Count how many investor/partner visas are selected
     const investorVisaCount = visaDetails.filter(visa => visa?.investorVisa === true).length;
     const requiredCapital = investorVisaCount * 50000;
     
-    // Trigger validation if there are investor visas and insufficient capital
+    // Trigger validation if there are investor/partner visas and insufficient capital
     if (investorVisaCount > 0 && currentShareCapital > 0 && currentShareCapital < requiredCapital) {
       // Set validation error for red border and text
       const errorMessage = investorVisaCount === 1 
-        ? `Minimum share capital requirement for investor visa is AED 50,000`
-        : `Minimum share capital requirement for ${investorVisaCount} investor visas is AED ${requiredCapital.toLocaleString()}`;
+        ? `Minimum share capital requirement for investor/partner visa is AED 50,000`
+        : `Minimum share capital requirement for ${investorVisaCount} investor/partner visas is AED ${requiredCapital.toLocaleString()}`;
         
       setValidationErrors(prev => ({
         ...prev,
@@ -301,7 +301,7 @@ export const useFormattedInputs = (setValue: UseFormSetValue<OfferData>, watched
         }
       }, 100);
     } else if (investorVisaCount > 0 && currentShareCapital >= requiredCapital) {
-      // Clear validation error only when sufficient capital for all investor visas
+      // Clear validation error only when sufficient capital for all investor/partner visas
       setValidationErrors(prev => ({
         ...prev,
         shareCapitalError: null

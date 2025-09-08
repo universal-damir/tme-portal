@@ -379,53 +379,51 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
             {/* Per-Visa Services - Compact Layout */}
             <div className="space-y-3">
               {Array.from({ length: authorityId === 'det' ? (watchedData.visaCosts?.numberOfVisas || 0) : Math.min(watchedData.visaCosts?.numberOfVisas || 0, watchedData.ifzaLicense?.visaQuota || 0) }, (_, index) => (
-                <div key={index} className="p-4 rounded-lg border border-gray-200 bg-slate-50">
-                  <h4 className="text-sm font-semibold mb-3" style={{ color: '#243F7B' }}>
-                    Visa {index + 1} Services
-                  </h4>
-                  
-                  {/* Compact grid layout for all dropdowns */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  
-                  {/* Health Insurance for this visa */}
-                  {healthInsurance && (
-                    <CustomDropdown
-                      label="Health Insurance *"
-                      options={[
-                        { value: "No Insurance", label: "No Insurance" },
-                        { value: "Low Cost", label: `Low Cost (AED ${healthInsurance.lowCost.toLocaleString()})` },
-                        { value: "Silver Package", label: `Silver Package (AED ${healthInsurance.silverPackage.toLocaleString()})` }
-                      ]}
-                      value={watchedData.visaCosts?.visaDetails?.[index]?.healthInsurance || "No Insurance"}
-                      onChange={(value) => {
-                        setValue(`visaCosts.visaDetails.${index}.healthInsurance`, value);
-                      }}
-                      error={errors.visaCosts?.visaDetails?.[index]?.healthInsurance?.message}
-                    />
-                  )}
-                  
-                  {/* Investor/Employment Visa for this visa - DET vs IFZA */}
-                  {(authorityId === 'det' || (visaCosts?.investorVisaFee && visaCosts.investorVisaFee > 0)) && (
-                    <CustomDropdown
-                      label={authorityId === 'det' 
-                        ? 'Investor/Employment Visa' 
-                        : `Investor Visa (AED ${visaCosts?.investorVisaFee?.toLocaleString()})`}
-                      options={authorityId === 'det' ? [
-                        { value: "", label: "Select visa type" },
-                        { value: "true", label: "Investor Visa" },
-                        { value: "employment", label: "Employment Visa" }
-                      ] : [
-                        { value: "", label: "No Investor Visa" },
-                        { value: "true", label: "Enable Investor Visa" }
-                      ]}
-                      value={watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === true ? "true" : 
-                             watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === "employment" ? "employment" : ""}
-                      onChange={(value) => {
-                        const boolValue = value === "true" ? true : (value === "employment" ? "employment" : false);
-                        setValue(`visaCosts.visaDetails.${index}.investorVisa`, boolValue);
-                      }}
-                    />
-                  )}
+                  <div key={index} className="p-4 rounded-lg border border-gray-200 bg-slate-50">
+                    <h4 className="text-sm font-semibold mb-3" style={{ color: '#243F7B' }}>
+                      Visa {index + 1} Services
+                    </h4>
+                    
+                    {/* Compact grid layout for all dropdowns */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    
+                    {/* Health Insurance for this visa */}
+                    {healthInsurance && (
+                      <CustomDropdown
+                        label="Health Insurance *"
+                        options={[
+                          { value: "No Insurance", label: "No Insurance" },
+                          { value: "Low Cost", label: `Low Cost (AED ${healthInsurance.lowCost.toLocaleString()})` },
+                          { value: "Silver Package", label: `Silver Package (AED ${healthInsurance.silverPackage.toLocaleString()})` }
+                        ]}
+                        value={watchedData.visaCosts?.visaDetails?.[index]?.healthInsurance || "No Insurance"}
+                        onChange={(value) => {
+                          setValue(`visaCosts.visaDetails.${index}.healthInsurance`, value);
+                        }}
+                        error={errors.visaCosts?.visaDetails?.[index]?.healthInsurance?.message}
+                      />
+                    )}
+                    
+                    {/* Visa Type for this visa - DET vs IFZA */}
+                    {(authorityId === 'det' || (visaCosts?.investorVisaFee && visaCosts.investorVisaFee > 0)) && (
+                      <CustomDropdown
+                        label="Visa Type"
+                        options={authorityId === 'det' ? [
+                          { value: "", label: "Select type" },
+                          { value: "true", label: "Investor/Partner" },
+                          { value: "employment", label: "Employment" }
+                        ] : [
+                          { value: "", label: "None" },
+                          { value: "true", label: "Investor/Partner" }
+                        ]}
+                        value={watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === true ? "true" : 
+                               watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === "employment" ? "employment" : ""}
+                        onChange={(value) => {
+                          const boolValue = value === "true" ? true : (value === "employment" ? "employment" : false);
+                          setValue(`visaCosts.visaDetails.${index}.investorVisa`, boolValue);
+                        }}
+                      />
+                    )}
                   
                   {/* Status Change for this visa */}
                   {visaCosts.statusChangeFee && (

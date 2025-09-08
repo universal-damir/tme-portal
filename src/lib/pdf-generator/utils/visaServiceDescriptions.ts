@@ -67,14 +67,14 @@ export const generateCompanyVisaServiceDescriptions = (
     });
   }
 
-  // 3. IFZA Investor Visa Cost
+  // 3. IFZA Investor/Partner Visa Cost
   if (visaCostData.investorVisaFees > 0) {
     services.push({
       id: 'investor-visa-fees',
       condition: true,
-      description: `${authorityConfig?.displayName || 'IFZA'} investor visa cost (${numberOfInvestorVisas} ${visaText(numberOfInvestorVisas)})`,
+      description: `${authorityConfig?.displayName || 'IFZA'} investor/partner visa cost (${numberOfInvestorVisas} ${visaText(numberOfInvestorVisas)})`,
       amount: visaCostData.investorVisaFees,
-      explanation: 'Charged by IFZA for issuing an investor visa.'
+      explanation: `Charged by ${authorityConfig?.displayName || 'IFZA'} for issuing investor/partner visa${numberOfInvestorVisas > 1 ? 's' : ''}.`
     });
   }
 

@@ -109,10 +109,10 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
       });
     }
     
-    // Investor visa fee (if this is an investor visa)
+    // Investor/Partner visa fee (if this is an investor/partner visa)
     if (visa.investorVisaFee > 0) {
       items.push({
-        description: `${authorityConfig?.displayName || 'Authority'} investor visa cost`,
+        description: `${authorityConfig?.displayName || 'Authority'} investor/partner visa cost`,
         amount: visa.investorVisaFee,
         secondaryAmount: visa.investorVisaFee / exchangeRate,
         isReduction: false
@@ -193,7 +193,7 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
               if (visaDetail.investorVisa === "employment") {
                 visaTypeText = ' (Employment Visa)';
               } else if (visaDetail.investorVisa === "true" || visaDetail.investorVisa === true) {
-                visaTypeText = ' (Investor Visa)';
+                visaTypeText = ' (Investor/Partner Visa)';
               }
             }
             
