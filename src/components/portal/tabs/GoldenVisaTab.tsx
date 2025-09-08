@@ -245,6 +245,8 @@ const GoldenVisaTab: React.FC = () => {
   // Initialize form with shared client context and sync when cleared
   const initializedRef = useRef(false);
   const isLoadingRejectedRef = useRef(false); // Track if we're loading a rejected application
+  const skipNextUpdate = useRef(false); // Moved declaration up here to be accessible
+  
   useEffect(() => {
     // NEVER sync/clear when in review-rejected or review-approved state or when loading
     if (workflowState === 'review-rejected' || workflowState === 'review-approved' || isLoadingRejectedRef.current) {
@@ -253,35 +255,44 @@ const GoldenVisaTab: React.FC = () => {
     
     // Initialize on mount if we have data
     if (!initializedRef.current && (clientInfo.firstName || clientInfo.lastName)) {
+      skipNextUpdate.current = true; // Skip the next update to prevent loop
       setValue('firstName', clientInfo.firstName || '');
       setValue('lastName', clientInfo.lastName || '');
       // Don't set companyName - Golden Visa doesn't have this field
       setValue('date', clientInfo.date);
       setValue('clientEmails', clientInfo.clientEmails || ['']);
       setValue('secondaryCurrency', clientInfo.secondaryCurrency || 'EUR');
-      setValue('exchangeRate', clientInfo.exchangeRate || 3.67);
+      setValue('exchangeRate', clientInfo.exchangeRate || 4);
       initializedRef.current = true;
     }
     
     // Also sync when context is cleared (all fields empty) and we're in fresh state
     if (initializedRef.current && workflowState === 'fresh' && !isLoadingRejectedRef.current &&
         !clientInfo.firstName && !clientInfo.lastName && !clientInfo.companyName) {
+      skipNextUpdate.current = true; // Skip the next update to prevent loop
       setValue('firstName', '');
       setValue('lastName', '');
       // Don't set companyName - Golden Visa doesn't have this field
       setValue('date', clientInfo.date || new Date().toISOString().split('T')[0]);
       setValue('clientEmails', ['']);
       setValue('secondaryCurrency', 'EUR');
-      setValue('exchangeRate', 3.67);
+      setValue('exchangeRate', 4);
     }
   }, [clientInfo, setValue, workflowState]);
 
   // Update shared client info when form changes (debounced)
   const updateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  
   useEffect(() => {
     // DON'T update SharedClientContext when in review states - let the form data stay as-is
     if (workflowState === 'review-rejected' || workflowState === 'review-approved') {
       return; // Don't sync to SharedClientContext when working with review data
+    }
+    
+    // Skip this update if we just synced from context
+    if (skipNextUpdate.current) {
+      skipNextUpdate.current = false;
+      return;
     }
     
     const { firstName, lastName, date, clientEmails, secondaryCurrency, exchangeRate } = watchedData;
@@ -301,7 +312,7 @@ const GoldenVisaTab: React.FC = () => {
         date: date || new Date().toISOString().split('T')[0],
         clientEmails: clientEmails || [''],
         secondaryCurrency: secondaryCurrency || 'EUR',
-        exchangeRate: exchangeRate || 3.67,
+        exchangeRate: exchangeRate || 4,
       });
     }, 100); // Small delay to prevent loops
     
@@ -317,8 +328,8 @@ const GoldenVisaTab: React.FC = () => {
     watchedData.clientEmails,
     watchedData.secondaryCurrency,
     watchedData.exchangeRate,
-    workflowState // Also watch workflowState to skip updates during review
-    // updateClientInfo removed - it's stable from context and was causing infinite loop
+    workflowState, // Also watch workflowState to skip updates during review
+    updateClientInfo // Now stable with useCallback in context
   ]);
 
   // Handle visa type change - update defaults
@@ -373,6 +384,9 @@ const GoldenVisaTab: React.FC = () => {
   // Handle secondary currency radio click
   const handleSecondaryCurrencyChange = (currency: 'EUR' | 'USD' | 'GBP') => {
     setValue('secondaryCurrency', currency);
+    // Update exchange rate based on currency - all currencies use 4 as default
+    const rates = { EUR: 4.0, USD: 4.0, GBP: 4.0 };
+    setValue('exchangeRate', rates[currency]);
   };
 
 
@@ -575,9 +589,6 @@ const GoldenVisaTab: React.FC = () => {
 
   // Submit for review validation handler
   const handleSubmitForReview = async () => {
-    console.log('🟢 GOLDEN: handleSubmitForReview called');
-    console.log('🟢 GOLDEN: reviewApp.application:', reviewApp.application);
-    console.log('🟢 GOLDEN: reviewApp.application?.id:', reviewApp.application?.id);
     
     // Validate the entire form data using Zod schema
     try {
@@ -600,7 +611,6 @@ const GoldenVisaTab: React.FC = () => {
       return;
     }
 
-    console.log('🟢 GOLDEN: About to open review modal');
     // If validation passes, open review modal
     setIsReviewModalOpen(true);
   };
@@ -1220,33 +1230,19 @@ const GoldenVisaTab: React.FC = () => {
         onSubmit={async (submission) => {
           const success = await reviewApp.submitForReview(submission);
           if (success) {
-            // Store client details before reset
-            const currentFirstName = getValues('firstName');
-            const currentLastName = getValues('lastName');
-            const currentDate = getValues('date');
-            const currentEmails = getValues('clientEmails');
+            // Don't reset the form - keep all data intact for the reviewer
+            // The form data is already saved in the database
+            console.log('🟢 [GoldenVisaTab] Successfully submitted for review - keeping form data intact');
             
-            // Clear form after successful submission but preserve client details
-            reset();
-            
-            // Restore client details after reset
-            setValue('firstName', currentFirstName || '');
-            setValue('lastName', currentLastName || '');
-            setValue('date', currentDate || new Date().toISOString().split('T')[0]);
-            setValue('clientEmails', currentEmails || ['']);
-            
-            // Clear UI but preserve data for when it comes back from review
-            console.log('🟢 [GoldenVisaTab] Successfully submitted for review');
-            
-            // Don't clear client info - keep for next submission
+            // Just update workflow state
             setWorkflowState('fresh');
             toast.success('Application submitted for review', {
-              description: 'Your application has been saved. Client details preserved for next submission.'
+              description: 'Your application has been sent to the reviewer.'
             });
             
             // Debug log
             if (typeof window !== 'undefined' && localStorage.getItem('DEBUG_SHARED_CONTEXT') === 'true') {
-              console.log('[GoldenVisaTab] Submitted for review - workflow state set to review-pending');
+              console.log('[GoldenVisaTab] Submitted for review - workflow state set to fresh');
             }
           }
           return success;

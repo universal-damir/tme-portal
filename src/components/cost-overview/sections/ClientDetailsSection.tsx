@@ -146,6 +146,10 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                   setValue('clientDetails.companyName', '');
                   setValue('clientDetails.shortCompanyName', '');
                   setValue('clientDetails.clientEmails', ['']);
+                  setValue('clientDetails.addressToCompany', false);
+                  setValue('clientDetails.date', new Date().toISOString().split('T')[0]);
+                  setValue('clientDetails.secondaryCurrency', 'EUR');
+                  setValue('clientDetails.exchangeRate', 4);
                   setEmailInputs(['']); // Reset email inputs state
                 }}
                 className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"

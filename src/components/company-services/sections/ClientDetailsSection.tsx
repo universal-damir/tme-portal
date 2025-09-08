@@ -174,6 +174,8 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                   setValue('companyName', '');
                   setValue('shortCompanyName', '');
                   setValue('clientEmails', ['']);
+                  setValue('secondaryCurrency', 'EUR');
+                  setValue('exchangeRate', 4);
                   setEmailInputs(['']); // Reset email inputs state
                 }}
                 className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"

@@ -324,7 +324,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       setValue('clientDetails.clientEmails', clientInfo.clientEmails || ['']);
       setValue('clientDetails.addressToCompany', clientInfo.addressToCompany || false);
       setValue('clientDetails.secondaryCurrency', clientInfo.secondaryCurrency || 'EUR');
-      setValue('clientDetails.exchangeRate', clientInfo.exchangeRate || 3.67);
+      setValue('clientDetails.exchangeRate', clientInfo.exchangeRate || 4);
       initializedRef.current = true;
     } else if (shouldSyncWhenCleared) {
       // Also sync when context is cleared (all fields empty) and we're in fresh state
@@ -336,7 +336,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
       setValue('clientDetails.clientEmails', ['']);
       setValue('clientDetails.addressToCompany', false);
       setValue('clientDetails.secondaryCurrency', 'EUR');
-      setValue('clientDetails.exchangeRate', 3.67);
+      setValue('clientDetails.exchangeRate', 4);
       // Reset the flag so we can sync again if needed
       initializedRef.current = false;
     }
@@ -368,7 +368,7 @@ const CostOverviewTab: React.FC<CostOverviewTabProps> = () => {
         clientEmails: watchedData.clientDetails?.clientEmails || [''],
         addressToCompany: watchedData.clientDetails?.addressToCompany || false,
         secondaryCurrency: watchedData.clientDetails?.secondaryCurrency || 'EUR',
-        exchangeRate: watchedData.clientDetails?.exchangeRate || 3.67,
+        exchangeRate: watchedData.clientDetails?.exchangeRate || 4,
       });
     }, 100); // Small delay to prevent loops
     

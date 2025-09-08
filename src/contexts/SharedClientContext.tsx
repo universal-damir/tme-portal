@@ -28,7 +28,7 @@ const initialClientInfo: SharedClientInfo = {
   clientEmails: [''],
   addressToCompany: false,
   secondaryCurrency: 'EUR',
-  exchangeRate: 3.67,
+  exchangeRate: 4,
 };
 
 // Simplified state - no more preserved data in client storage
@@ -129,12 +129,12 @@ export const SharedClientProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [state.clientInfo]);
 
-  const updateClientInfo = (info: Partial<SharedClientInfo>) => {
+  const updateClientInfo = React.useCallback((info: Partial<SharedClientInfo>) => {
     log('updateClientInfo called', info);
     dispatch({ type: 'UPDATE_CLIENT_INFO', payload: info });
-  };
+  }, []);
 
-  const clearClientInfo = (options?: any) => {
+  const clearClientInfo = React.useCallback((options?: any) => {
     log('clearClientInfo called', options);
     
     // Always clear localStorage when explicitly clearing
@@ -151,9 +151,9 @@ export const SharedClientProvider: React.FC<{ children: React.ReactNode }> = ({
     if (options?.source) {
       log(`Clear source: ${options.source}`);
     }
-  };
+  }, []);
 
-  const loadFromApplication = (applicationData: any) => {
+  const loadFromApplication = React.useCallback((applicationData: any) => {
     log('loadFromApplication called', { 
       hasData: !!applicationData,
       keys: applicationData ? Object.keys(applicationData).slice(0, 5) : [],
@@ -172,10 +172,10 @@ export const SharedClientProvider: React.FC<{ children: React.ReactNode }> = ({
     log('Extracted client info from application', clientInfo);
     // This will set isLoadingFromReview to true, which prevents localStorage save
     dispatch({ type: 'LOAD_CLIENT_INFO', payload: clientInfo });
-  };
+  }, []);
 
   // New function to fetch rejected applications from DB
-  const fetchRejectedApplications = async () => {
+  const fetchRejectedApplications = React.useCallback(async () => {
     log('fetchRejectedApplications called');
     try {
       const response = await fetch('/api/applications?status=rejected');
@@ -196,10 +196,10 @@ export const SharedClientProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Failed to fetch rejected applications:', error);
       return [];
     }
-  };
+  }, []);
 
   // Load a specific rejected application
-  const loadRejectedApplication = async (applicationId: string) => {
+  const loadRejectedApplication = React.useCallback(async (applicationId: string) => {
     log('loadRejectedApplication called', { applicationId });
     try {
       const response = await fetch(`/api/applications/${applicationId}`);
@@ -222,21 +222,21 @@ export const SharedClientProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error('Failed to load rejected application:', error);
       return null;
     }
-  };
+  }, [loadFromApplication]);
 
-  const getPreservedFormData = () => {
+  const getPreservedFormData = React.useCallback(() => {
     log('getPreservedFormData called (deprecated - use DB instead)');
     return null; // No longer using client-side preservation
-  };
+  }, []);
 
-  const setWorkflowState = (newState: string) => {
+  const setWorkflowState = React.useCallback((newState: string) => {
     log('setWorkflowState called (compatibility mode)', newState);
     // Track if we're loading from review
     const isReview = newState.includes('review') || newState.includes('rejected');
     dispatch({ type: 'SET_LOADING_FROM_REVIEW', payload: isReview });
-  };
+  }, []);
 
-  const value: SharedClientContextType = {
+  const value: SharedClientContextType = React.useMemo(() => ({
     clientInfo: state.clientInfo,
     updateClientInfo,
     clearClientInfo,
@@ -246,7 +246,17 @@ export const SharedClientProvider: React.FC<{ children: React.ReactNode }> = ({
     workflowState: state.isLoadingFromReview ? 'review-pending' : 'fresh', // Compatibility
     fetchRejectedApplications,
     loadRejectedApplication,
-  };
+  }), [
+    state.clientInfo,
+    state.isLoadingFromReview,
+    updateClientInfo,
+    clearClientInfo,
+    loadFromApplication,
+    getPreservedFormData,
+    setWorkflowState,
+    fetchRejectedApplications,
+    loadRejectedApplication
+  ]);
 
   return (
     <SharedClientContext.Provider value={value}>

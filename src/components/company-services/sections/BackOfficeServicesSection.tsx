@@ -128,7 +128,7 @@ export const BackOfficeServicesSection: React.FC<BackOfficeServicesSectionProps>
 
   // Calculate secondary currency values
   const getSecondaryCurrencyValue = (aedValue: number) => {
-    const exchangeRate = watchedData.exchangeRate || 3.67;
+    const exchangeRate = watchedData.exchangeRate || 4;
     return Math.round(aedValue / exchangeRate);
   };
 

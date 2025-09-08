@@ -170,10 +170,12 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   clearClientInfo({ source: 'manual-clear' });
-                  // Clear all form fields including emails
+                  // Clear all form fields including emails in a batch
                   setValue('firstName', '');
                   setValue('lastName', '');
                   setValue('clientEmails', ['']);
+                  setValue('secondaryCurrency', 'EUR');
+                  setValue('exchangeRate', 4);
                   setEmailInputs(['']); // Reset email inputs state
                 }}
                 className="p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200"
@@ -351,7 +353,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
                 Secondary Currency *
               </label>
-              <div className="flex gap-2">
+              <div className="flex gap-2" key={`currency-group-${data.secondaryCurrency}`}>
                 {SECONDARY_CURRENCIES.map((currency) => (
                   <motion.label 
                     key={currency.value} 
@@ -363,6 +365,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                         type="radio"
                         {...register('secondaryCurrency')}
                         value={currency.value}
+                        checked={data.secondaryCurrency === currency.value}
                         onChange={() => onSecondaryCurrencyChange(currency.value)}
                         className="sr-only"
                       />
@@ -445,7 +448,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                     e.target.style.borderColor = '#e5e7eb';
                   }}
                   className="w-20 px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  placeholder="3.67"
+                  placeholder="4"
                   style={{
                     borderColor: '#e5e7eb'
                   }}
@@ -466,7 +469,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 </motion.button>
               </div>
               <p className="text-xs text-gray-500 mt-1 whitespace-nowrap">
-                {data.exchangeRate || '3.67'} AED = 1 {data.secondaryCurrency || 'EUR'}
+                {data.exchangeRate || '4'} AED = 1 {data.secondaryCurrency || 'EUR'}
               </p>
               {errors.exchangeRate && (
                 <p className="text-red-500 text-xs mt-1">{errors.exchangeRate.message}</p>

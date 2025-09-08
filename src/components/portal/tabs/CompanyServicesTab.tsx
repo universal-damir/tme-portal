@@ -235,7 +235,7 @@ const CompanyServicesTab: React.FC = () => {
       setValue('date', clientInfo.date);
       setValue('clientEmails', clientInfo.clientEmails || ['']);
       setValue('secondaryCurrency', clientInfo.secondaryCurrency || 'EUR');
-      setValue('exchangeRate', clientInfo.exchangeRate || 3.67);
+      setValue('exchangeRate', clientInfo.exchangeRate || 4);
       initializedRef.current = true;
     } else if (shouldSyncWhenCleared) {
       // Also sync when context is cleared (all fields empty) and we're in fresh state
@@ -246,7 +246,7 @@ const CompanyServicesTab: React.FC = () => {
       setValue('date', new Date().toISOString().split('T')[0]);
       setValue('clientEmails', ['']);
       setValue('secondaryCurrency', 'EUR');
-      setValue('exchangeRate', 3.67);
+      setValue('exchangeRate', 4);
       // Reset the flag so we can sync again if needed
       initializedRef.current = false;
     }
@@ -277,7 +277,7 @@ const CompanyServicesTab: React.FC = () => {
         date: date || new Date().toISOString().split('T')[0],
         clientEmails: clientEmails || [''],
         secondaryCurrency: secondaryCurrency || 'EUR',
-        exchangeRate: exchangeRate || 3.67,
+        exchangeRate: exchangeRate || 4,
       });
     }, 100);
     
