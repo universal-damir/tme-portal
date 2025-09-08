@@ -98,7 +98,7 @@ const DEFAULT_CONFIG: ReviewSystemConfig = {
   showNotificationBadge: false,
   showReviewButtons: false,
   
-  maxApplicationsPerUser: 100,
+  maxApplicationsPerUser: 500,
   maxNotificationsPerUser: 200,
   maxReviewersToFetch: 20,
   
@@ -179,7 +179,7 @@ export function getReviewSystemConfig(): ReviewSystemConfig {
     
     // Safety limits
     maxApplicationsPerUser: parseInt(
-      getEnvVar('MAX_APPLICATIONS_PER_USER') || '100'
+      getEnvVar('MAX_APPLICATIONS_PER_USER') || '500'
     ),
     maxNotificationsPerUser: parseInt(
       getEnvVar('MAX_NOTIFICATIONS_PER_USER') || '200'

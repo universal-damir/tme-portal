@@ -29,6 +29,7 @@ interface UseCITReturnLettersApplicationReturn {
     comments?: string;
   }) => Promise<boolean>;
   restoreApplication: (applicationId: string, formData: any) => void;
+  clearApplication: () => void;
   
   // Status helpers
   canDownloadPDF: boolean;
@@ -64,25 +65,19 @@ export const useCITReturnLettersApplication = ({
       return 'CIT Return Letters';
     }
     
-    const date = new Date(formData.letterDate || new Date());
-    const yy = date.getFullYear().toString().slice(-2);
-    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-    const dd = date.getDate().toString().padStart(2, '0');
-    const formattedDate = `${yy}${mm}${dd}`;
-    
+    const companyCode = formData.selectedClient?.company_code || '';
     const companyShortName = formData.selectedClient?.company_name_short || 'Company';
     
     // Use selectedLetterTypes if available, otherwise fallback to letterType
     let letterTypes: string;
     if (hasLetterTypes) {
-      letterTypes = formData.selectedLetterTypes.length === 1 
-        ? formData.selectedLetterTypes[0] 
-        : `${formData.selectedLetterTypes.length} Letters`;
+      // For both single and multiple letters, use full names
+      letterTypes = formData.selectedLetterTypes.join(' - ');
     } else {
       letterTypes = formData.letterType || 'Letter';
     }
     
-    return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
+    return `${companyCode} ${companyShortName} ${letterTypes}`;
   }, [formData]);
 
   // Check if form data has changed
@@ -150,8 +145,11 @@ export const useCITReturnLettersApplication = ({
     try {
       const title = generateApplicationTitle();
       
-      if (application && application.id) {
-        // Update existing application only if it has a valid ID
+      // Only update existing application if it has a valid ID AND the form data matches
+      // This prevents reusing old application IDs with new client data
+      if (application && application.id && 
+          application.form_data?.selectedClient?.company_code === formData.selectedClient?.company_code) {
+        // Update existing application only if it's for the same client
         const response = await fetch(`/api/applications/${application.id}`, {
           method: 'PUT',
           headers: {
@@ -254,6 +252,13 @@ export const useCITReturnLettersApplication = ({
     
     let appToSubmit = application;
     
+    // If we have an existing application, check if it matches the current form data
+    // If not, clear it to force creating a new one
+    if (application && application.form_data?.selectedClient?.company_code !== formData.selectedClient?.company_code) {
+      setApplication(null);
+      appToSubmit = null;
+    }
+    
     setIsLoading(true);
     setError(null);
     
@@ -279,12 +284,6 @@ export const useCITReturnLettersApplication = ({
       }
       
       // Submit for review
-      console.log('🔧 Submitting for review:', {
-        applicationId: appToSubmit.id,
-        submission: submission,
-        url: `/api/applications/${appToSubmit.id}/submit-review`
-      });
-      
       const response = await fetch(`/api/applications/${appToSubmit.id}/submit-review`, {
         method: 'POST',
         headers: {
@@ -330,6 +329,14 @@ export const useCITReturnLettersApplication = ({
     }
   };
 
+  // Clear application state (used after successful submission)
+  const clearApplication = () => {
+    setApplication(null);
+    lastSavedDataRef.current = '';
+    setHasUnsavedChanges(false);
+    setError(null);
+  };
+
   // Restore application for editing after rejection
   const restoreApplication = (applicationId: string, applicationFormData: any) => {
     
@@ -345,25 +352,19 @@ export const useCITReturnLettersApplication = ({
         return 'CIT Return Letters';
       }
       
-      const date = new Date(data.letterDate || new Date());
-      const yy = date.getFullYear().toString().slice(-2);
-      const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-      const dd = date.getDate().toString().padStart(2, '0');
-      const formattedDate = `${yy}${mm}${dd}`;
-      
+      const companyCode = data.selectedClient?.company_code || '';
       const companyShortName = data.selectedClient?.company_name_short || 'Company';
       
       // Use selectedLetterTypes if available, otherwise fallback to letterType
       let letterTypes: string;
       if (hasLetterTypes) {
-        letterTypes = data.selectedLetterTypes.length === 1 
-          ? data.selectedLetterTypes[0] 
-          : `${data.selectedLetterTypes.length} Letters`;
+        // For both single and multiple letters, use full names
+        letterTypes = data.selectedLetterTypes.join(' - ');
       } else {
         letterTypes = data.letterType || 'Letter';
       }
       
-      return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
+      return `${companyCode} ${companyShortName} ${letterTypes}`;
     };
 
     // Create a minimal application object to maintain the ID and continue conversation history
@@ -423,6 +424,7 @@ export const useCITReturnLettersApplication = ({
     saveApplication,
     submitForReview,
     restoreApplication,
+    clearApplication,
     canDownloadPDF,
     needsApproval,
     statusMessage,

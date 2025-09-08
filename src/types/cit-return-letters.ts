@@ -143,5 +143,5 @@ export const CIT_RETURN_LETTERS_DEFAULTS = {
 export const LETTER_TYPE_OPTIONS: { value: LetterType; label: string }[] = [
   { value: 'CIT TP', label: '01 CIT TP' },
   { value: 'Conf acc docs + FS', label: '02 Conf acc docs + FS' },
-  { value: 'CIT assess+concl, non deduct, elect', label: '3 CIT assess+concl, non deduct, elect' },
+  { value: 'CIT assess+concl, non deduct, elect', label: '03 CIT assess+concl, non deduct, elect' },
 ];

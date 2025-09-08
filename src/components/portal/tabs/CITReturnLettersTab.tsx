@@ -302,8 +302,6 @@ const CITReturnLettersTab: React.FC = () => {
         toast.success('Application resubmitted successfully', {
           description: 'Your updated application has been submitted for review.'
         });
-        
-        console.log('🟢 [CITReturnLettersTab] Successfully resubmitted application');
       } else {
         toast.error('Failed to resubmit application. Please try again.');
       }
@@ -319,14 +317,25 @@ const CITReturnLettersTab: React.FC = () => {
 
   // Reset form function
   const resetForm = useCallback(() => {
-    reset(CIT_RETURN_LETTERS_DEFAULTS);
-    console.log('🔧 [CITReturnLettersTab] Form reset to defaults');
-  }, [reset]);
+    // Calculate default tax period dates (same logic as TaxPeriodSection initial load)
+    const previousYear = new Date().getFullYear() - 1;
+    const defaultStartDate = `${previousYear}-01-01`;
+    const defaultEndDate = `${previousYear}-12-31`; // Last day of previous year
+    
+    // Reset form with calculated tax period dates
+    reset({
+      ...CIT_RETURN_LETTERS_DEFAULTS,
+      taxPeriodStart: defaultStartDate,
+      taxPeriodEnd: defaultEndDate,
+      letterDate: new Date().toISOString().split('T')[0], // Also reset letter date to today
+    });
+    
+    reviewApp.clearApplication(); // Clear the application state to ensure fresh start
+  }, [reset, reviewApp]);
 
   // Function to load form data from application (for edit scenarios)
   const loadFromApplication = useCallback((applicationData: any) => {
     if (applicationData && typeof applicationData === 'object') {
-      console.log('🟡 [CITReturnLettersTab] Loading form data from application:', applicationData);
       reset({
         ...CIT_RETURN_LETTERS_DEFAULTS,
         ...applicationData
@@ -548,18 +557,12 @@ const CITReturnLettersTab: React.FC = () => {
               return 'CIT Return Letters';
             }
             
-            const date = new Date(watchedData.letterDate || new Date());
-            const yy = date.getFullYear().toString().slice(-2);
-            const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-            const dd = date.getDate().toString().padStart(2, '0');
-            const formattedDate = `${yy}${mm}${dd}`;
-            
+            const companyCode = watchedData.selectedClient?.company_code || '';
             const companyShortName = watchedData.selectedClient?.company_name_short || 'Company';
-            const letterTypes = watchedData.selectedLetterTypes.length === 1 
-              ? watchedData.selectedLetterTypes[0] 
-              : `${watchedData.selectedLetterTypes.length} Letters`;
+            // For both single and multiple letters, use full names separated by " - "
+            const letterTypes = watchedData.selectedLetterTypes.join(' - ');
             
-            return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
+            return `${companyCode} ${companyShortName} ${letterTypes}`;
           })()}
           documentType="cit-return-letters"
           onSubmit={async (submission) => {

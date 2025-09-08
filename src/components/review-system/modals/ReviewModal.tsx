@@ -240,26 +240,21 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         return `${formattedDate} ${companyAbbreviation} ${companyShortName} CIT Disclaimer ${formatTaxEndPeriod()}`;
       } else if (application.type === 'cit-return-letters') {
         const formData = application.form_data as CITReturnLettersData;
-        const date = new Date(formData.letterDate || new Date());
-        const yy = date.getFullYear().toString().slice(-2);
-        const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-        const dd = date.getDate().toString().padStart(2, '0');
-        const formattedDate = `${yy}${mm}${dd}`;
         
+        const companyCode = formData.selectedClient?.company_code || '';
         const companyShortName = formData.selectedClient?.company_name_short || 'Company';
         
         // Handle both new multi-select and legacy single selection
         let letterTypes: string;
         if (formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0) {
-          letterTypes = formData.selectedLetterTypes.length === 1 
-            ? formData.selectedLetterTypes[0] 
-            : `${formData.selectedLetterTypes.length} Letters`;
+          // For both single and multiple letters, use full names separated by " - "
+          letterTypes = formData.selectedLetterTypes.join(' - ');
         } else {
           letterTypes = formData.letterType || 'Letter';
         }
         
-        // Format: YYMMDD CompanyShort CIT Letter Type(s)
-        return `${formattedDate} ${companyShortName} CIT ${letterTypes}`;
+        // Format: CompanyCode CompanyShort Letter Type(s)
+        return `${companyCode} ${companyShortName} ${letterTypes}`;
       }
       
       return application?.title || 'Application';

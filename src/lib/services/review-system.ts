@@ -259,19 +259,28 @@ function generateTaxationTitle(formData: any): string {
 
 function generateCITReturnLettersTitle(formData: any): string {
   try {
-    // Use the same title generation logic as the hook
-    if (!formData.selectedClient || !formData.letterType) return 'CIT Return Letters';
+    // Check for selectedLetterTypes (new format) or fallback to letterType (legacy)
+    const hasLetterTypes = formData.selectedLetterTypes && formData.selectedLetterTypes.length > 0;
+    const hasLegacyLetterType = formData.letterType && formData.letterType !== '';
     
-    const date = new Date(formData.letterDate || new Date());
-    const yy = date.getFullYear().toString().slice(-2);
-    const mm = (date.getMonth() + 1).toString().padStart(2, '0');
-    const dd = date.getDate().toString().padStart(2, '0');
-    const formattedDate = `${yy}${mm}${dd}`;
+    if (!formData.selectedClient || (!hasLetterTypes && !hasLegacyLetterType)) {
+      return 'CIT Return Letters';
+    }
     
+    const companyCode = formData.selectedClient?.company_code || '';
     const companyShortName = formData.selectedClient?.company_name_short || 'Company';
-    const letterType = formData.letterType || 'Letter';
     
-    return `${formattedDate} ${companyShortName} CIT ${letterType}`;
+    // Use selectedLetterTypes if available, otherwise fallback to letterType
+    let letterTypes: string;
+    if (hasLetterTypes) {
+      // For both single and multiple letters, use full names separated by " - "
+      letterTypes = formData.selectedLetterTypes.join(' - ');
+    } else {
+      letterTypes = formData.letterType || 'Letter';
+    }
+    
+    // Return with company code instead of date
+    return `${companyCode} ${companyShortName} ${letterTypes}`;
   } catch (error) {
     console.warn('Failed to generate CIT return letters title, using fallback:', error);
     return 'CIT Return Letters Application';
@@ -364,6 +373,7 @@ export class ApplicationsService {
       
       if (parseInt(countResult.rows[0].count) >= config.maxApplicationsPerUser) {
         console.error('🔧 BACKEND: Maximum applications limit reached for user:', userId);
+        console.error('🔧 BACKEND: Current count:', countResult.rows[0].count, 'Limit:', config.maxApplicationsPerUser);
         throw new Error('Maximum applications limit reached');
       }
       

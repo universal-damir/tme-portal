@@ -182,6 +182,23 @@ export async function POST(
                   filename = generateTaxationFilename(applicationData, clientInfo);
                   break;
                 }
+                case 'cit-return-letters': {
+                  // Generate filename for CIT Return Letters
+                  const companyCode = applicationData.selectedClient?.company_code || '';
+                  const companyShortName = applicationData.selectedClient?.company_name_short || 'Company';
+                  let letterTypes = '';
+                  
+                  if (applicationData.selectedLetterTypes && applicationData.selectedLetterTypes.length > 0) {
+                    letterTypes = applicationData.selectedLetterTypes.join(' - ');
+                  } else if (applicationData.letterType) {
+                    letterTypes = applicationData.letterType;
+                  } else {
+                    letterTypes = 'CIT Return Letters';
+                  }
+                  
+                  filename = `${companyCode} ${companyShortName} ${letterTypes}`;
+                  break;
+                }
               }
             } catch (error) {
               console.error('🔧 SUBMIT-REVIEW: Failed to generate filename for audit log:', error);
