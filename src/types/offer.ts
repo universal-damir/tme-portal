@@ -2,6 +2,7 @@ export interface ClientDetails {
   firstName: string;
   lastName?: string;
   companyName?: string;
+  shortCompanyName?: string;
   addressToCompany?: boolean;
   date: string;
   companySetupType: string;

@@ -31,9 +31,6 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   const { clientDetails } = watchedData;
   const { clearClientInfo, clientInfo } = useSharedClient();
   
-  // Check if company name has any meaningful content
-  const hasCompanyName = clientDetails?.companyName && clientDetails.companyName.trim().length > 0;
-
   // Email management state - start with existing emails or just one empty field
   const [emailInputs, setEmailInputs] = useState<string[]>(() => {
     if (clientDetails?.clientEmails?.length) {
@@ -42,11 +39,16 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
     return [''];
   });
 
+  // Auto-fill short company name when company name changes
   useEffect(() => {
-    if (!hasCompanyName) {
-      setValue('clientDetails.addressToCompany', false);
+    if (clientDetails?.companyName) {
+      const words = clientDetails.companyName.trim().split(/\s+/);
+      const shortName = words.slice(0, 2).join(' ');
+      setValue('clientDetails.shortCompanyName', shortName);
+    } else {
+      setValue('clientDetails.shortCompanyName', '');
     }
-  }, [hasCompanyName, setValue]);
+  }, [clientDetails?.companyName, setValue]);
 
   // Update form data when email inputs change
   useEffect(() => {
@@ -146,7 +148,6 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                   setValue('clientDetails.companyName', '');
                   setValue('clientDetails.shortCompanyName', '');
                   setValue('clientDetails.clientEmails', ['']);
-                  setValue('clientDetails.addressToCompany', false);
                   setValue('clientDetails.date', new Date().toISOString().split('T')[0]);
                   setValue('clientDetails.secondaryCurrency', 'EUR');
                   setValue('clientDetails.exchangeRate', 4);
@@ -201,7 +202,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             </div>
           </div>
 
-          {/* Company Information and Date */}
+          {/* Company Name and Short Company Name side by side */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
@@ -211,7 +212,7 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 whileFocus={{ scale: 1.01 }}
                 {...register('clientDetails.companyName')}
                 className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
-                placeholder="Enter company name (optional)"
+                placeholder="Enter company name"
                 onFocus={(e) => e.target.style.borderColor = '#243F7B'}
                 onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
@@ -219,58 +220,42 @@ export const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                 <p className="text-red-500 text-xs mt-1">{errors.clientDetails.companyName.message}</p>
               )}
               
-              {/* Company Address Checkbox */}
-              <div className="mt-3">
-                <motion.label 
-                  whileHover={hasCompanyName ? { scale: 1.02 } : {}}
-                  className={`flex items-center cursor-pointer ${!hasCompanyName ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  <div className="relative">
-                    <input
-                      type="checkbox"
-                      {...register('clientDetails.addressToCompany')}
-                      disabled={!hasCompanyName}
-                      checked={hasCompanyName ? (clientDetails?.addressToCompany || false) : false}
-                      className="sr-only"
-                    />
-                    <div 
-                      className="w-5 h-5 rounded border-2 transition-all duration-200 flex items-center justify-center"
-                      style={{ 
-                        borderColor: (hasCompanyName && clientDetails?.addressToCompany) ? '#243F7B' : '#d1d5db',
-                        backgroundColor: (hasCompanyName && clientDetails?.addressToCompany) ? '#243F7B' : 'white'
-                      }}
-                    >
-                      {hasCompanyName && clientDetails?.addressToCompany && (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                        >
-                          <Check className="w-3 h-3 text-white" />
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
-                  <span className="ml-3 text-sm font-medium text-gray-700">
-                    Address offer to company
-                  </span>
-                </motion.label>
+              {/* Date Field */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
+                  Date *
+                </label>
+                <FormDatePicker
+                  register={register}
+                  name="clientDetails.date"
+                  value={watchedData.clientDetails?.date}
+                  onChange={(value: string) => setValue('clientDetails.date', value)}
+                  label=""
+                  placeholder="Select date"
+                  required={false}
+                  error={errors.clientDetails?.date?.message}
+                />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium mb-1" style={{ color: '#243F7B' }}>
-                Date *
+                Short Company Name
               </label>
-              <FormDatePicker
-                register={register}
-                name="clientDetails.date"
-                value={watchedData.clientDetails?.date}
-                onChange={(value: string) => setValue('clientDetails.date', value)}
-                label=""
-                placeholder="Select date"
-                required={false}
-                error={errors.clientDetails?.date?.message}
+              <motion.input
+                whileFocus={{ scale: 1.01 }}
+                {...register('clientDetails.shortCompanyName')}
+                className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px]"
+                placeholder="Auto-filled from company name"
+                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Automatically fills with first two words of company name
+              </p>
+              {errors.clientDetails?.shortCompanyName && (
+                <p className="text-red-500 text-xs mt-1">{errors.clientDetails.shortCompanyName.message}</p>
+              )}
             </div>
           </div>
 
