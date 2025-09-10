@@ -413,7 +413,7 @@ export const VisaCostsSection: React.FC<VisaCostsSectionProps> = ({
                           { value: "true", label: "Investor/Partner" },
                           { value: "employment", label: "Employment" }
                         ] : [
-                          { value: "", label: "None" },
+                          { value: "", label: "Employment" },
                           { value: "true", label: "Investor/Partner" }
                         ]}
                         value={watchedData.visaCosts?.visaDetails?.[index]?.investorVisa === true ? "true" : 

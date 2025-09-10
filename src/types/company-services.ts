@@ -35,7 +35,9 @@ export interface AccountingServices {
   costCenterBooking?: boolean;
   monthlyGroupReporting?: boolean;
   // Annual services
+  plStatementEnabled?: boolean;
   plStatementFee?: number;
+  auditReportEnabled?: boolean;
   auditReportFee?: number;
   localAuditorFee?: boolean;
   // Commercial services

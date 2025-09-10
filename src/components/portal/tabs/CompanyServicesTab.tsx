@@ -641,6 +641,39 @@ const CompanyServicesTab: React.FC = () => {
               shouldDirty: true,
               shouldTouch: true
             });
+          } else if (key === 'accountingServices' && typeof formData[key] === 'object') {
+            // Special handling for accounting services to ensure all nested fields are restored
+            const accountingData = formData[key];
+            
+            // Set the entire object first
+            setValue('accountingServices', accountingData, {
+              shouldValidate: false,
+              shouldDirty: true,
+              shouldTouch: true
+            });
+            
+            // Then explicitly set critical fields to ensure they're not cleared by hooks
+            setTimeout(() => {
+              if (accountingData.enabled) {
+                setValue('accountingServices.enabled', accountingData.enabled);
+              }
+              if (accountingData.serviceType) {
+                setValue('accountingServices.serviceType', accountingData.serviceType);
+              }
+              if (accountingData.transactionTier) {
+                setValue('accountingServices.transactionTier', accountingData.transactionTier);
+              }
+              // Set pricing fields if they exist
+              if (accountingData.monthlyPrice) {
+                setValue('accountingServices.monthlyPrice', accountingData.monthlyPrice);
+              }
+              if (accountingData.quarterlyPrice) {
+                setValue('accountingServices.quarterlyPrice', accountingData.quarterlyPrice);
+              }
+              if (accountingData.yearlyPrice) {
+                setValue('accountingServices.yearlyPrice', accountingData.yearlyPrice);
+              }
+            }, 50);
           } else {
             setValue(key as any, formData[key], {
               shouldValidate: false,
@@ -670,7 +703,8 @@ const CompanyServicesTab: React.FC = () => {
           date: formData.date,
           clientEmails: formData.clientEmails,
           secondaryCurrency: formData.secondaryCurrency,
-          exchangeRate: formData.exchangeRate
+          exchangeRate: formData.exchangeRate,
+          accountingServices: formData.accountingServices
         });
         
         // Re-set all client details fields to ensure they're displayed
@@ -729,6 +763,23 @@ const CompanyServicesTab: React.FC = () => {
             shouldDirty: true,
             shouldTouch: true 
           });
+        }
+        
+        // Double-check accounting services fields
+        if (formData.accountingServices && typeof formData.accountingServices === 'object') {
+          const accountingData = formData.accountingServices;
+          
+          if (accountingData.transactionTier) {
+            console.log('🟡 [CompanyServicesTab] Re-setting transaction tier:', accountingData.transactionTier);
+            setValue('accountingServices.transactionTier', accountingData.transactionTier, {
+              shouldValidate: true,
+              shouldDirty: true,
+              shouldTouch: true
+            });
+          }
+          
+          // Re-trigger accounting services fields
+          trigger(['accountingServices.enabled', 'accountingServices.serviceType', 'accountingServices.transactionTier']);
         }
         
         // Force a re-render by triggering validation on all client detail fields

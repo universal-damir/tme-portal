@@ -12,9 +12,13 @@ Edit your files as needed (components, API routes, etc.)
 
 ### 2. Build the Application
 ```bash
+# CRITICAL: Clean build directory first to avoid stale files
+rm -rf .next
+
 NODE_ENV=production npm run build
 ```
 **IMPORTANT:** Always use `NODE_ENV=production` to ensure proper production build without Turbopack dev files.
+**IMPORTANT:** Always clean `.next` directory before building to avoid BUILD_ID mismatches.
 This compiles your code into optimized production bundles.
 
 ### 3. Create Update Package
@@ -142,7 +146,18 @@ docker exec tme-user-app-1 ls -la /app/
 
 # Check container status
 docker ps -a | grep tme-user
+
+# Check BUILD_ID (should match between container and your build)
+docker exec tme-user-app-1 cat /app/.next/BUILD_ID
+
+# Test critical routes (like admin)
+curl -I http://localhost/admin
 ```
+
+### Common Issues:
+1. **404 on routes after deployment**: BUILD_ID mismatch - rebuild with clean `.next` directory
+2. **Container unhealthy**: Wait 2-3 minutes for health checks to complete
+3. **Old code still running**: Ensure `docker cp` commands completed successfully
 
 ### Rollback if needed:
 Keep previous update packages to quickly rollback:

@@ -33,10 +33,15 @@ export const AccountingServicesPage: React.FC<PDFComponentProps> = ({ data }) =>
   }
 
   // Check if we need to render annual services on a separate page
-  // For quarterly/yearly, we always show annual services on a separate page if they exist
+  // For quarterly/yearly, show annual/payroll services on a separate page if they exist
+  const hasPlStatement = accountingServices.plStatementEnabled && accountingServices.plStatementFee && accountingServices.plStatementFee > 0;
+  const hasAuditReport = accountingServices.auditReportEnabled && accountingServices.auditReportFee && accountingServices.auditReportFee > 0;
+  const hasLocalAuditor = accountingServices.localAuditorFee === true;
+  const hasPayrollSetup = accountingServices.payrollServices && accountingServices.payrollSetupFee && accountingServices.payrollSetupFee > 0;
+  const hasPayrollPerPerson = accountingServices.payrollServicesEnabled && accountingServices.payrollServicesPerPersonFee && accountingServices.payrollServicesPerPersonFee > 0;
+  
   const shouldShowAnnualServicesPage = accountingServices.serviceType !== 'monthly' && 
-    (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee ||
-     accountingServices.payrollServices || accountingServices.payrollServicesEnabled);
+    (hasPlStatement || hasAuditReport || hasLocalAuditor || hasPayrollSetup || hasPayrollPerPerson);
 
   return (
     <>

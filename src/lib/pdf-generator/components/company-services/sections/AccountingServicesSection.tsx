@@ -108,11 +108,15 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
       )}
 
       {/* Annual Services Section - Only for monthly (for quarterly/yearly it's in AnnualAccountingServicesSection) */}
-      {serviceType === 'monthly' && (accountingServices.plStatementFee || accountingServices.auditReportFee || accountingServices.localAuditorFee) && (
+      {serviceType === 'monthly' && (
+        (accountingServices.plStatementEnabled && accountingServices.plStatementFee && accountingServices.plStatementFee > 0) ||
+        (accountingServices.auditReportEnabled && accountingServices.auditReportFee && accountingServices.auditReportFee > 0) ||
+        accountingServices.localAuditorFee
+      ) && (
         <View style={{ marginTop: 16 }}>
           <Text style={styles.sectionTitle}>Annual Accounting Services</Text>
           
-          {accountingServices.plStatementFee && accountingServices.plStatementFee > 0 && (
+          {accountingServices.plStatementEnabled && accountingServices.plStatementFee && accountingServices.plStatementFee > 0 && (
             <>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 4, fontWeight: 'bold' }]}>
                 Year-End Financial Statement:
@@ -123,7 +127,7 @@ export const AccountingServicesSection: React.FC<PDFComponentProps> = ({ data })
             </>
           )}
           
-          {accountingServices.auditReportFee && accountingServices.auditReportFee > 0 && (
+          {accountingServices.auditReportEnabled && accountingServices.auditReportFee && accountingServices.auditReportFee > 0 && (
             <>
               <Text style={[styles.introText, { lineHeight: 1.4, marginBottom: 4, fontWeight: 'bold' }]}>
                 Audit Guiding:

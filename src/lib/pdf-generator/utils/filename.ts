@@ -47,8 +47,15 @@ export const generateDynamicFilename = (data: OfferData): string => {
     
     return components.join(' ') + '.pdf';
   } else {
-    // IFZA format: YYMMDD FZCO {ShortCompanyName} {FirstName} IFZA
+    // IFZA format for individual: YYMMDD FZCO {ShortCompanyName} {FirstName} IFZA
+    // IFZA format for corporate: YYMMDD FZCO {ShortCompanyName} {FirstName} IFZA CORP
     const components = [formattedDate, companyPrefix, ...nameComponents, 'IFZA'];
+    
+    // Add CORP only for corporate setup (same as DET)
+    if (data.clientDetails.companySetupType === 'Corporate Setup') {
+      components.push('CORP');
+    }
+    
     return components.join(' ') + '.pdf';
   }
 };
@@ -96,8 +103,16 @@ export const generateFamilyVisaFilename = (data: OfferData): string => {
     components.push('Dependent', 'Visa');
     return components.join(' ') + '.pdf';
   } else {
-    // IFZA format: YYMMDD FZCO {ShortCompanyName} {FirstName} IFZA Dependent Visa
-    const components = [formattedDate, companyPrefix, ...nameComponents, 'IFZA', 'Dependent', 'Visa'];
+    // IFZA format for individual: YYMMDD FZCO {ShortCompanyName} {FirstName} IFZA Dependent Visa
+    // IFZA format for corporate: YYMMDD FZCO {ShortCompanyName} {FirstName} IFZA CORP Dependent Visa
+    const components = [formattedDate, companyPrefix, ...nameComponents, 'IFZA'];
+    
+    // Add CORP only for corporate setup (same as DET)
+    if (data.clientDetails.companySetupType === 'Corporate Setup') {
+      components.push('CORP');
+    }
+    
+    components.push('Dependent', 'Visa');
     return components.join(' ') + '.pdf';
   }
 }; 

@@ -186,20 +186,29 @@ export const IndividualVisaBreakdownPage: React.FC<PDFComponentProps> = ({ data 
               return sum + (item.isReduction ? -item.amount : item.amount);
             }, 0);
             
-            // Determine visa type for DET
+            // Determine visa type for both DET and IFZA
             const visaDetail = data.visaCosts?.visaDetails?.[visa.visaNumber - 1];
             let visaTypeText = '';
-            if (authorityConfig?.id === 'det' && visaDetail?.investorVisa) {
+            
+            // If this is a reduced/promotional visa, ONLY show "(Promotional Rate)"
+            // Otherwise, show the visa type
+            if (visa.isReduced) {
+              visaTypeText = ' (Promotional Rate)';
+            } else if (visaDetail?.investorVisa) {
+              // Show visa type if NOT promotional
               if (visaDetail.investorVisa === "employment") {
                 visaTypeText = ' (Employment Visa)';
               } else if (visaDetail.investorVisa === "true" || visaDetail.investorVisa === true) {
                 visaTypeText = ' (Investor/Partner Visa)';
               }
+            } else {
+              // If no special visa type is selected, it's an employment visa
+              visaTypeText = ' (Employment Visa)';
             }
             
             // Dynamic title: "VISA BREAKDOWN" for single visa, "VISA X BREAKDOWN" for multiple
             const baseTitle = numberOfVisas === 1 ? 'Visa Breakdown' : `Visa ${visa.visaNumber} Breakdown`;
-            const title = `${baseTitle}${visa.isReduced ? ' (Promotional Rate)' : ''}${visaTypeText}`;
+            const title = `${baseTitle}${visaTypeText}`;
             
             return (
               <View key={`individual-visa-${visa.visaNumber}`} style={{ marginBottom: 6 }}>
