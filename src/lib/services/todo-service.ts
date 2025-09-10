@@ -105,6 +105,10 @@ export class TodoService {
       document_type = null
     } = input;
 
+    // Map frontend priority values to database values
+    // Frontend uses 'standard'/'urgent', database uses 'low'/'medium'/'high'/'urgent'
+    const mappedPriority = priority === 'standard' ? 'medium' : priority;
+
     try {
       const result = await query(`
         INSERT INTO user_todos (
@@ -114,7 +118,7 @@ export class TodoService {
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING *
       `, [
-        user_id, notification_id, title, description, category, priority, status,
+        user_id, notification_id, title, description, category, mappedPriority, status,
         due_date, auto_generated, action_type, action_data ? JSON.stringify(action_data) : null, application_id,
         client_name, document_type
       ]);

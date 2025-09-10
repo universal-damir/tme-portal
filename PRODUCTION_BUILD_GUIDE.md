@@ -105,7 +105,7 @@ docker run --rm tme-portal-server:production ls -la /app/server.js
 # Should output: -rw-r--r-- 1 nextjs nodejs [size] [date] /app/server.js
 ```
 
-### Step 5: Save and Transfer
+### Step 5: Save and Transfer (Including Migrations)
 
 ```bash
 # Save image to file
@@ -114,9 +114,120 @@ docker save -o tme-portal-production.tar tme-portal-server:production
 # Check file size (should be 200-300MB)
 ls -lh tme-portal-production.tar
 
-# Transfer to server
+# Create migration bundle if you have new migrations
+tar -czf migrations.tar.gz database/migrations/*.sql
+
+# Transfer BOTH to server
 scp tme-portal-production.tar tme-user@192.168.97.149:~/
+scp migrations.tar.gz tme-user@192.168.97.149:~/  # Only if you have migrations
 ```
+
+---
+
+## 🔄 Database Migrations (When Needed)
+
+### Migration Strategy
+
+**IMPORTANT**: Always test migrations on test database FIRST!
+
+### Step 1: Prepare Migration Files
+
+On your local machine:
+```bash
+# Create migrations directory if needed
+mkdir -p database/migrations
+
+# Create your migration file with timestamp
+cat > database/migrations/$(date +%Y%m%d)_migration.sql << 'EOF'
+-- Migration: Add new feature tables/columns
+-- Date: YYYY-MM-DD
+-- Author: Your name
+
+BEGIN;
+
+-- Your SQL changes here
+ALTER TABLE users ADD COLUMN IF NOT EXISTS new_field VARCHAR(255);
+CREATE TABLE IF NOT EXISTS new_feature (...);
+
+-- Always include rollback comment
+-- ROLLBACK: ALTER TABLE users DROP COLUMN new_field;
+-- ROLLBACK: DROP TABLE new_feature;
+
+COMMIT;
+EOF
+```
+
+### Step 2: Test Migration on Test Database FIRST
+
+```bash
+# On server - extract migrations if you transferred them
+tar -xzf migrations.tar.gz
+
+# Apply ALL pending migrations to TEST database first
+for migration in database/migrations/*.sql; do
+  echo "Applying $migration to TEST..."
+  docker exec -i tme-user-postgres-1 psql -U tme_user -d tme_portal_test < $migration
+done
+
+# Verify migrations worked
+docker exec tme-user-postgres-1 psql -U tme_user -d tme_portal_test -c "\d users"
+```
+
+### Step 3: Deploy and Test New Code
+
+```bash
+# Deploy new code to test container (port 3001)
+docker run -d --name tme-test -p 3001:3000 \
+  --env-file /home/tme-user/.env \
+  -e DATABASE_URL="postgresql://tme_user:TTJNkCMDFwXvfhYbogdVllzaS1mmCpnH@postgres:5432/tme_portal_test" \
+  --network tme-user_tme_network \
+  tme-portal-server:production
+
+# Test thoroughly on http://192.168.97.149:3001
+# Ensure new features work with migrated database
+```
+
+### Step 4: Production Migration (After Testing)
+
+```bash
+# BACKUP FIRST!
+/home/tme-user/scripts/backup-daily.sh
+
+# Apply to production database
+docker exec -i tme-user-postgres-1 psql -U tme_user -d tme_portal < ~/migration.sql
+
+# Verify
+docker exec tme-user-postgres-1 psql -U tme_user -d tme_portal -c "\d users"
+
+# Deploy new production container
+docker stop tme-user-app-new && docker rm tme-user-app-new
+docker run -d --name tme-user-app-new -p 80:3000 \
+  --env-file /home/tme-user/.env \
+  --network tme-user_tme_network \
+  --restart unless-stopped \
+  tme-portal-server:production
+```
+
+### Migration Rollback Plan
+
+Always include rollback SQL in your migration file:
+```sql
+-- To rollback if needed:
+-- docker exec tme-user-postgres-1 psql -U tme_user -d tme_portal -c "ALTER TABLE users DROP COLUMN new_field;"
+```
+
+### Migration Checklist
+
+- [ ] Migration tested locally
+- [ ] Migration file includes rollback commands
+- [ ] Backup taken before migration
+- [ ] Migration applied to test database first
+- [ ] New code tested with migrated test database
+- [ ] Test container stable for 10+ minutes
+- [ ] Production backup taken
+- [ ] Production migration applied
+- [ ] Production code deployed
+- [ ] Monitoring for 1 hour
 
 ---
 
@@ -381,6 +492,90 @@ ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 ---
 
+## 📦 Container Naming Convention (FIXED NAMES)
+
+### Permanent Container Names - NEVER CHANGE
+
+**Production**: Always use `tme-user-app-new`
+**Testing**: Always use `tme-test`
+
+```bash
+# Production (port 80) - ALWAYS this name
+docker run -d --name tme-user-app-new ...
+
+# Test (port 3001) - ALWAYS this name  
+docker run -d --name tme-test ...
+```
+
+### Why Fixed Names?
+
+1. **No guide updates needed** - Names never change
+2. **Scripts always work** - Fast deployment guide stays valid
+3. **Easy to remember** - Same names forever
+4. **Clear purpose**:
+   - `tme-test` = testing on port 3001
+   - `tme-user-app-new` = production on port 80
+
+### During Production Swap:
+
+```bash
+# Stop and remove old production
+docker stop tme-user-app-new && docker rm tme-user-app-new
+
+# Start new production with SAME name
+docker run -d --name tme-user-app-new -p 80:3000 ...
+```
+
+### Document deployments without changing names:
+```bash
+echo "$(date): Deployed new image to tme-user-app-new" >> ~/deployment.log
+```
+
+---
+
+## 🗄️ Automatic Backups
+
+### Database Backup Configuration (Already Set Up)
+
+**Location**: `/home/tme-user/scripts/backup-daily.sh`
+**Schedule**: Daily at 2 AM via cron
+**Retention**: 30 days
+**Size**: ~100KB compressed per backup
+
+### What Gets Backed Up:
+- All users and passwords (hashed)
+- All notifications
+- All applications/forms  
+- All client data
+- All messages
+- Complete database structure
+
+### Backup Commands:
+
+**Manual backup**:
+```bash
+/home/tme-user/scripts/backup-daily.sh
+```
+
+**Check backups**:
+```bash
+ls -lht /home/tme-user/backups/db_backup_*.sql.gz | head -5
+```
+
+**Restore from backup**:
+```bash
+zcat /home/tme-user/backups/db_backup_[DATE].sql.gz | \
+  docker exec -i tme-user-postgres-1 psql -U tme_user -d tme_portal
+```
+
+### Important Notes:
+- ✅ Backup script **persists across Docker rebuilds** (lives on host)
+- ✅ No need to recreate after image updates
+- ✅ Works independently of app container changes
+- ✅ Only needs postgres container (rarely changes)
+
+---
+
 ## 📝 Quick Reference
 
 ### Every Deployment Commands
@@ -405,8 +600,8 @@ docker run -d --name tme-test -p 3001:3000 --env-file /home/tme-user/.env \
 
 **Production Swap:**
 ```bash
-docker stop tme-user-app-new
-docker run -d --name tme-user-app-prod -p 80:3000 --env-file /home/tme-user/.env \
+docker stop tme-user-app-new && docker rm tme-user-app-new
+docker run -d --name tme-user-app-new -p 80:3000 --env-file /home/tme-user/.env \
   --network tme-user_tme_network --restart unless-stopped tme-portal-server:production
 ```
 
