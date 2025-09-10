@@ -33,7 +33,7 @@ export const AuthorityCostsPage: React.FC<PDFComponentProps> = ({ data }) => {
     </Text>
   ));
 
-  const introContent = locale === 'de' ? t.costsBreakdown.introText : `This page provides a detailed breakdown of all authority costs, including TME Services professional fee required for your Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.`;
+  const introContent = locale === 'de' ? t.costsBreakdown.introText : `This page provides a breakdown of the costs required for your Golden Visa application.`;
 
   return (
     <Page size="A4" style={styles.page}>

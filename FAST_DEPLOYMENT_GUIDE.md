@@ -30,7 +30,7 @@ ls -la .next/standalone/server.js
 
 ### 3. Create Update Package
 ```bash
-# Create a timestamped tar file with just the compiled code
+# Create a chane descriptive name and timestamped tar file with just the compiled code
 tar -czf update-$(date +%Y%m%d-%H%M%S).tar.gz \
   .next/standalone/ \
   .next/static/ \

@@ -128,7 +128,7 @@ export const GOLDEN_VISA_TRANSLATIONS = {
     },
     dependentCosts: {
       pageTitle: 'Dependent Visa Cost Breakdown',
-      introText: 'This page provides a detailed breakdown of all authority costs required for your dependent Golden Visa application. Each cost component is clearly itemized for complete transparency in the application process.',
+      introText: 'This page provides a breakdown of the costs required for your dependent Golden Visa application.',
       spouseVisaBreakdown: 'Spouse Visa Cost Breakdown',
       childVisaBreakdown: 'Child Visa Cost Breakdown',
       serviceExplanations: 'Service Explanations',
