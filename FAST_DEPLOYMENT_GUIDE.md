@@ -1,7 +1,9 @@
 # Fast Deployment Guide for TME Portal (Air-Gapped Environment)
 
 ## Overview
-Deploy code changes in **22MB** instead of **1.1GB** Docker images. This method updates only the application code, not the entire Docker container.
+Deploy code changes in **22MB** instead of **215MB** Docker images. This method updates only the application code, not the entire Docker container.
+
+> **⚠️ IMPORTANT**: Container name is now `tme-user-app-new` (not `tme-user-app-1`)
 
 ---
 
@@ -15,11 +17,16 @@ Edit your files as needed (components, API routes, etc.)
 # CRITICAL: Clean build directory first to avoid stale files
 rm -rf .next
 
+# Build with production settings (creates standalone output)
 NODE_ENV=production npm run build
+
+# VERIFY standalone was created (CRITICAL!)
+ls -la .next/standalone/server.js
+# If this file doesn't exist, the build failed to create standalone output
 ```
-**IMPORTANT:** Always use `NODE_ENV=production` to ensure proper production build without Turbopack dev files.
+**IMPORTANT:** Always use `NODE_ENV=production` to ensure proper production build.
 **IMPORTANT:** Always clean `.next` directory before building to avoid BUILD_ID mismatches.
-This compiles your code into optimized production bundles.
+**CRITICAL:** Verify `.next/standalone/` exists - Next.js 15 places server.js at root of standalone.
 
 ### 3. Create Update Package
 ```bash
@@ -55,23 +62,23 @@ tar -xzf update-20250813-212024.tar.gz
 ### 3. Copy Files into Docker Container
 ```bash
 # Copy the compiled application files
-docker cp .next/standalone/. tme-user-app-1:/app/
-docker cp .next/static tme-user-app-1:/app/.next/
-docker cp public/. tme-user-app-1:/app/public/
+docker cp .next/standalone/. tme-user-app-new:/app/
+docker cp .next/static tme-user-app-new:/app/.next/
+docker cp public/. tme-user-app-new:/app/public/
 ```
 
 ### 4. Restart the Container
 ```bash
-docker restart tme-user-app-1
+docker restart tme-user-app-new
 ```
 
 ### 5. Verify Deployment
 ```bash
 # Check container is running
-docker ps | grep tme-user-app-1
+docker ps | grep tme-user-app-new
 
 # Check logs if needed
-docker logs --tail 50 tme-user-app-1
+docker logs --tail 50 tme-user-app-new
 ```
 
 Your app should be live at http://192.168.97.149/ within 30 seconds!
@@ -97,10 +104,10 @@ fi
 
 echo "Applying update: $1"
 tar -xzf $1
-docker cp .next/standalone/. tme-user-app-1:/app/
-docker cp .next/static tme-user-app-1:/app/.next/
-docker cp public/. tme-user-app-1:/app/public/
-docker restart tme-user-app-1
+docker cp .next/standalone/. tme-user-app-new:/app/
+docker cp .next/static tme-user-app-new:/app/.next/
+docker cp public/. tme-user-app-new:/app/public/
+docker restart tme-user-app-new
 echo "✅ Update applied! Site restarting..."
 ```
 
@@ -139,16 +146,16 @@ echo "✅ Update applied! Site restarting..."
 ### If deployment fails:
 ```bash
 # Check container logs
-docker logs --tail 100 tme-user-app-1
+docker logs --tail 100 tme-user-app-new
 
 # Verify files were copied
-docker exec tme-user-app-1 ls -la /app/
+docker exec tme-user-app-new ls -la /app/
 
 # Check container status
 docker ps -a | grep tme-user
 
 # Check BUILD_ID (should match between container and your build)
-docker exec tme-user-app-1 cat /app/.next/BUILD_ID
+docker exec tme-user-app-new cat /app/.next/BUILD_ID
 
 # Test critical routes (like admin)
 curl -I http://localhost/admin
@@ -195,9 +202,9 @@ Keep previous update packages to quickly rollback:
 
 | Method | Transfer Size | Time | Downtime |
 |--------|--------------|------|----------|
-| Full Docker Rebuild | 1.1GB | 15-20 min | 2-3 min |
+| Full Docker Rebuild | 215MB | 5-10 min | 2-3 min |
 | Fast Deploy | 22MB | 1-2 min | 10-30 sec |
-| **Improvement** | **50x smaller** | **10x faster** | **6x less** |
+| **Improvement** | **10x smaller** | **5x faster** | **6x less** |
 
 ---
 
@@ -212,7 +219,7 @@ NODE_ENV=production npm run build && tar -czf update.tar.gz .next/standalone/ .n
 
 Server:
 ```bash
-tar -xzf update.tar.gz && docker cp .next/standalone/. tme-user-app-1:/app/ && docker cp .next/static tme-user-app-1:/app/.next/ && docker cp public/. tme-user-app-1:/app/public/ && docker restart tme-user-app-1
+tar -xzf update.tar.gz && docker cp .next/standalone/. tme-user-app-new:/app/ && docker cp .next/static tme-user-app-new:/app/.next/ && docker cp public/. tme-user-app-new:/app/public/ && docker restart tme-user-app-new
 ```
 
 That's it! Your changes are live in under 2 minutes! 🚀

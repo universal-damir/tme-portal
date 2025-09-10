@@ -65,6 +65,13 @@ dev.log
 
 # Backup files
 backups/
+*.tar.gz
+*.tar
+*.zip
+update-*
+backup-*
+*.backup
+*.bak
 
 # Documentation
 *.md
