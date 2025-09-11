@@ -1162,6 +1162,13 @@ export class NotificationsService {
           } else if (data.type === 'application_approved') {
             emailMetadata.approval_date = new Date().toLocaleDateString('en-GB');
             emailMetadata.comments = data.message;
+            // Include full name and employee code for approved emails
+            const fullName = userResult.rows[0]?.full_name || 'User';
+            emailMetadata.submitter_full_name = fullName;
+            emailMetadata.submitter_code = userResult.rows[0]?.employee_code || '';
+            // Add urgency handling for approved applications
+            emailMetadata.urgency = data.metadata?.urgency || 'standard';
+            emailMetadata.show_urgency = emailMetadata.urgency === 'urgent';
           } else if (data.type === 'application_rejected') {
             emailMetadata.feedback = data.message;
             // Add urgency handling for rejected applications
