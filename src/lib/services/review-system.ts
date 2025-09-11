@@ -1159,6 +1159,13 @@ export class NotificationsService {
             emailMetadata.status_class = data.metadata?.status === 'approved' ? 'approved' : 
                                         data.metadata?.status === 'rejected' ? 'rejected' : 'revision';
             emailMetadata.feedback = data.message;
+            // Include full name and employee code for review_completed emails
+            const fullName = userResult.rows[0]?.full_name || 'User';
+            emailMetadata.submitter_full_name = fullName;
+            emailMetadata.submitter_code = userResult.rows[0]?.employee_code || '';
+            // Add urgency handling
+            emailMetadata.urgency = data.metadata?.urgency || 'standard';
+            emailMetadata.show_urgency = emailMetadata.urgency === 'urgent';
           } else if (data.type === 'application_approved') {
             emailMetadata.approval_date = new Date().toLocaleDateString('en-GB');
             emailMetadata.comments = data.message;
