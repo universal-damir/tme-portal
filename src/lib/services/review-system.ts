@@ -1167,12 +1167,14 @@ export class NotificationsService {
             emailMetadata.urgency = data.metadata?.urgency || 'standard';
             emailMetadata.show_urgency = emailMetadata.urgency === 'urgent';
           } else if (data.type === 'application_approved') {
-            emailMetadata.approval_date = new Date().toLocaleDateString('en-GB');
+            // Format date as dd.MM.yyyy
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            emailMetadata.approval_date = `${day}.${month}.${year}`;
             emailMetadata.comments = data.message;
-            // Include full name and employee code for approved emails
-            const fullName = userResult.rows[0]?.full_name || 'User';
-            emailMetadata.submitter_full_name = fullName;
-            emailMetadata.submitter_code = userResult.rows[0]?.employee_code || '';
+            // Note: Removed submitter_full_name and submitter_code as per request
             // Add urgency handling for approved applications
             emailMetadata.urgency = data.metadata?.urgency || 'standard';
             emailMetadata.show_urgency = emailMetadata.urgency === 'urgent';
