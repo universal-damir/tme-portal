@@ -13,8 +13,10 @@ import {
   FileText, 
   MoreHorizontal,
   Check,
-  X
+  X,
+  Settings
 } from 'lucide-react';
+import NotificationPreferences from '@/components/notifications/NotificationPreferences';
 import { formatDistanceToNow } from 'date-fns';
 import { Notification, NotificationType, Application } from '@/types/review-system';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -205,6 +207,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
   } = useNotifications();
   
   const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   // Don't render if system is disabled
   if (!config.canShowNotifications) {
@@ -239,20 +242,21 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
   const hasNotifications = notifications.length > 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[998]"
-            onClick={onClose}
-          />
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[998]"
+              onClick={onClose}
+            />
 
-          {/* Panel */}
-          <motion.div
+            {/* Panel */}
+            <motion.div
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -274,6 +278,17 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
                 </div>
 
                 <div className="flex items-center space-x-2">
+                  {/* Settings button */}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowPreferences(true)}
+                    className="p-1.5 rounded-lg hover:bg-gray-200 transition-colors duration-200"
+                    title="Notification Settings"
+                  >
+                    <Settings className="w-4 h-4" style={{ color: '#243F7B' }} />
+                  </motion.button>
+                  
                   {/* Mark all as read */}
                   {unreadCount > 0 && (
                     <motion.button
@@ -373,5 +388,12 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
         </>
       )}
     </AnimatePresence>
+    
+    {/* Notification Preferences Modal */}
+    <NotificationPreferences 
+      isOpen={showPreferences}
+      onClose={() => setShowPreferences(false)}
+    />
+    </>
   );
 };

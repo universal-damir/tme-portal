@@ -1093,6 +1093,94 @@ export class NotificationsService {
       
       const notification = result.rows[0] as Notification;
       
+      // Queue email notification (non-blocking)
+      try {
+        const { NotificationEmailService } = await import('./notification-email');
+        
+        // Prepare email metadata
+        const emailMetadata: Record<string, any> = {
+          ...(data.metadata || {}),
+          form_name: data.title,
+          portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000'
+        };
+        
+        // Add type-specific metadata
+        if (data.type === 'review_requested') {
+          const reviewerResult = await pool.query(
+            `SELECT full_name, employee_code FROM users WHERE id = $1`,
+            [data.user_id]
+          );
+          if (reviewerResult.rows[0]) {
+            // Extract first name from full name
+            const fullName = reviewerResult.rows[0].full_name;
+            const firstName = fullName ? fullName.split(' ')[0] : 'User';
+            emailMetadata.reviewer_name = firstName;
+            emailMetadata.reviewer_employee_code = reviewerResult.rows[0].employee_code;
+          }
+          
+          // Get submitter info if we have metadata
+          if (data.metadata?.submitter_id) {
+            const submitterResult = await pool.query(
+              `SELECT full_name, employee_code FROM users WHERE id = $1`,
+              [data.metadata.submitter_id]
+            );
+            if (submitterResult.rows[0]) {
+              emailMetadata.submitter_name = submitterResult.rows[0].full_name;
+              emailMetadata.submitter_code = submitterResult.rows[0].employee_code || '';
+            }
+          } else if (data.metadata?.submitter_name) {
+            emailMetadata.submitter_name = data.metadata.submitter_name;
+            emailMetadata.submitter_code = data.metadata?.submitter_code || '';
+          }
+          
+          emailMetadata.urgency = data.metadata?.urgency || 'standard';
+          emailMetadata.show_urgency = emailMetadata.urgency === 'urgent';
+          emailMetadata.comments = data.message;
+        } else if (data.type === 'review_completed' || data.type === 'application_approved' || data.type === 'application_rejected') {
+          const userResult = await pool.query(
+            `SELECT full_name FROM users WHERE id = $1`,
+            [data.user_id]
+          );
+          if (userResult.rows[0]) {
+            const fullName = userResult.rows[0].full_name;
+            const firstName = fullName ? fullName.split(' ')[0] : 'User';
+            emailMetadata.submitter_name = firstName;
+            emailMetadata.user_name = firstName;
+          }
+          
+          if (data.type === 'review_completed') {
+            emailMetadata.status = data.metadata?.status || 'completed';
+            emailMetadata.status_class = data.metadata?.status === 'approved' ? 'approved' : 
+                                        data.metadata?.status === 'rejected' ? 'rejected' : 'revision';
+            emailMetadata.feedback = data.message;
+          } else if (data.type === 'application_approved') {
+            emailMetadata.approval_date = new Date().toLocaleDateString('en-GB');
+            emailMetadata.comments = data.message;
+          } else if (data.type === 'application_rejected') {
+            emailMetadata.feedback = data.message;
+          }
+          
+          if (data.metadata?.reviewer_name) {
+            emailMetadata.reviewer_name = data.metadata.reviewer_name;
+          }
+        }
+        
+        // Queue the email
+        await NotificationEmailService.queueEmail({
+          notification_id: notification.id,
+          user_id: data.user_id,
+          type: data.type as any,
+          title: data.title,
+          message: data.message,
+          metadata: emailMetadata
+        });
+        
+        console.log(`📧 Email queued for notification ${notification.id}`);
+      } catch (emailError) {
+        console.error('❌ Failed to queue email notification:', emailError);
+        // Don't fail notification creation if email queueing fails
+      }
+      
       // Trigger TODO automation for specific notification types (review workflows only)
       if (['application_approved', 'application_rejected'].includes(data.type)) {
         try {
