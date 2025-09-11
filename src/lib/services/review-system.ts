@@ -1138,7 +1138,7 @@ export class NotificationsService {
           emailMetadata.comments = data.message;
         } else if (data.type === 'review_completed' || data.type === 'application_approved' || data.type === 'application_rejected') {
           const userResult = await pool.query(
-            `SELECT full_name FROM users WHERE id = $1`,
+            `SELECT full_name, employee_code FROM users WHERE id = $1`,
             [data.user_id]
           );
           if (userResult.rows[0]) {
@@ -1146,6 +1146,12 @@ export class NotificationsService {
             const firstName = fullName ? fullName.split(' ')[0] : 'User';
             emailMetadata.submitter_name = firstName;
             emailMetadata.user_name = firstName;
+            
+            // For application_rejected, include full name and employee code
+            if (data.type === 'application_rejected') {
+              emailMetadata.submitter_full_name = fullName;
+              emailMetadata.submitter_code = userResult.rows[0].employee_code || '';
+            }
           }
           
           if (data.type === 'review_completed') {
@@ -1158,6 +1164,9 @@ export class NotificationsService {
             emailMetadata.comments = data.message;
           } else if (data.type === 'application_rejected') {
             emailMetadata.feedback = data.message;
+            // Add urgency handling for rejected applications
+            emailMetadata.urgency = data.metadata?.urgency || 'standard';
+            emailMetadata.show_urgency = emailMetadata.urgency === 'urgent';
           }
           
           if (data.metadata?.reviewer_name) {

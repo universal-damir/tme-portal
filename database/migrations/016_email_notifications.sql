@@ -235,6 +235,7 @@ INSERT INTO email_templates (name, subject_template, html_template, variables) V
         .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
         .button { display: inline-block; padding: 12px 30px; background: #243F7B; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
         .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .badge { display: inline-block; padding: 4px 12px; background: #D2BC99; color: #243F7B; border-radius: 4px; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -244,15 +245,15 @@ INSERT INTO email_templates (name, subject_template, html_template, variables) V
         </div>
         <div class="content">
             <p>Hello {{user_name}},</p>
-            <p>Your application requires some revisions before approval:</p>
-            <div style="background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
-                <p><strong>Application:</strong> {{form_name}}</p>
+            <p>Your document requires revisions before approval:</p>
+            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <p><strong>Document:</strong> {{form_name}}</p>
                 <p><strong>Reviewed by:</strong> {{reviewer_name}}</p>
-                <p><strong>Feedback:</strong></p>
-                <p style="margin-left: 20px;">{{feedback}}</p>
+                <p><strong>Status:</strong> <span class="badge">Revision Required</span></p>
+                {{#if feedback}}<p><strong>Feedback:</strong> {{feedback}}</p>{{/if}}
             </div>
             <p>Please address the feedback and resubmit your application.</p>
-            <a href="{{portal_url}}" class="button">View Feedback</a>
+            <a href="{{portal_url}}" class="button">Open TME Portal</a>
         </div>
         <div class="footer">
             <p>TME Services Portal</p>
