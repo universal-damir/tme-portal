@@ -107,12 +107,13 @@ export default function NotificationPreferences({ isOpen, onClose }: Notificatio
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - starts below header */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-x-0 bottom-0 bg-black/30 z-50"
+            style={{ top: '80px' }}  // Start below the header
             onClick={onClose}
           />
 
@@ -177,7 +178,8 @@ export default function NotificationPreferences({ isOpen, onClose }: Notificatio
                       <span className="text-sm">Portal Only</span>
                     </label>
                     
-                    <label className="flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200"
+                    {/* Email Only option - hidden for now but kept for future use */}
+                    {/* <label className="flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200"
                            style={{ 
                              borderColor: getDeliveryMethod() === 'email' ? '#243F7B' : '#e5e7eb',
                              backgroundColor: getDeliveryMethod() === 'email' ? '#f0f4ff' : 'white'
@@ -189,7 +191,7 @@ export default function NotificationPreferences({ isOpen, onClose }: Notificatio
                         onChange={() => handleDeliveryMethodChange('email')}
                       />
                       <span className="text-sm">Email Only</span>
-                    </label>
+                    </label> */}
                   </div>
                 </div>
 
