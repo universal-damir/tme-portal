@@ -1101,7 +1101,7 @@ export class NotificationsService {
         const emailMetadata: Record<string, any> = {
           ...(data.metadata || {}),
           form_name: data.title,
-          portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000'
+          portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://192.168.97.149'
         };
         
         // Add type-specific metadata
