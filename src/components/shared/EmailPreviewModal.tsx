@@ -19,6 +19,12 @@ export interface EmailPreviewData {
     contentType: string;
     size?: number;
   }[];
+  metadata?: {
+    clientName?: string;
+    clientFirstName?: string;
+    clientLastName?: string;
+    companyName?: string;
+  };
 }
 
 export interface EmailPreviewModalProps {
@@ -290,7 +296,13 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
       cc: editableCc ? editableCc.split(',').map(email => email.trim()) : undefined,
       subject: editableSubject,
       htmlContent: editedContentWithOriginalPreview,
-      attachments: allAttachments
+      attachments: allAttachments,
+      metadata: recipientData ? {
+        clientName: `${recipientData.firstName || ''} ${recipientData.lastName || ''}`.trim(),
+        clientFirstName: recipientData.firstName,
+        clientLastName: recipientData.lastName,
+        companyName: recipientData.companyName
+      } : emailData.metadata
     };
 
     try {

@@ -50,7 +50,8 @@ export const useEmailSender = (): UseEmailSenderReturn => {
         cc: emailData.cc,
         subject: emailData.subject,
         htmlContent: emailData.htmlContent,
-        attachments: processedAttachments
+        attachments: processedAttachments,
+        metadata: emailData.metadata
       };
 
       const response = await fetch('/api/email/send', {

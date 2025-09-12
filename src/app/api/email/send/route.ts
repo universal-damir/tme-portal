@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { to, cc, subject, htmlContent, attachments } = await request.json();
+    const { to, cc, subject, htmlContent, attachments, metadata } = await request.json();
 
     // Validate required fields
     if (!to || !subject || !htmlContent) {
@@ -102,54 +102,84 @@ export async function POST(request: NextRequest) {
       user_agent: getUserAgent(request)
     });
 
-    // Create follow-up todo directly after successful email send
+    // Create email follow-up entry after successful email send
     if (primaryFilename && attachments && attachments.length > 0) {
       try {
         const recipientEmail = Array.isArray(to) ? to[0] : to;
         
-        // Extract form data from the first attachment's metadata if available
-        // The attachments come from the FeedbackModal which has access to form data
-        let clientFirstName = '';
-        let clientLastName = '';
+        // Extract client name from metadata or fallback to extraction
+        let clientName = '';
         const formName = primaryFilename.replace('.pdf', '');
         
-        // Try to parse additional form context from the PDF filename
-        // Format is typically: YYMMDD ClientName offer/service type
-        const filenameParts = primaryFilename.replace('.pdf', '').split(' ');
-        if (filenameParts.length >= 3) {
-          // Look for client name patterns in filename
-          const potentialName = filenameParts.slice(1, 3).join(' '); // Take parts after date
-          if (potentialName && potentialName !== 'offer' && potentialName !== 'TME') {
-            const nameParts = potentialName.split(' ');
-            clientFirstName = nameParts[1] || '';
-            clientLastName = nameParts[0] || '';
+        // First priority: Use metadata if available
+        if (metadata?.clientName) {
+          clientName = metadata.clientName;
+        } else if (metadata?.clientFirstName || metadata?.clientLastName) {
+          clientName = `${metadata.clientFirstName || ''} ${metadata.clientLastName || ''}`.trim();
+        } else {
+          // Fallback: Try to extract from filename
+          let clientFirstName = '';
+          let clientLastName = '';
+          
+          // Try to parse additional form context from the PDF filename
+          // Format is typically: YYMMDD ClientName offer/service type
+          const filenameParts = primaryFilename.replace('.pdf', '').split(' ');
+          if (filenameParts.length >= 3) {
+            // Look for client name patterns in filename
+            const potentialName = filenameParts.slice(1, 3).join(' '); // Take parts after date
+            if (potentialName && potentialName !== 'offer' && potentialName !== 'TME') {
+              const nameParts = potentialName.split(' ');
+              clientFirstName = nameParts[1] || '';
+              clientLastName = nameParts[0] || '';
+            }
           }
+          
+          // Last fallback: email extraction
+          if (!clientFirstName && !clientLastName) {
+            const emailName = recipientEmail.split('@')[0].replace(/[._]/g, ' ');
+            const emailNameParts = emailName.split(' ');
+            clientFirstName = emailNameParts[0] || '';
+            clientLastName = emailNameParts[1] || '';
+          }
+          
+          clientName = `${clientFirstName} ${clientLastName}`.trim() || 'client';
         }
         
-        // Fallback to email extraction if no name found in filename
-        if (!clientFirstName && !clientLastName) {
-          const emailName = recipientEmail.split('@')[0].replace(/[._]/g, ' ');
-          const emailNameParts = emailName.split(' ');
-          clientFirstName = emailNameParts[0] || '';
-          clientLastName = emailNameParts[1] || '';
+        // Import FollowUpService and create email follow-up
+        const { FollowUpService } = await import('@/lib/services/follow-up-service');
+        
+        // Check if follow-ups table exists before trying to create entry
+        const tableExists = await FollowUpService.tableExists();
+        let followUpId = null;
+        
+        if (tableExists) {
+          const followUp = await FollowUpService.create({
+            user_id: session.user.id,
+            email_subject: subject,
+            client_name: clientName,
+            client_email: recipientEmail,
+            document_type: formName,
+            original_email_id: result.messageId,
+            sent_date: new Date()
+          });
+          
+          followUpId = followUp.id;
+          console.log('✅ Email follow-up created:', followUp.id);
+        } else {
+          console.log('⚠️ Follow-ups table not initialized - skipping follow-up creation');
         }
         
-        // Build contextual client name
-        const clientName = `${clientFirstName} ${clientLastName}`.trim() || 'client';
-        
-        // Format due date as dd.mm.yyyy
+        // Also create a legacy todo for backward compatibility (can be removed later)
+        const { TodoService } = await import('@/lib/services/todo-service');
         const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         const formattedDueDate = `${dueDate.getDate().toString().padStart(2, '0')}.${(dueDate.getMonth() + 1).toString().padStart(2, '0')}.${dueDate.getFullYear()}`;
         
-        // Import TodoService and create contextual follow-up todo
-        const { TodoService } = await import('@/lib/services/todo-service');
-        
-        const followUpTodo = await TodoService.create({
+        await TodoService.create({
           user_id: session.user.id,
           title: `Follow up with ${clientName} regarding ${formName}`,
           description: `Document "${formName}" has been sent to ${clientName} (${recipientEmail}) on ${new Date().toLocaleDateString('en-GB')}. Follow up to ensure they received it and answer any questions. Due: ${formattedDueDate}`,
-          category: 'follow_up',
-          priority: 'medium',
+          category: 'to_follow_up',
+          priority: 'standard',
           due_date: dueDate,
           client_name: clientName,
           document_type: formName,
@@ -164,12 +194,13 @@ export async function POST(request: NextRequest) {
             recipient_email: recipientEmail,
             sent_date: new Date(),
             due_date_formatted: formattedDueDate,
-            follow_up_reason: 'document_sent'
+            follow_up_reason: 'document_sent',
+            follow_up_id: followUpId // Link to new follow-up system (if created)
           }
         });
-      } catch (todoError) {
-        console.error('❌ Failed to create follow-up todo:', todoError);
-        // Don't fail the email send if todo creation fails
+      } catch (error) {
+        console.error('❌ Failed to create follow-up:', error);
+        // Don't fail the email send if follow-up creation fails
       }
     }
 

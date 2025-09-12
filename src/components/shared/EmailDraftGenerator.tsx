@@ -262,7 +262,7 @@ export const useEmailDraftGenerator = () => {
       // Create formatted HTML email content
       const htmlContent = createFormattedEmailHTML(processedTemplate);
       
-      // Prepare email preview data
+      // Prepare email preview data with metadata
       const previewData: EmailPreviewData = {
         to: recipients.emails,
         cc: recipients.ccEmails,
@@ -272,7 +272,13 @@ export const useEmailDraftGenerator = () => {
           filename: att.filename,
           contentType: att.contentType || 'application/pdf',
           size: att.blob.size
-        }))
+        })),
+        metadata: {
+          clientName: `${recipients.firstName || ''} ${recipients.lastName || ''}`.trim() || recipients.companyName,
+          clientFirstName: recipients.firstName,
+          clientLastName: recipients.lastName,
+          companyName: recipients.companyName
+        }
       };
       
       // Store data for modal

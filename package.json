@@ -13,6 +13,7 @@
     "migrate:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system.sql",
     "rollback:review-system": "psql $DATABASE_URL -f database/migrations/001_review_system_rollback.sql",
     "migrate:urgency-levels": "psql $DATABASE_URL -f database/migrations/002_update_urgency_levels.sql",
+    "migrate:follow-ups": "docker exec -i tme-portal-1-postgres-1 psql -U tme_user -d tme_portal < database/migrations/018_email_follow_ups.sql",
     "export-translations": "node scripts/translation-export-excel.js",
     "import-translations": "node scripts/translation-import-excel.js"
   },
