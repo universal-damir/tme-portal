@@ -17,7 +17,7 @@ import {
   Settings
 } from 'lucide-react';
 import NotificationPreferences from '@/components/notifications/NotificationPreferences';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { Notification, NotificationType, Application } from '@/types/review-system';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useReviewSystemConfig } from '@/lib/config/review-system';
@@ -29,6 +29,22 @@ interface NotificationPanelProps {
   onNotificationClick?: (notification: Notification) => void;
   maxHeight?: number;
 }
+
+// Helper function to format notification date/time
+const formatNotificationTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  
+  if (isToday(date)) {
+    // For today's notifications, show time (HH:mm)
+    return format(date, 'HH:mm');
+  } else if (isYesterday(date)) {
+    // For yesterday's notifications, show "Yesterday"
+    return 'Yesterday';
+  } else {
+    // For older notifications, show date in dd.MM format
+    return format(date, 'dd.MM');
+  }
+};
 
 // Notification type configurations
 const NOTIFICATION_CONFIGS: Record<NotificationType, {
@@ -159,11 +175,16 @@ const NotificationItem: React.FC<{
               <p className="text-sm text-gray-600 mt-1 leading-relaxed">
                 {notification.message}
               </p>
-              
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center space-x-1 ml-2">
+            {/* Time and Actions */}
+            <div className="flex items-start space-x-2 ml-3">
+              {/* Time/Date */}
+              <div className="text-xs text-gray-500 whitespace-nowrap pt-0.5">
+                {formatNotificationTime(notification.created_at)}
+              </div>
+              
+              {/* Actions */}
               {isUnread && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
