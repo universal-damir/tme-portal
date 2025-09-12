@@ -16,6 +16,8 @@ interface Preferences {
   email_review_completed: boolean;
   email_application_approved: boolean;
   email_application_rejected: boolean;
+  email_follow_up_reminders: boolean;
+  email_follow_up_escalations: boolean;
 }
 
 export default function NotificationPreferences({ isOpen, onClose }: NotificationPreferencesProps) {
@@ -25,7 +27,9 @@ export default function NotificationPreferences({ isOpen, onClose }: Notificatio
     email_review_requested: true,
     email_review_completed: true,
     email_application_approved: true,
-    email_application_rejected: true
+    email_application_rejected: true,
+    email_follow_up_reminders: true,
+    email_follow_up_escalations: true
   });
   
   const [loading, setLoading] = useState(true);
@@ -84,13 +88,46 @@ export default function NotificationPreferences({ isOpen, onClose }: Notificatio
   const handleDeliveryMethodChange = (method: 'both' | 'in_app' | 'email') => {
     switch (method) {
       case 'both':
-        setPreferences(prev => ({ ...prev, in_app_enabled: true, email_enabled: true }));
+        setPreferences(prev => ({ 
+          ...prev, 
+          in_app_enabled: true, 
+          email_enabled: true,
+          // Automatically enable ALL email notification types when email is enabled
+          email_review_requested: true,
+          email_review_completed: true,
+          email_application_approved: true,
+          email_application_rejected: true,
+          email_follow_up_reminders: true,
+          email_follow_up_escalations: true
+        }));
         break;
       case 'in_app':
-        setPreferences(prev => ({ ...prev, in_app_enabled: true, email_enabled: false }));
+        setPreferences(prev => ({ 
+          ...prev, 
+          in_app_enabled: true, 
+          email_enabled: false,
+          // Disable all email notification types when email is disabled
+          email_review_requested: false,
+          email_review_completed: false,
+          email_application_approved: false,
+          email_application_rejected: false,
+          email_follow_up_reminders: false,
+          email_follow_up_escalations: false
+        }));
         break;
       case 'email':
-        setPreferences(prev => ({ ...prev, in_app_enabled: false, email_enabled: true }));
+        setPreferences(prev => ({ 
+          ...prev, 
+          in_app_enabled: false, 
+          email_enabled: true,
+          // Automatically enable ALL email notification types when email is enabled
+          email_review_requested: true,
+          email_review_completed: true,
+          email_application_approved: true,
+          email_application_rejected: true,
+          email_follow_up_reminders: true,
+          email_follow_up_escalations: true
+        }));
         break;
     }
   };
@@ -194,6 +231,78 @@ export default function NotificationPreferences({ isOpen, onClose }: Notificatio
                     </label> */}
                   </div>
                 </div>
+
+                {/* Email Notification Types - hidden but all enabled when email is on */}
+                {/* {preferences.email_enabled && (
+                  <div>
+                    <label className="block text-sm font-medium mb-3" style={{ color: '#243F7B' }}>
+                      Email Notification Types
+                    </label>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="checkbox"
+                          checked={preferences.email_review_requested}
+                          onChange={(e) => setPreferences(prev => ({ ...prev, email_review_requested: e.target.checked }))}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Review Requests</span>
+                      </label>
+                      
+                      <label className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="checkbox"
+                          checked={preferences.email_review_completed}
+                          onChange={(e) => setPreferences(prev => ({ ...prev, email_review_completed: e.target.checked }))}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Review Completions</span>
+                      </label>
+                      
+                      <label className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="checkbox"
+                          checked={preferences.email_application_approved}
+                          onChange={(e) => setPreferences(prev => ({ ...prev, email_application_approved: e.target.checked }))}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Application Approvals</span>
+                      </label>
+                      
+                      <label className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50">
+                        <input
+                          type="checkbox"
+                          checked={preferences.email_application_rejected}
+                          onChange={(e) => setPreferences(prev => ({ ...prev, email_application_rejected: e.target.checked }))}
+                          className="w-4 h-4"
+                        />
+                        <span className="text-sm">Application Rejections</span>
+                      </label>
+                      
+                      <div className="border-t pt-2 mt-2">
+                        <label className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="checkbox"
+                            checked={preferences.email_follow_up_reminders}
+                            onChange={(e) => setPreferences(prev => ({ ...prev, email_follow_up_reminders: e.target.checked }))}
+                            className="w-4 h-4"
+                          />
+                          <span className="text-sm">Follow-up Reminders (7, 14, 21 days)</span>
+                        </label>
+                        
+                        <label className="flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50">
+                          <input
+                            type="checkbox"
+                            checked={preferences.email_follow_up_escalations}
+                            onChange={(e) => setPreferences(prev => ({ ...prev, email_follow_up_escalations: e.target.checked }))}
+                            className="w-4 h-4"
+                          />
+                          <span className="text-sm">Manager Escalations</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )} */}
 
               </div>
             )}

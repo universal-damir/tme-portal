@@ -47,7 +47,7 @@ const formatNotificationTime = (dateString: string): string => {
 };
 
 // Notification type configurations
-const NOTIFICATION_CONFIGS: Record<NotificationType, {
+const NOTIFICATION_CONFIGS: Record<string, {
   icon: React.ComponentType<any>;
   color: string;
   bgColor: string;
@@ -71,6 +71,16 @@ const NOTIFICATION_CONFIGS: Record<NotificationType, {
     icon: XCircle, // Will be replaced with profile picture
     color: '#EF4444', // red-500
     bgColor: '#FEE2E2' // red-100
+  },
+  follow_up_reminder: {
+    icon: Clock,
+    color: '#F59E0B', // amber-500
+    bgColor: '#FEF3C7' // amber-100
+  },
+  follow_up_escalation: {
+    icon: XCircle,
+    color: '#EF4444', // red-500
+    bgColor: '#FEE2E2' // red-100
   }
 };
 
@@ -79,7 +89,11 @@ const NotificationItem: React.FC<{
   onMarkAsRead: (id: string) => void;
   onClickNotification?: (notification: Notification) => void;
 }> = ({ notification, onMarkAsRead, onClickNotification }) => {
-  const config = NOTIFICATION_CONFIGS[notification.type];
+  const config = NOTIFICATION_CONFIGS[notification.type] || {
+    icon: FileText, // Default icon for unknown types
+    color: '#6B7280', // gray-500
+    bgColor: '#F3F4F6' // gray-100
+  };
   const IconComponent = config.icon;
   const isUnread = !notification.is_read;
   

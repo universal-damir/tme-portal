@@ -5,6 +5,7 @@
 
 import { query } from '@/lib/database';
 import { logAuditEvent } from '@/lib/audit';
+import { NotificationEmailService } from './notification-email';
 
 // TypeScript interfaces
 export interface EmailFollowUp {
@@ -58,12 +59,25 @@ export interface FollowUpStats {
 export class FollowUpService {
   /**
    * Calculate due date based on follow-up number
-   * 1st: 7 days, 2nd: 14 days, 3rd: 21 days
+   * Production: 1st: 7 days, 2nd: 14 days, 3rd: 21 days
+   * Development: 1st: 1 minute, 2nd: 2 minutes, 3rd: 3 minutes (for testing)
    */
   private static calculateDueDate(sentDate: Date, followUpNumber: 1 | 2 | 3): Date {
-    const daysMap = { 1: 7, 2: 14, 3: 21 };
+    const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_PORTAL_URL?.includes('localhost');
+    
     const dueDate = new Date(sentDate);
-    dueDate.setDate(dueDate.getDate() + daysMap[followUpNumber]);
+    
+    if (isDevelopment) {
+      // In development: use minutes for testing (1, 2, 3 minutes)
+      const minutesMap = { 1: 1, 2: 2, 3: 3 };
+      dueDate.setMinutes(dueDate.getMinutes() + minutesMap[followUpNumber]);
+      console.log(`🧪 DEV MODE: Follow-up ${followUpNumber} due in ${minutesMap[followUpNumber]} minute(s)`);
+    } else {
+      // In production: use days (7, 14, 21 days)
+      const daysMap = { 1: 7, 2: 14, 3: 21 };
+      dueDate.setDate(dueDate.getDate() + daysMap[followUpNumber]);
+    }
+    
     return dueDate;
   }
 
@@ -281,9 +295,8 @@ export class FollowUpService {
     // Calculate new follow-up number (max 3)
     const newFollowUpNumber = Math.min(current.follow_up_number + 1, 3) as 1 | 2 | 3;
     
-    // Calculate new due date from today
-    const newDueDate = new Date();
-    newDueDate.setDate(newDueDate.getDate() + 7);
+    // Calculate new due date from today (will use dev timing if in development)
+    const newDueDate = this.calculateDueDate(new Date(), newFollowUpNumber);
 
     // Update follow-up
     const result = await query(
@@ -348,6 +361,11 @@ export class FollowUpService {
    * Check and escalate overdue 3rd follow-ups
    */
   static async escalateOverdueFollowUps(): Promise<void> {
+    const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_PORTAL_URL?.includes('localhost');
+    
+    // In development: escalate after 1 minute, in production: after 1 day
+    const escalationInterval = isDevelopment ? '1 minute' : '1 day';
+    
     // Find overdue 3rd follow-ups
     const overdueResult = await query(
       `SELECT ef.*, u.role, u.is_manager, u.full_name
@@ -355,7 +373,7 @@ export class FollowUpService {
        JOIN users u ON ef.user_id = u.id
        WHERE ef.status = 'pending'
        AND ef.follow_up_number = 3
-       AND ef.due_date < NOW() - INTERVAL '1 day'
+       AND ef.due_date < NOW() - INTERVAL '${escalationInterval}'
        AND ef.escalated_to_manager = FALSE`
     );
 
@@ -407,8 +425,10 @@ export class FollowUpService {
             [managerId, followUp.id]
           );
 
-          // Here you would create a notification for the manager
-          // This would integrate with your existing notification system
+          // Send escalation email to manager
+          await this.sendEscalationEmail(followUp, managerId);
+          
+          console.log(`Escalated follow-up ${followUp.id} for ${followUp.client_name} to manager ${managerId}`);
         }
       }
     }
@@ -453,5 +473,270 @@ export class FollowUpService {
     );
 
     return newFollowUp;
+  }
+
+  /**
+   * Send email reminder for a follow-up
+   */
+  static async sendReminderEmail(followUp: EmailFollowUp): Promise<boolean> {
+    try {
+      // Get user details
+      const userResult = await query(
+        `SELECT full_name, email FROM users WHERE id = $1`,
+        [followUp.user_id]
+      );
+
+      if (userResult.rows.length === 0) {
+        console.error(`User not found for follow-up ${followUp.id}`);
+        return false;
+      }
+
+      const user = userResult.rows[0];
+      const firstName = user.full_name ? user.full_name.split(' ')[0] : 'User';
+
+      // Calculate time since sent (days in production, minutes in dev)
+      const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_PORTAL_URL?.includes('localhost');
+      const timeSinceSent = isDevelopment 
+        ? Math.floor((Date.now() - new Date(followUp.sent_date).getTime()) / (1000 * 60)) // minutes
+        : Math.floor((Date.now() - new Date(followUp.sent_date).getTime()) / (1000 * 60 * 60 * 24)); // days
+      
+      // Format time unit for template - just the number for days_ago variable
+      const timeAgoText = isDevelopment 
+        ? `${timeSinceSent} minute${timeSinceSent !== 1 ? 's' : ''} ago`
+        : `${timeSinceSent} day${timeSinceSent !== 1 ? 's' : ''} ago`;
+      
+      // Format dates
+      const formatDate = (date: Date) => {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}.${month}.${year}`;
+      };
+
+      // Determine attempt text
+      const attemptText = followUp.follow_up_number === 1 ? '1st' : 
+                         followUp.follow_up_number === 2 ? '2nd' : '3rd';
+
+      // Check if overdue
+      const isOverdue = new Date(followUp.due_date) < new Date();
+
+      // First create a notification record in the database
+      const notificationResult = await query(
+        `INSERT INTO notifications (user_id, type, title, message)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          followUp.user_id,
+          'follow_up_reminder',
+          `Follow-up Reminder: ${followUp.client_name}`,
+          `Follow-up reminder for ${followUp.client_name} - ${attemptText} attempt`
+        ]
+      );
+
+      const notificationId = notificationResult.rows[0].id;
+
+      // Prepare email metadata
+      const emailMetadata = {
+        user_name: firstName,
+        client_name: followUp.client_name,
+        email_subject: followUp.email_subject,
+        sent_date: formatDate(followUp.sent_date),
+        due_date: formatDate(followUp.due_date),
+        days_ago: timeSinceSent.toString(), // Just the number for template
+        time_ago_text: timeAgoText, // Full text like "2 minutes ago" or "7 days ago"
+        follow_up_number: followUp.follow_up_number,
+        attempt_text: attemptText,
+        is_overdue: isOverdue,
+        is_final_attempt: followUp.follow_up_number === 3,
+        portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000'
+      };
+
+      // Queue the email
+      console.log(`Attempting to queue email for user ${followUp.user_id}, notification ${notificationId}`);
+      const queued = await NotificationEmailService.queueEmail({
+        notification_id: notificationId,
+        user_id: followUp.user_id,
+        type: 'follow_up_reminder',
+        title: `Follow-up Reminder: ${followUp.client_name}`,
+        message: `Follow-up reminder for ${followUp.client_name} - ${attemptText} attempt`,
+        metadata: emailMetadata
+      });
+
+      console.log(`Queue result: ${queued}`);
+      if (queued) {
+        // Log the reminder sent
+        await query(
+          `INSERT INTO email_follow_up_history (
+            follow_up_id, user_id, action, notes
+          ) VALUES ($1, $2, $3, $4)`,
+          [followUp.id, followUp.user_id, 'reminder_sent', `${attemptText} reminder email sent`]
+        );
+
+        await logAuditEvent({
+          user_id: followUp.user_id,
+          action: 'follow_up_reminder_sent',
+          resource: 'email_follow_ups',
+          details: {
+            follow_up_id: followUp.id,
+            client_name: followUp.client_name,
+            attempt_number: followUp.follow_up_number
+          }
+        });
+      }
+
+      return queued;
+    } catch (error) {
+      console.error('Error sending follow-up reminder:', error);
+      console.error('Error details:', error instanceof Error ? error.stack : error);
+      return false;
+    }
+  }
+
+  /**
+   * Send manager escalation email
+   */
+  static async sendEscalationEmail(followUp: EmailFollowUp, managerId: number): Promise<boolean> {
+    try {
+      // Get manager details
+      const managerResult = await query(
+        `SELECT full_name, email FROM users WHERE id = $1`,
+        [managerId]
+      );
+
+      if (managerResult.rows.length === 0) {
+        console.error(`Manager not found with ID ${managerId}`);
+        return false;
+      }
+
+      const manager = managerResult.rows[0];
+      const managerName = manager.full_name || 'Manager';
+
+      // Get employee details
+      const employeeResult = await query(
+        `SELECT full_name, employee_code FROM users WHERE id = $1`,
+        [followUp.user_id]
+      );
+
+      const employee = employeeResult.rows[0];
+      const employeeName = employee?.full_name || 'Employee';
+      const employeeCode = employee?.employee_code || 'N/A';
+
+      // Calculate time since sent (days in production, minutes in dev)
+      const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_PORTAL_URL?.includes('localhost');
+      const timeSinceSent = isDevelopment 
+        ? Math.floor((Date.now() - new Date(followUp.sent_date).getTime()) / (1000 * 60)) // minutes
+        : Math.floor((Date.now() - new Date(followUp.sent_date).getTime()) / (1000 * 60 * 60 * 24)); // days
+      
+      // Format dates
+      const formatDate = (date: Date) => {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}.${month}.${year}`;
+      };
+
+      // Calculate all follow-up dates
+      const firstFollowupDate = new Date(followUp.sent_date);
+      firstFollowupDate.setDate(firstFollowupDate.getDate() + 7);
+      
+      const secondFollowupDate = new Date(followUp.sent_date);
+      secondFollowupDate.setDate(secondFollowupDate.getDate() + 14);
+      
+      const thirdFollowupDate = new Date(followUp.sent_date);
+      thirdFollowupDate.setDate(thirdFollowupDate.getDate() + 21);
+
+      // First create a notification record in the database for the manager
+      const notificationResult = await query(
+        `INSERT INTO notifications (user_id, type, title, message)
+         VALUES ($1, $2, $3, $4)
+         RETURNING id`,
+        [
+          managerId,
+          'follow_up_escalation',
+          `Escalation: ${followUp.client_name}`,
+          `Client ${followUp.client_name} has not responded after 3 follow-up attempts`
+        ]
+      );
+
+      const notificationId = notificationResult.rows[0].id;
+
+      // Prepare email metadata
+      const emailMetadata = {
+        manager_name: managerName,
+        employee_name: employeeName,
+        employee_code: employeeCode,
+        client_name: followUp.client_name,
+        client_email: followUp.client_email || 'Not provided',
+        email_subject: followUp.email_subject,
+        original_sent_date: formatDate(followUp.sent_date),
+        first_followup_date: formatDate(firstFollowupDate),
+        second_followup_date: formatDate(secondFollowupDate),
+        third_followup_date: formatDate(thirdFollowupDate),
+        escalation_date: formatDate(new Date()),
+        days_since_sent: timeSinceSent,
+        portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000'
+      };
+
+      // Queue the escalation email
+      const queued = await NotificationEmailService.queueEmail({
+        notification_id: notificationId,
+        user_id: managerId,
+        type: 'follow_up_escalation',
+        title: `Escalation: ${followUp.client_name}`,
+        message: `Client ${followUp.client_name} has not responded after 3 follow-up attempts`,
+        metadata: emailMetadata
+      });
+
+      if (queued) {
+        // Log the escalation
+        await query(
+          `INSERT INTO email_follow_up_history (
+            follow_up_id, user_id, action, notes
+          ) VALUES ($1, $2, $3, $4)`,
+          [followUp.id, followUp.user_id, 'escalated', `Escalated to manager: ${managerName}`]
+        );
+
+        await logAuditEvent({
+          user_id: followUp.user_id,
+          action: 'follow_up_escalated',
+          resource: 'email_follow_ups',
+          details: {
+            follow_up_id: followUp.id,
+            client_name: followUp.client_name,
+            manager_id: managerId,
+            manager_name: managerName
+          }
+        });
+      }
+
+      return queued;
+    } catch (error) {
+      console.error('Error sending escalation email:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get follow-ups that need reminders sent
+   */
+  static async getFollowUpsNeedingReminders(): Promise<EmailFollowUp[]> {
+    // Get follow-ups that are due today or overdue and haven't had a reminder sent today
+    const result = await query(
+      `SELECT ef.* 
+       FROM email_follow_ups ef
+       WHERE ef.status = 'pending'
+       AND ef.due_date <= NOW()
+       AND NOT EXISTS (
+         SELECT 1 FROM email_follow_up_history h
+         WHERE h.follow_up_id = ef.id
+         AND h.action = 'reminder_sent'
+         AND DATE(h.created_at) = CURRENT_DATE
+       )
+       ORDER BY ef.due_date ASC`
+    );
+
+    return result.rows;
   }
 }

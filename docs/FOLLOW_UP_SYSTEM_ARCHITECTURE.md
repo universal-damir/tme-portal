@@ -101,30 +101,56 @@ Automatically creates follow-up when email is sent:
 Day 0: Email Sent → Follow-up Created (Due: Day 7)
          ↓
 Day 7: 1st Follow-up Due
+         ├─ Email Reminder Sent (if enabled)
          ├─ Complete → Done
          ├─ Snooze → Becomes 2nd follow-up (Due: Day 14)
-         └─ No action → Reminder
+         └─ No action → Daily reminders continue
          ↓
 Day 14: 2nd Follow-up Due
+         ├─ Email Reminder Sent (if enabled)
          ├─ Complete → Done
          ├─ Snooze → Becomes 3rd follow-up (Due: Day 21)
-         └─ No action → Reminder
+         └─ No action → Daily reminders continue
          ↓
 Day 21: 3rd Follow-up Due
+         ├─ Final Email Reminder Sent (if enabled)
          ├─ Complete → Done
          ├─ No Response → Move to tab
          └─ No action → Auto-escalate (Day 22)
          ↓
-Day 22+: Manager Escalation (if user not manager)
+Day 22+: Manager Escalation
+         ├─ Escalation Email to Manager
+         └─ Status → "No Response"
 ```
 
 ### Key Business Logic
 
 1. **Automatic Creation**: Triggered when email has attachments
 2. **Progressive Escalation**: 7 → 14 → 21 days
-3. **Snooze Behavior**: Upgrades to next level (1st → 2nd → 3rd)
-4. **Manager Escalation**: After 3rd attempt expires
-5. **Self-Notification Prevention**: Managers don't notify themselves
+3. **Email Reminders**: Sent automatically when follow-ups are due (configurable)
+4. **Snooze Behavior**: Upgrades to next level (1st → 2nd → 3rd)
+5. **Manager Escalation**: After 3rd attempt expires with email notification
+6. **Self-Notification Prevention**: Managers don't notify themselves
+
+### Cron Job Configuration
+
+**Required Cron Jobs for Full Functionality:**
+
+```bash
+# Send daily follow-up reminders (run at 9 AM daily)
+0 9 * * * curl -H "Authorization: Bearer ${CRON_SECRET}" https://your-domain.com/api/cron/send-follow-up-reminders
+
+# Process escalations (run at 10 AM daily)
+0 10 * * * curl -H "Authorization: Bearer ${CRON_SECRET}" https://your-domain.com/api/cron/escalate-follow-ups
+
+# Process general follow-ups and todos (run every hour)
+0 * * * * curl -H "Authorization: Bearer ${CRON_SECRET}" https://your-domain.com/api/cron/process-follow-ups
+```
+
+**Environment Variable Required:**
+```bash
+CRON_SECRET=your-secure-cron-secret-here
+```
 
 ## Customization Guide
 
@@ -298,6 +324,33 @@ Follow the standard workflow in `MIGRATION_WORKFLOW_GUIDE.md`
 - Verify cron job is set up
 - Check is_manager field in users table
 - Review escalation date logic
+
+## Recent Updates (January 2025)
+
+### Email Reminder System (January 12, 2025)
+1. **Automated Email Reminders**:
+   - Email notifications sent automatically when follow-ups are due
+   - Separate templates for 1st/2nd/3rd attempts
+   - Manager escalation emails for overdue 3rd attempts
+   - User preference controls for follow-up emails
+
+2. **Email Templates Added**:
+   - `follow_up_reminder` - For 7/14/21 day reminders
+   - `follow_up_escalation` - For manager escalations
+   - Professional format matching existing email standards
+   - Dynamic content based on attempt number and status
+
+3. **New Cron Endpoints**:
+   - `/api/cron/send-follow-up-reminders` - Daily email reminders
+   - Checks user preferences before sending
+   - Prevents duplicate reminders on same day
+   - Logs all reminder activities
+
+4. **Integration Points**:
+   - Uses existing NotificationEmailService
+   - Leverages email queue system with retry logic
+   - Respects user notification preferences
+   - Full audit trail in email_follow_up_history
 
 ## Recent Updates (January 2025)
 

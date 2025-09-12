@@ -109,17 +109,23 @@ export async function POST(request: NextRequest) {
         
         // Extract client name from metadata or fallback to extraction
         let clientName = '';
+        let clientFirstName = '';
+        let clientLastName = '';
         const formName = primaryFilename.replace('.pdf', '');
         
         // First priority: Use metadata if available
         if (metadata?.clientName) {
           clientName = metadata.clientName;
+          // Try to split the full name into first and last
+          const nameParts = clientName.split(' ');
+          clientFirstName = nameParts[0] || '';
+          clientLastName = nameParts.slice(1).join(' ') || '';
         } else if (metadata?.clientFirstName || metadata?.clientLastName) {
-          clientName = `${metadata.clientFirstName || ''} ${metadata.clientLastName || ''}`.trim();
+          clientFirstName = metadata.clientFirstName || '';
+          clientLastName = metadata.clientLastName || '';
+          clientName = `${clientFirstName} ${clientLastName}`.trim();
         } else {
           // Fallback: Try to extract from filename
-          let clientFirstName = '';
-          let clientLastName = '';
           
           // Try to parse additional form context from the PDF filename
           // Format is typically: YYMMDD ClientName offer/service type

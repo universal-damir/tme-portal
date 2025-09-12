@@ -22,6 +22,8 @@ export interface NotificationPreferences {
   email_review_completed: boolean;
   email_application_approved: boolean;
   email_application_rejected: boolean;
+  email_follow_up_reminders?: boolean;
+  email_follow_up_escalations?: boolean;
 }
 
 export interface EmailQueueItem {
@@ -43,7 +45,7 @@ export interface EmailQueueItem {
 export interface NotificationEmailData {
   notification_id: string;
   user_id: number;
-  type: 'review_requested' | 'review_completed' | 'application_approved' | 'application_rejected';
+  type: 'review_requested' | 'review_completed' | 'application_approved' | 'application_rejected' | 'follow_up_reminder' | 'follow_up_escalation';
   title: string;
   message: string;
   metadata?: Record<string, any>;
@@ -121,7 +123,9 @@ export class NotificationEmailService {
         'review_requested': 'email_review_requested',
         'review_completed': 'email_review_completed',
         'application_approved': 'email_application_approved',
-        'application_rejected': 'email_application_rejected'
+        'application_rejected': 'email_application_rejected',
+        'follow_up_reminder': 'email_follow_up_reminders',
+        'follow_up_escalation': 'email_follow_up_escalations'
       };
 
       const preferenceKey = typePreferenceMap[notificationType];

@@ -130,24 +130,42 @@ const FollowUpRow: React.FC<{
             )}
           </div>
         </td>
-        <td className="py-4 px-2 text-center">
-          <div className="flex justify-center">
-            <label 
-              className="relative inline-flex items-center cursor-pointer"
-              onMouseEnter={() => setCheckboxHovered(true)}
-              onMouseLeave={() => setCheckboxHovered(false)}
+        <td className="py-4 px-2">
+          <div className="flex justify-end gap-2">
+            {/* Complete button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowConfirmModal(true)}
+              className="p-1.5 rounded-lg transition-all duration-200 bg-green-100 hover:bg-green-200"
+              title="Mark as complete"
             >
-              <input
-                type="checkbox"
-                className="sr-only peer"
-                onChange={handleCheckboxChange}
-              />
-              <div className={`w-5 h-5 border-2 rounded transition-all duration-200 flex items-center justify-center ${
-                checkboxHovered ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white'
-              } peer-checked:bg-blue-600 peer-checked:border-blue-600`}>
-                <Check className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100" />
-              </div>
-            </label>
+              <Check className="w-4 h-4 text-green-700" />
+            </motion.button>
+            
+            {/* Snooze button - upgrades to next level */}
+            {followUp.follow_up_number < 3 && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onAction(followUp.id, 'snooze')}
+                className="p-1.5 rounded-lg transition-all duration-200 bg-orange-100 hover:bg-orange-200"
+                title={`Snooze to ${followUp.follow_up_number + 1}${followUp.follow_up_number === 1 ? 'nd' : 'rd'} attempt`}
+              >
+                <Clock className="w-4 h-4 text-orange-700" />
+              </motion.button>
+            )}
+            
+            {/* Resend button - creates new cycle */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onAction(followUp.id, 'resend')}
+              className="p-1.5 rounded-lg transition-all duration-200 bg-blue-100 hover:bg-blue-200"
+              title="Resend (new cycle)"
+            >
+              <Mail className="w-4 h-4 text-blue-700" />
+            </motion.button>
           </div>
         </td>
       </motion.tr>
