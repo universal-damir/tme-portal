@@ -59,7 +59,7 @@ export interface FollowUpStats {
 export class FollowUpService {
   /**
    * Calculate due date based on follow-up number
-   * Production: 1st: 7 days, 2nd: 14 days, 3rd: 21 days
+   * Production: 1st: 1 day, 2nd: 2 days, 3rd: 3 days
    * Development: 1st: 1 minute, 2nd: 2 minutes, 3rd: 3 minutes (for testing)
    */
   private static calculateDueDate(sentDate: Date, followUpNumber: 1 | 2 | 3): Date {
@@ -73,8 +73,8 @@ export class FollowUpService {
       dueDate.setMinutes(dueDate.getMinutes() + minutesMap[followUpNumber]);
       console.log(`🧪 DEV MODE: Follow-up ${followUpNumber} due in ${minutesMap[followUpNumber]} minute(s)`);
     } else {
-      // In production: use days (7, 14, 21 days)
-      const daysMap = { 1: 7, 2: 14, 3: 21 };
+      // In production: use days (1, 2, 3 days)
+      const daysMap = { 1: 1, 2: 2, 3: 3 };
       dueDate.setDate(dueDate.getDate() + daysMap[followUpNumber]);
     }
     
@@ -95,7 +95,7 @@ export class FollowUpService {
       sent_date = new Date()
     } = input;
 
-    // Calculate initial due date (7 days)
+    // Calculate initial due date (1 day in production, 1 minute in dev)
     const due_date = this.calculateDueDate(sent_date, 1);
 
     const result = await query(
@@ -716,6 +716,76 @@ export class FollowUpService {
       console.error('Error sending escalation email:', error);
       return false;
     }
+  }
+
+  /**
+   * Manual escalation to a selected manager
+   */
+  static async manualEscalate(
+    followUpId: string,
+    userId: number,
+    managerId: number,
+    managerName?: string
+  ): Promise<EmailFollowUp> {
+    // Get current follow-up
+    const currentResult = await query(
+      `SELECT * FROM email_follow_ups 
+       WHERE id = $1 AND user_id = $2`,
+      [followUpId, userId]
+    );
+
+    if (currentResult.rows.length === 0) {
+      throw new Error('Follow-up not found');
+    }
+
+    const followUp = currentResult.rows[0];
+
+    // Update follow-up with escalation
+    const result = await query(
+      `UPDATE email_follow_ups 
+       SET status = 'no_response',
+           escalated_to_manager = true,
+           escalation_date = NOW(),
+           manager_id = $1,
+           updated_at = NOW()
+       WHERE id = $2 AND user_id = $3
+       RETURNING *`,
+      [managerId, followUpId, userId]
+    );
+
+    const updatedFollowUp = result.rows[0];
+
+    // Log the escalation
+    await query(
+      `INSERT INTO email_follow_up_history (
+        follow_up_id, user_id, action, previous_status, new_status, notes
+      ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        followUpId,
+        userId,
+        'escalated',
+        followUp.status,
+        'no_response',
+        `Manually escalated to ${managerName || `manager ID ${managerId}`}`
+      ]
+    );
+
+    // Send escalation email to the selected manager
+    await this.sendEscalationEmail(updatedFollowUp, managerId);
+
+    await logAuditEvent({
+      user_id: userId,
+      action: 'follow_up_manual_escalation',
+      resource: 'email_follow_ups',
+      details: {
+        follow_up_id: followUpId,
+        client_name: followUp.client_name,
+        manager_id: managerId,
+        manager_name: managerName
+      }
+    });
+
+    return updatedFollowUp;
   }
 
   /**

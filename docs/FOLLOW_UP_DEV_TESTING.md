@@ -2,9 +2,9 @@
 
 ## Overview
 In development mode, the follow-up system uses **minutes instead of days** for rapid testing:
-- **1st follow-up**: 1 minute after email sent (instead of 7 days)
-- **2nd follow-up**: 2 minutes after snooze (instead of 14 days)
-- **3rd follow-up**: 3 minutes after snooze (instead of 21 days)
+- **1st follow-up**: 1 minute after email sent (instead of 1 day)
+- **2nd follow-up**: 2 minutes after snooze (instead of 2 days)
+- **3rd follow-up**: 3 minutes after snooze (instead of 3 days)
 - **Manager escalation**: 1 minute after 3rd follow-up is overdue (instead of 1 day)
 
 ## How Development Mode is Detected
@@ -161,9 +161,9 @@ WHERE follow_up_id IN (
 
 | Feature | Development | Production |
 |---------|------------|------------|
-| 1st Follow-up | 1 minute | 7 days |
-| 2nd Follow-up | 2 minutes | 14 days |
-| 3rd Follow-up | 3 minutes | 21 days |
+| 1st Follow-up | 1 minute | 1 day |
+| 2nd Follow-up | 2 minutes | 2 days |
+| 3rd Follow-up | 3 minutes | 3 days |
 | Escalation | 1 minute after 3rd | 1 day after 3rd |
 | Email shows | "X minutes ago" | "X days ago" |
 | Cron frequency | Can run every minute | Daily at 9 AM |

@@ -11,6 +11,8 @@ import { motion } from 'framer-motion';
 import { Check, Clock, Mail, X, Copy } from 'lucide-react';
 import { EmailFollowUp } from '@/types/follow-up';
 import ConfirmationModal from './ConfirmationModal';
+import ActionDropdown from './ActionDropdown';
+import ManagerSelectionModal from './ManagerSelectionModal';
 
 export interface FollowUpTableProps {
   followUps: EmailFollowUp[];
@@ -31,8 +33,7 @@ const FollowUpRow: React.FC<{
   isOverdue: (date: Date | string) => boolean;
   isDueToday: (date: Date | string) => boolean;
 }> = ({ followUp, index, loading, onAction, formatDate, getFollowUpLabel, isOverdue, isDueToday }) => {
-  const [checkboxHovered, setCheckboxHovered] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showManagerModal, setShowManagerModal] = useState(false);
   const [subjectHovered, setSubjectHovered] = useState(false);
   const [copiedSubject, setCopiedSubject] = useState(false);
   const overdue = isOverdue(followUp.due_date);
@@ -44,20 +45,13 @@ const FollowUpRow: React.FC<{
     setTimeout(() => setCopiedSubject(false), 2000);
   };
   
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setShowConfirmModal(true);
-      e.target.checked = false; // Reset checkbox while modal is open
-    }
-  };
-  
-  const handleConfirm = () => {
-    onAction(followUp.id, 'complete', { reason: 'client_responded' });
-    setShowConfirmModal(false);
-  };
-  
-  const handleCancel = () => {
-    setShowConfirmModal(false);
+  const handleManagerSelect = (managerId: number, managerName: string) => {
+    // Escalate to selected manager
+    onAction(followUp.id, 'escalate', { 
+      manager_id: managerId, 
+      manager_name: managerName 
+    });
+    setShowManagerModal(false);
   };
   
   // Use portal for modal to avoid hydration issues
@@ -131,55 +125,26 @@ const FollowUpRow: React.FC<{
           </div>
         </td>
         <td className="py-4 px-2">
-          <div className="flex justify-end gap-2">
-            {/* Complete button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowConfirmModal(true)}
-              className="p-1.5 rounded-lg transition-all duration-200 bg-green-100 hover:bg-green-200"
-              title="Mark as complete"
-            >
-              <Check className="w-4 h-4 text-green-700" />
-            </motion.button>
-            
-            {/* Snooze button - upgrades to next level */}
-            {followUp.follow_up_number < 3 && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => onAction(followUp.id, 'snooze')}
-                className="p-1.5 rounded-lg transition-all duration-200 bg-orange-100 hover:bg-orange-200"
-                title={`Snooze to ${followUp.follow_up_number + 1}${followUp.follow_up_number === 1 ? 'nd' : 'rd'} attempt`}
-              >
-                <Clock className="w-4 h-4 text-orange-700" />
-              </motion.button>
-            )}
-            
-            {/* Resend button - creates new cycle */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onAction(followUp.id, 'resend')}
-              className="p-1.5 rounded-lg transition-all duration-200 bg-blue-100 hover:bg-blue-200"
-              title="Resend (new cycle)"
-            >
-              <Mail className="w-4 h-4 text-blue-700" />
-            </motion.button>
+          <div className="flex justify-end">
+            <ActionDropdown
+              followUpId={followUp.id}
+              followUpNumber={followUp.follow_up_number}
+              clientName={followUp.client_name}
+              onAction={onAction}
+              onSelectManager={() => setShowManagerModal(true)}
+            />
           </div>
         </td>
       </motion.tr>
       
       {/* Render modal via portal to avoid hydration issues */}
-      {mounted && showConfirmModal && createPortal(
-        <ConfirmationModal
-          isOpen={showConfirmModal}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-          title="Mark as Complete"
-          message={`Mark this follow-up for ${followUp.client_name} as complete? This indicates the client has responded.`}
-          confirmText="Mark Complete"
-          cancelText="Cancel"
+      {mounted && showManagerModal && createPortal(
+        <ManagerSelectionModal
+          isOpen={showManagerModal}
+          onClose={() => setShowManagerModal(false)}
+          onSelect={handleManagerSelect}
+          clientName={followUp.client_name}
+          followUpId={followUp.id}
         />,
         document.body
       )}

@@ -98,27 +98,27 @@ Automatically creates follow-up when email is sent:
 ### Follow-Up Lifecycle
 
 ```
-Day 0: Email Sent → Follow-up Created (Due: Day 7)
+Day 0: Email Sent → Follow-up Created (Due: Day 1)
          ↓
-Day 7: 1st Follow-up Due
+Day 1: 1st Follow-up Due
          ├─ Email Reminder Sent (if enabled)
          ├─ Complete → Done
-         ├─ Snooze → Becomes 2nd follow-up (Due: Day 14)
+         ├─ Snooze → Becomes 2nd follow-up (Due: Day 2)
          └─ No action → Daily reminders continue
          ↓
-Day 14: 2nd Follow-up Due
+Day 2: 2nd Follow-up Due
          ├─ Email Reminder Sent (if enabled)
          ├─ Complete → Done
-         ├─ Snooze → Becomes 3rd follow-up (Due: Day 21)
+         ├─ Snooze → Becomes 3rd follow-up (Due: Day 3)
          └─ No action → Daily reminders continue
          ↓
-Day 21: 3rd Follow-up Due
+Day 3: 3rd Follow-up Due
          ├─ Final Email Reminder Sent (if enabled)
          ├─ Complete → Done
          ├─ No Response → Move to tab
-         └─ No action → Auto-escalate (Day 22)
+         └─ No action → Auto-escalate (Day 4)
          ↓
-Day 22+: Manager Escalation
+Day 4+: Manager Escalation
          ├─ Escalation Email to Manager
          └─ Status → "No Response"
 ```
@@ -126,7 +126,7 @@ Day 22+: Manager Escalation
 ### Key Business Logic
 
 1. **Automatic Creation**: Triggered when email has attachments
-2. **Progressive Escalation**: 7 → 14 → 21 days
+2. **Progressive Escalation**: 1 → 2 → 3 days
 3. **Email Reminders**: Sent automatically when follow-ups are due (configurable)
 4. **Snooze Behavior**: Upgrades to next level (1st → 2nd → 3rd)
 5. **Manager Escalation**: After 3rd attempt expires with email notification
@@ -156,14 +156,14 @@ CRON_SECRET=your-secure-cron-secret-here
 
 ### Modifying Follow-Up Schedule
 
-To change the 7-14-21 day schedule, edit in `follow-up-service.ts`:
+To change the 1-2-3 day schedule, edit in `follow-up-service.ts`:
 
 ```typescript
 private static calculateDueDate(sentDate: Date, followUpNumber: 1 | 2 | 3): Date {
   const daysMap = { 
-    1: 7,   // Change these values
-    2: 14,  
-    3: 21 
+    1: 1,   // Change these values
+    2: 2,  
+    3: 3 
   };
   // ...
 }
@@ -354,6 +354,28 @@ Follow the standard workflow in `MIGRATION_WORKFLOW_GUIDE.md`
 
 ## Recent Updates (January 2025)
 
+### Dropdown Action System (January 13, 2025)
+1. **Text-Based Actions**:
+   - Replaced icon buttons with dropdown menu
+   - Three clear text options:
+     - "Completed" - Marks as complete
+     - "Follow-up Reminder Sent" - Snoozes to next level
+     - "Client Did Not Respond" - Opens team member selection
+
+2. **Team Member Selection**:
+   - Any team member can be selected for escalation
+   - Autocomplete search after 2 characters
+   - Managers/supervisors shown first, then regular team members
+   - Search by name, email, or employee code
+   - Prevents self-escalation
+
+3. **Manual Escalation Flow**:
+   - User selects "Client Did Not Respond" from dropdown
+   - Modal opens with team member search
+   - Type 2+ characters to search all active employees
+   - Select team member and confirm escalation
+   - Escalation email sent to selected person
+
 ### UI/UX Improvements
 1. **Renamed Labels** for clarity:
    - "Email Follow-ups" → "Email Response Tracker"
@@ -403,17 +425,27 @@ Potential improvements to consider:
 ```
 src/
 ├── app/api/
-│   ├── user/follow-ups/     # API endpoints
-│   ├── email/send/           # Email integration
-│   └── cron/escalate/        # Escalation job
-├── components/follow-ups/    # UI components
-├── hooks/useFollowUps.ts     # React hook
+│   ├── user/follow-ups/      # API endpoints
+│   ├── user/managers/         # Team member search API
+│   ├── email/send/            # Email integration
+│   └── cron/                  # Cron jobs
+│       ├── send-follow-up-reminders/
+│       ├── process-email-queue/
+│       └── escalate-follow-ups/
+├── components/follow-ups/     # UI components
+│   ├── FollowUpPanel.tsx
+│   ├── FollowUpTable.tsx
+│   ├── ActionDropdown.tsx     # New dropdown menu
+│   └── ManagerSelectionModal.tsx  # Team member selector
+├── hooks/useFollowUps.ts      # React hook
 ├── lib/services/
-│   └── follow-up-service.ts  # Business logic
-└── types/follow-up.ts        # TypeScript types
+│   ├── follow-up-service.ts   # Business logic
+│   └── notification-email.ts  # Email service
+└── types/follow-up.ts         # TypeScript types
 
 database/migrations/
-└── 018_email_follow_ups.sql  # Database schema
+├── 018_email_follow_ups.sql   # Database schema
+└── 019_follow_up_email_templates.sql  # Email templates
 ```
 
 ## Support & Maintenance

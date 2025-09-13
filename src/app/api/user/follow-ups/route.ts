@@ -195,7 +195,9 @@ export async function PATCH(request: NextRequest) {
     const {
       follow_up_id,
       action,
-      reason
+      reason,
+      manager_id,
+      manager_name
     } = body;
 
     // Validate required fields
@@ -232,6 +234,22 @@ export async function PATCH(request: NextRequest) {
 
       case 'resend':
         updatedFollowUp = await FollowUpService.resend(follow_up_id, userId);
+        break;
+
+      case 'escalate':
+        // Manual escalation to selected manager
+        if (!manager_id) {
+          return NextResponse.json(
+            { error: 'Manager ID is required for escalation' },
+            { status: 400 }
+          );
+        }
+        updatedFollowUp = await FollowUpService.manualEscalate(
+          follow_up_id,
+          userId,
+          manager_id,
+          manager_name
+        );
         break;
 
       default:
