@@ -537,6 +537,10 @@ export class FollowUpService {
       const notificationId = notificationResult.rows[0].id;
 
       // Prepare email metadata
+      // Determine the correct URL based on environment
+      const baseUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000';
+      const portalUrl = isDevelopment ? baseUrl : `${baseUrl}/portal#profile`;
+
       const emailMetadata = {
         user_name: firstName,
         client_name: followUp.client_name,
@@ -549,7 +553,7 @@ export class FollowUpService {
         attempt_text: attemptText,
         is_overdue: isOverdue,
         is_final_attempt: followUp.follow_up_number === 3,
-        portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000'
+        portal_url: portalUrl
       };
 
       // Queue the email
@@ -663,6 +667,10 @@ export class FollowUpService {
       const notificationId = notificationResult.rows[0].id;
 
       // Prepare email metadata
+      // Determine the correct URL based on environment
+      const baseUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000';
+      const portalUrl = isDevelopment ? baseUrl : `${baseUrl}/portal#profile`;
+
       const emailMetadata = {
         manager_name: managerName,
         employee_name: employeeName,
@@ -676,7 +684,7 @@ export class FollowUpService {
         third_followup_date: formatDate(thirdFollowupDate),
         escalation_date: formatDate(new Date()),
         days_since_sent: timeSinceSent,
-        portal_url: process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:3000'
+        portal_url: portalUrl
       };
 
       // Queue the escalation email

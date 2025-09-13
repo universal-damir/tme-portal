@@ -1,6 +1,18 @@
--- Migration 019: Follow-up Email Templates and Preferences
--- Adds email templates for follow-up reminders and manager escalations
+-- Migration: 019_follow_up_email_templates.sql
 -- Date: 2025-01-12
+-- Author: System
+-- Type: SAFE - Can deploy before code? YES
+-- Description: Adds email templates for follow-up reminders and manager escalations
+
+-- ============================================
+-- SAFETY CHECK
+-- ============================================
+-- Safe to run before code deploy: YES
+-- Rollback included: YES
+-- Tested on: tme_portal_test
+-- ============================================
+
+BEGIN;
 
 -- 1. Add follow-up reminder preference to notification_preferences table
 ALTER TABLE notification_preferences 
@@ -57,9 +69,8 @@ INSERT INTO email_templates (name, subject_template, html_template, variables) V
             font-size: 9pt;
         }
         .info-box {
-            background-color: #f5f5f5;
             border-left: 4px solid #243F7B;
-            padding: 10px;
+            padding-left: 10px;
             margin: 15px 0;
         }
         .overdue {
@@ -79,7 +90,7 @@ INSERT INTO email_templates (name, subject_template, html_template, variables) V
             <p><span class="field-label">Email Subject:</span> {{email_subject}}</p>
             <p><span class="field-label">Originally Sent:</span> {{sent_date}}</p>
             <p><span class="field-label">Follow-up Due:</span> <span{{#if is_overdue}} class="overdue"{{/if}}>{{due_date}}{{#if is_overdue}} (OVERDUE){{/if}}</span></p>
-            <p><span class="field-label">Attempt:</span> <span class="badge">{{attempt_text}} ({{follow_up_number}} of 3)</span></p>
+            <p><span class="field-label">Attempt:</span> {{follow_up_number}} of 3</p>
         </div>
         
         {{#if is_final_attempt}}
@@ -93,7 +104,7 @@ INSERT INTO email_templates (name, subject_template, html_template, variables) V
             <li>Snooze to the next follow-up level if more time is needed</li>
         </ul>
         
-        <p><a href="{{portal_url}}/portal#profile" class="button">Manage Follow-ups</a></p>
+        <p><a href="{{portal_url}}" class="button">Manage Follow-ups</a></p>
         
         <p style="color: #666; font-size: 9pt; margin-top: 20px;">
             This is an automated {{attempt_text}} follow-up reminder from TME Portal.
@@ -219,7 +230,7 @@ INSERT INTO email_templates (name, subject_template, html_template, variables) V
             <li>Determine if alternative contact methods are needed</li>
         </ul>
         
-        <p><a href="{{portal_url}}/portal#profile" class="button">View in TME Portal</a></p>
+        <p><a href="{{portal_url}}" class="button">View in TME Portal</a></p>
         
         <p style="color: #666; font-size: 9pt; margin-top: 20px;">
             This is an automated escalation from the TME Portal Email Response Tracker system.
@@ -289,3 +300,28 @@ END $$;
 -- 5. Grant permissions
 GRANT SELECT, INSERT, UPDATE ON email_templates TO tme_user;
 GRANT UPDATE ON notification_preferences TO tme_user;
+
+COMMIT;
+
+-- ============================================
+-- ROLLBACK (Save this separately)
+-- ============================================
+-- BEGIN;
+-- ALTER TABLE notification_preferences
+-- DROP COLUMN IF EXISTS email_follow_up_reminders,
+-- DROP COLUMN IF EXISTS email_follow_up_escalations;
+--
+-- DELETE FROM email_templates WHERE name IN ('follow_up_reminder', 'follow_up_escalation');
+--
+-- ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
+-- ALTER TABLE notifications
+-- ADD CONSTRAINT notifications_type_check
+-- CHECK (type IN (
+--     'review_requested',
+--     'review_completed',
+--     'application_approved',
+--     'application_rejected'
+-- ));
+--
+-- DELETE FROM schema_migrations WHERE version = '019_follow_up_email_templates';
+-- COMMIT;
