@@ -163,64 +163,6 @@ const FollowUpPanel: React.FC<FollowUpPanelProps> = ({
           </motion.button>
         </div>
 
-        {/* Search and Sort Controls */}
-        <div className="mt-4 flex flex-col lg:flex-row gap-3">
-          {/* Search Box */}
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by client name, email, or subject..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-sm"
-                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                style={{ fontFamily: 'Inter, sans-serif' }}
-              />
-              {searchQuery && (
-                <motion.button
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  onClick={() => setSearchQuery('')}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  title="Clear search"
-                >
-                  <X className="w-4 h-4" />
-                </motion.button>
-              )}
-            </div>
-          </div>
-
-          {/* Sort Dropdown */}
-          <div className="relative">
-            <select
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value as SortOption)}
-              className="pl-10 pr-10 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-sm appearance-none cursor-pointer"
-              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
-              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
-              <option value="due_date_asc">Due Date (Earliest First)</option>
-              <option value="due_date_desc">Due Date (Latest First)</option>
-              <option value="sent_date_asc">Sent Date (Oldest First)</option>
-              <option value="sent_date_desc">Sent Date (Newest First)</option>
-              <option value="client_name_asc">Client Name (A-Z)</option>
-              <option value="client_name_desc">Client Name (Z-A)</option>
-            </select>
-            <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-              {sortOption.includes('asc') ? (
-                <ArrowUp className="w-4 h-4 text-gray-400" />
-              ) : (
-                <ArrowDown className="w-4 h-4 text-gray-400" />
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Tab Navigation */}
         <div className="mt-4 flex space-x-1 rounded-lg p-1">
           {[
@@ -252,11 +194,11 @@ const FollowUpPanel: React.FC<FollowUpPanelProps> = ({
                 {label}
                 {count > 0 && (
                   <span
-                    className="ml-1 px-2 py-0.5 text-xs rounded-full font-semibold"
-                    style={{
-                      backgroundColor: '#D2BC99',
-                      color: '#243F7B'
-                    }}
+                    className={`ml-1 px-2 py-0.5 text-xs rounded-full font-semibold ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
                   >
                     {count}
                   </span>
@@ -265,35 +207,70 @@ const FollowUpPanel: React.FC<FollowUpPanelProps> = ({
             );
           })}
         </div>
+      </div>
 
-        {/* Stats Summary */}
-        {stats && (
-          <div className="mt-3 flex gap-4 text-xs items-center">
-            {stats.overdue_count > 0 && (
-              <span className="text-red-600 font-medium">
-                {stats.overdue_count} overdue
-              </span>
-            )}
-            {stats.due_today_count > 0 && (
-              <span className="text-orange-600 font-medium">
-                {stats.due_today_count} due today
-              </span>
-            )}
-            <span className="text-gray-500">
-              {stats.total_pending} pending total
-            </span>
-            {searchQuery && (
-              <span className="ml-auto text-blue-600 font-medium flex items-center gap-1">
-                <Search className="w-3 h-3" />
-                Filtered results
-              </span>
-            )}
+      {/* Search and Sort Controls */}
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div className="flex flex-col lg:flex-row gap-3">
+          {/* Search Box */}
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by client name, email, or subject..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-10 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-sm bg-white"
+                onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+                onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                style={{ fontFamily: 'Inter, sans-serif' }}
+              />
+              {searchQuery && (
+                <motion.button
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  onClick={() => setSearchQuery('')}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  title="Clear search"
+                >
+                  <X className="w-4 h-4" />
+                </motion.button>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value as SortOption)}
+              className="pl-10 pr-10 py-2 rounded-lg border-2 border-gray-200 focus:outline-none transition-all duration-200 h-[42px] text-sm appearance-none cursor-pointer bg-white"
+              onFocus={(e) => e.target.style.borderColor = '#243F7B'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              <option value="due_date_asc">Due Date (Earliest First)</option>
+              <option value="due_date_desc">Due Date (Latest First)</option>
+              <option value="sent_date_asc">Sent Date (Oldest First)</option>
+              <option value="sent_date_desc">Sent Date (Newest First)</option>
+              <option value="client_name_asc">Client Name (A-Z)</option>
+              <option value="client_name_desc">Client Name (Z-A)</option>
+            </select>
+            <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+              {sortOption.includes('asc') ? (
+                <ArrowUp className="w-4 h-4 text-gray-400" />
+              ) : (
+                <ArrowDown className="w-4 h-4 text-gray-400" />
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Content */}
-      <div 
+      <div
         className="overflow-y-auto overflow-x-hidden"
         style={{ maxHeight }}
       >
